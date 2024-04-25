@@ -2340,6 +2340,7 @@ void handleSamplePanningChange(s32 newpanning)
 	u8 pan = newpanning * 2;
 
 	smp->setPanning(pan);
+	smp->setBasePanning();
 	DC_FlushAll();
 }
 
