@@ -73,7 +73,7 @@
 #define SHARP	20
 #define SPACE	21
 
-const u8 notes_chars[] =   {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
+const u8 notes_chars[] =   {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 11};
 const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
 
 // TODO: Define width/height of cells
