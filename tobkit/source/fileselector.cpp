@@ -166,6 +166,7 @@ std::string FileSelector::getDir(void) {
 // Set current dir
 void FileSelector::setDir(std::string dir)
 {
+	if (!dir.ends_with("/")) dir += "/";
 	current_directory = dir;
 }
 
