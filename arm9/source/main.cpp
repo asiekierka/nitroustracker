@@ -3375,6 +3375,8 @@ void setupGUI(bool dldi_enabled)
 		gui->registerWidget(labeleffectpar, 0, MAIN_SCREEN);
 		gui->registerWidget(nseffectpar, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonseteffectpar, 0, MAIN_SCREEN);
+#else
+		pv->toggleEffectsVisibility(false);
 #endif
 		gui->registerWidget(buttoncut, 0, MAIN_SCREEN);
 		gui->registerWidget(buttoncopy, 0, MAIN_SCREEN);

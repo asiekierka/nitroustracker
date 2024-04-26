@@ -1,3 +1,24 @@
+-- NitrousTracker v0.4.9 (2024-04-26)
+
+New features:
+
+- env sustain playback + configuration (LeviathaninWaves)
+- player now supports more pattern effects (LeviathaninWaves)
+
+Improvements:
+
+- NitrousTracker now uses a distinct logo
+- updated BlocksDS toolchain
+
+Fixes:
+
+- fixed about message box width
+- fixed crash if paths were set without trailing slashes in config file
+- fixed combined loop and lock not working correctly
+- fixed panning being incorrectly set (exelotl)
+- fixed sample panning slider (exelotl)
+- fixed saving of sample panning information (exelotl)
+
 -- NitrousTracker v0.4.8 (2023-11-27)
 
 Improvements:
