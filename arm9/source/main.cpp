@@ -24,6 +24,7 @@
 
 #define GURU // Show guru meditations
 #define USE_FAT
+// #define ENABLE_EFFECT_MENU
 
 #include <nds.h>
 #include <nds/arm9/console.h>
@@ -3296,6 +3297,7 @@ void setupGUI(bool dldi_enabled)
 		buttonsetnotevol->setCaption("set");
 		buttonsetnotevol->registerPushCallback(handleSetNoteVol);
 
+#ifdef ENABLE_EFFECT_MENU
 		cbtoggleeffects = new CheckBox(195, 32, 30, 12, &main_vram_back, true, true, true);
 		cbtoggleeffects->setCaption("fx");
 		cbtoggleeffects->registerToggleCallback(handleToggleEffectsVisibility);
@@ -3319,6 +3321,7 @@ void setupGUI(bool dldi_enabled)
 		buttonseteffectpar = new Button(196, 110, 28, 12, &main_vram_back);
 		buttonseteffectpar->setCaption("set");
 		buttonseteffectpar->registerPushCallback(handleSetEffectParam);
+#endif
 
 		//buttoncut         = new BitButton(232,  52, 22, 21, &main_vram_back, icon_cut_raw, 16, 16, 3, 2);
 		//buttoncopy        = new BitButton(232,  74, 22, 21, &main_vram_back, icon_copy_raw, 16, 16, 3, 3);
@@ -3364,6 +3367,7 @@ void setupGUI(bool dldi_enabled)
 		gui->registerWidget(labelnotevol, 0, MAIN_SCREEN);
 		gui->registerWidget(nsnotevolume, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonsetnotevol, 0, MAIN_SCREEN);
+#ifdef ENABLE_EFFECT_MENU
 		gui->registerWidget(cbtoggleeffects, 0, MAIN_SCREEN);
 		gui->registerWidget(labeleffectcmd, 0, MAIN_SCREEN);
 		gui->registerWidget(nseffectcmd, 0, MAIN_SCREEN);
@@ -3371,6 +3375,7 @@ void setupGUI(bool dldi_enabled)
 		gui->registerWidget(labeleffectpar, 0, MAIN_SCREEN);
 		gui->registerWidget(nseffectpar, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonseteffectpar, 0, MAIN_SCREEN);
+#endif
 		gui->registerWidget(buttoncut, 0, MAIN_SCREEN);
 		gui->registerWidget(buttoncopy, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonpaste, 0, MAIN_SCREEN);
