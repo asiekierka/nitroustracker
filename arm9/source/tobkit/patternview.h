@@ -299,7 +299,7 @@ class PatternView: public Widget {
 			cb_col2_highlight, col_left_numbers, col_notes, col_instr, col_volume, col_effect, col_effect_param,
 			col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark, col_effect_param_dark, col_bg, cb_sel_highlight;
 		
-		u16 hscrollpos;
+		u16 hscrollpos, lines_per_beat;
 		
 		bool selection_exists, pen_down;
 		bool effects_visible;

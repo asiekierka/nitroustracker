@@ -56,7 +56,7 @@ PatternView::PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, St
 	col_effect_param_dark(RGB15(7,5,20)|BIT(15)),
 	col_bg(RGB15(4,6,15)|BIT(15)),
 	cb_sel_highlight(RGB15(31,24,0)|BIT(15)),
-	hscrollpos(0), selection_exists(false), pen_down(false),
+	hscrollpos(0), lines_per_beat(8), selection_exists(false), pen_down(false),
 	effects_visible(true), cell_width(50)
 {
 	for(int i=0;i<32;++i)
@@ -293,7 +293,7 @@ void PatternView::draw(void)
 		realrow = i-getCursorBarPos()+state->getCursorRow();
 	
 		if((realrow>=0)&&(realrow<=ptnlen)) {
-			if(realrow%PV_CELL_HEIGHT==0) {
+			if(realrow%lines_per_beat==0) {
 				drawHLine(0, PV_CELL_HEIGHT*i, getEffectiveWidth(), linescol);
 			} else {
 				drawHLine(PV_BORDER_WIDTH, PV_CELL_HEIGHT*i,
