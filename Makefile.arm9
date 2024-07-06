@@ -113,7 +113,7 @@ SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
 
 DEFINES		+= -D__NDS__ -DARM9 -DBLOCKSDS
 ifeq ($(DEBUG),true)
-DEFINES		+= -DDEBUG
+DEFINES		+= -DDEBUG -fstack-protector-strong
 else
 DEFINES		+= -DNDEBUG
 endif

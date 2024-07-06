@@ -1,159 +1,212 @@
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
+# SPDX-License-Identifier: CC0-1.0
+#
+# SPDX-FileContributor: Antonio Niño Díaz, 2023
 
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
-endif
+BLOCKSDS	?= /opt/blocksds/core
+BLOCKSDSEXT	?= /opt/blocksds/external
 
-include $(DEVKITARM)/ds_rules
+WONDERFUL_TOOLCHAIN	?= /opt/wonderful
+ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-#---------------------------------------------------------------------------------
-TARGET		:=	$(shell basename $(CURDIR))
-BUILD		:=	build
+# Source code paths
+# -----------------
+
+SOURCEDIRS	:= source
+INCLUDEDIRS	:= include
+GFXDIRS		:=
+BINDIRS		:=
+FONTSDIRS	:= fonts
+BITMAPSDIRS	:= bitmaps
+TOOLSDIR	:= ../tools
+
+# Defines passed to all files
+# ---------------------------
+
+DEFINES		:=
+
+# Libraries
+# ---------
+
+LIBDIRS		:= $(BLOCKSDS)/libs/libnds
+
+# Build artifacts
+# ---------------
+
+NAME		:= tobkit
 ifeq ($(DEBUG),true)
-BUILD		:=	build-debug
+NAME		:= tobkitd
 endif
-SOURCES		:=	source
-DATA		:=	data
-INCLUDES	:=	include
-FONTS		:=	fonts
-BITMAPS		:=	bitmaps
+INSTALLNAME	:= tobkit
+BUILDDIR	:= build/$(NAME)
+ARCHIVE		:= lib/lib$(NAME).a
 
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork
-#ARCH	:= -mthumb-interwork
+# Tools
+# -----
 
-CFLAGS	:=	-g -Wall -O2\
-		-march=armv5te -mtune=arm946e-s \
-		-fomit-frame-pointer -ffast-math \
-		$(ARCH)
+PREFIX		:= $(ARM_NONE_EABI_PATH)arm-none-eabi-
+CC		:= $(PREFIX)gcc
+CXX		:= $(PREFIX)g++
+AR		:= ar
+MKDIR		:= mkdir
+RM		:= rm -rf
+CP		:= cp
+INSTALL	:= install
 
-CFLAGS	+=	$(INCLUDE) -DARM9
-ifeq ($(DEBUG),true)
-CFLAGS	+=	-DDEBUG
-endif
+# Verbose flag
+# ------------
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
-
-CFLAGS		:=	$(CFLAGS) -std=gnu11
-CXXFLAGS	:=	$(CXXFLAGS) -std=gnu++20
-
-ASFLAGS	:=	-g $(ARCH) -march=armv5te -mtune=arm946e-s
-LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
-
-LIBDIRS :=	$(LIBNDS)
-
-#---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#---------------------------------------------------------------------------------
-ifneq ($(BUILD),$(notdir $(CURDIR)))
-#---------------------------------------------------------------------------------
-
-ifeq ($(DEBUG),true)
-export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET)d.a
+ifeq ($(VERBOSE),1)
+V		:=
 else
-export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
+V		:= @
 endif
 
-export TOOLSDIR	:=	$(CURDIR)/../tools
+# Source files
+# ------------
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(FONTS),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(BITMAPS),$(CURDIR)/$(dir))
-
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
-
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-IMGFILES	:=	$(foreach dir,$(FONTS),$(notdir $(wildcard $(dir)/*.png))) \
-			$(foreach dir,$(BITMAPS),$(notdir $(wildcard $(dir)/*.png)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
+ifneq ($(BINDIRS),)
+    SOURCES_BIN	:= $(shell find -L $(BINDIRS) -name "*.bin")
+    INCLUDEDIRS	+= $(addprefix $(BUILDDIR)/,$(BINDIRS))
 endif
-#---------------------------------------------------------------------------------
+ifneq ($(GFXDIRS),)
+    SOURCES_PNG	:= $(shell find -L $(GFXDIRS) -name "*.png")
+    INCLUDEDIRS	+= $(addprefix $(BUILDDIR)/,$(GFXDIRS))
+endif
+ifneq ($(FONTSDIRS),)
+    SOURCES_FONTS := $(shell find -L $(FONTSDIRS) -name "*.png")
+    INCLUDEDIRS	+= $(addprefix $(BUILDDIR)/,$(FONTSDIRS))
+endif
+ifneq ($(BITMAPSDIRS),)
+    SOURCES_BITMAPS := $(shell find -L $(BITMAPSDIRS) -name "*.png")
+    INCLUDEDIRS	+= $(addprefix $(BUILDDIR)/,$(BITMAPSDIRS))
+endif
 
-export OFILES	:=	$(addsuffix .o,$(BINFILES)) $(IMGFILES:.png=.raw.o) \
-			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+SOURCES_S	:= $(shell find -L $(SOURCEDIRS) -name "*.s")
+SOURCES_C	:= $(shell find -L $(SOURCEDIRS) -name "*.c")
+SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+# Compiler and linker flags
+# -------------------------
 
-.PHONY: $(BUILD) clean all
+DEFINES		+= -D__NDS__ -DARM9 -DBLOCKSDS
+ifeq ($(DEBUG),true)
+DEFINES		+= -DDEBUG
+endif
 
-#---------------------------------------------------------------------------------
-all: $(BUILD)
+ARCH		:= -mcpu=arm946e-s+nofp
 
-lib:
-	@[ -d $@ ] || mkdir -p $@
-	
-$(BUILD): lib
-	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+WARNFLAGS	:= -Wall
 
-#---------------------------------------------------------------------------------
+INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
+		   $(foreach path,$(LIBDIRS),-I$(path)/include)
+
+ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(ARCH) \
+		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) \
+		   -ffunction-sections -fdata-sections
+
+CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(DEFINES) $(ARCH) \
+		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
+		   -ffunction-sections -fdata-sections \
+		   -fomit-frame-pointer
+
+CXXFLAGS	+= -std=gnu++20 -Wno-volatile $(WARNFLAGS) $(DEFINES) $(ARCH) \
+		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
+		   -ffunction-sections -fdata-sections \
+		   -fno-exceptions -fno-rtti \
+		   -fomit-frame-pointer
+
+# Intermediate build files
+# ------------------------
+
+OBJS_ASSETS	:= $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_BIN))) \
+		   $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_PNG))) \
+		   $(patsubst %.png,%.raw.o,$(addprefix $(BUILDDIR)/,$(SOURCES_FONTS))) \
+		   $(patsubst %.png,%.raw.o,$(addprefix $(BUILDDIR)/,$(SOURCES_BITMAPS)))
+
+HEADERS_ASSETS	:= $(patsubst %.bin,%_bin.h,$(addprefix $(BUILDDIR)/,$(SOURCES_BIN))) \
+		   $(patsubst %.png,%.h,$(addprefix $(BUILDDIR)/,$(SOURCES_PNG)))
+
+OBJS_SOURCES	:= $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_S))) \
+		   $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_C))) \
+		   $(addsuffix .o,$(addprefix $(BUILDDIR)/,$(SOURCES_CPP)))
+
+OBJS		:= $(OBJS_ASSETS) $(OBJS_SOURCES)
+
+DEPS		:= $(OBJS:.o=.d)
+
+# Targets
+# -------
+
+.PHONY: all clean install
+
+all: $(ARCHIVE)
+
+$(ARCHIVE): $(OBJS)
+	@echo "  AR      $@"
+	@$(MKDIR) -p $(@D)
+	$(V)$(AR) rcs $@ $(OBJS)
+
 clean:
-	@echo clean ...
-	@rm -fr build build-debug lib
+	@echo "  CLEAN"
+	$(V)$(RM) $(ARCHIVE) $(BUILDDIR)
 
 install: all
-	cp lib/*.a $(DEVKITPRO)/libnds/lib
-	cp -R include/tobkit $(DEVKITPRO)/libnds/include
+	@echo "  INSTALL $(BLOCKSDSEXT)/$(INSTALLNAME)/"
+	$(V)$(RM) $(BLOCKSDSEXT)/$(INSTALLNAME)/
+	$(V)$(INSTALL) -d $(BLOCKSDSEXT)/$(INSTALLNAME)/
+	$(V)$(CP) -r include lib $(BLOCKSDSEXT)/$(INSTALLNAME)/
 
-#---------------------------------------------------------------------------------
-else
+# Rules
+# -----
 
-DEPENDS	:=	$(OFILES:.o=.d)
+$(BUILDDIR)/%.s.o : %.s
+	@echo "  AS      $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CC) $(ASFLAGS) -MMD -MP -c -o $@ $<
 
-#---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-$(OUTPUT)	:	$(OFILES)
+$(BUILDDIR)/%.c.o : %.c
+	@echo "  CC      $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $@ $<
 
-#---------------------------------------------------------------------------------
-%.bin.o	:	%.bin
-#---------------------------------------------------------------------------------
+$(BUILDDIR)/%.cpp.o : %.cpp
+	@echo "  CXX     $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILDDIR)/%.bin.o $(BUILDDIR)/%_bin.h : %.bin
+	@echo "  BIN2C   $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $< $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(BUILDDIR)/$*.bin.o $(BUILDDIR)/$*_bin.c
+
+$(BUILDDIR)/%.png.o $(BUILDDIR)/%.h : %.png %.grit
+	@echo "  GRIT    $<"
+	@$(MKDIR) -p $(@D)
+	$(V)$(BLOCKSDS)/tools/grit/grit $< -ftc -W1 -o$(BUILDDIR)/$*
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(BUILDDIR)/$*.png.o $(BUILDDIR)/$*.c
+	$(V)touch $(BUILDDIR)/$*.png.o $(BUILDDIR)/$*.h
+
+$(BUILDDIR)/fonts/font_8x11.raw.o : fonts/font_8x11.png fonts/font_8x11.png.txt
 	@echo $(notdir $<)
-	@$(bin2o)
+	@$(MKDIR) -p $(@D)
+	$(V)python3 $(TOOLSDIR)/font_pack.py $< $(basename $(basename $@)).raw
+	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $(basename $(basename $@)).raw $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.c
 
-
-%.raw.o :	%.raw
+$(BUILDDIR)/%.raw.o : %.png
 	@echo $(notdir $<)
-	@$(bin2o)
+	@$(MKDIR) -p $(@D)
+	$(V)python3 $(TOOLSDIR)/icon_pack.py $< $(basename $(basename $@)).raw
+	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $(basename $(basename $@)).raw $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.c
 
-font_8x11.raw :		font_8x11.png
-	@echo $(notdir $<)
-	@python3 $(TOOLSDIR)/font_pack.py $< $@
+# All assets must be built before the source code
+# -----------------------------------------------
 
-%.raw :		%.png
-	@echo $(notdir $<)
-	@python3 $(TOOLSDIR)/icon_pack.py $< $@
+$(SOURCES_S) $(SOURCES_C) $(SOURCES_CPP): $(HEADERS_ASSETS)
 
--include $(DEPENDS)
+# Include dependency files if they exist
+# --------------------------------------
 
-#---------------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------------
+-include $(DEPS)
