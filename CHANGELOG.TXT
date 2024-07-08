@@ -1,3 +1,19 @@
+-- NitrousTracker v0.4.10 (2024-07-08)
+
+New features:
+
+- support for Bxx XM command (exelotl)
+- support for EEx XM command (exelotl)
+
+Improvements:
+
+- updated BlocksDS toolchain
+
+Fixes:
+
+- [#112] fixed freeze on recording long samples
+- fixed XM pattern decoding bug leading to missing notes (exelotl)
+
 -- NitrousTracker v0.4.9 (2024-04-26)
 
 New features:
