@@ -58,7 +58,7 @@ div.logobg{
 top:5px;
     width: 456px;
     height: 102px;
-    background-image: url(/docs/resources/nitroustracker_logo.png);
+    background-image: url(/nitrotracker/resources/nitroustracker_logo.png);
 }
 
 div.footer {
@@ -74,7 +74,7 @@ div.footer {
     border-style: solid;
     border-width: 1px;
     border-color: black;
-    background-image: url(/docs/resources/barbg.png);
+    background-image: url(/nitrotracker/resources/barbg.png);
     padding-top: 3px;
 }
 
@@ -86,7 +86,7 @@ div.links{
     border-width: 1px;
     border-color: black;
 	text-align: center;
-    background-image: url(/docs/resources/barbg.png);
+    background-image: url(/nitrotracker/resources/barbg.png);
     font-weight: bold;
 /*	font-size:10pt;*/
 }
@@ -131,7 +131,7 @@ div.links table{
 }
 
 div.links td{
-    background-image: url(/docs/resources/barbg.png);
+    background-image: url(/nitrotracker/resources/barbg.png);
     font-weight: bold;
     /*
     border-left-style: solid;
@@ -146,7 +146,7 @@ div.links td{
 div.links td.hl{
     /*background-color: #999947;*/
     color: black;
-    background-image: url(/docs/resources/barbg_hl.png);
+    background-image: url(/nitrotracker/resources/barbg_hl.png);
 }
 
 div.sublinks{
@@ -163,7 +163,7 @@ div.sublinks{
 	height:20px;
 	width:100%;
 	/*background-color:#3f3f2c;*/
-    background-image: url(/docs/resources/subbarbg.png);
+    background-image: url(/nitrotracker/resources/subbarbg.png);
 	text-align:center;
 }
 
@@ -182,13 +182,13 @@ div.sublinks a:visited{
 }
 
 div.sublinks td{
-    background-image: url(/docs/resources/subbarbg.png);
+    background-image: url(/nitrotracker/resources/subbarbg.png);
     font-weight: bold;
 }
 
 div.sublinks td.hl{
     background-color: #a7a673;
-    background-image: url(/docs/resources/subbarbg_hl.png);
+    background-image: url(/nitrotracker/resources/subbarbg_hl.png);
 }
     
 
@@ -240,7 +240,7 @@ div.smallcontainer{
     border-style: solid;
     border-width: 1px;
     border-color: black;
-    background-image: url(/docs/resources/sc_bg.png);
+    background-image: url(/nitrotracker/resources/sc_bg.png);
     font-color: black;
 }
 
