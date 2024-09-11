@@ -1,0 +1,488 @@
+body {
+	margin-left : 0;
+	margin-right : 0;
+	margin-top : 0;
+	margin-bottom : 0;
+    padding:0;
+	font-family:"Tahoma","Arial",sans-serif;
+    font-size:0.9em;
+/*	background-color: #1b285b; */
+    background-image: url(resources/bg.png);
+    color: white;
+    text-align: center;
+}
+
+div.heading {
+	top:0px;
+	left:0px;
+	width:100%;
+	height:115px;
+    background-position: top center;
+    text-align: center;
+}
+
+div.logotop{
+    position:absolute;
+	font-size:33px;
+	font-weight:200;
+	color:white;
+	letter-spacing:12px;
+	line-height:20px;
+    margin: 0 auto;
+    top:20px;
+    padding-left:40px;
+    z-index: 2;
+}
+
+div.logobottom{
+    position:absolute;
+	font-size: 10px;
+	font-weight:200;
+	color: white;
+	letter-spacing: 17px;
+	text-decoration: overline;
+    padding-top:44px;
+	white-space: nowrap;
+    margin: 0 auto;
+    z-index: 2;
+}
+
+div.logobox{
+    width:487px;
+    margin:0 auto;
+}
+
+div.logobg{
+    position:absolute;
+    background-size:cover;
+top:5px;
+    width: 456px;
+    height: 102px;
+    background-image: url(/docs/resources/nitroustracker_logo.png);
+}
+
+div.footer {
+	position: relative;
+	left:0px;
+	height:17px;
+	width:100%;
+	text-align:center;
+    color: white;
+    font-size:11px;
+    font-weight: bold;
+    letter-spacing:2px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+    background-image: url(/docs/resources/barbg.png);
+    padding-top: 3px;
+}
+
+div.links{
+	top:105px;
+	height:20px;
+	width:100%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+	text-align: center;
+    background-image: url(/docs/resources/barbg.png);
+    font-weight: bold;
+/*	font-size:10pt;*/
+}
+
+div.toplink{
+    width=165px;
+    height=20px;
+/*    font-size:10pt;*/
+    letter-spacing:5px;
+    text-decoration: none;
+    color : #FFFFFF;
+}
+
+div.links a:link {
+    font-size:10pt;
+	letter-spacing:5px;
+	text-decoration: none;
+	color : #FFFFFF;
+}
+
+div.links td.hl a:link {
+    color: black;
+}
+
+div.links td.hl a:visited {
+    color: black;
+}
+
+div.links td.hl a:active {
+    color: black;
+}
+
+div.links a:visited{
+    font-size:10pt;
+    letter-spacing:5px;
+    text-decoration: none;
+    color : #FFFFFF;
+}                
+
+div.links table{
+    margin: 0 auto;
+}
+
+div.links td{
+    background-image: url(/docs/resources/barbg.png);
+    font-weight: bold;
+    /*
+    border-left-style: solid;
+    border-left-width: 1px;
+    border-left-color: black;
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-right-color: black;
+    */
+}
+
+div.links td.hl{
+    /*background-color: #999947;*/
+    color: black;
+    background-image: url(/docs/resources/barbg_hl.png);
+}
+
+div.sublinks{
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+   
+    border-top-style: none;
+   
+    font-size:10pt;
+    font-weight: bold;
+    
+	top:0px;
+	height:20px;
+	width:100%;
+	/*background-color:#3f3f2c;*/
+    background-image: url(/docs/resources/subbarbg.png);
+	text-align:center;
+}
+
+div.sublinks a:link{
+    font-size:10pt;
+    letter-spacing:5px;
+    text-decoration: none;
+    color : #FFFFFF;
+}
+
+div.sublinks a:visited{
+    font-size:10pt;
+    letter-spacing:5px;
+    text-decoration: none;
+    color : #FFFFFF;
+}
+
+div.sublinks td{
+    background-image: url(/docs/resources/subbarbg.png);
+    font-weight: bold;
+}
+
+div.sublinks td.hl{
+    background-color: #a7a673;
+    background-image: url(/docs/resources/subbarbg_hl.png);
+}
+    
+
+div.content div.sublinks a:link {
+    font-size:10pt;
+	letter-spacing:5px;
+	text-decoration: none;
+	color : #FFFFFF;
+}
+
+div.content div.sublinks a:visited {
+	font-size:10pt;
+	letter-spacing:5px;
+	text-decoration: none;
+	color :#FFFFFF;
+}
+
+div.content {
+	left:0px;
+	top:104px;
+	bottom:17px;
+    margin: 0 auto;
+	text-align:center;
+	padding-top : 20px;
+	vertical-align : middle;
+}
+
+div.container{
+    width:700px;
+    margin: 0 auto;
+    position:relative;
+    margin-bottom: 2px;
+    position:relative;
+    text-align: justify;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+/*    background-color: #8090c0; */
+    background-color: #506090;
+}
+
+div.smallcontainer{
+    width:700px;
+    margin: 0 auto;
+    position:relative;
+    margin-bottom: 2px;
+    position:relative;
+    text-align: justify;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+    background-image: url(/docs/resources/sc_bg.png);
+    font-color: black;
+}
+
+
+div.newsheading{
+    font-size: 17px;
+    font-weight: bold;
+color:black;
+}
+
+div.news{
+    position:relative;
+    margin-bottom: 25px;
+/*    font-size: 12pt;*/
+}
+
+div.boxtop{
+    height: 10px;
+/*    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/topborder-b.png);*/
+    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/topborder.png);
+/*
+    filter: alpha(opacity=80);
+    -moz-opacity:.8;
+    opacity:.8;
+*/
+}
+
+div.boxbottom{
+    height: 20px;
+    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/bottomborder-b.png);
+
+    filter: alpha(opacity=80);
+    -moz-opacity:.8;
+    opacity:.8;
+}
+
+div.transbox{
+    border-right-style:solid;
+    border-right-width:1px;
+    border-right-color: black;
+   
+    border-left-style:solid;
+    border-left-width:1px;
+    border-left-color: black;
+            
+    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/gradient.png);
+    background-repeat: repeat-x;
+    
+    width:698px;
+    position:absolute;
+    /*background-color:#666647;*/
+    
+    background-color:#0571c4;
+    filter: alpha(opacity=80);
+    -moz-opacity:.8;
+    opacity:.8;
+   
+    /*
+     background-color:#0041b0;
+         filter: alpha(opacity=60);
+             -moz-opacity:.6;
+                 opacity:.6;
+                */ 
+}
+
+div.smallbox_boxtop{
+    height: 14px;
+    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/topborder-b_small.png);
+    
+    filter: alpha(opacity=80);
+    -moz-opacity:.8;
+    opacity:.8;
+}
+
+div.smallbox_boxbottom{
+    height: 14px;
+    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/bottomborder-b_small.png);
+
+    filter: alpha(opacity=80);
+    -moz-opacity:.8;
+    opacity:.8;
+}
+
+div.smallbox_transbox{
+    border-right-style:solid;
+    border-right-width:1px;
+    border-right-color: black;
+                
+    border-left-style:solid;
+    border-left-width:1px;
+    border-left-color: black;
+
+    /*background-color: #9ac0e3;*/
+    background-color: #0571c4;
+
+    width:698px;
+    position:absolute;
+
+    filter: alpha(opacity=80);
+    -moz-opacity:.8;
+    opacity:.8;
+}
+
+div.boxrightalign{
+    text-align: right;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color:white;
+}
+
+div.boxnoalign{
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color:white;
+}
+
+div.boxleftalign{
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color:white;
+}
+
+div.boxcenteralign{
+    text-align: center;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color:white;
+}
+
+
+div.opaquetext{
+    width:698px;
+    /*width:500px;*/
+    z-index: 2;
+}
+
+/*
+table{
+    border-style:solid;    
+}
+
+td{
+    border-style:solid;
+}
+*/
+ul{
+    padding-left:20pt;
+}
+
+ul.metalist{
+    line-height:2em;
+}
+
+h5{
+margin-bottom:0.5em;
+}
+
+li {
+	list-style-type: square;
+	line-height: 1.5em;
+}
+
+/*
+h3 {
+	font-size: 9pt;
+	font-weight: 200;
+    letter-spacing: 5pt;
+	font-family: Tahoma,Arial,Courier New;
+	color: Gray;
+	text-align: center;
+	margin-top:0;
+	white-space: nowrap;
+}
+*/
+
+/*
+tr {
+	font-family: Tahoma,Arial,Courier New;
+	font-size: 9 pt;
+	color: black;
+	text-align: justify;
+	line-height : 13pt;
+}
+*/
+
+div.content a:link, a:visited, a:active, a:hover{
+    color: #ffb03c;
+    font-weight: bold;
+    text-decoration:none;
+}
+
+input, textarea, button {
+	font-size: 9 pt;
+	background-color : #C1C1C1;
+	color: white;
+	border : thin solid;
+}
+
+/*
+td {
+		font-size:10pt;
+}*/
+
+form {
+    margin-top : 1px;
+	margin-bottom : 1px;
+}
+
+div.pixeltyp {
+    background-image: url(/web/20190124121723im_/http://nitrotracker.tobw.net/pixel/typ2.png);
+    width: 115px;
+    height: 172px;
+    left:12%;
+    top:200px;
+    position:absolute;
+}
+
+/*
+     FILE ARCHIVED ON 12:17:23 Jan 24, 2019 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 18:13:09 Sep 11, 2024.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  captures_list: 0.453
+  exclusion.robots: 0.018
+  exclusion.robots.policy: 0.009
+  esindex: 0.01
+  cdx.remote: 6.33
+  LoadShardBlock: 97.002 (3)
+  PetaboxLoader3.datanode: 86.29 (5)
+  PetaboxLoader3.resolve: 198.774 (3)
+  load_resource: 239.456 (2)
+*/
