@@ -30,7 +30,7 @@ extern "C" {
   #include "ntxm/linear_freq_table.h"
 }
 
-#ifdef WIFI
+#ifdef MIDI
 #include <dswifi7.h>
 #endif
 
@@ -52,7 +52,7 @@ void VcountHandler() {
 
 void VblankHandler(void)
 {
-#ifdef WIFI
+#ifdef MIDI
 	if(ntxm_recording == false)
 		Wifi_Update(); // update wireless in vblank
 #endif
@@ -79,13 +79,13 @@ int main(int argc, char ** argv) {
 	irqSet(IRQ_VCOUNT, VcountHandler);
 	irqSet(IRQ_VBLANK, VblankHandler);
 	fifoInit();
-#ifdef WIFI
+#ifdef MIDI
 	installWifiFIFO();
 #endif
 	installSystemFIFO();
 
 	irqEnable(IRQ_VBLANK | IRQ_VCOUNT);
-#ifdef WIFI
+#ifdef MIDI
 	irqEnable(IRQ_NETWORK);
 #endif
 #ifdef BLOCKSDS

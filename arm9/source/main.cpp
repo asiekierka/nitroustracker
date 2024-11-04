@@ -100,7 +100,7 @@
 #include "action.h"
 
 #include <fat.h>
-#ifdef WIFI
+#ifdef MIDI
 #include <libdsmi.h>
 #include <dswifi9.h>
 #endif
@@ -442,7 +442,7 @@ void handleNoteStroke(u8 note)
 	// Send "play inst" command
 	CommandPlayInst(state->instrument, state->basenote + note, 255, 255); // channel==255 -> search for free channel
 
-#ifdef WIFI
+#ifdef MIDI
 	u8 midichannel = state->instrument % 16;
 	if( (state->dsmi_connected) && (state->dsmi_send) )
 		dsmi_write(NOTE_ON | midichannel, state->basenote + note, 127);
@@ -469,7 +469,7 @@ void handleNoteRelease(u8 note, bool moved)
 
 	CommandStopInst(255);
 
-#ifdef WIFI
+#ifdef MIDI
 	u8 midichannel = state->instrument % 16;
 	if( (state->dsmi_connected) && (state->dsmi_send) )
 		dsmi_write(NOTE_OFF | midichannel, state->basenote + note, 127);
@@ -1178,7 +1178,7 @@ void stop(void)
 	redraw_main_requested = false;
 	drawMainScreen();
 
-#ifdef WIFI
+#ifdef MIDI
 	if( (state->dsmi_connected) && (state->dsmi_send) )
 	{
 		for(u8 chn=0; chn<16; ++chn) {
@@ -1293,7 +1293,7 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 	updateGuiToNewPattern(song->getPotEntry(state->potpos));
 }
 
-#ifdef WIFI
+#ifdef MIDI
 
 void handleDSMWRecv(void)
 {
@@ -1615,7 +1615,7 @@ void handleRowChangeFromSong(u16 row)
 	
 	redraw_main_requested = true;
 
-#ifdef WIFI
+#ifdef MIDI
 	if( (state->dsmi_connected) && (state->dsmi_send) )
 	{
 		Cell ** pattern = song->getPattern( song->getPotEntry( state->potpos ) );
@@ -2511,7 +2511,7 @@ void sampleTabBoxChage(u8 tab)
 	}
 }
 
-#ifdef WIFI
+#ifdef MIDI
 
 void dsmiConnect(void)
 {
@@ -2534,16 +2534,9 @@ void dsmiConnect(void)
 	}
 }
 
-// h4x!
-extern int sock, sockin;
-
 void dsmiDisconnect(void)
 {
-	close(sock);
-	close(sockin);
-
-	Wifi_DisconnectAP();
-	Wifi_DisableWifi();
+	dsmi_disconnect();
 
 	btndsmwtoggleconnect->setCaption("connect");
 	btndsmwtoggleconnect->pleaseDraw();
@@ -3142,9 +3135,9 @@ void setupGUI(bool dldi_enabled)
 		rbghandedness->setActive(1);
 		rbghandedness->registerChangeCallback(handleHandednessChange);
 
-#ifdef WIFI
+#ifdef MIDI
 		gbdsmw = new GroupBox(5, 55, 80, 54, &sub_vram);
-		gbdsmw->setText("dsmidiwifi");
+		gbdsmw->setText("dsmidi");
 
 		btndsmwtoggleconnect = new Button(10, 67, 71, 14, &sub_vram);
 		btndsmwtoggleconnect->setCaption("connect");
@@ -3184,14 +3177,14 @@ void setupGUI(bool dldi_enabled)
 		btnconfigsave->setCaption("save");
 		btnconfigsave->registerPushCallback(saveConfig);
 
-#ifdef WIFI
+#ifdef MIDI
 		btndsmwtoggleconnect->registerPushCallback(dsmiToggleConnect);
 		cbdsmwsend->registerToggleCallback(handleDsmiSendToggled);
 		cbdsmwrecv->registerToggleCallback(handleDsmiRecvToggled);
 #endif
 		tabbox->registerWidget(rblefthanded, 0, 4);
 		tabbox->registerWidget(rbrighthanded, 0, 4);
-#ifdef WIFI
+#ifdef MIDI
 		tabbox->registerWidget(cbdsmwsend, 0, 4);
 		tabbox->registerWidget(cbdsmwrecv, 0, 4);
 		tabbox->registerWidget(btndsmwtoggleconnect, 0, 4);
@@ -3858,9 +3851,10 @@ int main(int argc, char **argv) {
 	{
 		VblankHandler();
 
-#ifdef WIFI
+#ifdef MIDI
 		if( state->dsmi_connected ) {
 			handleDSMWRecv();
+			dsmi_task();
 		}
 #endif
 

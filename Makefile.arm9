@@ -46,7 +46,7 @@ ifeq ($(DEBUG),true)
 BUILDDIR	:= build/arm9d
 NAME		:= arm9d
 else
-ifeq ($(WIFI),true)
+ifeq ($(MIDI),true)
 BUILDDIR	:= build/arm9
 NAME		:= arm9
 else
@@ -117,8 +117,8 @@ DEFINES		+= -DDEBUG -fstack-protector-strong
 else
 DEFINES		+= -DNDEBUG
 endif
-ifeq ($(WIFI),true)
-DEFINES		+= -DWIFI
+ifeq ($(MIDI),true)
+DEFINES		+= -DMIDI
 endif
 
 ARCH		:= -mcpu=arm946e-s+nofp

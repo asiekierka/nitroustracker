@@ -39,7 +39,7 @@ ifeq ($(DEBUG),true)
 BUILDDIR	:= build/arm7d
 NAME		:= arm7d
 else
-ifeq ($(WIFI),true)
+ifeq ($(MIDI),true)
 BUILDDIR	:= build/arm7
 NAME		:= arm7
 else
@@ -91,8 +91,8 @@ DEFINES		+= -DDEBUG -fstack-protector-strong
 else
 DEFINES		+= -DNDEBUG
 endif
-ifeq ($(WIFI),true)
-DEFINES		+= -DWIFI
+ifeq ($(MIDI),true)
+DEFINES		+= -DMIDI
 endif
 
 ARCH		:= -mcpu=arm7tdmi
