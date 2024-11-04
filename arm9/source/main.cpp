@@ -2240,7 +2240,7 @@ void showMessage(const char *msg, bool error)
 void showAboutBox(void)
 {
 	char msg[256];
-	sniprintf(msg, 256, "NitrousTracker : %s", __DATE__);
+	sniprintf(msg, 256, "NitrousTracker " VERSION " (" GIT_HASH ")");
 	mb = new MessageBox(&sub_vram, msg, 2, "track on!", deleteMessageBox, "exit", showExitBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();

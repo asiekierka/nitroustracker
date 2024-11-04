@@ -38,7 +38,7 @@
 static inline void debugprintf(...) {}
 #endif
 
-#ifdef BLOCKSDS
+#ifdef __BLOCKSDS__
 #define iprintf printf
 #define fiprintf fprintf
 #define siprintf sprintf

@@ -27,7 +27,7 @@ Has rectangular area
 
 #include "theme.h"
 
-#ifdef BLOCKSDS
+#ifdef __BLOCKSDS__
 #define iprintf printf
 #define fiprintf fprintf
 #define siprintf sprintf

@@ -23,7 +23,7 @@ TOOLSDIR	:= tools
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:=
+DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF
 
 # Libraries
 # ---------
@@ -65,6 +65,7 @@ SOUNDBANKDIR	:= $(BUILDDIR)/maxmod
 PREFIX		:= $(ARM_NONE_EABI_PATH)arm-none-eabi-
 CC		:= $(PREFIX)gcc
 CXX		:= $(PREFIX)g++
+LD		:= $(PREFIX)gcc
 OBJDUMP		:= $(PREFIX)objdump
 MKDIR		:= mkdir
 RM		:= rm -rf
@@ -111,7 +112,7 @@ SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
 # Compiler and linker flags
 # -------------------------
 
-DEFINES		+= -D__NDS__ -DARM9 -DBLOCKSDS
+DEFINES		+= -D__NDS__ -DARM9 -DBLOCKSDS -DVERSION=\"$(VERSION)\" -DGIT_HASH=\"$(GIT_HASH)\"
 ifeq ($(DEBUG),true)
 DEFINES		+= -DDEBUG -fstack-protector-strong
 else
@@ -121,14 +122,16 @@ ifeq ($(MIDI),true)
 DEFINES		+= -DMIDI
 endif
 
-ARCH		:= -mcpu=arm946e-s+nofp
+ARCH		:= -mthumb -mcpu=arm946e-s+nofp
+
+SPECS           := $(BLOCKSDS)/sys/crts/ds_arm9.specs
 
 WARNFLAGS	:= -Wall
 
 ifeq ($(SOURCES_CPP),)
-    LD	:= $(CC)
+        LIBS    += -lc
 else
-    LD	:= $(CXX)
+        LIBS    += -lstdc++ -lc
 endif
 
 INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
@@ -136,28 +139,21 @@ INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
 
 LIBDIRSFLAGS	:= $(foreach path,$(LIBDIRS),-L$(path)/lib)
 
-ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) \
-		   -ffunction-sections -fdata-sections
+ASFLAGS         += -x assembler-with-cpp $(DEFINES) $(INCLUDEFLAGS) \
+                   $(ARCH) -ffunction-sections -fdata-sections \
+                   -specs=$(SPECS)
 
-CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
-		   -ffunction-sections -fdata-sections \
-		   -fomit-frame-pointer
+CFLAGS          += -std=gnu17 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+                   $(ARCH) -O2 -ffunction-sections -fdata-sections \
+                   -specs=$(SPECS)
 
-CXXFLAGS	+= -std=gnu++20 -Wno-volatile $(WARNFLAGS) $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
-		   -ffunction-sections -fdata-sections \
-		   -fno-exceptions -fno-rtti \
-		   -fomit-frame-pointer
+CXXFLAGS        += -std=gnu++20 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+                   $(ARCH) -O2 -ffunction-sections -fdata-sections \
+                   -fno-exceptions -fno-rtti \
+                   -specs=$(SPECS)
 
-LDFLAGS		:= -Wl,--defsym=vfprintf=__i_vfprintf -Wl,--defsym=vfscanf=__i_vfscanf \
-		   -mthumb -mthumb-interwork $(LIBDIRSFLAGS) \
-		   -Wl,-Map,$(MAP) -Wl,--gc-sections -nostdlib \
-		   -T$(BLOCKSDS)/sys/crts/ds_arm9.mem \
-		   -T$(BLOCKSDS)/sys/crts/ds_arm9.ld \
-		   -Wl,--no-warn-rwx-segments -Wl,--use-blx \
-		   -Wl,--start-group $(LIBS) -lgcc -Wl,--end-group
+LDFLAGS         := $(ARCH) $(LIBDIRSFLAGS) -Wl,-Map,$(MAP) $(DEFINES) \
+                   -Wl,--start-group $(LIBS) -Wl,--end-group -specs=$(SPECS)
 
 # Intermediate build files
 # ------------------------
@@ -192,7 +188,7 @@ all: $(ELF)
 
 $(ELF): $(OBJS)
 	@echo "  LD.9    $@"
-	$(V)$(LD) -o $@ $(OBJS) $(BLOCKSDS)/sys/crts/ds_arm9_crt0.o $(LDFLAGS)
+	$(V)$(LD) -o $@ $(OBJS) $(LDFLAGS)
 
 $(DUMP): $(ELF)
 	@echo "  OBJDUMP.9 $@"

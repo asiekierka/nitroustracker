@@ -18,7 +18,7 @@ BINDIRS		:=
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:=
+DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF
 
 # Libraries
 # ---------
@@ -57,6 +57,7 @@ MAP		:= build/$(NAME).map
 PREFIX		:= $(ARM_NONE_EABI_PATH)arm-none-eabi-
 CC		:= $(PREFIX)gcc
 CXX		:= $(PREFIX)g++
+LD		:= $(PREFIX)gcc
 OBJDUMP		:= $(PREFIX)objdump
 MKDIR		:= mkdir
 RM		:= rm -rf
@@ -95,14 +96,16 @@ ifeq ($(MIDI),true)
 DEFINES		+= -DMIDI
 endif
 
-ARCH		:= -mcpu=arm7tdmi
+ARCH		:= -mthumb -mcpu=arm7tdmi
+
+SPECS           := $(BLOCKSDS)/sys/crts/ds_arm7.specs
 
 WARNFLAGS	:= -Wall
 
 ifeq ($(SOURCES_CPP),)
-    LD	:= $(CC)
+        LIBS    += -lc
 else
-    LD	:= $(CXX)
+        LIBS    += -lstdc++ -lc
 endif
 
 INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
@@ -110,27 +113,21 @@ INCLUDEFLAGS	:= $(foreach path,$(INCLUDEDIRS),-I$(path)) \
 
 LIBDIRSFLAGS	:= $(foreach path,$(LIBDIRS),-L$(path)/lib)
 
-ASFLAGS		+= -x assembler-with-cpp $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) \
-		   -ffunction-sections -fdata-sections
+ASFLAGS         += -x assembler-with-cpp $(DEFINES) $(INCLUDEFLAGS) \
+                   $(ARCH) -ffunction-sections -fdata-sections \
+                   -specs=$(SPECS)
 
-CFLAGS		+= -std=gnu11 $(WARNFLAGS) $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
-		   -ffunction-sections -fdata-sections \
-		   -fomit-frame-pointer
+CFLAGS          += -std=gnu17 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+                   $(ARCH) -O2 -ffunction-sections -fdata-sections \
+                   -specs=$(SPECS)
 
-CXXFLAGS	+= -std=gnu++14 $(WARNFLAGS) $(DEFINES) $(ARCH) \
-		   -mthumb -mthumb-interwork $(INCLUDEFLAGS) -O2 \
-		   -ffunction-sections -fdata-sections \
-		   -fno-exceptions -fno-rtti \
-		   -fomit-frame-pointer
+CXXFLAGS        += -std=gnu++20 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+                   $(ARCH) -O2 -ffunction-sections -fdata-sections \
+                   -fno-exceptions -fno-rtti \
+                   -specs=$(SPECS)
 
-LDFLAGS		:= -Wl,--defsym=vfprintf=__i_vfprintf -Wl,--defsym=vfscanf=__i_vfscanf \
-		   -mthumb -mthumb-interwork $(LIBDIRSFLAGS) \
-		   -Wl,-Map,$(MAP) -Wl,--gc-sections -nostdlib \
-		   -T$(BLOCKSDS)/sys/crts/ds_arm7.ld \
-		   -Wl,--no-warn-rwx-segments \
-		   -Wl,--start-group $(LIBS) -lgcc -Wl,--end-group
+LDFLAGS         := $(ARCH) $(LIBDIRSFLAGS) -Wl,-Map,$(MAP) $(DEFINES) \
+                   -Wl,--start-group $(LIBS) -Wl,--end-group -specs=$(SPECS)
 
 # Intermediate build files
 # ------------------------
@@ -156,7 +153,7 @@ all: $(ELF)
 
 $(ELF): $(OBJS)
 	@echo "  LD.7    $@"
-	$(V)$(LD) -o $@ $(OBJS) $(BLOCKSDS)/sys/crts/ds_arm7_crt0.o $(LDFLAGS)
+	$(V)$(LD) -o $@ $(OBJS) $(LDFLAGS)
 
 $(DUMP): $(ELF)
 	@echo "  OBJDUMP.7 $@"

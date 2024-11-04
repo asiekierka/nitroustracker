@@ -88,7 +88,7 @@ int main(int argc, char ** argv) {
 #ifdef MIDI
 	irqEnable(IRQ_NETWORK);
 #endif
-#ifdef BLOCKSDS
+#ifdef __BLOCKSDS__
 	initClockIRQTimer(3);
 #else
 	rtcReset();

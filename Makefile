@@ -9,9 +9,11 @@ BLOCKSDSEXT	?= /opt/blocksds/external
 # ===========
 
 NAME		:= nitroustracker
+export VERSION		:= 0.4.11
+export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 GAME_TITLE	:= NitrousTracker
-GAME_SUBTITLE	:= v0.4.10
+GAME_AUTHOR	:= v$(VERSION)
 GAME_ICON	:= icon.bmp
 
 # DLDI and internal SD slot of DSi
