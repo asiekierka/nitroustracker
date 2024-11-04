@@ -1,3 +1,14 @@
+-- NitrousTracker v0.4.11 (2024-07-08)
+
+New features:
+
+- DSMIDI support for NRIO/DS Linker Writer Slot-2 USB cartridges
+
+Improvements:
+
+- updated BlocksDS toolchain to 1.6.2
+- the about screen now lists the version and the Git commit hash of the build
+
 -- NitrousTracker v0.4.10 (2024-07-08)
 
 New features:
@@ -7,7 +18,7 @@ New features:
 
 Improvements:
 
-- updated BlocksDS toolchain
+- updated BlocksDS toolchain to 1.3.0
 
 Fixes:
 

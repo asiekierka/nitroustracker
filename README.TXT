@@ -1,5 +1,5 @@
 
-      NitrousTracker v0.4.10
+      NitrousTracker v0.4.11
      --------------------------------
      original by 0xtob ^ 0x80
           modifications by asie & co.
