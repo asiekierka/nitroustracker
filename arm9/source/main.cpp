@@ -3084,7 +3084,7 @@ void setupGUI(bool dldi_enabled)
 		volenvedit->registerPointsChangeCallback(volEnvPointsChanged);
 		volenvedit->registerDrawFinishCallback(volEnvDrawFinish);
 
-		cbvolenvenabled = new CheckBox(6, 98, 60, 10, &sub_vram, true, false);
+		cbvolenvenabled = new CheckBox(6, 97, 60, 10, &sub_vram, true, false);
 		cbvolenvenabled->setCaption("env on");
 		cbvolenvenabled->registerToggleCallback(toggleVolEnvEnabled);
 
@@ -3116,8 +3116,8 @@ void setupGUI(bool dldi_enabled)
     cbsusenabled->setCaption("sus on");
     cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
     
-		tbmapsamples = new ToggleButton(5, 125, 80, 12, &sub_vram, false);
-		tbmapsamples->setCaption("map samples");
+		tbmapsamples = new ToggleButton(72, 133, 134-72, 12, &sub_vram, false);
+		tbmapsamples->setCaption("map samp.");
 		tbmapsamples->registerToggleCallback(toggleMapSamples);
 
 		tabbox->registerWidget(btnaddenvpoint, 0, 3);
@@ -3224,14 +3224,14 @@ void setupGUI(bool dldi_enabled)
 		}
 	// </Settings Gui>
 
-	lbinstruments = new ListBox(141, 33, 114, 89, &sub_vram, MAX_INSTRUMENTS, true, true, false);
+	lbinstruments = new ListBox(141, 32, 114, 89, &sub_vram, MAX_INSTRUMENTS, true, true, false);
 
-	lbsamples = new ListBox(141, 101, 114, 23, &sub_vram, MAX_INSTRUMENT_SAMPLES, true, false, true);
+	lbsamples = new ListBox(141, 100, 114, 23, &sub_vram, MAX_INSTRUMENT_SAMPLES, true, false, true);
 
-	buttonswitchsub    = new BitButton(233, 1  , 21, 21, &sub_vram, icon_flp_raw, 18, 18);
-	buttonplay         = new BitButton(180, 4  , 23, 15, &sub_vram, icon_play_raw, 12, 12, 5, 0, true);
-	buttonpause        = new BitButton(180, 4  , 23, 15, &sub_vram, icon_pause_raw, 12, 12, 5, 0, false);
-	buttonstop         = new BitButton(204, 4  , 23, 15, &sub_vram, icon_stop_raw, 12, 12, 5, 0);
+	buttonswitchsub    = new BitButton(234, 1  , 21, 21, &sub_vram, icon_flp_raw, 18, 18);
+	buttonplay         = new BitButton(180, 3  , 23, 15, &sub_vram, icon_play_raw, 12, 12, 5, 0, true);
+	buttonpause        = new BitButton(180, 3  , 23, 15, &sub_vram, icon_pause_raw, 12, 12, 5, 0, false);
+	buttonstop         = new BitButton(204, 3  , 23, 15, &sub_vram, icon_stop_raw, 12, 12, 5, 0);
 
 	buttonundo         = new BitButton(226, 127, 14, 12, &sub_vram, icon_undo_raw, 8, 8, 3, 2);
 	buttonredo         = new BitButton(226 + 15, 127, 14, 12, &sub_vram, icon_redo_raw, 8, 8, 3, 2);
@@ -3239,19 +3239,19 @@ void setupGUI(bool dldi_enabled)
 	buttondelnote2     = new Button(225, 153, 30, 12, &sub_vram);
 	buttonemptynote    = new Button(225, 166, 30, 12, &sub_vram);
 	buttonstopnote     = new Button(225, 179, 30, 12, &sub_vram);
-	buttonrenamesample = new Button(141, 125 , 23, 12, &sub_vram, false);
-	buttonrenameinst   = new Button(141, 20 , 23, 12, &sub_vram);
+	buttonrenamesample = new Button(141, 124, 23, 12, &sub_vram, false);
+	buttonrenameinst   = new Button(141, 19 , 23, 12, &sub_vram);
 
-	tbmultisample      = new ToggleButton(165, 21, 10, 10, &sub_vram);
+	tbmultisample      = new ToggleButton(165, 20, 10, 10, &sub_vram);
 
 	buttonundo->registerPushCallback(undoOp);
 	buttonredo->registerPushCallback(redoOp);
 
-	cbscrolllock = new CheckBox(178, 19, 30, 12, &sub_vram, true, false, true);
-	cbscrolllock->setCaption("scrl lock");
+	cbscrolllock = new CheckBox(179, 18, 30, 12, &sub_vram, true, false, true);
+	cbscrolllock->setCaption("scr lock");
 	cbscrolllock->registerToggleCallback(handleToggleScrollLock);
 
-	tbrecord = new ToggleButton(140, 136, 16, 16, &sub_vram);
+	tbrecord = new ToggleButton(141, 136, 16, 16, &sub_vram);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
 	tbrecord->registerToggleCallback(setRecordMode);
 	tbrecord->setColorOff(RGB15(18, 0, 0) | BIT(15));
@@ -3293,7 +3293,7 @@ void setupGUI(bool dldi_enabled)
 	tbmultisample->setCaption("+");
 
 	// <Main Screen>
-		buttonswitchmain = new BitButton(233, 1  , 21, 21, &main_vram_back, icon_flp_raw, 18, 18);
+		buttonswitchmain = new BitButton(234, 1  , 21, 21, &main_vram_back, icon_flp_raw, 18, 18);
 		buttonswitchmain->registerPushCallback(switchScreens);
 
 		labelmute = new Label(226, 23, 32, 8, &main_vram_back, false, true);
@@ -3404,6 +3404,7 @@ void setupGUI(bool dldi_enabled)
 		gui->registerWidget(pv, 0, MAIN_SCREEN);
 	// </Main Screen>
 
+	gui->registerWidget(cbscrolllock, 0, SUB_SCREEN);
 	gui->registerWidget(buttonswitchsub, 0, SUB_SCREEN);
 	gui->registerWidget(buttonplay, 0, SUB_SCREEN);
 	gui->registerWidget(buttonstop, 0, SUB_SCREEN);
@@ -3416,7 +3417,6 @@ void setupGUI(bool dldi_enabled)
 	gui->registerWidget(buttonrenameinst, 0, SUB_SCREEN);
 	gui->registerWidget(buttonrenamesample, 0, SUB_SCREEN);
 	gui->registerWidget(tbmultisample, 0, SUB_SCREEN);
-	gui->registerWidget(cbscrolllock, 0, SUB_SCREEN);
 	gui->registerWidget(numberboxadd, 0, SUB_SCREEN);
 	gui->registerWidget(numberboxoctave, 0, SUB_SCREEN);
 	gui->registerWidget(labeladd, 0, SUB_SCREEN);
