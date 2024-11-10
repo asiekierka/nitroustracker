@@ -1,9 +1,10 @@
--- NitrousTracker DEV --
+-- NitrousTracker v0.4.13 (2024-11-10)
 
 Fixes:
 
 - [#40] Fix freeze when attempting to loop samples in certain .xm files
 - [#117] Fix "map samples" button UI overlap
+- [#123] Fix playback regressions from v0.4.12
 - [#84] Fix sample selection glitch
 
 -- NitrousTracker v0.4.12 (2024-11-10)
