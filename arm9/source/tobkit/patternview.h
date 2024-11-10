@@ -108,6 +108,7 @@ class PatternView: public Widget {
 		void clearSelection(void);
 		
 		void setSong(Song *s);
+		void setLinesPerBeat(u16 lpb);
 		
 		void registerMuteCallback(void (*onMute_)(bool *channels_muted));
 		

@@ -22,6 +22,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// #define SHOW_ALL_SETTINGS
 #define GURU // Show guru meditations
 #define USE_FAT
 // #define ENABLE_EFFECT_MENU
@@ -214,6 +215,8 @@ GUI *gui;
 	RadioButton::RadioButtonGroup *rbgfreq;
 	RadioButton *rbfreq32, *rbfreq47;
 	GroupBox *gbfreq;
+	GroupBox *gblinesbeat;
+	NumberBox *nblinesbeat;
 	Button *btnconfigsave;
 // </Settings Gui>
 
@@ -1523,6 +1526,12 @@ void handleTempoChange(u8 tempo) {
 void handleBpmChange(s32 bpm) {
 	song->setBpm(bpm);
 	DC_FlushAll();
+}
+
+void handleLinesBeatChange(u8 lpb) {
+	settings->setLinesPerBeat(lpb);
+	pv->setLinesPerBeat(lpb);
+	redraw_main_requested = true;
 }
 
 void handleRestartPosChange(s32 restartpos)
@@ -3135,7 +3144,7 @@ void setupGUI(bool dldi_enabled)
 		rbghandedness->setActive(1);
 		rbghandedness->registerChangeCallback(handleHandednessChange);
 
-#ifdef MIDI
+#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
 		gbdsmw = new GroupBox(5, 55, 80, 54, &sub_vram);
 		gbdsmw->setText("dsmidi");
 
@@ -3160,14 +3169,22 @@ void setupGUI(bool dldi_enabled)
 		rbgoutput->setActive(1);
 		rbgoutput->registerChangeCallback(handleOutputModeChange);
 
-		if (isDSiMode()) {
-			gbfreq = new GroupBox(89, 62, 40, 34, &sub_vram);
+		gblinesbeat = new GroupBox(89, 62, 40, 28, &sub_vram);
+		gblinesbeat->setText("l/b");
+		nblinesbeat = new NumberBox(93, 72, 32, 17, &sub_vram, settings->getLinesPerBeat(), 1, 64);
+		nblinesbeat->registerChangeCallback(handleLinesBeatChange);
+
+#if !defined(SHOW_ALL_SETTINGS)
+		if (isDSiMode())
+#endif
+		{
+			gbfreq = new GroupBox(89, 95, 40, 34, &sub_vram);
 			gbfreq->setText("freq");
 
 			rbgfreq = new RadioButton::RadioButtonGroup();
-			rbfreq32 = new RadioButton(91, 72, 36, 14, &sub_vram, rbgfreq);
+			rbfreq32 = new RadioButton(91, 105, 36, 14, &sub_vram, rbgfreq);
 			rbfreq32->setCaption("32k");
-			rbfreq47 = new RadioButton(91, 86, 36, 14, &sub_vram, rbgfreq);
+			rbfreq47 = new RadioButton(91, 119, 36, 14, &sub_vram, rbgfreq);
 			rbfreq47->setCaption("47k");
 			rbgfreq->setActive(1);
 			rbgfreq->registerChangeCallback(handleOutputFreqChange);
@@ -3184,7 +3201,7 @@ void setupGUI(bool dldi_enabled)
 #endif
 		tabbox->registerWidget(rblefthanded, 0, 4);
 		tabbox->registerWidget(rbrighthanded, 0, 4);
-#ifdef MIDI
+#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
 		tabbox->registerWidget(cbdsmwsend, 0, 4);
 		tabbox->registerWidget(cbdsmwrecv, 0, 4);
 		tabbox->registerWidget(btndsmwtoggleconnect, 0, 4);
@@ -3195,7 +3212,12 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(rboutputmono, 0, 4);
 		tabbox->registerWidget(rboutputstereo, 0, 4);
 		tabbox->registerWidget(gboutput, 0, 4);
-		if (isDSiMode()) {
+		tabbox->registerWidget(nblinesbeat, 0, 4);
+		tabbox->registerWidget(gblinesbeat, 0, 4);
+#if !defined(SHOW_ALL_SETTINGS)
+		if (isDSiMode())
+#endif
+		{
 			tabbox->registerWidget(rbfreq32, 0, 4);
 			tabbox->registerWidget(rbfreq47, 0, 4);
 			tabbox->registerWidget(gbfreq, 0, 4);
@@ -3412,6 +3434,7 @@ void setupGUI(bool dldi_enabled)
 
 	actionBufferChangeCallback();
 	updateTempoAndBpm();
+	handleLinesBeatChange(settings->getLinesPerBeat());
 
 
 	gui->drawSubScreen(); // GUI

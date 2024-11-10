@@ -52,6 +52,9 @@ class Settings {
 		bool getFreq47kHz(void);
 		void setFreq47kHz(bool freq_47khz_);
 
+		u8 getLinesPerBeat(void);
+		void setLinesPerBeat(u8 lines_per_beat_);
+
 		Theme *getTheme(void);
 		void setTheme(Theme *theme_);
 
@@ -78,6 +81,7 @@ class Settings {
 		bool sample_preview;
 		bool stereo_output;
 		bool freq_47khz;
+		u8 lines_per_beat;
 		Theme *theme;
 		char configpath[SETTINGS_FILENAME_LEN + 1];
 		char songpath[SETTINGS_FILENAME_LEN + 1];

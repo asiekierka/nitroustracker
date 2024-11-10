@@ -1,4 +1,21 @@
--- NitrousTracker v0.4.11 (2024-07-08)
+-- NitrousTracker v0.4.12 (2024-11-10)
+
+New features:
+
+- [#95] WAV sample import and export now supports loop points
+- [#111] adjustable lines per beat
+
+Improvements:
+
+- minor maintenance work in libntxm
+- updated BlocksDS toolchain
+- updated DSMIDI NRIO USB support library
+
+Fixes:
+
+- fixed some scrollbar render issues in list boxes
+
+-- NitrousTracker v0.4.11 (2024-11-04)
 
 New features:
 

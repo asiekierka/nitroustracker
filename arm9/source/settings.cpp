@@ -96,6 +96,11 @@ fat(use_fat), changed(false)
 			getConfigValue(confstr, "47kHz Output", prevstring, 20, "False");
 			freq_47khz = stringToBool(prevstring);
 
+			getConfigValue(confstr, "Lines Per Beat", prevstring, 20, "8");
+			lines_per_beat = strtoul(prevstring, NULL, 10);
+			if (!lines_per_beat || lines_per_beat > 64)
+				lines_per_beat = 8;
+
 			free(confstr);
 		}
 	}
@@ -142,6 +147,17 @@ bool Settings::getFreq47kHz(void)
 void Settings::setFreq47kHz(bool freq_47khz_)
 {
 	freq_47khz =  freq_47khz_;
+	changed = true;
+}
+
+u8 Settings::getLinesPerBeat(void)
+{
+	return lines_per_beat;
+}
+
+void Settings::setLinesPerBeat(u8 lines_per_beat_)
+{
+	lines_per_beat =  lines_per_beat_;
 	changed = true;
 }
 
@@ -213,8 +229,8 @@ bool Settings::write(void)
 	boolToString(sample_preview, prevstring);
 	boolToString(stereo_output, stereostring);
 	boolToString(freq_47khz, freqstring);
-	fiprintf(conf, "Samplepath = %s\nSongpath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\n",
-			samplepath, songpath, hstring, prevstring, stereostring, freqstring);
+	fiprintf(conf, "Samplepath = %s\nSongpath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\nLines Per Beat = %d\n",
+			samplepath, songpath, hstring, prevstring, stereostring, freqstring, lines_per_beat);
 	fclose(conf);
 	return true;
 }
@@ -256,7 +272,7 @@ static bool setDefaultConfigValue(char *value, const char *defvalue, size_t maxl
 	if (defvalue != NULL)
 	{
 		strncpy(value, defvalue, maxlen);
-		value[maxlen] = '\0';
+		value[maxlen - 1] = 0;
 	}
 	return false;
 }
@@ -292,9 +308,6 @@ bool Settings::getConfigValue(char *config, const char *attribute, char *value, 
 	valend--;
 	while(*valend == ' ')
 		valend--;
-
-	// Clear the destination string just to be safe
-	memset(value, 0, maxlen);
 
 	size_t vallen = valend - valstart + 1;
 	size_t len = std::min(maxlen-1, vallen);

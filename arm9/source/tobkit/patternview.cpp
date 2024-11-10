@@ -189,6 +189,11 @@ void PatternView::setSong(Song *s)
 	hscrollpos = 0;
 }
 
+void PatternView::setLinesPerBeat(u16 lpb)
+{
+	lines_per_beat = lpb;
+}
+
 void PatternView::registerMuteCallback(void (*onMute_)(bool *channels_muted))
 {
 	onMute = onMute_;
