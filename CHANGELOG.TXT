@@ -2,6 +2,7 @@
 
 Fixes:
 
+- [#40] Fix freeze when attempting to loop samples in certain .xm files
 - [#117] Fix "map samples" button UI overlap
 - [#84] Fix sample selection glitch
 
