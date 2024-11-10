@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches: [ new ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container: skylyrac/blocksds:slim-latest
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install prerequisites
+        run: |
+          apt-get update -y
+          apt-get install -y --no-install-recommends python3 python3-pil
+
+      - name: Build
+        run: make VERSION=git
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NitrousTracker
+          path: |
+            nitroustracker*.nds
+            CHANGELOG.TXT
+            licenses/
+            README.TXT
