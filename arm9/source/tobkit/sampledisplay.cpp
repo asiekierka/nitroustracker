@@ -403,24 +403,25 @@ void SampleDisplay::draw(void)
 	//
 	// Selection
 	//
-	s32 selleft = sampleToPixel(std::min(selstart, selend));
-	s32 selwidth = sampleToPixel(std::max(selstart, selend)) - selleft;
-	bool dontdraw = false;
+	s32 selleft = 0;
+	s32 selwidth = 0;
+	s32 selright = 0;
 
-	if( (selleft >= 0) && (selleft < width-2) && (selleft + selwidth > width - 2) ) {
-		selwidth = (width-2) - selleft;
-	} else if( (selleft < 0) && (selleft + selwidth > 0) && (selleft + selwidth < width-2) ) {
-		selwidth += selleft;
-		selleft = 0;
-	} else if( (selleft < 0) && (selleft + selwidth > width-2) ) {
-		selwidth = width-2;
-		selleft = 0;
-	} else if( (selleft + selwidth < 0) || (selleft > width-2) ) {
-		dontdraw = true;
-	}
+	if(selection_exists) {
+		selleft = sampleToPixel(std::min(selstart, selend));
+		selright = sampleToPixel(std::max(selstart, selend));
+		bool dontdraw = false;
 
-	if(selection_exists && !dontdraw) {
-		drawFullBox(selleft+1, 1, selwidth, DRAW_HEIGHT+1, RGB15(31,31,0)|BIT(15));
+		if (selleft < 1) selleft = 1;
+		else if (selleft > (width-1)) dontdraw = true;
+
+		if (selright > width-1) selright = width-1;
+		else if (selright < 1) dontdraw = true;
+
+		selwidth = selright - selleft;
+		if(!dontdraw) {
+			drawFullBox(selleft, 1, selwidth, DRAW_HEIGHT+1, RGB15(31,31,0)|BIT(15));
+		}
 	}
 
 	//
@@ -502,7 +503,7 @@ void SampleDisplay::draw(void)
 
 		for(s32 i=1; i<s32(width-1); ++i)
 		{
-			u16 *colortable_current = (i >= selleft+1 && i <= selleft+selwidth) ? colortable_selected : colortable;
+			u16 *colortable_current = (selection_exists && i >= selleft && i < selright) ? colortable_selected : colortable;
 			data = &(base[f32toint(pos)]);
 
 			s32 maxsmp = -32767, minsmp = 32767;
@@ -538,7 +539,7 @@ void SampleDisplay::draw(void)
 
 		for(s32 i=1; i<s32(width-1); ++i)
 		{
-			u16 *colortable_current = (i >= selleft+1 && i <= selleft+selwidth) ? colortable_selected : colortable;
+			u16 *colortable_current = (selection_exists && i >= selleft && i < selright) ? colortable_selected : colortable;
 			data = &(base[f32toint(pos)]);
 
 			s8 maxsmp = -127, minsmp = 127;
