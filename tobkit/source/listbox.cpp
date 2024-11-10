@@ -336,9 +336,10 @@ void ListBox::draw(void)
 	
 	drawBox(width-SCROLLBAR_WIDTH, 0, SCROLLBAR_WIDTH,height);
 	
+	// Clear Scrollbar
+	drawGradient(theme->col_medium_bg, theme->col_light_bg, width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2, height-2*SCROLLBUTTON_HEIGHT);
+
 	if (height >= 2*SCROLLBUTTON_HEIGHT+scrollthingyheight) {
-		// Clear Scrollbar
-		drawGradient(theme->col_medium_bg, theme->col_light_bg, width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2, height-2*SCROLLBUTTON_HEIGHT);
 	
 		// The scroll thingy
 		if(buttonstate==SCROLLTHINGY) {
