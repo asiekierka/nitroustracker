@@ -583,7 +583,7 @@ void SampleDisplay::draw(void)
 		if( (loop_start_pos >= 0) && (loop_start_pos <= width-2) ) {
 			// Line
 			for(u8 i=1; i<DRAW_HEIGHT+1; ++i)
-				*(*vram+SCREEN_WIDTH*(y+i)+x+loop_start_pos) = colortable[middle];
+				*(*vram+SCREEN_WIDTH*(y+i)+x+loop_start_pos) = RGB15(7,25,5)|BIT(15);
 
 			/* unused
 			u8 cutoff = 0;
@@ -626,7 +626,7 @@ void SampleDisplay::draw(void)
 		if( (loop_end_pos >= 0) && (loop_end_pos <= width-2) ) {
 			// Line
 			for(u8 i=1; i<DRAW_HEIGHT+1; ++i)
-				*(*vram+SCREEN_WIDTH*(y+i)+x+loop_end_pos) = colortable[middle];
+				*(*vram+SCREEN_WIDTH*(y+i)+x+loop_end_pos) = RGB15(7,25,5)|BIT(15);
 
 			// Left Triangle
 			if(loop_end_pos > 1 + LOOP_TRIANGLE_SIZE)
