@@ -1,0 +1,11 @@
+Memory usage
+------------
+0x06000000	0x060007FF	Main BG0 map (console)
+0x06002000	0x06002FFF	Main BG0 tiles (console)
+0x06008000	0x0601FFFF	Main BG2 bitmap (pattern view, buffer 1)
+0x06020000	0x06037FFF	Main BG2 bitmap (pattern view, buffer 2)
+0x06200000	0x062002DF	Sub BG0 tiles (piano)
+0x06200800	0x06200FFF	Sub BG0 map (piano)
+0x06204000	0x06205E5F	Sub BG1 tiles (typewriter)
+0x06206000	0x062067FF	Sub BG1 map (typewriter)
+0x06208000	0x0621FFFF	Sub BG1 bitmap (framebuffer)
