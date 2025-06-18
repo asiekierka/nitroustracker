@@ -77,7 +77,7 @@ clean:
 	$(V)$(MAKE) -C tobkit clean DEBUG=false
 	$(V)$(MAKE) -C dsmi/ds/libdsmi -f Makefile.blocks clean
 	$(V)$(MAKE) -C libntxm/libntxm -f Makefile.blocks clean
-	$(V)$(RM) $(ROM) build $(SDIMAGE)
+	$(V)$(RM) $(ROM) $(ROM_DEBUG) $(ROM_NOMIDI) build $(SDIMAGE)
 
 libntxm:
 	@make -C libntxm/libntxm -f Makefile.blocks
