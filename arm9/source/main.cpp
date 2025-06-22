@@ -1309,20 +1309,24 @@ void handleDSMWRecv(void)
 			debugprintf("got sth. %x %x %x\n", message, data1, data2);
 
 			u8 type = message & 0xF0;
-			u8 channel = 255;
-			u8 inst = message & 0x0F;
-			u8 note = data1;
-			u8 volume = data2 * 2;
-			debugprintf("Type is %x\n", type);
+			//debugprintf("Type is %x\n", type);
 			switch(type)
 			{
 				case NOTE_ON: {
+					u8 channel = 255;
+					u8 inst = message & 0x0F;
+					u8 note = data1;
+					u8 volume = data2;
 					debugprintf("on %d %d\n", inst, note);
 					CommandPlayInst(inst, note, volume, channel);
 					break;
 				}
 
 				case NOTE_OFF: {
+					u8 channel = 255;
+					u8 inst = message & 0x0F;
+					u8 note = data1;
+					u8 volume = data2;
 					CommandStopMidiInst(inst, note, volume, channel);
 					break;
 				}
