@@ -3460,12 +3460,19 @@ void move_to_top(void)
 	redraw_main_requested = true;
 }
 
+void move_inst_to_top(void)
+{
+	handleInstChange(0);
+	lbinstruments->highlight(0);
+	lbinstruments->select(0);
+}
+
 // Update the state for certain keypresses
 void handleButtons(u16 buttons, u16 buttonsheld)
 {
 	u16 ptnlen = song->getPatternLength(song->getPotEntry(state->potpos));
 
-	if(!(buttonsheld & mykey_R))
+	if(!(buttonsheld & mykey_R) && !(buttonsheld & mykey_Y))
 	{
 		if(buttons & mykey_UP)
 		{
@@ -3501,7 +3508,29 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			state->setCursorRow(newrow);
 
 			pv->updateSelection();
+
 			redraw_main_requested = true;
+		}
+		
+	}
+
+	if(!(buttonsheld & mykey_R) && (buttonsheld & mykey_Y))
+	{
+		int move_by = (buttonsheld & mykey_B) ? 4 : 1;
+		u16 cur_i = lbinstruments->getidx();
+		u16 new_i = cur_i;
+		if(buttons & mykey_DOWN) {
+			new_i = cur_i + move_by >= 0x7f ? 0x7f : cur_i + move_by;
+			lbinstruments->highlight(new_i);
+			lbinstruments->select(new_i);
+			handleInstChange(new_i);
+		}
+
+		if(buttons & mykey_UP) {
+			new_i = cur_i - move_by <= 0 ? 0 : cur_i - move_by;
+			lbinstruments->highlight(new_i);
+			lbinstruments->select(new_i);
+			handleInstChange(new_i);
 		}
 	}
 
@@ -3585,10 +3614,13 @@ void VblankHandler(void)
 
 	if(keysheld & mykey_R)
 	{
-		if(keysheld & mykey_DOWN)
-			move_to_bottom();
-		else if(keysheld & mykey_UP)
-			move_to_top();
+		if(!(keysheld & mykey_Y)) {
+			if(keysheld & mykey_DOWN)
+				move_to_bottom();
+			else if(keysheld & mykey_UP)
+				move_to_top();
+		} else if (keysheld & mykey_UP)
+			move_inst_to_top();
 	}
 
 	if(keysdown & ~KEY_TOUCH)
