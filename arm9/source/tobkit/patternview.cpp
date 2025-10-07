@@ -309,7 +309,7 @@ void PatternView::draw(void)
 	
 	// V-Lines
 	for(u16 i=0;i<=getNumVisibleChannels();++i) {
-		drawVLine(PV_BORDER_WIDTH-1+i*getCellWidth(), 0, width-PV_BORDER_WIDTH, linescol);
+		drawVLine(PV_BORDER_WIDTH-1+i*getCellWidth(), 0, height, linescol);
 	}
 	
 	// Cursor bar (highlight)
