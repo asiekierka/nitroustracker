@@ -227,36 +227,35 @@ class PatternView: public Widget {
 					drawChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
 				}
 				drawChar(cell->note/12, realx+2*PV_CHAR_WIDTH, realy, notecol);
-				
-				// Instrument
-				drawHexByte(cell->instrument+1, realx+3*PV_CHAR_WIDTH+1, realy, instrcol); // Adding one because FT2 indices start with 1
 			}
+
+			// Instrument
+			if(cell->instrument != NO_INSTRUMENT)
+				drawHexByte(cell->instrument+1, realx+3*PV_CHAR_WIDTH+1, realy, instrcol); // Adding one because FT2 indices start with 1
 			
 			// Volume
 			if(cell->volume != NO_VOLUME)
 				drawHexByte(cell->volume, realx+5*PV_CHAR_WIDTH+2, realy, volumecol);
 			
-			if (effects_visible)
-			{
-        // Effect and effect parameter
-        if (cell->effect != 0xff)
-          drawHexByte(cell->effect, realx+7*PV_CHAR_WIDTH+2, realy, effectcol);
+			if(effects_visible) {
+				// Effect and effect parameter
+				if (cell->effect != 0xff)
+					drawHexByte(cell->effect, realx+7*PV_CHAR_WIDTH+2, realy, effectcol);
 
-        if (cell->effect_param != 0x00)
-          drawHexByte(cell->effect_param, realx+9*PV_CHAR_WIDTH+2, realy, effectparamcol);
-      }
-    }
+				if (cell->effect_param != 0x00)
+					drawHexByte(cell->effect_param, realx+9*PV_CHAR_WIDTH+2, realy, effectparamcol);
+			}
+		}
 		
 		void updateFromState(void);
 	
 		inline u8 getCellWidth(void)
 		{
-		  if (effects_visible)
-		  {
-		    cell_width = 50;
-		  } else {
-		    cell_width = 31;
-		  }
+			if (effects_visible) {
+				cell_width = 50;
+			} else {
+				cell_width = 31;
+			}
 			return cell_width;
 		}
 
