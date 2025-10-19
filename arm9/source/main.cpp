@@ -224,10 +224,11 @@ GUI *gui;
 	Button *buttonins, *buttondel, *buttonstopnote2, *buttoncolselect, *buttonemptynote2, *buttonunmuteall;
 	BitButton *buttonswitchmain;
 	Button *buttoncut, *buttoncopy, *buttonpaste, *buttonsetnotevol, *buttonseteffectcmd, *buttonseteffectpar;
+	Button *buttontransposedown, *buttontransposeup;
 	BitButton *buttonundo, *buttonredo;
 	PatternView *pv;
 	NumberSlider *nsnotevolume, *nseffectcmd, *nseffectpar;
-	Label *labelmute, *labelnotevol, *labeleffectcmd, *labeleffectpar;
+	Label *labelmute, *labelnotevol, *labeleffectcmd, *labeleffectpar, *labeltranspose;
 	CheckBox *cbtoggleeffects;
 // </Main Screen>
 
@@ -1827,6 +1828,42 @@ void setEffectParam(u16 eff_par)
 	}
 }
 
+void handleTranspose(s32 transpose_amount)
+{
+	const s32 min_note = 0;  // c-0
+	const s32 max_note = 95; // h-7
+	u16 sel_x1, sel_y1, sel_x2, sel_y2;
+	uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, false);
+	CellArray *fill = new CellArray(sel_x2 - sel_x1 + 1, sel_y2 - sel_y1 + 1);
+	if (fill != NULL && fill->valid())
+	{
+		for (u16 chn = sel_x1; chn <= sel_x2; chn++)
+			for (u16 row = sel_y1; row <= sel_y2; row++)
+			{
+				Cell cell = song->getPattern(song->getPotEntry(state->potpos))[chn][row];
+				if (cell.note != EMPTY_NOTE && cell.note != STOP_NOTE)
+				{
+					s32 new_note = (s32)cell.note + transpose_amount;
+					if (new_note >= min_note && new_note <= max_note)
+						cell.note = (u8)new_note;
+				}
+				*fill->ptr(chn - sel_x1, row - sel_y1) = cell;
+			}
+		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
+		redraw_main_requested = true;
+	}
+}
+
+void handleTransposeUp(void)
+{
+	handleTranspose(1);
+}
+
+void handleTransposeDown(void)
+{
+	handleTranspose(-1);
+}
+
 // number slider
 void handleNoteVolumeChanged(s32 vol)
 {
@@ -3317,6 +3354,15 @@ void setupGUI(bool dldi_enabled)
 		buttonsetnotevol->setCaption("set");
 		buttonsetnotevol->registerPushCallback(handleSetNoteVol);
 
+		labeltranspose = new Label(200, 1, 48, 12, &main_vram_back, false, true);
+		labeltranspose->setCaption("trps");
+		buttontransposedown = new Button(199, 13, 12, 12, &main_vram_back);
+		buttontransposedown->setCaption("-");
+		buttontransposedown->registerPushCallback(handleTransposeDown);
+		buttontransposeup = new Button(212, 13, 12, 12, &main_vram_back);
+		buttontransposeup->setCaption("+");
+		buttontransposeup->registerPushCallback(handleTransposeUp);
+
 #ifdef ENABLE_EFFECT_MENU
 		cbtoggleeffects = new CheckBox(195, 32, 30, 12, &main_vram_back, true, true, true);
 		cbtoggleeffects->setCaption("fx");
@@ -3387,6 +3433,9 @@ void setupGUI(bool dldi_enabled)
 		gui->registerWidget(labelnotevol, 0, MAIN_SCREEN);
 		gui->registerWidget(nsnotevolume, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonsetnotevol, 0, MAIN_SCREEN);
+		gui->registerWidget(labeltranspose, 0, MAIN_SCREEN);
+		gui->registerWidget(buttontransposedown, 0, MAIN_SCREEN);
+		gui->registerWidget(buttontransposeup, 0, MAIN_SCREEN);
 #ifdef ENABLE_EFFECT_MENU
 		gui->registerWidget(cbtoggleeffects, 0, MAIN_SCREEN);
 		gui->registerWidget(labeleffectcmd, 0, MAIN_SCREEN);
