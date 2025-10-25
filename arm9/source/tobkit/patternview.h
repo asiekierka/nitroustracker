@@ -68,10 +68,10 @@
 #define G	16
 #define H	17
 
-#define DOT	18
-#define MINUS	19
-#define SHARP	20
-#define SPACE	21
+#define DOT	36
+#define MINUS	37
+#define SHARP	38
+#define SPACE	39
 
 const u8 notes_chars[] =   {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
 const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
@@ -171,7 +171,7 @@ class PatternView: public Widget {
 			u8 i,j;
 			for(j=0;j<5;++j) {
 				for(i=0;i<3;++i) {
-					u16 pixelidx = 3*22*j+3*c+i;
+					u16 pixelidx = 3*40*j+3*c+i;
 					if(font_3x5_raw[pixelidx/8]&BIT(pixelidx%8)) {
 						//*(*vram+SCREEN_WIDTH*(2+cy*8+j)+1+cx*4+i) = col;
 						*(*vram+SCREEN_WIDTH*(y+cy+j)+x+cx+i) = col;
@@ -239,11 +239,11 @@ class PatternView: public Widget {
 			
 			if(effects_visible) {
 				// Effect and effect parameter
-				if (cell->effect != 0xff)
-					drawHexByte(cell->effect, realx+7*PV_CHAR_WIDTH+2, realy, effectcol);
-
-				if (cell->effect_param != 0x00)
-					drawHexByte(cell->effect_param, realx+9*PV_CHAR_WIDTH+2, realy, effectparamcol);
+        if (cell->effect != 0xff)
+          drawChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
+				
+        if (cell->effect_param != 0x00)
+          drawHexByte(cell->effect_param, realx+8*PV_CHAR_WIDTH+3, realy, effectparamcol);
 			}
 		}
 		
@@ -252,7 +252,7 @@ class PatternView: public Widget {
 		inline u8 getCellWidth(void)
 		{
 			if (effects_visible) {
-				cell_width = 50;
+				cell_width = 45;
 			} else {
 				cell_width = 31;
 			}
