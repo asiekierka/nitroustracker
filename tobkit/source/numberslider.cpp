@@ -175,7 +175,7 @@ void NumberSlider::draw(void)
 		}
 	}
 	
-	drawBox(0, 0, 9, 17);
+	drawBox(0, 0, 9, 17, theme->col_outline);
 	
 	// Number display
 	drawFullBox(9,1,width-10,height-2,theme->col_lighter_bg);
@@ -186,8 +186,8 @@ void NumberSlider::draw(void)
 	} else {
 		snprintf(numberstr, sizeof(numberstr), hex ? "%2lx" : "%3ld", value);
 	}
-	drawString(numberstr, 10, 5);
+	drawString(numberstr, 10, 5, theme->col_text);
 	
 	// Border
-	drawBorder();
+	drawBorder(theme->col_outline);
 }

@@ -53,9 +53,6 @@ void MemoryIndicator::pleaseDraw(void)
 
 /* ===================== PRIVATE ===================== */
 
-#define COL_INDICATOR_OK (RGB15(17,24,16) | BIT(15))
-#define COL_INDICATOR_WARNING (RGB15(31,31,0) | BIT(15))
-#define COL_INDICATOR_ALERT (RGB15(31,0,0) | BIT(15))
 
 void MemoryIndicator::draw(void)
 {
@@ -71,13 +68,13 @@ void MemoryIndicator::draw(void)
 	// Color depends on percentage of used RAM
 	u16 col;
 	if(percentfull < 62)
-		col = COL_INDICATOR_OK;
+		col = theme->col_mem_ok;
 	else if(percentfull < 78)
-		col = interpolateColor(COL_INDICATOR_WARNING, COL_INDICATOR_OK, (percentfull - 62) << 8);
+		col = interpolateColor(theme->col_mem_warn, theme->col_mem_ok, (percentfull - 62) << 8);
 	else if(percentfull < 94)
-		col = interpolateColor(COL_INDICATOR_ALERT, COL_INDICATOR_WARNING, (percentfull - 78) << 8);
+		col = interpolateColor(theme->col_mem_alert, theme->col_mem_warn, (percentfull - 78) << 8);
 	else
-		col = COL_INDICATOR_ALERT;
+		col = theme->col_mem_alert;
 
 	drawBorder(theme->col_outline);
 	drawFullBox(1, 1, width-2, height-2, theme->col_light_bg);

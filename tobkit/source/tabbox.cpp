@@ -165,12 +165,12 @@ void TabBox::draw(void)
 {
 	u8 size_border = icon_size + 2;
 	u8 size_full = size_border;
-	u16 black = RGB15(0,0,0)|BIT(15);
+	u16 black = theme->col_tab_outline;
 
 	if (orientation == TABBOX_ORIENTATION_TOP) {
 		// Draw box
 		drawFullBox(1, size_full+1, width-2, height-(size_border+2), theme->col_light_bg);
-		drawBox(0, size_border, width, height-size_border);
+		drawBox(0, size_border, width, height-size_border, theme->col_outline);
 		
 		// Draw tabs
 		drawFullBox(0, 0, 3+size_full*guis.size(), 3, theme->col_dark_bg);
@@ -188,7 +188,7 @@ void TabBox::draw(void)
 	} else {
 		// Draw box
 		drawFullBox(14, 1, width-15, height-2, theme->col_light_bg);
-		drawBox(13, 0, width-13, height);
+		drawBox(13, 0, width-13, height, theme->col_outline);
 
 		// Draw tabs
 		drawFullBox(0, 0, 3, 3+13*guis.size(), theme->col_light_bg);

@@ -117,12 +117,12 @@ void NormalizeBox::setTheme(Theme *theme_, u16 bgcolor_)
 void NormalizeBox::draw(void)
 {
 	drawGradient(theme->col_list_highlight1, theme->col_list_highlight2, 1, 1, width - 2, 15);
-	drawHLine(1, 16, width - 2, RGB15(0,0,0)|BIT(15));
+	drawHLine(1, 16, width - 2, theme->col_outline);
 	drawFullBox(1, 17, width - 2, NORMALIZEBOX_HEIGHT-17, theme->col_light_bg);
-	drawBorder();
+	drawBorder(theme->col_outline);
 	
 	u8 titlewidth = getStringWidth(title)+5;
-	drawString(title, (NORMALIZEBOX_WIDTH-titlewidth)/2, 2, titlewidth+5);
+	drawString(title, (NORMALIZEBOX_WIDTH-titlewidth)/2, 2, theme->col_text, titlewidth+5);
 	
 	gui.draw();
 }

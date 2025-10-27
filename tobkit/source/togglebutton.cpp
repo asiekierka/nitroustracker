@@ -117,7 +117,7 @@ void ToggleButton::draw(void)
 
 	u16 bg = (color_bg & BIT(15)) ? color_bg : theme->col_dark_ctrl;
 	drawFullBox(1, 1, width - 2, height - 2, bg);
-	drawBorder();
+	drawBorder(theme->col_outline);
 
 	u16 col;
 	if(penIsDown) {
@@ -138,6 +138,6 @@ void ToggleButton::draw(void)
 	}
 
 	if (caption != NULL)
-		drawString(caption, MAX(2, ((width-getStringWidth(caption))/2) ), height/2-5, 255, col);
+		drawString(caption, MAX(2, ((width-getStringWidth(caption))/2) ), col, height/2-5);
 }
 

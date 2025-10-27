@@ -255,7 +255,7 @@ void Typewriter::setTheme(Theme *theme_, u16 bgcolor_)
 void Typewriter::draw(void)
 {
 	drawFullBox(1, 1, TW_WIDTH - 2, TW_HEIGHT - 2, theme->col_light_bg);
-	drawBorder();
+	drawBorder(theme->col_outline);
 	gui.draw();
 	
 	redraw();
@@ -297,7 +297,7 @@ void Typewriter::drawCursor(void)
 	cursory = ly - y + 1;
 	cursorheight = lh - 2;
 	if(cursorx<lx -x + lw) {
-		drawVLine(cursorx, cursory, cursorheight, RGB15(0,0,0)|BIT(15));
+		drawVLine(cursorx, cursory, cursorheight, theme->col_typewriter_cursor);
 	}
 }
 

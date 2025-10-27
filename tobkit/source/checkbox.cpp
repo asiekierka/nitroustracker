@@ -103,7 +103,7 @@ void CheckBox::draw(void)
 	
 	// Text
 	if(!albino)
-		drawString(label, 13, 2, 255, theme->col_text);
+		drawString(label, 13, 2, theme->col_text);
 	else
-		drawString(label, 13, 2, 255, theme->col_lighter_bg);
+		drawString(label, 13, 2, theme->col_lighter_bg);
 }

@@ -65,5 +65,5 @@ void GroupBox::draw(void)
 	}
 
 	drawFullBox(x, 0, strwidth+2, 10, theme->col_light_bg);
-	drawString(text, x+1, 0, width - x - 2);
+	drawString(text, x+1, 0, theme->col_text, width - x - 2);
 }

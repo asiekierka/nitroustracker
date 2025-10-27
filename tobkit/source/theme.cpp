@@ -33,8 +33,39 @@ Theme::Theme(void)
 	col_list_highlight1     = RGB15(28,15,0)|BIT(15);
 	col_list_highlight2     = RGB15(28,28,0)|BIT(15);
 	col_outline             = RGB15(0,0,0)|BIT(15);
+	col_tab_outline			= col_outline;
 	col_sepline             = RGB15(31,31,0)|BIT(15);
 	col_icon                = RGB15(0,0,0)|BIT(15);
 	col_text                = RGB15(0,0,0)|BIT(15);
 	col_signal              = RGB15(31,0,0)|BIT(15);
+	col_signal_off			= RGB15(18, 0, 0) | BIT(15);
+	col_piano_label			= RGB15(0, 0, 0);
+	col_piano_label_inv		= RGB15(31,31,31);
+	col_loop				= RGB15(7,25,5)|BIT(15);
+	col_env_sustain			= RGB15(0,31,0) | BIT(15);
+
+	col_mem_ok				= RGB15(17,24,16) | BIT(15);
+	col_mem_warn			= RGB15(31,31,0) | BIT(15);
+	col_mem_alert			= RGB15(31,0,0) | BIT(15);
+	col_typewriter_cursor   = RGB15(0,0,0)|BIT(15);
+	col_pv_lines			= col_light_bg;
+	col_pv_sublines			= RGB15(7,9,17)|BIT(15);
+	col_pv_lines_record		= col_dark_ctrl;
+	col_pv_cb_col1			= col_medium_bg;
+	col_pv_cb_col2			= col_light_bg;
+	col_pv_cb_col1_highlight= col_list_highlight1;
+	col_pv_cb_col2_highlight= col_list_highlight2;
+	col_pv_left_numbers		= col_list_highlight1;
+	col_pv_notes			= RGB15(9,15,31)|BIT(15);
+	col_pv_notes_dark		= RGB15(0,6,26)|BIT(15);
+	col_pv_instr			= RGB15(31,11,0)|BIT(15);
+	col_pv_instr_dark		= RGB15(20,6,0)|BIT(15);
+	col_pv_volume			= RGB15(0,27,0)|BIT(15);
+	col_pv_volume_dark		= RGB15(0,16,0)|BIT(15);
+	col_pv_effect			= RGB15(31,12,29)|BIT(15);
+	col_pv_effect_dark		= RGB15(12,6,18)|BIT(15);
+	col_pv_effect_param		= RGB15(30,26,8)|BIT(15);
+	col_pv_effect_param_dark= RGB15(9,8,5)|BIT(15);
+	col_pv_cb_sel_highlight	= RGB15(31,24,0)|BIT(15);
+
 }

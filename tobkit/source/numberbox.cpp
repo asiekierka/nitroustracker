@@ -104,7 +104,7 @@ void NumberBox::draw(void)
 		}
 	}
 	
-	drawBox(0, 0, 9, 9);
+	drawBox(0, 0, 9, 9, theme->col_outline);
 	
 	// Lower Button
 	if(btnstate==2) {
@@ -120,7 +120,7 @@ void NumberBox::draw(void)
 		}
 	}
 	
-	drawBox(0, 8, 9, 9);
+	drawBox(0, 8, 9, 9, theme->col_outline);
 	
 	// Number display
 	drawFullBox(9, 1, width-9, height-1, theme->col_lighter_bg);
@@ -131,9 +131,9 @@ void NumberBox::draw(void)
 	formatstr[1] = digits+48;
 	
 	snprintf(numberstr, sizeof(numberstr), formatstr, value);
-	drawString(numberstr, 10, 5);
+	drawString(numberstr, 10, 5, theme->col_text);
 	
 	// Border
-	drawBorder();
+	drawBorder(theme->col_outline);
 	
 }

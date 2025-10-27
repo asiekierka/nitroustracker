@@ -138,7 +138,7 @@ bool Widget::set_enabled(bool value)
 // Draw utility functions
 
 ITCM_CODE
-void Widget::drawString(const char* str, u8 tx, u8 ty, u8 maxwidth, u16 color, u8 maxheight)
+void Widget::drawString(const char* str, u8 tx, u8 ty, u16 color, u8 maxwidth, u8 maxheight)
 {
 	// Draw text
 	u8 charidx, i, j;

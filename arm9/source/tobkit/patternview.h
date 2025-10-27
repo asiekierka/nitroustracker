@@ -90,7 +90,7 @@ const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
 class PatternView: public Widget {
 	public:
 		// Constructor sets base variables
-		PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state);
+		PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state, Theme *_theme);
 		
 		// Drawing request
 		void pleaseDraw(void);
@@ -299,9 +299,8 @@ class PatternView: public Widget {
 		Song *song;
 		State *state;
 
-		u16 col_lines, col_sublines, col_lines_record, cb_col1, cb_col2, cb_col1_highlight,
-			cb_col2_highlight, col_left_numbers, col_notes, col_instr, col_volume, col_effect, col_effect_param,
-			col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark, col_effect_param_dark, col_bg, cb_sel_highlight;
+		u16 col_notes, col_instr, col_volume, col_effect, col_effect_param,
+			col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark, col_effect_param_dark;
 		
 		u16 hscrollpos, lines_per_beat;
 		

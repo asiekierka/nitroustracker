@@ -172,10 +172,10 @@ void RecordBox::draw(void)
 		buttoncancel->show();
 		buttoncancel->pleaseDraw();
 	}
-	drawBorder();
+	drawBorder(theme->col_outline);
 	
 	u8 titlewidth = getStringWidth(title)+5;
-	drawString(title, (RECORDBOX_WIDTH-titlewidth)/2, 2, titlewidth+5);
+	drawString(title, (RECORDBOX_WIDTH-titlewidth)/2, 2, theme->col_text, titlewidth+5);
 	
 	labelmsg->pleaseDraw();
 	labelmsg2->pleaseDraw();

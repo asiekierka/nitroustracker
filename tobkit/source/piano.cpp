@@ -217,13 +217,13 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	if(isHalfTone(key) == true)
 	{
 		ypos = 12;
-		col = RGB15(31, 31, 31);
+		col = theme->col_piano_label_inv;
 		offset = 3;
 	}
 	else
 	{
 		ypos = 28;
-		col = RGB15(0, 0, 0);
+		col = theme->col_piano_label_inv;
 		offset = 5;
 	}
 	
@@ -237,7 +237,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	
 	char label[] = {key_labels[key], 0};
 	
-	drawString(label, xpos, ypos, 255, col);
+	drawString(label, xpos, ypos, col);
 }
 
 void Piano::eraseKeyLabel(u8 key)

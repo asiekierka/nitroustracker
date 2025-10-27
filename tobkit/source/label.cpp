@@ -98,7 +98,7 @@ void Label::draw(void)
 	{
 		if(!no_bg)
 			drawFullBox(1, 1, width - 2, height - 2, theme->col_lighter_bg);
-		drawBorder();
+		drawBorder(theme->col_outline);
 		caption_x_offset += 2;
 		caption_y_offset += 2;
 	}
@@ -118,9 +118,9 @@ void Label::draw(void)
 				caption_local++;
 				string_width = getStringWidth(caption_local);
 			}
-			drawString(caption_local,caption_x_offset,caption_y_offset,caption_width,col_text);
+			drawString(caption_local,caption_x_offset,caption_y_offset,col_text,caption_width);
 		} else {
-			drawString(caption,caption_x_offset,caption_y_offset,caption_width,col_text);
+			drawString(caption,caption_x_offset,caption_y_offset,col_text,caption_width);
 		}
 	}
 }

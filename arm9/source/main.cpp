@@ -1253,7 +1253,7 @@ void setRecordMode(bool is_on)
 	u32 colcol;
 
 	if(is_on)
-		col = RGB15(31, 0, 0) | BIT(15); // red
+		col = settings->getTheme()->col_signal; // red
 	else
 		col = settings->getTheme()->col_bg; // bg color
 	colcol = (col) | (col << 16);
@@ -3318,7 +3318,7 @@ void setupGUI(bool dldi_enabled)
 	tbrecord = new ToggleButton(141, 136, 16, 16, &sub_vram);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
 	tbrecord->registerToggleCallback(setRecordMode);
-	tbrecord->setColorOff(RGB15(18, 0, 0) | BIT(15));
+	tbrecord->setColorOff(settings->getTheme()->col_signal_off);
 
 	labeladd = new Label(182, 126, 22, 12, &sub_vram, false, true);
 	labeladd->setCaption("add");
@@ -3442,7 +3442,7 @@ void setupGUI(bool dldi_enabled)
 		buttondelnote->setCaption("del");
 		buttonemptynote2->setCaption("clr");
 
-		pv = new PatternView(0, 0, 200, 192, &main_vram_back, state);
+		pv = new PatternView(0, 0, 200, 192, &main_vram_back, state, settings->getTheme());
 		pv->setSong(song);
 		pv->registerMuteCallback(handleMuteChannelsChanged);
 

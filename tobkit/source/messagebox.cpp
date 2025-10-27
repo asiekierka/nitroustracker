@@ -161,10 +161,10 @@ void MessageBox::setTheme(Theme *theme_, u16 bgcolor_)
 void MessageBox::draw(void)
 {
 	drawGradient(theme->col_list_highlight1, theme->col_list_highlight2, 0, 1, width, 15);
-	drawHLine(0, 16, width, RGB15(0,0,0)|BIT(15));
+	drawHLine(0, 16, width, theme->col_outline);
 	drawFullBox(0, 17, width, MB_HEIGHT-17, theme->col_light_bg);
-	drawBorder();
+	drawBorder(theme->col_outline);
 	u8 labelx = (width-getStringWidth(msg))/2;
-	drawString(msg, labelx, 3, width);
+	drawString(msg, labelx, 3, theme->col_text, width);
 	gui.draw();
 }

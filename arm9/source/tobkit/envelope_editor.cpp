@@ -459,12 +459,12 @@ void EnvelopeEditor::draw(void)
 	// Border and background
 	//
 	drawFullBox(1, 1, width - 2, height - 2, theme->col_dark_bg);
-	drawBorder();
+	drawBorder(theme->col_outline);
 
 	if( (draw_mode == true) && (n_points == 0) )
 	{
-		drawString("draw the envelope", 10, 20, 255, theme->col_lighter_bg);
-		drawString("with the stylus", 20, 30, 255, theme->col_lighter_bg);
+		drawString("draw the envelope", 10, 20, theme->col_lighter_bg, 255);
+		drawString("with the stylus", 20, 30, theme->col_lighter_bg, 255);
 	}
 
 	//
@@ -519,7 +519,7 @@ void EnvelopeEditor::draw(void)
 			{
 			  if (idx == (sustain_point_index + 1))
 			  {
-			    drawBresLine(last_point_x, last_point_y, last_point_x, MAX_Y, RGB15(0,31,0) | BIT(15));
+			    drawBresLine(last_point_x, last_point_y, last_point_x, MAX_Y, theme->col_env_sustain);
 			  }
 			}
 			drawBresLine(line_x1, line_y1, line_x2, line_y2, theme->col_dark_ctrl);
@@ -552,11 +552,11 @@ void EnvelopeEditor::draw(void)
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = RGB15(0,0,0) | BIT(15);
+			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon;
 		}
 	}
 
-	drawBox(width-SCROLLBAR_WIDTH, height-SCROLLBUTTON_HEIGHT, 9, 9);
+	drawBox(width-SCROLLBAR_WIDTH, height-SCROLLBUTTON_HEIGHT, 9, 9, theme->col_outline);
 
 	// Left Button
 	if(buttonstate==SCROLLLEFT) {
@@ -572,10 +572,10 @@ void EnvelopeEditor::draw(void)
 		}
 	}
 
-	drawBox(0, height-9, 9, 9);
+	drawBox(0, height-9, 9, 9, theme->col_outline);
 
 
-	drawBox(0, height-SCROLLBAR_WIDTH, width, SCROLLBAR_WIDTH);
+	drawBox(0, height-SCROLLBAR_WIDTH, width, SCROLLBAR_WIDTH, theme->col_outline);
 
 	// Clear Scrollbar
 	drawGradient(theme->col_medium_bg, theme->col_light_bg, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
@@ -587,7 +587,7 @@ void EnvelopeEditor::draw(void)
 		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingyheight-2, SCROLLBAR_WIDTH-2, theme->col_dark_ctrl);
 	}
 
-	drawBox(SCROLLBUTTON_HEIGHT-1+scrollthingypos, height-SCROLLBAR_WIDTH, scrollthingyheight, SCROLLBAR_WIDTH);
+	drawBox(SCROLLBUTTON_HEIGHT-1+scrollthingypos, height-SCROLLBAR_WIDTH, scrollthingyheight, SCROLLBAR_WIDTH, theme->col_outline);
 }
 
 // Calculate height and position of the scroll thingy
