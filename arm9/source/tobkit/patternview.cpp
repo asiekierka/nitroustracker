@@ -34,19 +34,9 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-PatternView::PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state, Theme *_theme)
+PatternView::PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state)
 	:Widget(_x, _y, _width, _height, _vram),
 	onMute(0), pattern(0), song(0), state(_state),
-	col_notes(_theme->col_pv_notes), /* RGB15(3,11,31) */
-	col_instr(_theme->col_pv_instr),
-	col_volume(_theme->col_pv_volume),
-	col_effect(_theme->col_pv_effect),
-	col_effect_param(_theme->col_pv_effect_param),
-	col_notes_dark(_theme->col_pv_notes_dark),
-	col_instr_dark(_theme->col_pv_instr_dark),
-	col_volume_dark(_theme->col_pv_volume_dark),
-	col_effect_dark(_theme->col_pv_effect_dark),
-	col_effect_param_dark(_theme->col_pv_effect_param_dark),
 	hscrollpos(0), lines_per_beat(8), selection_exists(false), pen_down(false),
 	effects_visible(true), cell_width(50)
 {

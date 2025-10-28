@@ -3442,7 +3442,7 @@ void setupGUI(bool dldi_enabled)
 		buttondelnote->setCaption("del");
 		buttonemptynote2->setCaption("clr");
 
-		pv = new PatternView(0, 0, 200, 192, &main_vram_back, state, settings->getTheme());
+		pv = new PatternView(0, 0, 200, 192, &main_vram_back, state);
 		pv->setSong(song);
 		pv->registerMuteCallback(handleMuteChannelsChanged);
 

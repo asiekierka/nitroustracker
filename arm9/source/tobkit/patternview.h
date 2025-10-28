@@ -90,7 +90,7 @@ const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
 class PatternView: public Widget {
 	public:
 		// Constructor sets base variables
-		PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state, Theme *_theme);
+		PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state);
 		
 		// Drawing request
 		void pleaseDraw(void);
@@ -125,6 +125,21 @@ class PatternView: public Widget {
 		bool isMuted(u16 channel);
 		void unmute(u16 channel);
 		void toggleEffectsVisibility(bool on);
+
+		void setTheme(Theme *theme_, u16 bgcolor_) { 
+			theme = theme_; 
+			bgcolor = bgcolor_;
+			col_notes = theme_->col_pv_notes;
+			col_instr = theme_->col_pv_instr;
+			col_volume = theme_->col_pv_volume;
+			col_effect = theme_->col_pv_effect;
+			col_effect_param = theme_->col_pv_effect_param;
+			col_notes_dark = theme_->col_pv_notes_dark;
+			col_instr_dark = theme_->col_pv_instr_dark;
+			col_volume_dark = theme_->col_pv_volume_dark;
+			col_effect_dark = theme_->col_pv_effect_dark;
+			col_effect_param_dark = theme_->col_pv_effect_param_dark;
+		}
 		
 	private:
 		void draw(void);
