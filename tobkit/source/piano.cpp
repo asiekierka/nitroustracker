@@ -223,7 +223,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	else
 	{
 		ypos = 28;
-		col = theme->col_piano_label_inv;
+		col = theme->col_piano_label;
 		offset = 5;
 	}
 	
