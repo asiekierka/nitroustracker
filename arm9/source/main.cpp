@@ -467,12 +467,10 @@ void handleNoteStroke(u8 note)
 		kb->setKeyLabel(note, label);
 	}
 	
-	// after pr153 merge: also add this to handlePianoPakStroke
-	onKeypress(note); 
+	onKeypress(note);
 
 	// Play the note
-	// Send "play inst" command
-	CommandPlayInst(state->instrument, state->basenote + note, 255, 255); // channel==255 -> search for free channel
+	CommandPlayNoteAuto(state->instrument, state->basenote + note, 255, note);
 
 #ifdef MIDI
 	u8 midichannel = state->instrument % 16;
@@ -499,9 +497,47 @@ void handleNoteRelease(u8 note, bool moved)
 		redraw_main_requested = true;
 	}
 
-	// after pr153 merge: also add this to handlePianoPakRelease
 	onKeyrelease();
-	CommandStopInst(255);
+	CommandStopNoteAuto(note);
+
+#ifdef MIDI
+	u8 midichannel = state->instrument % 16;
+	if( (state->dsmi_connected) && (state->dsmi_send) )
+		dsmi_write(NOTE_OFF | midichannel, state->basenote + note, 127);
+#endif
+}
+
+void handlePianoPakStroke(u8 note)
+{
+	if(state->recording == true)
+	{
+		Cell newCell = getChangedNote(song->getPattern(song->getPotEntry(state->potpos))[state->channel][state->getCursorRow()], note);
+		action_buffer->add(song, new SingleCellSetAction(state, state->channel, state->getCursorRow(), newCell));
+
+		// Advance row
+		handleNoteAdvanceRow();
+
+		// Redraw
+		DC_FlushAll();
+		redraw_main_requested = true;
+	}
+
+	onKeypress(note);
+
+	// Play the note
+	CommandPlayNoteAuto(state->instrument, state->basenote + note, 255, note);
+
+#ifdef MIDI
+	u8 midichannel = state->instrument % 16;
+	if( (state->dsmi_connected) && (state->dsmi_send) )
+		dsmi_write(NOTE_ON | midichannel, state->basenote + note, 127);
+#endif
+}
+
+void handlePianoPakRelease(u8 note)
+{
+	onKeyrelease();
+	CommandStopNoteAuto(note);
 
 #ifdef MIDI
 	u8 midichannel = state->instrument % 16;
@@ -1387,23 +1423,20 @@ void handleDSMWRecv(void)
 			switch(type)
 			{
 				case NOTE_ON: {
-					u8 channel = 255;
 					u8 inst = message & 0x0F;
 					u8 note = data1;
 					u8 volume = data2;
+					u16 tag = (((u16)inst + 1) << 8) | note;
 					// debugprintf("on %d %d\n", inst, note);
-					CommandPlayInst(inst, note, volume, channel);
+					CommandPlayNoteAuto(inst, note, volume, tag);
 					break;
 				}
 
 				case NOTE_OFF: {
-					// FIXME: Autochannel stores only the last activated channel, which
-					// breaks polyphony. This mitigates the issue by disabling all
-					// matching notes, but a better fix would probably be to remember
-					// which NTXM channels are mapped to which MIDI channels.
 					u8 inst = message & 0x0F;
 					u8 note = data1;
-					CommandStopMatchingInst(inst, note);
+					u16 tag = (((u16)inst + 1) << 8) | note;
+					CommandStopNoteAuto(tag);
 					break;
 				}
 			}
@@ -3845,12 +3878,14 @@ void VblankHandler(void)
 		if(keysup & mykey_B)
 			fastscroll = false;
 	}
-
+	
 	// Easy Piano pak handling logic
 	if (pianoIsInserted())
 	{
 		pianoScanKeys();
+
 		u16 piano_down = pianoKeysDown();
+		u16 piano_up = pianoKeysUp();
 
 		for (u16 i = 0; i < 15; i++) {
 			if (i > 10 && i < 13)
@@ -3859,8 +3894,10 @@ void VblankHandler(void)
 			u16 note_val = (i >= 13) ? (i - 2) : i;
 
 			if (piano_down & (1 << i)) {
-				handleNoteStroke(note_val);
-				handleNoteRelease(note_val, false);
+				handlePianoPakStroke(note_val);
+			}
+			if (piano_up & (1 << i)) {
+				handlePianoPakRelease(note_val);
 			}
  		}
 	}
