@@ -138,6 +138,6 @@ void ToggleButton::draw(void)
 	}
 
 	if (caption != NULL)
-		drawString(caption, MAX(2, ((width-getStringWidth(caption))/2) ), col, height/2-5);
+		drawString(caption, MAX(2, ((width-getStringWidth(caption))/2) ), height/2-5, col);
 }
 
