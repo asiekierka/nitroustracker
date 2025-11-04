@@ -14,65 +14,74 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#ifndef _THEME_H_
-#define _THEME_H_
+  // Themes
 
+#ifndef THEME_H
+#define THEME_H
+
+#include "../../arm9/source/tools.h" 
 #include <nds.h>
 
+#define NUM_COLORS 45
+#define THEME_FILENAME_LEN 255
+
 namespace tobkit {
+class Theme {
+public:
+	Theme(char* themepath = NULL, bool use_fat = true);
+	void read(void);
 
-class Theme
-{
-	public:
-		Theme();
-		
-		u16 col_bg;
-		u16 col_dark_bg;
-		u16 col_medium_bg;
-		u16 col_light_bg;
-		u16 col_lighter_bg;
-		u16 col_light_ctrl;
-		u16 col_dark_ctrl;
-		u16 col_light_ctrl_disabled;
-		u16 col_dark_ctrl_disabled;
-		u16 col_list_highlight1;
-		u16 col_list_highlight2;
-		u16 col_outline;
-		u16 col_tab_outline;
-		u16 col_sepline;
-		u16 col_icon;
-		u16 col_text;
-		u16 col_signal;
-		u16 col_signal_off;
-		u16 col_piano_label;
-		u16 col_piano_label_inv;
-		u16 col_loop;
-		u16 col_env_sustain;
-		u16 col_mem_ok;
-		u16 col_mem_warn;
-		u16 col_mem_alert;
-		u16 col_typewriter_cursor;
-		u16 col_pv_lines;
-		u16	col_pv_sublines;
-		u16	col_pv_lines_record;
-		u16 col_pv_cb_col1;
-		u16 col_pv_cb_col2;
-		u16	col_pv_cb_col1_highlight;
-		u16	col_pv_cb_col2_highlight;
-		u16 col_pv_left_numbers;
-		u16 col_pv_notes;
-		u16 col_pv_instr;
-		u16 col_pv_volume;
-		u16 col_pv_effect;
-		u16 col_pv_effect_param;
-		u16 col_pv_notes_dark;
-		u16 col_pv_instr_dark;
-		u16 col_pv_volume_dark;
-		u16 col_pv_effect_dark;
-		u16 col_pv_effect_param_dark;
-		u16 col_pv_cb_sel_highlight;
+	u16 col_bg;
+	u16 col_dark_bg;
+	u16 col_medium_bg;
+	u16 col_light_bg;
+	u16 col_lighter_bg;
+	u16 col_light_ctrl;
+	u16 col_dark_ctrl;
+	u16 col_light_ctrl_disabled;
+	u16 col_dark_ctrl_disabled;
+	u16 col_list_highlight1;
+	u16 col_list_highlight2;
+	u16 col_outline;
+	u16 col_tab_outline;
+	u16 col_sepline;
+	u16 col_icon;
+	u16 col_text;
+	u16 col_signal;
+	u16 col_signal_off;
+	u16 col_piano_label;
+	u16 col_piano_label_inv;
+	u16 col_loop;
+	u16 col_env_sustain;
+	u16 col_mem_ok;
+	u16 col_mem_warn;
+	u16 col_mem_alert;
+	u16 col_typewriter_cursor;
+	u16 col_pv_lines;
+	u16 col_pv_sublines;
+	u16 col_pv_lines_record;
+	u16 col_pv_cb_col1;
+	u16 col_pv_cb_col2;
+	u16 col_pv_cb_col1_highlight;
+	u16 col_pv_cb_col2_highlight;
+	u16 col_pv_left_numbers;
+	u16 col_pv_notes;
+	u16 col_pv_notes_dark;
+	u16 col_pv_instr;
+	u16 col_pv_instr_dark;
+	u16 col_pv_volume;
+	u16 col_pv_volume_dark;
+	u16 col_pv_effect;
+	u16 col_pv_effect_dark;
+	u16 col_pv_effect_param;
+	u16 col_pv_effect_param_dark;
+	u16 col_pv_cb_sel_highlight;
+private:
+	bool stringToRGB15(char* str, u16* col);
+	bool parseThemeConf(char* str, u16* theme_cols);
+	char themepath[THEME_FILENAME_LEN + 1];
+	bool fat;
 };
 
 };
-
 #endif

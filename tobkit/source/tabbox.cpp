@@ -183,7 +183,7 @@ void TabBox::draw(void)
 			drawVLine(2+size_full*guiidx, 1+offset, size_border-offset, black);
 			drawHLine(3+size_full*guiidx, 0+offset, size_border, black);
 			drawVLine(2+size_full*(guiidx+1), 1+offset, size_border-offset, black);
-			drawMonochromeIcon(4+size_full*guiidx, 2+offset, icon_size, icon_size - offset, icons.at(guiidx));
+			drawMonochromeIcon(4+size_full*guiidx, 2+offset, icon_size, icon_size - offset, icons.at(guiidx), theme->col_icon);
 		}
 	} else {
 		// Draw box
@@ -201,7 +201,7 @@ void TabBox::draw(void)
 			drawHLine(1+offset, 2+size_full*guiidx, size_border-offset, black);
 			drawVLine(0+offset, 3+size_full*guiidx, size_border - 1, black);
 			drawHLine(1+offset, 2+size_full*(guiidx+1), size_border-offset, black);
-			drawMonochromeIconOffset(2+offset, 4+size_full*guiidx, icon_size - offset, icon_size, 0, 0, icon_size, icon_size, icons.at(guiidx));
+			drawMonochromeIconOffset(2+offset, 4+size_full*guiidx, icon_size - offset, icon_size, 0, 0, icon_size, icon_size, icons.at(guiidx), theme->col_icon);
 		}
 	}
 	

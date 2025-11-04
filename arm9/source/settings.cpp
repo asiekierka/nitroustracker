@@ -23,10 +23,8 @@
  */
 
 #include "settings.h"
-
 #include <stdio.h>
 #include <string.h>
-
 #include "tools.h"
 
 #define SETTINGS_DEFAULT_DATA_DIR "/data/NitroTracker"
@@ -38,11 +36,12 @@ Settings::Settings(char *launch_path, bool use_fat)
 : handedness(RIGHT_HANDED),
 sample_preview(true),
 stereo_output(true),
-theme(new tobkit::Theme()),
 fat(use_fat), changed(false)
 {
 	songpath[SETTINGS_FILENAME_LEN] = '\0';
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
+	themename[THEME_NAME_LEN] = '\0';
+	themepath[SETTINGS_FILENAME_LEN] = '\0';
 
 	// might never have snprintf called
 	configpath[0] = '\0';
@@ -50,6 +49,8 @@ fat(use_fat), changed(false)
 
 	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
 	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
+	snprintf(themename, SETTINGS_FILENAME_LEN, "Default.nttheme");
+	
 
 	if(fat == true)
 	{
@@ -57,6 +58,7 @@ fat(use_fat), changed(false)
 		{
 			dirCreate("/data");
 			dirCreate("/data/NitroTracker");
+			dirCreate("/data/NitroTracker/Themes");
 		}
 
 		snprintf(configpath, SETTINGS_FILENAME_LEN, "%s/%s",
@@ -101,9 +103,16 @@ fat(use_fat), changed(false)
 			if (!lines_per_beat || lines_per_beat > 64)
 				lines_per_beat = 8;
 
+			getConfigValue(confstr, "Theme", themename, SETTINGS_FILENAME_LEN, NULL);
+			
 			free(confstr);
 		}
 	}
+
+	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Themes/%s",
+				launch_path != NULL ? launch_path : SETTINGS_DEFAULT_DATA_DIR,
+				themename); // will default to 'Default.nttheme' if no fat
+	theme = new tobkit::Theme(themepath, fat);
 }
 
 Handedness Settings::getHandedness(void)
@@ -180,6 +189,7 @@ char *Settings::getSongPath(void)
     return songpath;
 }
 
+
 void Settings::setSongPath(const char* songpath_)
 {
 	strncpy(songpath, songpath_, SETTINGS_FILENAME_LEN);
@@ -229,8 +239,8 @@ bool Settings::write(void)
 	boolToString(sample_preview, prevstring);
 	boolToString(stereo_output, stereostring);
 	boolToString(freq_47khz, freqstring);
-	fprintf(conf, "Samplepath = %s\nSongpath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\nLines Per Beat = %d\n",
-			samplepath, songpath, hstring, prevstring, stereostring, freqstring, lines_per_beat);
+	fprintf(conf, "Samplepath = %s\nSongpath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\nLines Per Beat = %d\nTheme = %s\n",
+			samplepath, songpath, hstring, prevstring, stereostring, freqstring, lines_per_beat, themename);
 	fclose(conf);
 	return true;
 }

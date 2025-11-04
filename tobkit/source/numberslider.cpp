@@ -166,7 +166,7 @@ void NumberSlider::draw(void)
 	}
 	
 	// This draws the connection
-	drawVLine(4, 6, 5, theme->col_outline);
+	drawVLine(4, 6, 5, theme->col_icon);
 	
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {

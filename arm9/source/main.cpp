@@ -3860,12 +3860,20 @@ int main(int argc, char **argv) {
 	REG_BLDCNT_SUB = BLEND_FADE_BLACK | BLEND_SRC_BG2 | BLEND_SRC_BG0;
 	REG_BLDCNT = BLEND_FADE_BLACK | BLEND_SRC_BG2 | BLEND_SRC_BG0;
 #endif
-
+	#ifdef USE_FAT
+	bool fat_success = fatInitDefault();
+#else
+    bool fat_success = false;
+#endif
 	// Setup text
 	consoleInit(NULL, 0, BgType_Text4bpp, BgSize_T_256x256, 4, 0, true, true);
 	bgSetPriority(0, text_priority);
 
 	bgUpdate();
+
+	settings = new Settings(launch_path, fat_success);
+
+
 
 	// Set draw loactions for the ERBs
 	main_vram_front = (uint16*)BG_BMP_RAM(2);
@@ -3875,11 +3883,7 @@ int main(int argc, char **argv) {
 	// Clear tile mem
 	dmaFillWords(0, BG_BMP_RAM_SUB(0), 32*1024);
 
-#ifdef USE_FAT
-	bool fat_success = fatInitDefault();
-#else
-    bool fat_success = false;
-#endif
+
 
 	// parse argv[0], if present
 	if (argc >= 1 && argv != NULL && argv[0] != NULL) {
@@ -3898,9 +3902,7 @@ int main(int argc, char **argv) {
 	}
 
 	state = new State();
-
-	settings = new Settings(launch_path, fat_success);
-
+	
 	clearMainScreen();
 	clearSubScreen();
 

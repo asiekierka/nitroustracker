@@ -129,8 +129,8 @@ class Widget {
 			)|BIT(15);
 		}
 
-		void drawMonochromeIcon(u8 tx, u8 ty, u8 tw, u8 th, const u8 *icon, u16 color=RGB15(0,0,0)|BIT(15));
-		void drawMonochromeIconOffset(u8 tx, u8 ty, u8 tw, u8 th, u8 ix, u8 iy, u8 iw, u8 ih, const u8 *icon, u16 color=RGB15(0,0,0)|BIT(15));
+		void drawMonochromeIcon(u8 tx, u8 ty, u8 tw, u8 th, const u8 *icon, u16 color);
+		void drawMonochromeIconOffset(u8 tx, u8 ty, u8 tw, u8 th, u8 ix, u8 iy, u8 iw, u8 ih, const u8 *icon, u16 color);
 
 		// Stylus utility functions
 		bool isInRect(u8 x, u8 y, u8 x1, u8 y1, u8 x2, u8 y2);

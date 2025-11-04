@@ -33,4 +33,5 @@ jobs:
             nitroustracker*.nds
             CHANGELOG.TXT
             licenses/
+            themes/
             README.TXT

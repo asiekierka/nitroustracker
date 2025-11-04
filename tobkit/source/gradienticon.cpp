@@ -68,7 +68,7 @@ void GradientIcon::draw(void)
 				pixel >>= 2;
 			}
 			if(pixel & 3)
-				(*vram)[SCREEN_WIDTH*(y+j)+x+i] = (pixel & 2) ? 0x000000 : colorFg;
+				(*vram)[SCREEN_WIDTH*(y+j)+x+i] = (pixel & 2) ? theme->col_outline : colorFg;
 		}
 	}
 }

@@ -99,7 +99,7 @@ void CheckBox::draw(void)
 	
 	// Checked or not
 	if(checked == true)
-		drawMonochromeIcon(1, 0, 10, 10, haken_raw);
+		drawMonochromeIcon(1, 0, 10, 10, haken_raw, theme->col_icon);
 	
 	// Text
 	if(!albino)
