@@ -7,13 +7,19 @@ f8f800 ; Light control
 f89000 ; Dark control
 8090c0 ; Light control (disabled)
 485888 ; Dark control (disabled)
+485888 ; List item 1
+8090c0 ; List item 2
 e07800 ; List highlight 1
 e0e000 ; List highlight 2
 000000 ; Outline
 000000 ; Tab outline
 f8f800 ; List separator line
-000000 ; Icon
+000000 ; Tab icons
 000000 ; Text
+000000 ; Button text & button icons
+000000 ; Text (list items)
+000000 ; Text (value, e.g. number slider)
+000000 ; Text (selected list item)
 f80000 ; Recording/signal
 900000 ; Recording/signal (off)
 000000 ; Piano mapping label (naturals)
@@ -23,7 +29,8 @@ f8f8f8 ; Piano mapping label, inverted (sharps)
 88c080 ; Memory usage: OK
 f8f800 ; Memory usage: Warning
 f80000 ; Memory usage: Alert
-000000 ; Keyboard cursor
+000000 ; Typewriter cursor
+203078 ; Pattern - background
 8090c0 ; Pattern - lines
 384888 ; Pattern - sublines
 f89000 ; Pattern - lines (recording)

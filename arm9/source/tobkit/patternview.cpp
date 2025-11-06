@@ -233,7 +233,7 @@ void PatternView::toggleEffectsVisibility(bool on)
 // the whole screen.
 void PatternView::draw(void)
 {
-	u32 colcol = theme->col_bg | theme->col_bg << 16;
+	u32 colcol = theme->col_pv_bg | theme->col_pv_bg << 16;
 	s32 sel_screen_x1 = -1, sel_screen_x2 = -1, sel_screen_y1 = -1, sel_screen_y2 = -1;
 
 	dmaFillWords(colcol, *vram, 192*256*2);
@@ -348,7 +348,7 @@ void PatternView::draw(void)
 	char numberstr[3];
 	for(u16 i=0;i<getNumVisibleChannels();++i)
 	{
-		drawFullBox(PV_BORDER_WIDTH+i*getCellWidth()+1, 1, getCellWidth()-2, 11, theme->col_bg);
+		drawFullBox(PV_BORDER_WIDTH+i*getCellWidth()+1, 1, getCellWidth()-2, 11, theme->col_pv_bg);
 		snprintf(numberstr, sizeof(numberstr), "%-2x", (u8) (hscrollpos+i));
 		drawString(numberstr, PV_BORDER_WIDTH+i*getCellWidth()+1, 1, theme->col_pv_lines, 255);
 	}

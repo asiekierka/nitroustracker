@@ -161,17 +161,17 @@ void NumberSlider::draw(void)
 	int_fast8_t i,j;
 	for(j=0;j<3;j++) {
 		for(i=-j;i<=j;++i) {
-			drawPixel(4+i, j+3, theme->col_icon);
+			drawPixel(4+i, j+3, theme->col_text_bt);
 		}
 	}
 	
 	// This draws the connection
-	drawVLine(4, 6, 5, theme->col_icon);
+	drawVLine(4, 6, 5, theme->col_text_bt);
 	
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(i=-j;i<=j;++i) {
-			drawPixel(4+i, -j+13, theme->col_icon);
+			drawPixel(4+i, -j+13, theme->col_text_bt);
 		}
 	}
 	
@@ -186,7 +186,7 @@ void NumberSlider::draw(void)
 	} else {
 		snprintf(numberstr, sizeof(numberstr), hex ? "%2lx" : "%3ld", value);
 	}
-	drawString(numberstr, 10, 5, theme->col_text);
+	drawString(numberstr, 10, 5, theme->col_text_2);
 	
 	// Border
 	drawBorder(theme->col_outline);

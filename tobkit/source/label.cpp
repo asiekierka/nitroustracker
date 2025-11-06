@@ -96,11 +96,15 @@ void Label::draw(void)
 
 	if(has_border)
 	{
-		if(!no_bg)
+		if(!no_bg) {
 			drawFullBox(1, 1, width - 2, height - 2, theme->col_lighter_bg);
+			col_text = theme->col_text_2; 
+		}
+
 		drawBorder(theme->col_outline);
 		caption_x_offset += 2;
 		caption_y_offset += 2;
+		
 	}
 	else
 	{

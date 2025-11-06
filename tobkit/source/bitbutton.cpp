@@ -86,5 +86,5 @@ void BitButton::draw(u8 down)
 	}
 	drawBorder(theme->col_outline);
 
-	drawMonochromeIcon(bmpx, bmpy, bmpwidth, bmpheight, bitmap, theme->col_icon);
+	drawMonochromeIcon(bmpx, bmpy, bmpwidth, bmpheight, bitmap, theme->col_text_bt);
 }

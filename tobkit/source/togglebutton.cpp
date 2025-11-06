@@ -130,7 +130,7 @@ void ToggleButton::draw(void)
 		if(on) {
 			col = (color_on & BIT(15)) ? color_on : theme->col_light_ctrl;
 		} else {
-			col = (color_off & BIT(15)) ? color_off : theme->col_text;
+			col = (color_off & BIT(15)) ? color_off : theme->col_text_bt;
 		}
 	}
 	if(has_bitmap) {

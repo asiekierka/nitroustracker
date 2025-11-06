@@ -122,17 +122,17 @@ void NumberSliderRelNote::draw(void)
 	s8 i,j;
 	for(j=0;j<3;j++) {
 		for(i=-j;i<=j;++i) {
-			*(*vram+SCREEN_WIDTH*(y+j+3)+x+4+i) = theme->col_icon;
+			*(*vram+SCREEN_WIDTH*(y+j+3)+x+4+i) = theme->col_text_bt;
 		}
 	}
 	
 	// This draws the connection
-	drawVLine(4, 6, 5, theme->col_outline);
+	drawVLine(4, 6, 5, theme->col_text_bt);
 	
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(i=-j;i<=j;++i) {
-			*(*vram+SCREEN_WIDTH*(y-j+13)+x+4+i) = theme->col_icon;
+			*(*vram+SCREEN_WIDTH*(y-j+13)+x+4+i) = theme->col_text_bt;
 		}
 	}
 	
@@ -163,7 +163,7 @@ void NumberSliderRelNote::draw(void)
 	
 	char notestr[4];
 	snprintf(notestr, sizeof(notestr), "%s%u", nstr, octave);
-	drawString(notestr, 10, 5, theme->col_text);
+	drawString(notestr, 10, 5, theme->col_text_2);
 	
 	// Border
 	drawBorder(theme->col_outline);

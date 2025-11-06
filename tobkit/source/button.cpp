@@ -94,5 +94,5 @@ void Button::draw(u8 down) {
 	}
 	drawBorder(theme->col_outline);
 	
-	drawString(caption, (width-getStringWidth(caption))/2, height/2-5, theme->col_text);
+	drawString(caption, (width-getStringWidth(caption))/2, height/2-5, theme->col_text_bt);
 }

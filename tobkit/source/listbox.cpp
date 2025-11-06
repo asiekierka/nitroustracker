@@ -285,8 +285,8 @@ void ListBox::draw(void)
 	
 	// Fill rows
 	for(i=0;i<rows_displayed;++i) {
-		u16 col_bottom = theme->col_medium_bg;
-		u16 col_top = theme->col_light_bg;
+		u16 col_bottom = theme->col_list_1;
+		u16 col_top = theme->col_list_2;
 		if((scrollpos+i)==activeelement) {
 			col_bottom = theme->col_list_highlight1;
 			col_top = theme->col_list_highlight2;
@@ -365,7 +365,8 @@ void ListBox::draw(void)
 		}
 		for(i=0;(i<height/ROW_HEIGHT)&&(scrollpos+i<elements.size());++i) {
 			snprintf(numberstr, sizeof(numberstr), "%2x", (u16) (scrollpos+i+offset));
-			drawString(numberstr, 2, ROW_HEIGHT*i+2, theme->col_text);
+			drawString(numberstr, 2, ROW_HEIGHT*i+2, 
+			scrollpos+i == activeelement ? theme->col_text_lb_highlight : theme->col_text_lb);
 		}
 		
 		contentoffset = COUNTER_WIDTH;
@@ -376,7 +377,7 @@ void ListBox::draw(void)
 	// Content
 	for(i=0;(i<height/ROW_HEIGHT)&&(scrollpos+i<elements.size());++i) {
 		drawString(elements.at(scrollpos+i).c_str(), contentoffset+2, ROW_HEIGHT*i+2,
-			theme->col_text,
+			scrollpos+i == activeelement ? theme->col_text_lb_highlight : theme->col_text_lb,
 			width-contentoffset-2-SCROLLBAR_WIDTH-2,
 			height-(ROW_HEIGHT*i+4)
 		);

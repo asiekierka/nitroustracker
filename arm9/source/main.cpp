@@ -3353,7 +3353,7 @@ void setupGUI(bool dldi_enabled)
 		buttonunmuteall = new Button(RIGHT_SIDE_BUTTON_X, 22, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
 		buttonunmuteall->setCaption("-m/s");
 
-		labelnotevol = new Label(RIGHT_SIDE_BUTTON_X + 5, 34, RIGHT_SIDE_BUTTON_WIDTH - 7, 9, &main_vram_back, false, true);
+		labelnotevol = new Label(RIGHT_SIDE_BUTTON_X + 5, 34, RIGHT_SIDE_BUTTON_WIDTH - 7, 9, &main_vram_back, false, true, true);
 		labelnotevol->setCaption("vol");
 
 		nsnotevolume	 = new NumberSlider(RIGHT_SIDE_BUTTON_X, 45, RIGHT_SIDE_BUTTON_WIDTH, 17, &main_vram_back, 127, 0, 127, true, true);

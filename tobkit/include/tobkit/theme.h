@@ -22,7 +22,7 @@ limitations under the License.
 #include "../../arm9/source/tools.h" 
 #include <nds.h>
 
-#define NUM_COLORS 45
+#define NUM_COLORS 52
 #define THEME_FILENAME_LEN 255
 
 namespace tobkit {
@@ -40,6 +40,8 @@ public:
 	u16 col_dark_ctrl;
 	u16 col_light_ctrl_disabled;
 	u16 col_dark_ctrl_disabled;
+	u16 col_list_1;
+	u16 col_list_2;
 	u16 col_list_highlight1;
 	u16 col_list_highlight2;
 	u16 col_outline;
@@ -47,6 +49,10 @@ public:
 	u16 col_sepline;
 	u16 col_icon;
 	u16 col_text;
+	u16 col_text_bt;
+	u16 col_text_2;
+	u16 col_text_lb;
+	u16 col_text_lb_highlight;
 	u16 col_signal;
 	u16 col_signal_off;
 	u16 col_piano_label;
@@ -57,6 +63,7 @@ public:
 	u16 col_mem_warn;
 	u16 col_mem_alert;
 	u16 col_typewriter_cursor;
+	u16 col_pv_bg;
 	u16 col_pv_lines;
 	u16 col_pv_sublines;
 	u16 col_pv_lines_record;
@@ -78,7 +85,8 @@ public:
 	u16 col_pv_cb_sel_highlight;
 private:
 	bool stringToRGB15(char* str, u16* col);
-	bool parseThemeConf(char* str, u16* theme_cols);
+	void RGB15ToString(u16 col, char* str);
+	bool parseTheme(FILE *theme, u16* theme_cols);
 	char themepath[THEME_FILENAME_LEN + 1];
 	bool fat;
 };
