@@ -305,9 +305,9 @@ void ListBox::draw(void)
 	// Scrollbar
 	// Upper Button
 	if(buttonstate==SCROLLUP) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, width-SCROLLBAR_WIDTH+1, 1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-SCROLLBAR_WIDTH+1, 1, 8, 8);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, width-SCROLLBAR_WIDTH+1, 1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-SCROLLBAR_WIDTH+1, 1, 8, 8);
 	}
 	
 	// This draws the up-arrow
@@ -322,9 +322,9 @@ void ListBox::draw(void)
 	
 	// Lower Button
 	if(buttonstate==SCROLLDOWN) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, width-SCROLLBAR_WIDTH+1, height-9, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-SCROLLBAR_WIDTH+1, height-9, 8, 8);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, width-SCROLLBAR_WIDTH+1, height-9, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-SCROLLBAR_WIDTH+1, height-9, 8, 8);
 	}
 	
 	// This draws the down-arrow
@@ -339,15 +339,15 @@ void ListBox::draw(void)
 	drawBox(width-SCROLLBAR_WIDTH, 0, SCROLLBAR_WIDTH, height, theme->col_outline);
 	
 	// Clear Scrollbar
-	drawGradient(theme->col_medium_bg, theme->col_light_bg, width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2, height-2*SCROLLBUTTON_HEIGHT);
+	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2, height-2*SCROLLBUTTON_HEIGHT);
 
 	if (height >= 2*SCROLLBUTTON_HEIGHT+scrollthingyheight) {
 	
 		// The scroll thingy
 		if(buttonstate==SCROLLTHINGY) {
-			drawFullBox(width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT-1+scrollthingypos, SCROLLBAR_WIDTH-2, scrollthingyheight, theme->col_list_highlight2);
+			drawFullBox(width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT-1+scrollthingypos, SCROLLBAR_WIDTH-2, scrollthingyheight, theme->col_scrollbar_active);
 		} else {
-			drawFullBox(width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT-1+scrollthingypos, SCROLLBAR_WIDTH-2, scrollthingyheight, theme->col_list_highlight1);
+			drawFullBox(width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT-1+scrollthingypos, SCROLLBAR_WIDTH-2, scrollthingyheight, theme->col_scrollbar_inactive);
 		}
 		drawBox(width-SCROLLBAR_WIDTH, SCROLLBUTTON_HEIGHT+scrollthingypos-1, SCROLLBAR_WIDTH, scrollthingyheight, theme->col_outline);
 	}

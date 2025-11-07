@@ -309,11 +309,11 @@ void PatternView::draw(void)
 	// Playback box
 	int playback_box_y = PV_CURSORBAR_Y + (state->getPlaybackRow()-state->getCursorRow())*PV_CELL_HEIGHT;
 	if (playback_box_y >= 0 && playback_box_y < 192) {
-		drawBox(0, playback_box_y, getEffectiveWidth(), PV_CELL_HEIGHT+1, theme->col_outline);
+		drawBox(0, playback_box_y, getEffectiveWidth(), PV_CELL_HEIGHT+1, theme->col_pv_pb);
 	}
 
 	// Cursor
-	drawBox(PV_BORDER_WIDTH-1+(state->channel-hscrollpos)*getCellWidth(), PV_CURSORBAR_Y, getCellWidth()+1, PV_CELL_HEIGHT+1, theme->col_outline);
+	drawBox(PV_BORDER_WIDTH-1+(state->channel-hscrollpos)*getCellWidth(), PV_CURSORBAR_Y, getCellWidth()+1, PV_CELL_HEIGHT+1, theme->col_pv_pb_cell);
 	drawGradient(theme->col_pv_cb_col1_highlight, theme->col_pv_cb_col2_highlight, PV_BORDER_WIDTH+(state->channel-hscrollpos)*getCellWidth(),
 				 PV_CURSORBAR_Y+1, getCellWidth()-1, PV_CELL_HEIGHT-1);
 	
@@ -350,7 +350,7 @@ void PatternView::draw(void)
 	{
 		drawFullBox(PV_BORDER_WIDTH+i*getCellWidth()+1, 1, getCellWidth()-2, 11, theme->col_pv_bg);
 		snprintf(numberstr, sizeof(numberstr), "%-2x", (u8) (hscrollpos+i));
-		drawString(numberstr, PV_BORDER_WIDTH+i*getCellWidth()+1, 1, theme->col_pv_lines, 255);
+		drawString(numberstr, PV_BORDER_WIDTH+i*getCellWidth()+1, 1, theme->col_pv_chn, 255);
 	}
 	
 	// Mute / Solo buttons
@@ -364,31 +364,31 @@ void PatternView::draw(void)
 		{
 			if(mute_channels[chn] == true)
 			{
-				mute_col1 = theme->col_pv_cb_col1_highlight;
-				mute_col2 = theme->col_pv_cb_col2_highlight;
+				mute_col1 = theme->col_pv_mutesolo_col1_highlight;
+				mute_col2 = theme->col_pv_mutesolo_col2_highlight;
 			}
 			else
 			{
-				mute_col1 = theme->col_pv_cb_col1;
-				mute_col2 = theme->col_pv_cb_col2;
+				mute_col1 = theme->col_pv_mutesolo_col1;
+				mute_col2 = theme->col_pv_mutesolo_col2;
 			}
 			drawGradient(mute_col1, mute_col2, MUTE_X(i), MUTE_Y, MUTE_WIDTH, MUTE_HEIGHT);
-			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+1, 0, theme->col_text, 255);
+			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+1, 0, theme->col_pv_mutesolo_text, 255);
 		}
 		
 		if(solo_channels[chn] == true)
 		{
-			solo_col1 = theme->col_pv_cb_col1_highlight;
-			solo_col2 = theme->col_pv_cb_col2_highlight;
+			solo_col1 = theme->col_pv_mutesolo_col1_highlight;
+			solo_col2 = theme->col_pv_mutesolo_col2_highlight;
 		}
 		else
 		{
-			solo_col1 = theme->col_pv_cb_col1;
-			solo_col2 = theme->col_pv_cb_col2;
+			solo_col1 = theme->col_pv_mutesolo_col1;
+			solo_col2 = theme->col_pv_mutesolo_col2;
 		}
 		
 		drawGradient(solo_col1, solo_col2, SOLO_X(i), SOLO_Y, SOLO_WIDTH, SOLO_HEIGHT);
-		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+2, 0, theme->col_text, 255);
+		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+2, 0, theme->col_pv_mutesolo_text, 255);
 	}
 }
 

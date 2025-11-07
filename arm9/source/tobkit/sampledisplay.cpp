@@ -391,7 +391,7 @@ void SampleDisplay::draw(void)
 	//
 	// Border and background
 	//
-	drawFullBox(1, 1, width - 2, height - 2, theme->col_dark_bg);
+	drawFullBox(1, 1, width - 2, height - 2, theme->col_smp_bg);
 	
 	if(active==false) {
 		drawBorder(theme->col_outline);
@@ -422,7 +422,7 @@ void SampleDisplay::draw(void)
 
 		selwidth = selright - selleft;
 		if(!dontdraw) {
-			drawFullBox(selleft, 1, selwidth, DRAW_HEIGHT+1, theme->col_sepline);
+			drawFullBox(selleft, 1, selwidth, DRAW_HEIGHT+1, theme->col_smp_bg_sel);
 		}
 	}
 
@@ -432,16 +432,16 @@ void SampleDisplay::draw(void)
 
 	// Right Button
 	if(pen_on_scroll_right) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
 	}
 
 	// This draws the right-arrow
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon;
+			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon_bt;
 		}
 	}
 
@@ -449,15 +449,15 @@ void SampleDisplay::draw(void)
 
 	// Left Button
 	if(pen_on_scroll_left) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, height-9, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, 1, height-9, 8, 8);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 1, height-9, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, 1, height-9, 8, 8);
 	}
 
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon;
+			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon_bt;
 		}
 	}
 
@@ -467,13 +467,13 @@ void SampleDisplay::draw(void)
 	drawBox(0, height-SCROLLBAR_WIDTH, width, SCROLLBAR_WIDTH, theme->col_outline);
 
 	// Clear Scrollbar
-	drawGradient(theme->col_medium_bg, theme->col_light_bg, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
+	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
 
 	// The scroll thingy
 	if(pen_on_scrollthingy) {
-		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingywidth-2, SCROLLBAR_WIDTH-2, theme->col_light_ctrl);
+		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingywidth-2, SCROLLBAR_WIDTH-2, theme->col_scrollbar_active);
 	} else {
-		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingywidth-2, SCROLLBAR_WIDTH-2, theme->col_dark_ctrl);
+		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingywidth-2, SCROLLBAR_WIDTH-2, theme->col_scrollbar_inactive);
 	}
 
 	drawBox(SCROLLBUTTON_HEIGHT-1+scrollthingypos, height-SCROLLBAR_WIDTH, scrollthingywidth, SCROLLBAR_WIDTH, theme->col_outline);
@@ -485,9 +485,10 @@ void SampleDisplay::draw(void)
 	u16 colortable[DRAW_HEIGHT+2];
 	u16 colortable_selected[DRAW_HEIGHT+2];
 	for(s32 i=0; i<DRAW_HEIGHT+2; i++) {
-		colortable[i] = interpolateColor(theme->col_light_ctrl, theme->col_dark_ctrl, i<<4);
+		// colortable[i] = interpolateColor(theme->col_light_ctrl, theme->col_dark_ctrl, i<<4);
+		colortable[i] = theme->col_smp_waveform;
 		//colortable_selected[i] = ((colortable[i] >> 2) & 0x1CE7) | 0x8000;
-		colortable_selected[i] = 0x8000;
+		colortable_selected[i] = theme->col_smp_waveform_sel;
 	}
 
 	int32 step = divf32(inttof32(smp->getNSamples() >> zoom_level), inttof32(width-2));
@@ -596,30 +597,30 @@ void SampleDisplay::draw(void)
 			// Left Triangle
 			if(loop_start_pos > 1 + LOOP_TRIANGLE_SIZE)
 			{
-				drawHLine(loop_start_pos-2, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_icon);
+				drawHLine(loop_start_pos-2, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
 
 				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
 				{
 					drawHLine(loop_start_pos-i-2, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, i+2, theme->col_loop);
-					drawPixel(loop_start_pos-i-3, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_icon);
+					drawPixel(loop_start_pos-i-3, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
 				}
 
 				drawHLine(loop_start_pos-LOOP_TRIANGLE_SIZE+1, DRAW_HEIGHT, LOOP_TRIANGLE_SIZE-1,
 					theme->col_loop);
-				drawPixel(loop_start_pos-LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_icon);
+				drawPixel(loop_start_pos-LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
 			}
 
 			// Right Triangle
 			if(loop_start_pos < width - 2 - LOOP_TRIANGLE_SIZE)
 			{
-				drawHLine(loop_start_pos+1, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_icon);
+				drawHLine(loop_start_pos+1, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
 				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i) {
 					drawHLine(loop_start_pos+1, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, 2+i, theme->col_loop);
-					drawPixel(loop_start_pos+3+i, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_icon);
+					drawPixel(loop_start_pos+3+i, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
 				}
 				drawHLine(loop_start_pos+1, DRAW_HEIGHT-LOOP_TRIANGLE_SIZE+LOOP_TRIANGLE_SIZE, LOOP_TRIANGLE_SIZE-1,
 					theme->col_loop);
-				drawPixel(loop_start_pos+LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_icon);
+				drawPixel(loop_start_pos+LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
 			}
 		}
 
@@ -635,30 +636,30 @@ void SampleDisplay::draw(void)
 			{
 				drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+1, 1, LOOP_TRIANGLE_SIZE-1,
 					theme->col_loop);
-				drawPixel(loop_end_pos-LOOP_TRIANGLE_SIZE, 1, theme->col_icon);
+				drawPixel(loop_end_pos-LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
 
 				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
 				{
 					drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+i+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
-					drawPixel(loop_end_pos-1-LOOP_TRIANGLE_SIZE+i+1, 2+i, theme->col_icon);
+					drawPixel(loop_end_pos-1-LOOP_TRIANGLE_SIZE+i+1, 2+i, theme->col_outline);
 				}
 
-				drawHLine(loop_end_pos-2, LOOP_TRIANGLE_SIZE, 2, theme->col_icon);
+				drawHLine(loop_end_pos-2, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
 			}
 
 			// Right Triangle
 			if(loop_end_pos < width-1-LOOP_TRIANGLE_SIZE)
 			{
 				drawHLine(loop_end_pos+1, 1, LOOP_TRIANGLE_SIZE-1, theme->col_loop);
-				drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE, 1, theme->col_icon);
+				drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
 
 				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
 				{
 					drawHLine(loop_end_pos+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
-					drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE-i, 2+i, theme->col_icon);
+					drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE-i, 2+i, theme->col_outline);
 				}
 
-				drawHLine(loop_end_pos+1, LOOP_TRIANGLE_SIZE, 2, theme->col_icon);
+				drawHLine(loop_end_pos+1, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
 			}
 		}
 	}
@@ -682,8 +683,8 @@ void SampleDisplay::draw(void)
 		// +
 		if(pen_on_zoom_in) {
 			drawFullBox(2, 2, 7, 7, theme->col_light_bg);
-			drawHLine(3, 5, 5, theme->col_dark_bg);
-			drawVLine(5, 3, 5, theme->col_dark_bg);
+			drawHLine(3, 5, 5, theme->col_smp_bg);
+			drawVLine(5, 3, 5, theme->col_smp_bg);
 		} else {
 			drawHLine(3, 5, 5, theme->col_light_bg);
 			drawVLine(5, 3, 5, theme->col_light_bg);
@@ -692,7 +693,7 @@ void SampleDisplay::draw(void)
 		// -
 		if(pen_on_zoom_out) {
 			drawFullBox(10, 2, 7, 7, theme->col_light_bg);
-			drawHLine(11, 5, 5, theme->col_dark_bg);
+			drawHLine(11, 5, 5, theme->col_smp_bg);
 		} else {
 			drawHLine(11, 5, 5, theme->col_light_bg);
 		}

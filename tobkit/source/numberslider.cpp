@@ -186,7 +186,7 @@ void NumberSlider::draw(void)
 	} else {
 		snprintf(numberstr, sizeof(numberstr), hex ? "%2lx" : "%3ld", value);
 	}
-	drawString(numberstr, 10, 5, theme->col_text_2);
+	drawString(numberstr, 10, 5, theme->col_text_value);
 	
 	// Border
 	drawBorder(theme->col_outline);

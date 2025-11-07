@@ -131,7 +131,7 @@ void NumberBox::draw(void)
 	formatstr[1] = digits+48;
 	
 	snprintf(numberstr, sizeof(numberstr), formatstr, value);
-	drawString(numberstr, 10, 5, theme->col_text_2);
+	drawString(numberstr, 10, 5, theme->col_text_value);
 	
 	// Border
 	drawBorder(theme->col_outline);

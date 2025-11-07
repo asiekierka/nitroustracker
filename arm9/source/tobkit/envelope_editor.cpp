@@ -458,7 +458,7 @@ void EnvelopeEditor::draw(void)
 	//
 	// Border and background
 	//
-	drawFullBox(1, 1, width - 2, height - 2, theme->col_dark_bg);
+	drawFullBox(1, 1, width - 2, height - 2, theme->col_env_bg);
 	drawBorder(theme->col_outline);
 
 	if( (draw_mode == true) && (n_points == 0) )
@@ -522,7 +522,7 @@ void EnvelopeEditor::draw(void)
 			    drawBresLine(last_point_x, last_point_y, last_point_x, MAX_Y, theme->col_env_sustain);
 			  }
 			}
-			drawBresLine(line_x1, line_y1, line_x2, line_y2, theme->col_dark_ctrl);
+			drawBresLine(line_x1, line_y1, line_x2, line_y2, theme->col_env_line);
 
 			// Display unclipped points
 			if( (last_point_x >= MIN_X) && (last_point_x <= MAX_X) )
@@ -543,16 +543,16 @@ void EnvelopeEditor::draw(void)
 
 	// Right Button
 	if(buttonstate == SCROLLRIGHT) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
 	}
 
 	// This draws the right-arrow
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon;
+			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon_bt;
 		}
 	}
 
@@ -560,15 +560,15 @@ void EnvelopeEditor::draw(void)
 
 	// Left Button
 	if(buttonstate==SCROLLLEFT) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, height-9, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, 1, height-9, 8, 8);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 1, height-9, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, 1, height-9, 8, 8);
 	}
 
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon;
+			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon_bt;
 		}
 	}
 
@@ -578,13 +578,13 @@ void EnvelopeEditor::draw(void)
 	drawBox(0, height-SCROLLBAR_WIDTH, width, SCROLLBAR_WIDTH, theme->col_outline);
 
 	// Clear Scrollbar
-	drawGradient(theme->col_medium_bg, theme->col_light_bg, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
+	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
 
 	// The scroll thingy
 	if(buttonstate==SCROLLTHINGY) {
-		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingyheight-2, SCROLLBAR_WIDTH-2, theme->col_light_ctrl);
+		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingyheight-2, SCROLLBAR_WIDTH-2, theme->col_scrollbar_active);
 	} else {
-		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingyheight-2, SCROLLBAR_WIDTH-2, theme->col_dark_ctrl);
+		drawFullBox(SCROLLBUTTON_HEIGHT+scrollthingypos, height-SCROLLBAR_WIDTH+1, scrollthingyheight-2, SCROLLBAR_WIDTH-2, theme->col_scrollbar_inactive);
 	}
 
 	drawBox(SCROLLBUTTON_HEIGHT-1+scrollthingypos, height-SCROLLBAR_WIDTH, scrollthingyheight, SCROLLBAR_WIDTH, theme->col_outline);
@@ -600,12 +600,12 @@ void EnvelopeEditor::calcScrollThingy(void)
 
 void EnvelopeEditor::drawPoint(u8 x, u8 y, bool active)
 {
-	drawFullBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_light_ctrl);
+	drawFullBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_env_pt);
 
 	if(!active)
-		drawBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_outline);
+		drawBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_env_pt_border);
 	else
-		drawBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_signal);
+		drawBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_env_pt_border_active);
 }
 
 void EnvelopeEditor::scroll(s32 difference)

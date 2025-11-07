@@ -95,15 +95,15 @@ void CheckBox::draw(void)
 	if(!albino)
 		drawFullBox(0, 0, 11, 3, theme->col_light_bg);
 	else
-		drawFullBox(0, 0, 11, 3, theme->col_dark_bg);
+		drawFullBox(0, 0, 11, 3, theme->col_bg);
 	
 	// Checked or not
 	if(checked == true)
-		drawMonochromeIcon(1, 0, 10, 10, haken_raw, theme->col_icon);
+		drawMonochromeIcon(1, 0, 10, 10, haken_raw, theme->col_checkmark);
 	
 	// Text
 	if(!albino)
 		drawString(label, 13, 2, theme->col_text);
 	else
-		drawString(label, 13, 2, theme->col_lighter_bg);
+		drawString(label, 13, 2, theme->col_text_light);
 }

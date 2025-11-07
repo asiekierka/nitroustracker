@@ -170,16 +170,16 @@ void TabBox::draw(void)
 	if (orientation == TABBOX_ORIENTATION_TOP) {
 		// Draw box
 		drawFullBox(1, size_full+1, width-2, height-(size_border+2), theme->col_light_bg);
-		drawBox(0, size_border, width, height-size_border, theme->col_outline);
+		drawBox(0, size_border, width, height-size_border, theme->col_tab_outline);
 		
 		// Draw tabs
-		drawFullBox(0, 0, 3+size_full*guis.size(), 3, theme->col_dark_bg);
+		drawFullBox(0, 0, 3+size_full*guis.size(), 3, theme->col_bg);
 		
 		for(u8 guiidx=0;guiidx<guis.size();++guiidx) {
 			bool selected = guiidx==currentgui;
 			u8 offset = selected ? 0 : 3;
 
-			drawFullBox(3+size_full*guiidx, 1+offset, size_border, size_border-offset, selected ? theme->col_light_bg : theme->col_medium_bg);
+			drawFullBox(3+size_full*guiidx, 1+offset, size_border, size_border-offset, selected ? theme->col_selected_tab : theme->col_unselected_tab);
 			drawVLine(2+size_full*guiidx, 1+offset, size_border-offset, black);
 			drawHLine(3+size_full*guiidx, 0+offset, size_border, black);
 			drawVLine(2+size_full*(guiidx+1), 1+offset, size_border-offset, black);
@@ -188,7 +188,7 @@ void TabBox::draw(void)
 	} else {
 		// Draw box
 		drawFullBox(14, 1, width-15, height-2, theme->col_light_bg);
-		drawBox(13, 0, width-13, height, theme->col_outline);
+		drawBox(13, 0, width-13, height, theme->col_tab_outline);
 
 		// Draw tabs
 		drawFullBox(0, 0, 3, 3+13*guis.size(), theme->col_light_bg);
@@ -197,7 +197,7 @@ void TabBox::draw(void)
 			bool selected = guiidx==currentgui;
 			u8 offset = selected ? 3 : 0;
 
-			drawFullBox(1+offset, 2+size_full*guiidx, size_border-offset, size_border, selected ? theme->col_medium_bg : theme->col_light_bg);
+			drawFullBox(1+offset, 2+size_full*guiidx, size_border-offset, size_border, selected ? theme->col_unselected_tab : theme->col_selected_tab);
 			drawHLine(1+offset, 2+size_full*guiidx, size_border-offset, black);
 			drawVLine(0+offset, 3+size_full*guiidx, size_border - 1, black);
 			drawHLine(1+offset, 2+size_full*(guiidx+1), size_border-offset, black);

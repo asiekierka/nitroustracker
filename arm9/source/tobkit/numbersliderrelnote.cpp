@@ -163,7 +163,7 @@ void NumberSliderRelNote::draw(void)
 	
 	char notestr[4];
 	snprintf(notestr, sizeof(notestr), "%s%u", nstr, octave);
-	drawString(notestr, 10, 5, theme->col_text_2);
+	drawString(notestr, 10, 5, theme->col_text_value);
 	
 	// Border
 	drawBorder(theme->col_outline);

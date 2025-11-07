@@ -273,7 +273,7 @@ void dumpSample(void);
 
 void clearMainScreen(void)
 {
-	u16 col = settings->getTheme()->col_dark_bg;
+	u16 col = settings->getTheme()->col_bg;
 	u32 colcol = col | col << 16;
 	dmaFillWords(colcol, main_vram_front, 256 * 192 * 2);
 	dmaFillWords(colcol, main_vram_back, 256 * 192 * 2);
@@ -281,7 +281,7 @@ void clearMainScreen(void)
 
 void clearSubScreen(void)
 {
-	u16 col = settings->getTheme()->col_dark_bg;
+	u16 col = settings->getTheme()->col_bg;
 	u32 colcol = col | col << 16;
 	// Fill the bg with the bg color except for the place where the keyboard is
 	dmaFillWords(colcol, sub_vram, 256 * 153 * 2);
@@ -2792,7 +2792,7 @@ void sampleDrawToggle(bool on)
 void setupGUI(bool dldi_enabled)
 {
 	gui = new GUI();
-	gui->setTheme(settings->getTheme(), settings->getTheme()->col_dark_bg);
+	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 
 	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
 	kb->registerNoteCallback(handleNoteStroke);
@@ -2803,7 +2803,7 @@ void setupGUI(bool dldi_enabled)
 	pixmaplogo->registerPushCallback(showAboutBox);
 
 	tabbox = new TabBox(1, 1, 139, 151, &sub_vram, TABBOX_ORIENTATION_TOP, 16);
-	tabbox->setTheme(settings->getTheme(), settings->getTheme()->col_dark_bg);
+	tabbox->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	tabbox->addTab(icon_song_raw, 0);
 	if (dldi_enabled)
 		tabbox->addTab(icon_disk_raw, 1);
@@ -3000,7 +3000,7 @@ void setupGUI(bool dldi_enabled)
 	sampledisplay->setActive();
 
 	sampletabbox = new TabBox(3, 94, 132, 55, &sub_vram, TABBOX_ORIENTATION_LEFT, 11);
-	sampletabbox->setTheme(settings->getTheme(), settings->getTheme()->col_dark_bg);
+	sampletabbox->setTheme(settings->getTheme(), settings->getTheme()->col_smp_bg);
 	sampletabbox->addTab(sampleedit_wave_icon_raw, 0);
 	sampletabbox->addTab(sampleedit_draw_small_raw, 1);
 	sampletabbox->addTab(sampleedit_control_icon_raw, 2);

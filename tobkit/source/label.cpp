@@ -82,8 +82,8 @@ void Label::draw(void)
 	u16 col_bg, col_text;
 	if(is_albino)
 	{
-		col_bg = theme->col_dark_bg;
-		col_text = theme->col_lighter_bg;
+		col_bg = theme->col_bg;
+		col_text = theme->col_text_light;
 	}
 	else
 	{
@@ -98,7 +98,7 @@ void Label::draw(void)
 	{
 		if(!no_bg) {
 			drawFullBox(1, 1, width - 2, height - 2, theme->col_lighter_bg);
-			col_text = theme->col_text_2; 
+			col_text = theme->col_text_value; 
 		}
 
 		drawBorder(theme->col_outline);
