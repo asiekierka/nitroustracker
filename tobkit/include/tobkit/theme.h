@@ -22,7 +22,7 @@ limitations under the License.
 #include "../../arm9/source/tools.h" 
 #include <nds.h>
 
-#define NUM_COLORS 79
+#define NUM_COLORS 84
 #define THEME_FILENAME_LEN 255
 
 namespace tobkit {
@@ -110,6 +110,12 @@ public:
 	u16 col_pv_mutesolo_col2;
 	u16 col_pv_mutesolo_col1_highlight;
 	u16 col_pv_mutesolo_col2_highlight;
+	u16 col_pv_left_numbers_highlight;
+	u16 col_list_sep_vertical;
+	u16 col_tb_bg;
+	u16 col_tb_fg_off;
+	u16 col_tb_fg_on;
+
 private:
 	bool stringToRGB15(char* str, u16* col);
 	void RGB15ToString(u16 col, char* str);

@@ -101,7 +101,12 @@ Theme::Theme(char* themepath, bool use_fat) :
 	col_pv_mutesolo_col2(col_pv_cb_col2),
 	col_pv_mutesolo_col1_highlight(col_pv_cb_col1_highlight),
 	col_pv_mutesolo_col2_highlight(col_pv_cb_col2_highlight),
-	
+	col_pv_left_numbers_highlight(col_pv_left_numbers),
+	col_list_sep_vertical(col_sepline),
+	col_tb_bg(col_dark_ctrl),
+	col_tb_fg_off(col_text_bt),
+	col_tb_fg_on(col_light_ctrl),
+
 	fat(use_fat)
 {
 	if (fat == true && themepath != NULL)
@@ -195,6 +200,11 @@ Theme::Theme(char* themepath, bool use_fat) :
 				col_pv_mutesolo_col2 			= colscheme[76] | BIT(15);
 				col_pv_mutesolo_col1_highlight 	= colscheme[77] | BIT(15);
 				col_pv_mutesolo_col2_highlight 	= colscheme[78] | BIT(15);
+				col_pv_left_numbers_highlight 	= colscheme[79] | BIT(15);
+				col_list_sep_vertical			= colscheme[80] | BIT(15);
+				col_tb_bg						= colscheme[81] | BIT(15);
+				col_tb_fg_off					= colscheme[82] | BIT(15);
+				col_tb_fg_on					= colscheme[83] | BIT(15);
 
 				debugprintf("loaded theme '%s'\n", themepath);
 			}

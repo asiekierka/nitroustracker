@@ -299,7 +299,7 @@ void ListBox::draw(void)
 
 	// Vertical number separator line
 	if(show_numbers) {
-		drawVLine(COUNTER_WIDTH,1,height-2,theme->col_sepline);
+		drawVLine(COUNTER_WIDTH,1,height-2,theme->col_list_sep_vertical);
 	}
 	
 	// Scrollbar

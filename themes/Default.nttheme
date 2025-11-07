@@ -12,6 +12,8 @@
 12=8394c5 ; List item gradient 2
 13=e67b00 ; List item gradient 1 (highlighted)
 14=e6e600 ; List item gradient 2 (highlighted)
+23=ffff00 ; List item separator line
+80=ffff00 ; List item separator line (vertical)
 15=4a5a8b ; Scrollbar background gradient 1
 16=8394c5 ; Scrollbar background gradient 2
 17=ff9400 ; Scrollbar thumb (inactive)
@@ -20,7 +22,6 @@
 20=ffff00 ; Scrollbar arrow background gradient 2
 21=000000 ; Widget outline
 22=000000 ; Tab/tab box outline
-23=ffff00 ; List item separator line
 24=000000 ; Tab icon
 25=000000 ; Button icon and scrollbar arrows
 26=000000 ; Checkmark
@@ -30,6 +31,9 @@
 30=000000 ; Text (value input)
 31=000000 ; Text (list items)
 32=000000 ; Text (highlighted list item)
+81=ff9400 ; Togglebutton background
+82=000000 ; Togglebutton text (off)
+83=ffff00 ; Togglebutton text (on)
 33=ff0000 ; Recording/signal (red)
 34=940000 ; Recording/signal (off, dark red)
 35=000000 ; Piano mapping label (naturals)
@@ -59,6 +63,7 @@
 58=e67b00 ; Pattern - cursor bar gradient 1 (highlight)
 59=e6e600 ; Pattern - cursor bar gradient 2 (highlight)
 60=e67b00 ; Pattern - row numbers
+79=e67b00 ; Pattern - row numbers (highlight)
 61=4a7bff ; Pattern - notes
 62=0031d5 ; Pattern - notes (dark)
 63=ff5a00 ; Pattern - instruments

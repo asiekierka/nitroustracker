@@ -115,7 +115,7 @@ void ToggleButton::draw(void)
 {
 	if(!isExposed()) return;
 
-	u16 bg = (color_bg & BIT(15)) ? color_bg : theme->col_dark_ctrl;
+	u16 bg = (color_bg & BIT(15)) ? color_bg : theme->col_tb_bg;
 	drawFullBox(1, 1, width - 2, height - 2, bg);
 	drawBorder(theme->col_outline);
 
@@ -124,13 +124,13 @@ void ToggleButton::draw(void)
 		if(on) {
 			col = bg;
 		} else {
-			col = (color_on & BIT(15)) ? color_on : theme->col_light_ctrl;
+			col = (color_on & BIT(15)) ? color_on : theme->col_tb_fg_on;
 		}
 	} else {
 		if(on) {
-			col = (color_on & BIT(15)) ? color_on : theme->col_light_ctrl;
+			col = (color_on & BIT(15)) ? color_on : theme->col_tb_fg_on;
 		} else {
-			col = (color_off & BIT(15)) ? color_off : theme->col_text_bt;
+			col = (color_off & BIT(15)) ? color_off : theme->col_tb_fg_off;
 		}
 	}
 	if(has_bitmap) {

@@ -321,7 +321,7 @@ void PatternView::draw(void)
 	s16 ip;
 	for(ip=state->getCursorRow()-getCursorBarPos();ip<=state->getCursorRow()+getCursorBarPos()+1;++ip) {
 		if((ip>=0)&&(ip<ptnlen)) {
-			drawHexByte(ip, 1, 2+(ip+getCursorBarPos()-state->getCursorRow())*PV_CHAR_HEIGHT, theme->col_pv_left_numbers);
+			drawHexByte(ip, 1, 2+(ip+getCursorBarPos()-state->getCursorRow())*PV_CHAR_HEIGHT, ip % lines_per_beat == 0 ? theme->col_pv_left_numbers_highlight : theme->col_pv_left_numbers);
 		}
 	}
 	
