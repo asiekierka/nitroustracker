@@ -26,7 +26,7 @@ namespace tobkit {
  */
 class GradientIcon: public Widget {
 	public:
-		GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, u16 _colorTop, u16 _colorBottom, const u32* _image, u16 **_vram, bool _visible=true);
+		GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, u16 **_vram, bool _visible=true);
 	
 		~GradientIcon();
 		
@@ -44,7 +44,6 @@ class GradientIcon: public Widget {
 		
 		void (*onPush)(void);
 		const u32 *image;
-		const u16 colorTop, colorBottom;
 };
 
 };

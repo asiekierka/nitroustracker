@@ -23,7 +23,6 @@ limitations under the License.
 #include <nds.h>
 
 #define NUM_COLORS 84
-#define THEME_FILENAME_LEN 255
 
 namespace tobkit {
 
@@ -125,7 +124,8 @@ class Theme : public ColorScheme {
 public:
 	Theme(char* themepath = NULL, bool use_fat = true);
 	void read(void);
-
+	bool loadTheme(const char* themefile);
+	void loadDefault(void);
 private:
 	bool stringToRGB15(char* str, u16* col);
 	void RGB15ToString(u16 col, char* str);

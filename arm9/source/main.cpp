@@ -48,7 +48,7 @@
 #include "tobkit/sampledisplay.h"
 #include "tobkit/patternview.h"
 #include "tobkit/normalizebox.h"
-
+#include "tobkit/themeselectorbox.h"
 using namespace tobkit;
 
 #include <ntxm/fifocommand.h>
@@ -208,7 +208,9 @@ GUI *gui;
 // <Settings Gui>
 	RadioButton::RadioButtonGroup *rbghandedness;
 	RadioButton *rblefthanded, *rbrighthanded;
-	GroupBox *gbhandedness, *gbdsmw;
+	Button *bttheme;
+	ThemeSelectorBox *fbtheme;
+	GroupBox *gbhandedness, *gbdsmw, *gbtheme;
 	CheckBox *cbdsmwsend, *cbdsmwrecv;
 	Button *btndsmwtoggleconnect;
 	RadioButton::RadioButtonGroup *rbgoutput;
@@ -252,6 +254,9 @@ ActionBuffer *action_buffer = NULL;
 u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+char last_themepath[SETTINGS_FILENAME_LEN + 1];
+char last_themename[THEME_NAME_LEN + 1];
+
 bool fastscroll = false;
 
 uint16* map;
@@ -285,7 +290,7 @@ void clearSubScreen(void)
 	u32 colcol = col | col << 16;
 	// Fill the bg with the bg color except for the place where the keyboard is
 	dmaFillWords(colcol, sub_vram, 256 * 153 * 2);
-	for(int y=154;y<192;++y)
+	for(int y=153;y<192;++y)
 	{
 		dmaFillWords(0, sub_vram + (256*y), 224 * 2);
 		dmaFillWords(colcol, sub_vram + (256*y) + 224, (256 - 224) * 2);
@@ -1844,6 +1849,97 @@ void handleTranspose(s32 transpose_amount)
 	}
 }
 
+void destroyThemeDialog(void)
+{
+	gui->unregisterOverlayWidget();
+	if (fbtheme) {
+		delete fbtheme;
+		fbtheme = NULL;
+	}
+		
+	redrawSubScreen();
+}
+void reloadSkin(void)
+{
+	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
+
+	for (int y = 153; y < 192;++y)
+	{
+		// fill the quirky little square next to the piano
+		u16 col = settings->getTheme()->col_bg;
+		u32 colcol = col | col << 16;
+		dmaFillWords(colcol, sub_vram + (256 * y) + 224, (256 - 224) * 2);
+	}
+	gui->draw();
+	redrawSubScreen();
+	redraw_main_requested = true;
+}
+
+void handleThemeChosen(File file)
+{
+	if(!file.is_dir)
+	{
+		const char *str = file.name.c_str();
+		int slen = strlen(str);
+
+		if(slen > 8 && (strcasecmp(&str[slen-8], ".nttheme") == 0))
+		{
+			// if(state->playing)
+			// 	pausePlay();
+
+			settings->getTheme()->loadTheme(file.name_with_path.c_str());
+			// set theme path and name separately so the theme picker
+			// opens in the last used theme folder
+			settings->setThemePath(fbtheme->getDir().c_str());
+			settings->setThemeFilename(file.name.c_str());
+			
+			reloadSkin();
+		}
+	}
+}
+
+
+void handleThemeCancel(void)
+{
+	char last_themenamepath[SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1];
+	snprintf(last_themenamepath, SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1, "%s%s",
+	last_themepath, last_themename);
+	settings->getTheme()->loadTheme(last_themenamepath);
+	
+	// a bit messy doing it this way but it works 
+	settings->setThemePath(last_themepath);
+	settings->setThemeFilename(last_themename);
+	reloadSkin();
+
+	destroyThemeDialog();
+}
+
+void handleThemeReset(void)
+{
+	destroyThemeDialog();
+	
+	settings->getTheme()->loadDefault();
+	settings->setThemeFilename("");
+	settings->writeIfChanged();
+	reloadSkin();
+}
+
+void handleThemeApply(void)
+{
+	settings->writeIfChanged();
+	destroyThemeDialog();
+}
+void handleThemeButton(void)
+{
+	pausePlay();
+	strncpy(last_themename, settings->getThemeFilename(), THEME_NAME_LEN);
+	strncpy(last_themepath, settings->getThemePath(), SETTINGS_FILENAME_LEN);
+	fbtheme = new tobkit::ThemeSelectorBox(&sub_vram, handleThemeChosen, handleThemeApply, handleThemeReset, handleThemeCancel);
+	fbtheme->setDir(settings->getThemePath());
+	gui->registerOverlayWidget(fbtheme, 0, SUB_SCREEN);
+	fbtheme->reveal();
+}
+
 void handleTransposeUp(void)
 {
 	u16 keysheld = keysHeld();
@@ -2798,7 +2894,7 @@ void setupGUI(bool dldi_enabled)
 	kb->registerNoteCallback(handleNoteStroke);
 	kb->registerReleaseCallback(handleNoteRelease);
 
-	pixmaplogo = new GradientIcon(98, 1, 80, 17, settings->getTheme()->col_light_ctrl, settings->getTheme()->col_dark_ctrl,
+	pixmaplogo = new GradientIcon(98, 1, 80, 17,
 		(const u32*) nitrotracker_logo_raw, &sub_vram);
 	pixmaplogo->registerPushCallback(showAboutBox);
 
@@ -3198,6 +3294,9 @@ void setupGUI(bool dldi_enabled)
 		rbghandedness->setActive(1);
 		rbghandedness->registerChangeCallback(handleHandednessChange);
 
+
+
+
 #if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
 		gbdsmw = new GroupBox(5, 55, 80, 54, &sub_vram);
 		gbdsmw->setText("dsmidi");
@@ -3210,7 +3309,15 @@ void setupGUI(bool dldi_enabled)
 
 		cbdsmwrecv = new CheckBox(7, 97, 40, 14, &sub_vram, true, true);
 		cbdsmwrecv->setCaption("receive");
+		gbtheme = new GroupBox(5, 114, 80, 25, &sub_vram);
+		bttheme = new Button(10, 125, 71, 14, &sub_vram);
+#else
+		gbtheme = new GroupBox(5, 54, 80, 25, &sub_vram);
+		bttheme = new Button(10, 64, 71, 14, &sub_vram);
 #endif
+		gbtheme->setText("theme");
+		bttheme->registerPushCallback(handleThemeButton);
+		bttheme->setCaption("select...");
 
 		gboutput = new GroupBox(89, 23, 40, 34, &sub_vram);
 		gboutput->setText("out");
@@ -3263,6 +3370,9 @@ void setupGUI(bool dldi_enabled)
 #endif
 		tabbox->registerWidget(btnconfigsave, 0, 4);
 		tabbox->registerWidget(gbhandedness, 0, 4);
+		tabbox->registerWidget(bttheme, 0, 4);
+
+		tabbox->registerWidget(gbtheme, 0, 4);
 		tabbox->registerWidget(rboutputmono, 0, 4);
 		tabbox->registerWidget(rboutputstereo, 0, 4);
 		tabbox->registerWidget(gboutput, 0, 4);
@@ -3308,7 +3418,6 @@ void setupGUI(bool dldi_enabled)
 	tbrecord = new ToggleButton(141, 136, 16, 16, &sub_vram);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
 	tbrecord->registerToggleCallback(setRecordMode);
-	tbrecord->setColorOff(settings->getTheme()->col_signal_off);
 
 	labeladd = new Label(182, 126, 22, 12, &sub_vram, false, true);
 	labeladd->setCaption("add");
@@ -3900,6 +4009,9 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+
+	last_themename[THEME_NAME_LEN] = '\0';
+	last_themepath[SETTINGS_FILENAME_LEN] = '\0';
 
 	state = new State();
 	

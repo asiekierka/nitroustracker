@@ -25,7 +25,6 @@ using namespace tobkit;
 
 ToggleButton::ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible)
 	:Widget(_x, _y, _width, _height, _vram, _visible),
-	color_off(0), color_on(0), color_bg(0),
 	penIsDown(false), on(false), has_bitmap(false)
 {
 	onToggle = 0;
@@ -115,7 +114,7 @@ void ToggleButton::draw(void)
 {
 	if(!isExposed()) return;
 
-	u16 bg = (color_bg & BIT(15)) ? color_bg : theme->col_tb_bg;
+	u16 bg = theme->col_tb_bg;
 	drawFullBox(1, 1, width - 2, height - 2, bg);
 	drawBorder(theme->col_outline);
 
@@ -124,13 +123,13 @@ void ToggleButton::draw(void)
 		if(on) {
 			col = bg;
 		} else {
-			col = (color_on & BIT(15)) ? color_on : theme->col_tb_fg_on;
+			col = theme->col_tb_fg_on;
 		}
 	} else {
 		if(on) {
-			col = (color_on & BIT(15)) ? color_on : theme->col_tb_fg_on;
+			col = theme->col_tb_fg_on;
 		} else {
-			col = (color_off & BIT(15)) ? color_off : theme->col_tb_fg_off;
+			col = has_bitmap ? theme->col_signal_off : theme->col_tb_fg_off;
 		}
 	}
 	if(has_bitmap) {

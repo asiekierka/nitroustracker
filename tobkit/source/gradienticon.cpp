@@ -22,9 +22,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-GradientIcon::GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, u16 _colorTop, u16 _colorBottom, const u32* _image, u16 **_vram, bool _visible)
+GradientIcon::GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, u16 **_vram, bool _visible)
 	:Widget(_x, _y, _width, _height, _vram, _visible),
-	onPush(0), image(_image), colorTop(_colorTop), colorBottom(_colorBottom)
+	onPush(0), image(_image)
 {
 	
 }
@@ -60,7 +60,7 @@ void GradientIcon::draw(void)
 	u32 colorStep = div32((1<<12), height);
 
 	for(u32 j=0; j<height; j++) {
-		colorFg = interpolateColor(colorBottom, colorTop, colorStep * j);
+		colorFg = interpolateColor(theme->col_light_ctrl, theme->col_dark_ctrl, colorStep * j);
 		for(u32 i=0; i<width; i++, pos++) {
 			if (!(pos & 0x0F)) {
 				pixel = image[pos >> 4];

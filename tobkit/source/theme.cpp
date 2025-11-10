@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    https://www.apache.org/licenses/LICENSE-2.0
+	https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -92,7 +92,7 @@ ColorScheme::ColorScheme() {
 	col_pv_effect_dark = RGB15(12, 6, 18) | BIT(15);
 	col_pv_effect_param = RGB15(30, 26, 8) | BIT(15);
 	col_pv_effect_param_dark = RGB15(9, 8, 5) | BIT(15);
-	col_pv_cb_sel_highlight = RGB15(31, 24, 0) | BIT(15); 
+	col_pv_cb_sel_highlight = RGB15(31, 24, 0) | BIT(15);
 	col_pv_pb = col_outline;
 	col_pv_pb_cell = col_outline;
 	col_pv_mutesolo_text = col_text;
@@ -111,28 +111,39 @@ Theme::Theme(char* themepath, bool use_fat)
 {
 	if (use_fat && themepath != NULL)
 	{
-		FILE* themedef = fopen(themepath, "r");
-		// debugprintf("loading theme '%s'\n", themepath);
-
-		if (themedef != NULL) {
-			tobkit::ColorScheme scheme;
-			bool result = parseTheme(themedef, scheme.data);
-
-			fclose(themedef);
-
-			if (result) {
-				memcpy(data, scheme.data, sizeof(data));
-				col_piano_label &= ~BIT(15);
-				col_piano_label_inv &= ~BIT(15);
-
-				debugprintf("loaded theme '%s'\n", themepath);
-			}
-
-			else
-				debugprintf("failed to parse theme at '%s', using builtin\n", themepath);
-		} else
-			debugprintf("no theme found at '%s', using builtin\n", themepath);
+		loadTheme(themepath);
 	}
+}
+
+bool Theme::loadTheme(const char* themefile) {
+	FILE* themedef = fopen(themefile, "r");
+	if (themedef != NULL) {
+		tobkit::ColorScheme scheme;
+		bool result = parseTheme(themedef, scheme.data);
+		fclose(themedef);
+
+		if (result) {
+			memcpy(data, scheme.data, sizeof(data));
+			col_piano_label &= ~BIT(15);
+			col_piano_label_inv &= ~BIT(15);
+
+			debugprintf("loaded theme '%s'\n", themefile);
+			return true;
+		}
+		else
+			debugprintf("failed to parse theme at '%s', using builtin\n", themefile);
+	}
+	else
+		debugprintf("no theme found at '%s', using builtin\n", themefile);
+	return false;
+}
+
+void Theme::loadDefault(void) {
+	tobkit::ColorScheme scheme;
+
+	memcpy(data, scheme.data, sizeof(data));
+	col_piano_label &= ~BIT(15);
+	col_piano_label_inv &= ~BIT(15);
 }
 
 /* ===================== PRIVATE ===================== */
@@ -149,7 +160,7 @@ bool Theme::stringToRGB15(char* str, u16* col)
 	int res = sscanf(str, "%02x%02x%02x", &r, &g, &b);
 	if (res < 3)
 		return false;
-	*col = (u16) (RGB15(r * 31 / 255, g * 31 / 255, b * 31 / 255) | BIT(15));
+	*col = (u16)(RGB15(r * 31 / 255, g * 31 / 255, b * 31 / 255) | BIT(15));
 	return true;
 }
 
@@ -160,7 +171,7 @@ void Theme::RGB15ToString(u16 col, char* str)
 }
 
 
-bool Theme::parseTheme(FILE *theme_, u16 *theme_cols) {
+bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (theme_ == NULL || theme_cols == NULL)
 		return false;
 
@@ -169,22 +180,23 @@ bool Theme::parseTheme(FILE *theme_, u16 *theme_cols) {
 
 	for (int l = 0; l < NUM_COLORS; ++l) {
 		parsed = fscanf(theme_, "%d=%02x%02x%02x%*[^\n]\n", &k, &r, &g, &b);
-		
+
 		if (parsed != 4 || k < 0) {
 			debugprintf("theme parse error on line %d\n", l + 1);
 			return false;
-		} else if ( k > NUM_COLORS - 1 ) {
+		}
+		else if (k > NUM_COLORS - 1) {
 			debugprintf("theme parse error on line %d (key out of bounds, max %d)  \n", l + 1, NUM_COLORS - 1);
 			return false;
 		}
 		theme_cols[k] = RGB15(r * 31 / 255, g * 31 / 255, b * 31 / 255) | BIT(15);
 		theme_i++;
-	} 
+	}
 
 	if (theme_i < NUM_COLORS - 1) {
 		debugprintf("theme only specifies %u colors, need %u\n", theme_i, NUM_COLORS);
 		return false;
 	}
-		
+
 	return true;
 }
