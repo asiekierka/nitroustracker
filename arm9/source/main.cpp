@@ -255,7 +255,6 @@ u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 char last_themepath[SETTINGS_FILENAME_LEN + 1];
-char last_themename[THEME_NAME_LEN + 1];
 
 bool fastscroll = false;
 
@@ -1881,14 +1880,8 @@ void handleThemeChosen(File file)
 
 		if(slen > 8 && (strcasecmp(&str[slen-8], ".nttheme") == 0))
 		{
-			// if(state->playing)
-			// 	pausePlay();
-
 			settings->getTheme()->loadTheme(file.name_with_path.c_str());
-			// set theme path and name separately so the theme picker
-			// opens in the last used theme folder
-			settings->setThemePath(fbtheme->getDir().c_str());
-			settings->setThemeFilename(file.name.c_str());
+			settings->setThemePath(file.name_with_path.c_str());
 			
 			reloadSkin();
 		}
@@ -1898,14 +1891,9 @@ void handleThemeChosen(File file)
 
 void handleThemeCancel(void)
 {
-	char last_themenamepath[SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1];
-	snprintf(last_themenamepath, SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1, "%s%s",
-	last_themepath, last_themename);
-	settings->getTheme()->loadTheme(last_themenamepath);
+	settings->getTheme()->loadTheme(last_themepath);
 	
-	// a bit messy doing it this way but it works 
 	settings->setThemePath(last_themepath);
-	settings->setThemeFilename(last_themename);
 	reloadSkin();
 
 	destroyThemeDialog();
@@ -1916,7 +1904,6 @@ void handleThemeReset(void)
 	destroyThemeDialog();
 	
 	settings->getTheme()->loadDefault();
-	settings->setThemeFilename(" ");
 	settings->setThemePath("/");
 	settings->writeIfChanged();
 	reloadSkin();
@@ -1930,10 +1917,10 @@ void handleThemeApply(void)
 void handleThemeButton(void)
 {
 	pausePlay();
-	strncpy(last_themename, settings->getThemeFilename(), THEME_NAME_LEN);
 	strncpy(last_themepath, settings->getThemePath(), SETTINGS_FILENAME_LEN);
 	fbtheme = new tobkit::ThemeSelectorBox(&sub_vram, handleThemeChosen, handleThemeApply, handleThemeReset, handleThemeCancel);
-	fbtheme->setDir(settings->getThemePath());
+	std::string themepath_(settings->getThemePath());
+	fbtheme->setDir(themepath_.substr(0, themepath_.find_last_of("/")));
 	gui->registerOverlayWidget(fbtheme, 0, SUB_SCREEN);
 	fbtheme->reveal();
 }
@@ -4008,7 +3995,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	last_themename[THEME_NAME_LEN] = '\0';
 	last_themepath[SETTINGS_FILENAME_LEN] = '\0';
 
 	state = new State();

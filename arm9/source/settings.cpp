@@ -40,9 +40,7 @@ fat(use_fat), changed(false)
 {
 	songpath[SETTINGS_FILENAME_LEN] = '\0';
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
-	themename[THEME_NAME_LEN] = '\0';
 	themepath[SETTINGS_FILENAME_LEN] = '\0';
-	themenamepath[SETTINGS_FILENAME_LEN + THEME_NAME_LEN] = '\0';
 
 	// might never have snprintf called
 	configpath[0] = '\0';
@@ -50,9 +48,7 @@ fat(use_fat), changed(false)
 
 	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
 	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
-	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Themes/", launch_path != NULL ? launch_path : "");
-	snprintf(themename, SETTINGS_FILENAME_LEN, "Default.nttheme");
-	snprintf(themenamepath, SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1, "%s%s", themepath, themename);
+	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Themes/Default.nttheme", launch_path != NULL ? launch_path : "/data");
 	
 
 	if(fat == true)
@@ -105,20 +101,12 @@ fat(use_fat), changed(false)
 			lines_per_beat = strtoul(prevstring, NULL, 10);
 			if (!lines_per_beat || lines_per_beat > 64)
 				lines_per_beat = 8;
-
-			// the parser is greedy and will use the value for "Themepath" as "Theme"
-			// if it comes first, calling it "Themename" allows it to not be
-			// order-sensitive
-			getConfigValue(confstr, "Themename", themename, SETTINGS_FILENAME_LEN, NULL);
 			
 			free(confstr);
 		}
 	}
 
-	snprintf(themenamepath, SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1, "%s%s",
-				themepath,
-				themename); // will default to 'Default.nttheme' if no fat
-	theme = new tobkit::Theme(themenamepath, fat);
+	theme = new tobkit::Theme(themepath, fat);
 }
 
 Handedness Settings::getHandedness(void)
@@ -193,21 +181,8 @@ void Settings::setThemePath(const char *themepath_) {
 	changed = true;
 }
 
-void Settings::setThemeFilename(const char *themename_) {
-	strncpy(themename, themename_, THEME_NAME_LEN);
-	themename[THEME_NAME_LEN] = '\0';
-	changed = true;
-}
-
-char *Settings::getThemeFilename(void)
-{
-	return themename;
-}
 char *Settings::getThemePath(void)
 {
-    if(!dirExists(themepath)) {
-        strncpy(themepath, "/", SETTINGS_FILENAME_LEN);
-    }
 	return themepath;
 }
 
@@ -271,8 +246,8 @@ bool Settings::write(void)
 	boolToString(sample_preview, prevstring);
 	boolToString(stereo_output, stereostring);
 	boolToString(freq_47khz, freqstring);
-	fprintf(conf, "Samplepath = %s\nSongpath = %s\nThemepath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\nLines Per Beat = %d\nThemename = %s\n",
-			samplepath, songpath, themepath, hstring, prevstring, stereostring, freqstring, lines_per_beat, themename);
+	fprintf(conf, "Samplepath = %s\nSongpath = %s\nThemepath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\nLines Per Beat = %d\n",
+			samplepath, songpath, themepath, hstring, prevstring, stereostring, freqstring, lines_per_beat);
 	fclose(conf);
 	return true;
 }

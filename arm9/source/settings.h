@@ -32,7 +32,6 @@
 #include <stdlib.h>
 
 #define SETTINGS_FILENAME_LEN 255
-#define THEME_NAME_LEN 63
 
 enum Handedness {LEFT_HANDED, RIGHT_HANDED};
 
@@ -68,8 +67,6 @@ class Settings {
 		char *getThemePath(void);
 		void setThemePath(const char* themepath_);
 
-		char *getThemeFilename(void);
-		void setThemeFilename(const char* themefname_);
 		bool writeIfChanged(void);
 
 	private:
@@ -92,10 +89,8 @@ class Settings {
 		char configpath[SETTINGS_FILENAME_LEN + 1];
 		char songpath[SETTINGS_FILENAME_LEN + 1];
 		char samplepath[SETTINGS_FILENAME_LEN + 1];
-		char themename[THEME_NAME_LEN + 1];
 		char themepath[SETTINGS_FILENAME_LEN + 1];
-		// specify theme name and path separately 
-		char themenamepath[SETTINGS_FILENAME_LEN + THEME_NAME_LEN + 1];
+
         bool fat, changed;
 };
 
