@@ -1852,11 +1852,8 @@ void handleTranspose(s32 transpose_amount)
 void destroyThemeDialog(void)
 {
 	gui->unregisterOverlayWidget();
-	if (fbtheme) {
-		delete fbtheme;
-		fbtheme = NULL;
-	}
-		
+	delete fbtheme;
+	fbtheme = 0;
 	redrawSubScreen();
 }
 void reloadSkin(void)
@@ -1919,7 +1916,8 @@ void handleThemeReset(void)
 	destroyThemeDialog();
 	
 	settings->getTheme()->loadDefault();
-	settings->setThemeFilename("");
+	settings->setThemeFilename(" ");
+	settings->setThemePath("/");
 	settings->writeIfChanged();
 	reloadSkin();
 }

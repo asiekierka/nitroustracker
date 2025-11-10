@@ -111,8 +111,6 @@ fat(use_fat), changed(false)
 			// order-sensitive
 			getConfigValue(confstr, "Themename", themename, SETTINGS_FILENAME_LEN, NULL);
 			
-			
-
 			free(confstr);
 		}
 	}
