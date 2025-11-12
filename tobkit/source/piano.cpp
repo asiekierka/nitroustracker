@@ -49,10 +49,10 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 	u16 piano_cols[8] = { theme_->col_piano_full_col1, theme_->col_piano_full_col2, theme_->col_piano_half_col1, theme_->col_piano_half_col2, 
 						theme_->col_piano_full_highlight_col1, theme_->col_piano_full_highlight_col2, theme_->col_piano_half_highlight_col1, theme_->col_piano_half_highlight_col2};
 	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
-	DC_FlushAll();
-	dmaCopy(piano_Palette, BG_PALETTE_SUB, 32);
-	dmaCopy(piano_fullnotehighlight_Palette, BG_PALETTE_SUB+16, 32);
-	dmaCopy(piano_halfnotehighlight_Palette, BG_PALETTE_SUB+32, 32);
+
+	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+	memcpy(BG_PALETTE_SUB+16, piano_fullnotehighlight_Palette, 32);
+	memcpy(BG_PALETTE_SUB+32, piano_halfnotehighlight_Palette, 32);
 	pleaseDraw();
 }
 
