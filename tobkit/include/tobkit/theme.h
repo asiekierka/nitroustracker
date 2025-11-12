@@ -22,7 +22,7 @@ limitations under the License.
 #include "../../arm9/source/tools.h" 
 #include <nds.h>
 
-#define NUM_COLORS 84
+#define NUM_COLORS 92
 
 namespace tobkit {
 
@@ -114,6 +114,14 @@ struct ColorScheme {
 			u16 col_tb_bg;
 			u16 col_tb_fg_off;
 			u16 col_tb_fg_on;
+			u16 col_piano_full_col1;
+			u16 col_piano_full_col2;
+			u16 col_piano_half_col1;
+			u16 col_piano_half_col2;
+			u16 col_piano_full_highlight_col1;
+			u16 col_piano_full_highlight_col2;
+			u16 col_piano_half_highlight_col1;
+			u16 col_piano_half_highlight_col2;
 		};
 	};
 

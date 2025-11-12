@@ -105,6 +105,14 @@ ColorScheme::ColorScheme() {
 	col_tb_bg = col_dark_ctrl;
 	col_tb_fg_off = col_text_bt;
 	col_tb_fg_on = col_light_ctrl;
+	col_piano_full_col1 = RGB15(31, 31, 31) | BIT(15);
+	col_piano_full_col2 = RGB15(25, 25, 25) | BIT(15);
+	col_piano_half_col1 = RGB15(8, 8, 8) | BIT(15);
+	col_piano_half_col2 = RGB15(0, 0, 0) | BIT(15);
+	col_piano_full_highlight_col1 = RGB15(24, 24, 30) | BIT(15);
+	col_piano_full_highlight_col2 = RGB15(20, 20, 26) | BIT(15);
+	col_piano_half_highlight_col1 = RGB15(20, 8, 8) | BIT(15);
+	col_piano_half_highlight_col2 = RGB15(13, 0, 0) | BIT(15);
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -180,6 +188,8 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 
 	for (int l = 0; l < NUM_COLORS; ++l) {
 		parsed = fscanf(theme_, "%d=%02x%02x%02x%*[^\n]\n", &k, &r, &g, &b);
+		if (parsed == EOF)
+			break;
 
 		if (parsed != 4 || k < 0) {
 			debugprintf("theme parse error on line %d\n", l + 1);
@@ -193,10 +203,13 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 		theme_i++;
 	}
 
-	if (theme_i < NUM_COLORS - 1) {
-		debugprintf("theme only specifies %u colors, need %u\n", theme_i, NUM_COLORS);
+	if (theme_i == 0) {
+		debugprintf("ignoring empty theme\n");
 		return false;
 	}
+		
+	if (theme_i < NUM_COLORS - 1)
+		debugprintf("theme only specifies %u colors, using defaults for remaining %u\n", theme_i, NUM_COLORS - theme_i);
 
 	return true;
 }

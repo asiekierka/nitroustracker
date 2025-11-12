@@ -45,17 +45,20 @@ class Piano: public Widget {
 		void showKeyLabels(void);
 		void hideKeyLabels(void);
 		void setKeyLabel(u8 key, char label);
-		
+		void setTheme(Theme *theme_, u16 bgcolor_);
+
 	private:
 		void (*onNote)(u8);
 		void (*onRelease)(u8, bool);
 		uint16 *char_base, *map_base;
 		
+		unsigned short piano_Palette[16], piano_fullnotehighlight_Palette[16], piano_halfnotehighlight_Palette[16];
+		
 		void draw(void);
 		void setKeyPal(u8 note);
 		u8 isHalfTone(u8 note);
 		void resetPals(void);
-		
+		void genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 *pal_half_highlight);
 		void drawKeyLabel(u8 key, bool visible=true);
 		void eraseKeyLabel(u8 key);
 		
