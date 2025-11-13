@@ -20,7 +20,6 @@ limitations under the License.
 #include "tobkit/piano.h"
 
 #include "piano.h"
-#include "piano_pal.h"
 #include "piano_hit.h"
 
 using namespace tobkit;
@@ -30,6 +29,8 @@ using namespace tobkit;
 static u8 halftones[] = {1, 3, 6, 8, 10, 13, 15, 18, 20, 22};
 static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
 
+
+
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_map_base, u16 **_vram)
 :Widget(_x, _y, _width, _height, _vram),
@@ -37,12 +38,22 @@ char_base(_char_base), map_base(_map_base), key_labels_visible(false)
 {
 	onNote = 0;
 	onRelease = 0;
-	dmaCopy(piano_Palette, BG_PALETTE_SUB, 32);
-	dmaCopy(piano_fullnotehighlight_Palette, BG_PALETTE_SUB+16, 32);
-	dmaCopy(piano_halfnotehighlight_Palette, BG_PALETTE_SUB+32, 32);
+
+	// Piano::draw is never invoked before Piano::setTheme
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
 	
 	memset(key_labels, ' ', 24);
+}
+
+void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
+	u16 piano_cols[8] = { theme_->col_piano_full_col1, theme_->col_piano_full_col2, theme_->col_piano_half_col1, theme_->col_piano_half_col2, 
+						theme_->col_piano_full_highlight_col1, theme_->col_piano_full_highlight_col2, theme_->col_piano_half_highlight_col1, theme_->col_piano_half_highlight_col2};
+	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
+	Widget::setTheme(theme_, bgcolor_);
+	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+	memcpy(BG_PALETTE_SUB+16, piano_fullnotehighlight_Palette, 32);
+	memcpy(BG_PALETTE_SUB+32, piano_halfnotehighlight_Palette, 32);
+	pleaseDraw();
 }
 
 
@@ -146,6 +157,21 @@ void Piano::setKeyLabel(u8 key, char label)
 }
 
 /* ===================== PRIVATE ===================== */
+
+void Piano::genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 *pal_half_highlight) {
+	for (int i = 0; i < 9; ++i) {
+		pal[i] = interpolateColor(piano_cols_base[2], piano_cols_base[3], (4096 / 9) * i);
+		pal_half_highlight[i] = interpolateColor(piano_cols_base[6], piano_cols_base[7], (4096 / 9) * i);
+	}
+	memcpy(&pal_full_highlight[0], &pal[0], 9 * sizeof(u16));
+
+
+	for (int i = 0; i < 7; ++i) {
+		pal[i + 9] = interpolateColor(piano_cols_base[0], piano_cols_base[1], (4096 / 7) * i);
+		pal_full_highlight[i + 9] = interpolateColor(piano_cols_base[4], piano_cols_base[5], (4096 / 7) * i);
+	}
+	memcpy(&pal_half_highlight[9], &pal[9], 7 * sizeof(u16));
+}
 
 void Piano::draw(void)
 {

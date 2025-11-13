@@ -82,3 +82,11 @@
 76=8394c5 ; Pattern - mute/solo gradient 2
 77=e67b00 ; Pattern - mute/solo gradient 1 (highlight)
 78=e6e600 ; Pattern - mute/solo gradient 2 (highlight)
+84=ffffff ; Piano - full key color 1
+85=cbcbcb ; Piano - full key color 2
+86=000000 ; Piano - half key color 1
+87=383838 ; Piano - half key color 2
+88=b2b2e3 ; Piano - full key color 1 (highlight)
+89=a2a2d3 ; Piano - full key color 2 (highlight)
+90=690000 ; Piano - half key color 1 (highlight)
+91=9a3838 ; Piano - half key color 2 (highlight)
