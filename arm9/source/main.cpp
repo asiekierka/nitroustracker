@@ -447,7 +447,7 @@ void onKeyrelease(void)
 {
 	// extracted into a function for pr153 compat
 	sampledisplay->eraseCursor();
-	sampledisplay->stopCursor(false);
+	sampledisplay->stopCursor(true);
 }
 
 void handleNoteStroke(u8 note)
