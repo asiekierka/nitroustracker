@@ -35,6 +35,7 @@ void RadioButton::pleaseDraw(void) {
 
 // Event calls
 void RadioButton::penDown(u8 px, u8 py) {
+	if (!enabled) return;
 	rbg->pushed(this);
 }
 
@@ -60,9 +61,12 @@ bool RadioButton::getActive(void) {
 
 void RadioButton::draw(void)
 {
+	if (!isExposed()) return;
 	// Draw the dot
 	//drawFullBox(2, 2, 7, 7, col);
-	drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl ,2, 2, 7, 7);
+	u16 col_light = enabled ? theme->col_light_ctrl : theme->col_light_ctrl_disabled;
+	u16 col_dark = enabled ? theme->col_dark_ctrl : theme->col_dark_ctrl_disabled;
+	drawGradient(col_light, col_dark ,2, 2, 7, 7);
 	
 	drawHLine(3, 1, 5, theme->col_outline);
 	drawHLine(3, 9, 5, theme->col_outline);

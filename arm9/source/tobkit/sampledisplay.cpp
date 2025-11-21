@@ -43,14 +43,20 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, S
 	pen_on_zoom_in(false), pen_on_zoom_out(false),
 	pen_on_scroll_left(false), pen_on_scroll_right(false), pen_on_scrollthingy(false), pen_on_scrollbar(false),
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
-	snap_to_zero_crossings(true), draw_mode(false)
+	snap_to_zero_crossings(true), draw_mode(false), currentSampleFreq(0), playing(false), last_cursor_draw_x(0)
 {
-
+	for (int i = 0; i < DRAW_HEIGHT_S + 1; ++i) {
+		previous_cursor_pixels[i] = 0;
+	}
 }
 
 SampleDisplay::~SampleDisplay(void)
 {
-
+}
+void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
+{
+	last_cursor_draw_x = 0;
+	Widget::setTheme(theme_, bgcolor_);
 }
 
 void SampleDisplay::penDown(u8 px, u8 py)
@@ -62,6 +68,7 @@ void SampleDisplay::penDown(u8 px, u8 py)
 		draw_last_x = px - x;
 		draw_last_y = py - y;
 	} else {
+		last_cursor_draw_x = 0;
 		// Stylus on a loop point?
 		u32 loop_start_pos = sampleToPixel(smp->getLoopStart());//smp->getLoopStart() * (width-2) / smp->getNSamples();
 		u32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());//(smp->getLoopStart() + smp->getLoopLength()) * (width-2) / smp->getNSamples();
@@ -229,6 +236,7 @@ void SampleDisplay::penMove(u8 px, u8 py)
 void SampleDisplay::setSample(Sample *_smp)
 {
 	smp = _smp;
+	last_cursor_draw_x = 0; // dont draw under-cursor-buffer over other sample
 	selection_exists = false;
 	selstart = selend = 0;
 	if(_smp == 0) {
@@ -316,7 +324,83 @@ void SampleDisplay::setSnapToZeroCrossing(bool snap)
 	snap_to_zero_crossings = snap;
 }
 
+void SampleDisplay::stopCursor(bool full_redraw = false)  {
+	playing = false;
+	if (full_redraw && last_cursor_draw_x != 0) { // don't redraw if we never drew the cursor
+		draw();
+		last_cursor_draw_x = 0; // use 0 when we want to skip restoring under-cursor pixels
+	}
+}
+
+// commented out sections facilitating for 09xx command support
+// if/when it is added
+void SampleDisplay::startCursor(u8 note/*, u32 offs_raw*/)  {
+	// setOffsetRaw(offs_raw);
+	if (smp == NULL) 
+	{
+		printf("NULL SAMPLE\n");
+		return;
+	}
+	stopCursor(true); // stop previous cursor if necessary
+	playing = true;
+	// if (_samp != smp) { 		// <- necessary if the behaviour is retained where
+	// 	eraseCursor();     		//    pressing different multisample keys does not update the wave disp
+	// 	return;					//    according to that sample
+	// }
+}
+
+
 /* ===================== PRIVATE ===================== */
+
+// backup the pixels that are about to be overwritten
+// by the cursor and only restore those when it moves,
+// rather than drawing the entire sample box every time
+void SampleDisplay::eraseCursor(void)
+{
+	if (last_cursor_draw_x != 0)
+		for (int i = 0; i < DRAW_HEIGHT + 1; ++i) {
+			*(*vram + SCREEN_WIDTH * (y + i + 1) + x + last_cursor_draw_x) = previous_cursor_pixels[i];
+		}
+}
+
+void SampleDisplay::updateCursorPos(u32 newCursorPos)
+{
+	position_samps = newCursorPos;
+}
+
+void SampleDisplay::drawCursor(void)
+{
+	if (smp==0) return;
+	
+	if (position_samps != 0) {
+		u32 drawpix = sampleToPixel((position_samps));
+		// draw the previous pixels on the previous cursor pos
+		eraseCursor();
+		if (drawpix < x + width) {
+			s32 draw_at_x = sampleToPixel(position_samps);
+
+			u16 col_cursor = theme->col_env_sustain;
+
+			if (!playing)
+				return;
+				
+			// backup pixels that were underneath the cursor
+			if (last_cursor_draw_x != (u32)draw_at_x) {
+				last_cursor_draw_x = (u32)draw_at_x;
+				for(int i=0;i<DRAW_HEIGHT + 1;++i)
+					previous_cursor_pixels[i] = *(*vram+SCREEN_WIDTH*(y+i+1)+x+draw_at_x);
+			}
+
+			// ...and finally, draw the cursor itself
+			if (!(draw_at_x >= width + 1) && draw_at_x != 0) {
+				for(int i=0;i<DRAW_HEIGHT+1;++i) {
+					*(*vram+SCREEN_WIDTH*(y+i+1)+x+draw_at_x) = col_cursor;
+				}
+			}
+		}
+	}
+}
+
 
 long SampleDisplay::find_zero_crossing_near(long pos)
 {

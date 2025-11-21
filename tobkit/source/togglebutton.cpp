@@ -50,6 +50,7 @@ void ToggleButton::pleaseDraw(void) {
 // Event calls
 void ToggleButton::penDown(u8 x, u8 y)
 {
+	if (!enabled) return;
 	penIsDown = true;
 	on = !on;
 	draw();
@@ -113,12 +114,12 @@ bool ToggleButton::getState(void)
 void ToggleButton::draw(void)
 {
 	if(!isExposed()) return;
-
-	u16 bg = theme->col_tb_bg;
+	u16 bg = enabled ? theme->col_tb_bg : theme->col_dark_ctrl_disabled;
 	drawFullBox(1, 1, width - 2, height - 2, bg);
 	drawBorder(theme->col_outline);
-
+	
 	u16 col;
+
 	if(penIsDown) {
 		if(on) {
 			col = bg;

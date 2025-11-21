@@ -45,6 +45,7 @@ class Piano: public Widget {
 		void showKeyLabels(void);
 		void hideKeyLabels(void);
 		void setKeyLabel(u8 key, char label);
+		void setInMappingMode(bool instmap);
 		void setTheme(Theme *theme_, u16 bgcolor_);
 
 	private:
@@ -64,6 +65,7 @@ class Piano: public Widget {
 		
 		char key_labels[24];
 		bool key_labels_visible;
+		bool mapping_instrument;
 		u16 curr_note;
 };
 

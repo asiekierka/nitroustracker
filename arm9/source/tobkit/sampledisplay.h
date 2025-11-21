@@ -41,6 +41,7 @@ namespace tobkit {
 #define SCROLLPIXELS				25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH		15
 #define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-2) // height of the visible window
+#define DRAW_HEIGHT_S				(70-SCROLLBUTTON_HEIGHT-2) // available at compile time
 
 class SampleDisplay: public Widget {
 	public:
@@ -57,9 +58,15 @@ class SampleDisplay: public Widget {
 		void pleaseDraw(void);
 
 		void setSample(Sample *_smp);
-
+		bool getIsExposed(void) { return isExposed(); }
 		void select_all(void);
 		void clear_selection(void);
+
+		void updateCursorPos(u32 newCursorPos);
+		void drawCursor(void);
+		void startCursor(u8 note=NULL/*, u32 offset_raw_ = 0*/);
+		void stopCursor(bool full_redraw);
+		void eraseCursor(void);
 
 		// Return start and end sample of selection
 		bool getSelection(u32 *startsample, u32 *endsample);
@@ -80,10 +87,12 @@ class SampleDisplay: public Widget {
 		long find_zero_crossing_near(long pos);
 
 		void draw(void);
+		void setTheme(Theme *theme_, u16 bgcolor_);
 		void scroll(u32 newscrollpos);
 		void calcScrollThingy(void);
 		void zoomIn(void);
 		void zoomOut(void);
+
 		u32 pixelToSample(s32 pixel);
 		s32 sampleToPixel(u32 sample);
 
@@ -118,6 +127,13 @@ class SampleDisplay: public Widget {
 		bool draw_mode;
 
 		u8 draw_last_x, draw_last_y;
+
+		
+		u32 currentSampleFreq;
+		u32 position_samps;
+		bool playing;
+		u32 last_cursor_draw_x;
+		u16 previous_cursor_pixels[DRAW_HEIGHT_S + 1];
 };
 
 };

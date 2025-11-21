@@ -40,6 +40,8 @@ void NumberSlider::pleaseDraw(void) {
 // Event calls
 void NumberSlider::penDown(u8 px, u8 py)
 {
+	if (!enabled) return;
+
 	if((px>x)&&(px<x+32)&&(py>y)&&(py<y+17)) {
 		btnstate = true;
 		lasty = py;
@@ -68,6 +70,8 @@ void NumberSlider::penDown(u8 px, u8 py)
 
 void NumberSlider::penUp(u8 px, u8 py)
 {
+	if (!enabled) return;
+
 	btnstate = false;
 
 	if(onPostChange!=0) {
@@ -79,6 +83,8 @@ void NumberSlider::penUp(u8 px, u8 py)
 
 void NumberSlider::penMove(u8 px, u8 py)
 {
+	if (!enabled) return;
+
 	s16 dy = lasty-py;
 	if(abs(dy)>1) {
 		int inc = dy*dy/8;
@@ -146,15 +152,17 @@ void NumberSlider::registerChangeCallback(void (*onChange_)(s32)) {
 
 void NumberSlider::draw(void)
 {
-	
 	if(!isExposed())
 		return;
-	
+
+	u16 col_light = enabled ? theme->col_light_ctrl : theme->col_light_ctrl_disabled;
+	u16 col_dark = enabled ? theme->col_dark_ctrl : theme->col_dark_ctrl_disabled;
+	drawGradient(col_light, col_dark ,2, 2, 7, 7);
 	// Slider thingy
 	if(btnstate==true) {
-		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1, 8, 15);
+		drawGradient(col_dark, col_light, 1, 1, 8, 15);
 	} else {
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 1, 1, 8, 15);
+		drawGradient(col_light, col_dark, 1, 1, 8, 15);
 	}
 	
 	// This draws the up-arrow

@@ -54,6 +54,7 @@ void BitButton::penDown(u8 x, u8 y)
 
 void BitButton::penUp(u8 x, u8 y)
 {
+	if (!enabled) return;
 	penIsDown = false;
 	draw(0);
 	if(onPush) {

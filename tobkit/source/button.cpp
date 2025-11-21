@@ -48,12 +48,14 @@ void Button::pleaseDraw(void) {
 // Event calls
 void Button::penDown(u8 x, u8 y)
 {
+	if (!enabled) return;
 	penIsDown = true;
 	draw(1);
 }
 
 void Button::penUp(u8 x, u8 y)
 {
+	if (!enabled) return;
 	penIsDown = false;
 	draw(0);
 	if(onPush) {

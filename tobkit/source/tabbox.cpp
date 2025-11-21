@@ -181,8 +181,9 @@ void TabBox::draw(void)
 
 			drawFullBox(3+size_full*guiidx, 1+offset, size_border, size_border-offset, selected ? theme->col_selected_tab : theme->col_unselected_tab);
 			drawVLine(2+size_full*guiidx, 1+offset, size_border-offset, black);
-			drawHLine(3+size_full*guiidx, 0+offset, size_border, black);
+			drawHLine(3+size_full*guiidx, 0+offset, size_border - 1, black);
 			drawVLine(2+size_full*(guiidx+1), 1+offset, size_border-offset, black);
+			if (!selected) drawPixel(3+size_full*guiidx+size_border-1, 0+offset, theme->col_bg);
 			drawMonochromeIcon(4+size_full*guiidx, 2+offset, icon_size, icon_size - offset, icons.at(guiidx), theme->col_icon);
 		}
 	} else {
@@ -200,7 +201,8 @@ void TabBox::draw(void)
 			drawFullBox(1+offset, 2+size_full*guiidx, size_border-offset, size_border, selected ? theme->col_selected_tab : theme->col_unselected_tab);
 			drawHLine(1+offset, 2+size_full*guiidx, size_border-offset, black);
 			drawVLine(0+offset, 3+size_full*guiidx, size_border - 1, black);
-			drawHLine(1+offset, 2+size_full*(guiidx+1), size_border-offset, black);
+			drawHLine(1+offset, 2+size_full*(guiidx+1), size_border-offset-1, black);
+			if (!selected) drawPixel(offset, 2+size_full*guiidx + size_border, theme->col_light_bg);
 			drawMonochromeIconOffset(2+offset, 4+size_full*guiidx, icon_size - offset, icon_size, 0, 0, icon_size, icon_size, icons.at(guiidx), theme->col_icon);
 		}
 	}

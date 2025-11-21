@@ -34,7 +34,7 @@ static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_map_base, u16 **_vram)
 :Widget(_x, _y, _width, _height, _vram),
-char_base(_char_base), map_base(_map_base), key_labels_visible(false)
+char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_instrument(false)
 {
 	onNote = 0;
 	onRelease = 0;
@@ -53,6 +53,7 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
 	memcpy(BG_PALETTE_SUB+16, piano_fullnotehighlight_Palette, 32);
 	memcpy(BG_PALETTE_SUB+32, piano_halfnotehighlight_Palette, 32);
+	setInMappingMode(mapping_instrument);
 	pleaseDraw();
 }
 
@@ -147,6 +148,19 @@ void Piano::hideKeyLabels(void)
 		eraseKeyLabel(key);
 }
 
+void Piano::setInMappingMode(bool instmap)
+{
+	mapping_instrument = instmap;
+	u16 col = theme->col_signal & ~BIT(15);
+	if (!instmap)
+	{
+		drawHLine(0, height-1, width, theme->col_piano_half_col1);
+		drawVLine(0, 1, height-1, theme->col_piano_half_col2);
+		drawVLine(width-1, 1, height-1, theme->col_piano_half_col1);
+	}
+	drawBox(0, 1, width, height-1, mapping_instrument ? col | BIT(15) : col);
+}
+
 void Piano::setKeyLabel(u8 key, char label)
 {
 	eraseKeyLabel(key);
@@ -160,16 +174,16 @@ void Piano::setKeyLabel(u8 key, char label)
 
 void Piano::genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 *pal_half_highlight) {
 	for (int i = 0; i < 9; ++i) {
-		pal[i] = interpolateColor(piano_cols_base[2], piano_cols_base[3], (4096 / 9) * i);
-		pal_half_highlight[i] = interpolateColor(piano_cols_base[6], piano_cols_base[7], (4096 / 9) * i);
+		pal[i] = interpolateColor(piano_cols_base[3], piano_cols_base[2], (4096 / 9) * i + 1);
+		pal_half_highlight[i] = interpolateColor(piano_cols_base[6], piano_cols_base[7], (4096 / 9) * i + 1);
 	}
 	memcpy(&pal_full_highlight[0], &pal[0], 9 * sizeof(u16));
-
 
 	for (int i = 0; i < 7; ++i) {
 		pal[i + 9] = interpolateColor(piano_cols_base[0], piano_cols_base[1], (4096 / 7) * i);
 		pal_full_highlight[i + 9] = interpolateColor(piano_cols_base[4], piano_cols_base[5], (4096 / 7) * i);
 	}
+	// pal_full_highlight[9] = piano_cols_base[1];
 	memcpy(&pal_half_highlight[9], &pal[9], 7 * sizeof(u16));
 }
 
@@ -182,7 +196,7 @@ void Piano::draw(void)
 	for(int py=0; py<PIANO_HEIGHT_TILES; ++py)
 	{
 		memcpy(map_base + (32*(py+y/8)+(x/8)), pianoMap + (PIANO_WIDTH_TILES * py), PIANO_WIDTH_TILES * 2);
-	}
+	}	
 }
 
 // Set the key corresp. to note to palette corresp. to pal_idx

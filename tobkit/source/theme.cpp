@@ -107,8 +107,8 @@ ColorScheme::ColorScheme() {
 	col_tb_fg_on = col_light_ctrl;
 	col_piano_full_col1 = RGB15(31, 31, 31) | BIT(15);
 	col_piano_full_col2 = RGB15(25, 25, 25) | BIT(15);
-	col_piano_half_col1 = RGB15(8, 8, 8) | BIT(15);
-	col_piano_half_col2 = RGB15(0, 0, 0) | BIT(15);
+	col_piano_half_col1 = RGB15(0, 0, 0) | BIT(15);
+	col_piano_half_col2 = RGB15(8, 8, 8) | BIT(15);
 	col_piano_full_highlight_col1 = RGB15(24, 24, 30) | BIT(15);
 	col_piano_full_highlight_col2 = RGB15(20, 20, 26) | BIT(15);
 	col_piano_half_highlight_col1 = RGB15(20, 8, 8) | BIT(15);
@@ -168,14 +168,14 @@ bool Theme::stringToRGB15(char* str, u16* col)
 	int res = sscanf(str, "%02x%02x%02x", &r, &g, &b);
 	if (res < 3)
 		return false;
-	*col = (u16)(RGB15(r * 31 / 255, g * 31 / 255, b * 31 / 255) | BIT(15));
+	*col = (u16)(RGB15(r >> 3, g >> 3, b >> 3) | BIT(15));
 	return true;
 }
 
 // not needed as we are not writing themes currently
 void Theme::RGB15ToString(u16 col, char* str)
 {
-	sprintf(str, "%02x%02x%02x", (col & 0x1f) * 255 / 31, ((col >> 5) & 0x1f) * 255 / 31, (col >> 10 & 0x1f) * 255 / 31);
+	sprintf(str, "%02x%02x%02x", (col & 0x1f) << 3, ((col >> 5) & 0x1f) << 3, (col >> 10 & 0x1f) << 3);
 }
 
 
@@ -199,7 +199,7 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 			debugprintf("theme parse error on line %d (key out of bounds, max %d)  \n", l + 1, NUM_COLORS - 1);
 			return false;
 		}
-		theme_cols[k] = RGB15(r * 31 / 255, g * 31 / 255, b * 31 / 255) | BIT(15);
+		theme_cols[k] = RGB15(r >> 3, g >> 3, b >> 3) | BIT(15);
 		theme_i++;
 	}
 
