@@ -130,13 +130,13 @@ void ThemeSelectorBox::pleaseDraw(void)
 
 void ThemeSelectorBox::draw(void)
 {
-	drawGradient(theme->col_list_highlight1, theme->col_list_highlight2, 1, 1, width - 2, 15);
+	drawGradient(theme->col_messagebox_title_col1, theme->col_messagebox_title_col2, 1, 1, width - 2, 15);
 	drawHLine(1, 16, width - 2, theme->col_outline);
 	drawFullBox(1, 17, width - 2, THEMESELBOX_HEIGHT-17, theme->col_light_bg);
 	drawBorder(theme->col_outline);
 	
 	u8 titlewidth = getStringWidth(title)+5;
-	drawString(title, (THEMESELBOX_WIDTH-titlewidth)/2, 4, theme->col_text, titlewidth+5);
+	drawString(title, (THEMESELBOX_WIDTH-titlewidth)/2, 4, theme->col_messagebox_title_text, titlewidth+5);
 	
 	gui.draw();
 }
