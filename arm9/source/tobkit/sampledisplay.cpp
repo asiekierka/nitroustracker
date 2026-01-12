@@ -685,32 +685,32 @@ void SampleDisplay::draw(void)
 
 	if(!draw_mode) {
 		// Outlines
-		drawHLine(2, 1, 7, theme->col_light_bg);
-		drawHLine(10, 1, 7, theme->col_light_bg);
+		drawHLine(2, 1, 7, theme->col_smp_zoom);
+		drawHLine(10, 1, 7, theme->col_smp_zoom);
 
-		drawHLine(2, 9, 7, theme->col_light_bg);
-		drawHLine(10, 9, 7, theme->col_light_bg);
+		drawHLine(2, 9, 7, theme->col_smp_zoom);
+		drawHLine(10, 9, 7, theme->col_smp_zoom);
 
-		drawVLine(1, 2, 7, theme->col_light_bg);
-		drawVLine(9, 2, 7, theme->col_light_bg);
-		drawVLine(17, 2, 7, theme->col_light_bg);
+		drawVLine(1, 2, 7, theme->col_smp_zoom);
+		drawVLine(9, 2, 7, theme->col_smp_zoom);
+		drawVLine(17, 2, 7, theme->col_smp_zoom);
 
 		// +
 		if(pen_on_zoom_in) {
-			drawFullBox(2, 2, 7, 7, theme->col_light_bg);
+			drawFullBox(2, 2, 7, 7, theme->col_smp_zoom);
 			drawHLine(3, 5, 5, theme->col_smp_bg);
 			drawVLine(5, 3, 5, theme->col_smp_bg);
 		} else {
-			drawHLine(3, 5, 5, theme->col_light_bg);
-			drawVLine(5, 3, 5, theme->col_light_bg);
+			drawHLine(3, 5, 5, theme->col_smp_zoom);
+			drawVLine(5, 3, 5, theme->col_smp_zoom);
 		}
 
 		// -
 		if(pen_on_zoom_out) {
-			drawFullBox(10, 2, 7, 7, theme->col_light_bg);
+			drawFullBox(10, 2, 7, 7, theme->col_smp_zoom);
 			drawHLine(11, 5, 5, theme->col_smp_bg);
 		} else {
-			drawHLine(11, 5, 5, theme->col_light_bg);
+			drawHLine(11, 5, 5, theme->col_smp_zoom);
 		}
 	}
 }

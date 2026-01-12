@@ -120,6 +120,10 @@ ColorScheme::ColorScheme() {
 	col_typewriter_mod_key = RGB15(17, 17, 26) | BIT(15);
 	col_typewriter_pressed_key = col_typewriter_bg;
 	col_typewriter_mod_key_label = col_typewriter_key_label;
+	col_smp_zoom = col_light_bg;
+	col_messagebox_title_col1 = col_list_highlight1;
+	col_messagebox_title_col2 = col_list_highlight2;
+	col_messagebox_title_text = col_text;
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -190,14 +194,15 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (theme_ == NULL || theme_cols == NULL)
 		return false;
 
-	int theme_i = 0;
-	int r, g, b, k, parsed;
+	int r, g, b, k, l, parsed;
 
-	for (int l = 0; l < NUM_COLORS; ++l) {
+	bool theme_has_key[NUM_COLORS] = { 0 };
+
+	for (l = 0;;++l) {
 		parsed = fscanf(theme_, "%d=%02x%02x%02x%*[^\n]\n", &k, &r, &g, &b);
 		if (parsed == EOF)
 			break;
-
+			
 		if (parsed != 4 || k < 0) {
 			debugprintf("theme parse error on line %d\n", l + 1);
 			return false;
@@ -207,16 +212,20 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 			return false;
 		}
 		theme_cols[k] = RGB15(r >> 3, g >> 3, b >> 3) | BIT(15);
-		theme_i++;
+		theme_has_key[k] = true;
 	}
 
-	if (theme_i == 0) {
-		debugprintf("ignoring empty theme\n");
+	if (l == 0) {
+		ntxm_dprintf("ignoring empty theme\n");
 		return false;
 	}
-		
-	if (theme_i < NUM_COLORS - 1)
-		debugprintf("theme only specifies %u colors, using defaults for remaining %u\n", theme_i, NUM_COLORS - theme_i);
+	
+	// check if specific colours were specified by the theme
+	// if not replace them with their previous colour from the same theme
+	if (!theme_has_key[99]) theme_cols[99] = theme_cols[3];		// Sample editor zoom buttons
+	if (!theme_has_key[100]) theme_cols[100] = theme_cols[13];	// Message box title gradient col1
+	if (!theme_has_key[101]) theme_cols[101] = theme_cols[14];	// Message box title gradient col2
+	if (!theme_has_key[102]) theme_cols[102] = theme_cols[27];	// Message box title text
 
 	return true;
 }

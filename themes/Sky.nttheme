@@ -5,8 +5,8 @@
 4=fcfdff ; Lighter background
 5=ebfafa ; Light control / button gradient 1
 6=a9e3fa ; Dark control / button gradient 2
-7=cce4eb ; Light control (disabled)
-8=b2c9d0 ; Dark control (disabled)
+7=acc4eb ; Light control (disabled)
+8=82a9d0 ; Dark control (disabled)
 9=f7faff ; Selected tab
 10=5c90c4 ; Unselected tab
 11=e3fcee ; List item gradient 1
@@ -97,3 +97,7 @@
 96=bcb2d8 ; Text entry modifier keys
 97=b5f9df ; Text entry pressed keys
 98=8d83b6 ; Text entry modifier key labels
+99=c0bbd9  ; Sample editor zoom buttons
+100=8acbb2 ; Message box title bar gradient 1
+101=b5f9df ; Message box title bar gradient 2
+102=fdfeff ; Message box title bar text
