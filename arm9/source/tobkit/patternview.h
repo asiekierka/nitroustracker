@@ -29,7 +29,6 @@
 #include "ntxm/song.h"
 
 #include "../state.h"
-#include "font_3x5_raw.h"
 
 namespace tobkit {
 
@@ -70,12 +69,29 @@ namespace tobkit {
 #define G	16
 #define H	17
 
+#define L	21
+#define M	22
+#define P	25
+#define R	27
+#define S	28
+#define U	30
+#define V 	31
+
 #define DOT	36
 #define MINUS	37
 #define SHARP	38
 #define SPACE	39
 
-#define GLYPH_3X5_COUNT 40
+#define VSLIDEUP 		41
+#define VSLIDEDOWN 		MINUS
+#define FVSLIDEDOWN 	43
+#define FVSLIDEUP 		42
+#define SETPANPOS		P
+#define PANSLIDELEFT 	44
+#define PANSLIDERIGHT 	45
+#define NOTEPORTA		M
+#define SETVIBRATOSPD	S
+#define SETVIBRATO		V
 
 const u8 notes_chars[] =   {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
 const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
@@ -140,71 +156,18 @@ class PatternView: public Widget {
 			col_effect_dark = theme_->col_pv_effect_dark;
 			col_effect_param_dark = theme_->col_pv_effect_param_dark;
 		}
+		void recalcHscroll(void);
 		
 	private:
 		void draw(void);
 		
-		// Draw a 3x5 character at gridpos (cx,cy)
-		inline void drawChar(u8 c, u8 cx, u8 cy, u16 col)
-		{
-			/*
-			// Ugly quick code (which also does not work)
-			TODO: Fix this and test if its quicker
-			u8 i;
-			for(i=0;i<15;++i) {
-				if(font_3x5[(3*22*i/3)+3*c+i%3] & BIT(15))
-				  *(*vram+SCREEN_WIDTH*(cy*6+i/3)+cx*4+i%3) = RGB15(0,0,0)|BIT(15);
-			}
-			*/
-			
-			// Readable slow code
-			/*
-			u8 xpos = cx*4;
-			u8 ypos = cy*6;
-			
-			u8 i,j;
-			u16 px;
-			for(j=0;j<5;++j) {
-				for(i=0;i<3;++i) {
-					px = font_3x5[3*22*j+3*c+i];
-					if(px&BIT(15)) {
-						*(*vram+SCREEN_WIDTH*(ypos+j)+xpos+i) = RGB15(0,0,0)|BIT(15);
-					}
-				}
-			}
-			*/
-			
-			// Semi-readable code with less variables. OK for now.
-			/*
-			u8 i,j;
-			for(j=0;j<5;++j) {
-				for(i=0;i<3;++i) {
-					if(font_3x5[3*22*j+3*c+i]&BIT(15)) {
-						*(*vram+SCREEN_WIDTH*(2+cy*8+j)+1+cx*4+i) = col;
-					}
-				}
-			}
-			*/
-			
-			// Rather hard to understand code that uses the new size-efficient bitmap-font (8 pixels/byte)
-			u8 i,j;
-			for(j=0;j<5;++j) {
-				for(i=0;i<3;++i) {
-					u16 pixelidx = 3*GLYPH_3X5_COUNT*j+3*c+i;
-					if(font_3x5_raw[pixelidx/8]&BIT(pixelidx%8)) {
-						//*(*vram+SCREEN_WIDTH*(2+cy*8+j)+1+cx*4+i) = col;
-						*(*vram+SCREEN_WIDTH*(y+cy+j)+x+cx+i) = col;
-					}
-				}
-			}
-		}
 
 		inline void drawHexByte(u8 byte, u8 cx, u8 cy, u16 col)
 		{
-			//drawChar(byte/0x10, cx  , cy, col);
-			//drawChar(byte%0x10, cx+1, cy, col);
-			drawChar(byte/0x10, cx               , cy, col);
-			drawChar(byte%0x10, cx+PV_CHAR_WIDTH, cy, col);
+			//drawSmallChar(byte/0x10, cx  , cy, col);
+			//drawSmallChar(byte%0x10, cx+1, cy, col);
+			drawSmallChar(byte/0x10, cx               , cy, col);
+			drawSmallChar(byte%0x10, cx+PV_CHAR_WIDTH, cy, col);
 		}
 
 		inline void drawCell(u8 cellx, u8 celly, u8 px, u8 py, bool dark)
@@ -231,32 +194,72 @@ class PatternView: public Widget {
 
 			// Check for empty note or stop-note
 			if(cell->note == STOP_NOTE) {
-				drawChar(DOT,   realx                , realy, notecol);
-				drawChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
-				drawChar(DOT,   realx+2*PV_CHAR_WIDTH, realy, notecol);
+				drawSmallChar(DOT,   realx                , realy, notecol);
+				drawSmallChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
+				drawSmallChar(DOT,   realx+2*PV_CHAR_WIDTH, realy, notecol);
 			} else if(cell->note != EMPTY_NOTE) {
 				// Note
-				drawChar(notes_chars[cell->note%12], realx, realy, notecol);
+				drawSmallChar(notes_chars[cell->note%12], realx, realy, notecol);
 				if(notes_signs[cell->note%12]) {
-					drawChar(SHARP, realx+1*PV_CHAR_WIDTH, realy, notecol);
+					drawSmallChar(SHARP, realx+1*PV_CHAR_WIDTH, realy, notecol);
 				} else {
-					drawChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
+					drawSmallChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
 				}
-				drawChar(cell->note/12, realx+2*PV_CHAR_WIDTH, realy, notecol);
+				drawSmallChar(cell->note/12, realx+2*PV_CHAR_WIDTH, realy, notecol);
 			}
 
 			// Instrument
 			if(cell->instrument != NO_INSTRUMENT)
 				drawHexByte(cell->instrument+1, realx+3*PV_CHAR_WIDTH+1, realy, instrcol); // Adding one because FT2 indices start with 1
 			
-			// Volume
-			if(cell->volume != NO_VOLUME)
-				drawHexByte(cell->volume, realx+5*PV_CHAR_WIDTH+2, realy, volumecol);
+			if (cell->volume != NO_VOLUME)
+			{
+				drawHexByte(cell->volume, realx + 5 * PV_CHAR_WIDTH + 2, realy, volumecol);
+			}
+
+			// volume effect column slightly buggy and needs 
+			// song.cpp adjustment in libntxm, lets leave that commented for now
+			
+			// else {
+			// 	if (cell->effect2 != 0xff && cell->volume == NO_VOLUME)
+			// 	{
+			// 		char eff;
+			// 		u8 vol = cell->volume_raw;
+					
+			// 		if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
+			// 			eff = VSLIDEDOWN;
+			// 		else if ((vol >= 0x70) && (vol <= 0x7F)) // Volume slide up
+			// 			eff = VSLIDEUP;
+			// 		else if ((vol >= 0x80) && (vol <= 0x8F)) // Fine volume slide down
+			// 			eff = FVSLIDEDOWN;
+			// 		else if ((vol >= 0x90) && (vol <= 0x9F)) // Fine volume slide up
+			// 			eff = FVSLIDEUP;
+			// 		else if ((vol >= 0xA0) && (vol <= 0xAF)) // Set vibrato speed (calls vibrato)
+			// 			eff = SETVIBRATOSPD;
+			// 		else if ((vol >= 0xB0) && (vol <= 0xBF)) // Vibrato
+			// 			eff = SETVIBRATO;
+			// 		else if ((vol >= 0xC0) && (vol <= 0xCF)) // Set panning
+			// 			eff = SETPANPOS;
+			// 		else if ((vol >= 0xD0) && (vol <= 0xDF)) // Panning slide left
+			// 			eff = PANSLIDELEFT;
+			// 		else if ((vol <= 0x1f)) // Panning slide right
+			// 			eff = PANSLIDERIGHT;
+			// 		else if (vol >= 0xF0) // Tone porta
+			// 			eff = NOTEPORTA;
+			// 		else {
+			// 			eff = 0;
+			// 		}
+			// 		if (eff != 0) {
+			// 			drawSmallChar(eff, realx + 5 * PV_CHAR_WIDTH + 2, realy, effectcol);
+			// 			drawSmallChar(cell->effect2_param & 0x0F, realx + 6 * PV_CHAR_WIDTH + 2, realy, effectparamcol);
+			// 		}
+			// 	}
+			// }
 			
 			if(effects_visible) {
 				// Effect and effect parameter
 				if (cell->effect != 0xff)
-					drawChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
+					drawSmallChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
 						
 				if (cell->effect_param != 0x00)
 					drawHexByte(cell->effect_param, realx+8*PV_CHAR_WIDTH+3, realy, effectparamcol);

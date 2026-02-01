@@ -22,13 +22,15 @@ limitations under the License.
 using namespace tobkit;
 
 #include "font_8x11.inc"
+#include "font_3x5_raw.h"
+
 
 #define	abs(x)	(x<0?(-x):(x))
 
 /* ===================== PUBLIC ===================== */
 
 Widget::Widget(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible, bool _occluded)
-	:x(_x), y(_y), width(_width), height(_height), enabled(true), vram(_vram), visible(_visible), occluded(_occluded)
+	:x(_x), y(_y), width(_width), height(_height), enabled(true), do_overdraw(true), vram(_vram), visible(_visible), occluded(_occluded)
 {
 
 }
@@ -133,6 +135,10 @@ bool Widget::set_enabled(bool value)
 	return changed;
 }
 
+void Widget::set_overdraw(bool value)
+{
+	do_overdraw = value;
+}
 /* ===================== PROTECTED ===================== */
 
 // Draw utility functions
@@ -169,6 +175,21 @@ void Widget::drawString(const char* str, u8 tx, u8 ty, u16 color, u8 maxwidth, u
 
 		drawpos += width+1;
 		str++;
+	}
+}
+
+ITCM_CODE
+void Widget::drawSmallChar(u8 c, u8 cx, u8 cy, u16 col)
+{
+	u8 i,j;
+	for(j=0;j<5;++j) {
+		for(i=0;i<3;++i) {
+			u16 pixelidx = 3*GLYPH_3X5_COUNT*j+3*c+i;
+			if(font_3x5_raw[pixelidx/8]&BIT(pixelidx%8)) {
+				//*(*vram+SCREEN_WIDTH*(2+cy*8+j)+1+cx*4+i) = col;
+				*(*vram+SCREEN_WIDTH*(y+cy+j)+x+cx+i) = col;
+			}
+		}
 	}
 }
 
@@ -387,5 +408,6 @@ bool Widget::isExposed(void)
 
 void Widget::overdraw(void)
 {
-	drawFullBox(0, 0, width, height, bgcolor);
+	if (do_overdraw)
+		drawFullBox(0, 0, width, height, bgcolor);
 }

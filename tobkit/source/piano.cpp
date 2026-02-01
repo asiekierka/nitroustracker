@@ -58,6 +58,13 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 	pleaseDraw();
 }
 
+void Piano::show(void)
+{
+	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
+	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+
+	Widget::show();
+}
 
 // Drawing request
 void Piano::pleaseDraw(void) {

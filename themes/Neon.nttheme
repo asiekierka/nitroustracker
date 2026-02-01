@@ -97,3 +97,7 @@
 96=9391f6 ; Text entry modifier keys
 97=01eded ; Text entry pressed keys
 98=0f1519 ; Text entry modifier key labels
+103=9391f6 ; FX input keyboard button gradient 1
+104=4949c6 ; FX input keyboard button gradient 2
+105=334566 ; FX input keyboard button gradient 1 (disabled)
+106=1d2030 ; FX input keyboard button gradient 2 (disabled)

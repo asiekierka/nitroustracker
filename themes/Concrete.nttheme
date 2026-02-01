@@ -87,3 +87,4 @@
 95=555555 ; Text entry key labels
 96=555555 ; Text entry modifier keys
 97=ffdd00 ; Text entry pressed keys
+109=333333 ; FX input keyboard command description label (disabled)

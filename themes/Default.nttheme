@@ -101,3 +101,12 @@
 100=e67b00 ; Message box title bar gradient 1
 101=e6e600 ; Message box title bar gradient 2
 102=000000 ; Message box title bar text
+103=ffffff ; FX input keyboard button gradient 1
+104=cbcbcb ; FX input keyboard button gradient 2
+105=8394c5 ; FX input keyboard button gradient 1 (disabled)
+106=4a5a8b ; FX input keyboard button gradient 2 (disabled)
+107=000000 ; FX input keyboard button command label
+108=8394c5 ; FX input keyboard command description label
+109=ff9400 ; FX input keyboard command description label (disabled)
+110=4a7bff ; FX input keyboard button "X" label
+111=ff62ee ; FX input keyboard button "Y" label
