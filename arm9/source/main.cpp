@@ -2352,14 +2352,12 @@ void handleEffectParamChanged(u8 eff_par)
 // "set" button
 void handleSetEffectParam(void)
 {
-	pv->clearSelection();
-	setEffectParam(dbeffectpar->getValue(), false);
+	setEffectParam(dbeffectpar->getValue(), false, true);
 	handleNoteAdvanceRow();
 }
 
 void handleClearFx(void)
 {
-	pv->clearSelection();
 	setEffectParam(0, false, true);
 	setEffectCommand(0xff);
 }
