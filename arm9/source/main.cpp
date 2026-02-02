@@ -2325,9 +2325,9 @@ void handleToggleEffectsVisibility(bool on)
 	setRecordMode(state->recording); // ensure red border gets drawn!
 }
 
-void onFxKeyPressed(u8 val, bool key_enabled)
+void onFxKeyPressed(u8 val)
 {	
-	if (!key_enabled || !state->recording) return;
+	if (val == NO_EFFECT || !state->recording) return;
 	// for E effects, the button's val is the E sub-command, rather than just 'E'
 
 	if (fxkb->getCategory() == FX_CATEGORY_E) {

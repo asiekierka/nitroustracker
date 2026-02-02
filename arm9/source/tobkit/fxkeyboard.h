@@ -19,11 +19,16 @@ limitations under the License.
 
 #include "tobkit/label.h"
 
-#define FXBUTTON_WIDTH		13
+#define FXBUTTON_WIDTH		12
 #define FXBUTTON_HEIGHT		27
 
 #define FXKEYBOARD_WIDTH		176
 #define FXKEYBOARD_HEIGHT		40
+
+// the fx keyboard isn't quite as wide as the piano, but we want to draw blank tiles
+// over where the piano was anyway
+#define FXKEYBOARD_WIDTH_TILES	28
+#define FXKEYBOARD_HEIGHT_TILES	5
 
 #define FXKEYBOARD_R_OVERDRAW	48
 #define FXKEYBOARD_LMARGIN		2
@@ -37,15 +42,20 @@ limitations under the License.
 #define FX_CATEGORY_FT 			2
 #define FX_CATEGORY_VOL 		3
 
+// button state, can be added to tilemap index to get tile in said state
+// eg TILE_LCORNER + FXBUTTON_DISABLED = TILE_LCORNER (disabled)
 #define FXBUTTON_NORMAL			0
 #define FXBUTTON_DOWN			1
 #define FXBUTTON_DISABLED		2
 
+#define NO_EFFECT				255
+
+// Tilemap indices
+#define TILE_BLANK				0x0000
 #define TILE_LCORNER			0x0001
 #define TILE_MID_EDGE			0x0004
 #define TILE_EVEN_END_EDGE		0x000d
 #define TILE_ODD_END_EDGE		0x0010
-#define TILE_BLANK				0x0000
 #define TILE_LEDGE				0x0013
 #define TILE_MID				0x0016
 #define TILE_EVEN_END_MID		0x001f
@@ -59,7 +69,7 @@ namespace tobkit {
 	class FXKeyboard : public Widget {
 	public:
 		FXKeyboard(u8 _x, u8 _y, u16* _char_base, u16* _map_base, u16** _vram,
-			void (*onFxKeypress)(u8 pressedValue, bool key_enabled), bool _visible = true);
+			void (*onFxKeypress)(u8 pressedValue), bool _visible = true);
 
 		// Drawing request
 		void pleaseDraw(void);
@@ -81,13 +91,14 @@ namespace tobkit {
 
 		void setLastCmd(u8 _last_cmd);
 		u8 getLastCmd(void);
+
 	private:
 		uint16* char_base, * map_base;
 
 		u8 category;
 		u8 last_cmd;
 
-		u16 fxkb_map[140] __attribute__((aligned(4))) = { 0 };
+		u16 fxkb_map[FXKEYBOARD_WIDTH_TILES*FXKEYBOARD_HEIGHT_TILES] __attribute__((aligned(4))) = { 0 };
 		u16 fxkb_pal[16];
 		u8 fxkb_state[NUM_FXKEYS] = { 0 };
 		u8 fxkb_vals[NUM_FXKEYS] = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xf };
@@ -115,7 +126,7 @@ namespace tobkit {
 
 		void genPal(u16* fxkb_cols_base, u16* pal);
 
-		void (*onFxKeypress)(u8 val, bool key_enabled);
+		void (*onFxKeypress)(u8 val);
 
 		void drawCaption(void);
 

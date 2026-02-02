@@ -28,7 +28,7 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 
-FXKeyboard::FXKeyboard(u8 _x, u8 _y, u16 *_char_base, u16 *_map_base, uint16** _vram, void (*_onFxKeypress)(u8 pressedValue, bool key_enabled), bool _visible)
+FXKeyboard::FXKeyboard(u8 _x, u8 _y, u16 *_char_base, u16 *_map_base, uint16** _vram, void (*_onFxKeypress)(u8 pressedValue), bool _visible)
 	: Widget(_x, _y, FXKEYBOARD_WIDTH, FXKEYBOARD_HEIGHT, _vram, _visible),
 	char_base(_char_base), map_base(_map_base), last_cmd(0), caption(0), darken_title(false), onFxKeypress(_onFxKeypress)
 {
@@ -43,18 +43,19 @@ void FXKeyboard::pleaseDraw(void) {
 // Event calls
 void FXKeyboard::penDown(u8 px, u8 py)
 {
-	s16 tx, rx;
-	tx = ntxm_clamp((px - x)/24, 0, 8 - 1);
-	rx = (px - x) % 24;
-	bool r = rx > 11;
-	u8 bt_ind = (tx * 2) + (r ? 1 : 0);
+	if (px > FXBUTTON_WIDTH * NUM_FXKEYS) return;
 
-	if (fxkb_state[bt_ind] != FXBUTTON_DISABLED)
+	u8 bt_ind = ntxm_clamp(px / FXBUTTON_WIDTH, 0, NUM_FXKEYS-1);
+
+	if (fxkb_state[bt_ind] != FXBUTTON_DISABLED) {
 		fxkb_state[bt_ind] |= 0x1; // set pushed
-
+		setLastCmd(fxkb_vals[bt_ind]);
+	} else {
+		useDarkTitle(true);
+		setLastCmd(NO_EFFECT);
+	}
+		
 	updateCaptionForFx(fxkb_vals[bt_ind]);
-	useDarkTitle(fxkb_state[bt_ind] == FXBUTTON_DISABLED);
-	onFxKeypress(fxkb_vals[bt_ind], fxkb_state[bt_ind] != FXBUTTON_DISABLED);
 	draw();
 }
 
@@ -62,6 +63,8 @@ void FXKeyboard::penDown(u8 px, u8 py)
 void FXKeyboard::penUp(u8 px, u8 py)
 {
 	for (int i=0;i<NUM_FXKEYS;++i) fxkb_state[i] &= ~0x1; // clear pushed
+	onFxKeypress(getLastCmd());
+
 	draw();
 }
 
@@ -120,6 +123,7 @@ void FXKeyboard::setCategory(u8 newcat) {
 
 	category = newcat;
 
+	useDarkTitle(false);
 	memset(fxkb_state, FXBUTTON_NORMAL, NUM_FXKEYS);
 	setCaption(category_captions[category]);
 
@@ -150,9 +154,9 @@ u8 FXKeyboard::getCategory(void)
 	return category;
 }
 
-void FXKeyboard::setLastCmd(u8 _last_e_cmd)
+void FXKeyboard::setLastCmd(u8 _last_cmd)
 {
-	last_cmd = _last_e_cmd;
+	last_cmd = _last_cmd;
 }
 
 u8 FXKeyboard::getLastCmd(void)
@@ -177,12 +181,12 @@ void FXKeyboard::drawCaption(void) {
 	
 	drawFullBox(1, 3, width, 5, bgcolor);
 	u16 capcol = darken_title ? theme->col_fxkeyboard_cmd_desc_disabled : theme->col_fxkeyboard_cmd_desc;
-	drawSmallString(caption, ((NUM_FXKEYS * FXBUTTON_WIDTH) / 2) - (2 * strlen(caption)), 3, capcol);  // width=(3px char+1px space) / 2 
+	drawSmallString(caption, ((NUM_FXKEYS * FXBUTTON_WIDTH) / 2) - (2 * strlen(caption)) + 4, 3, capcol);  // width=(3px char+1px space) / 2 
 }
 
 void FXKeyboard::drawButtonLabel(u8 key, u8 cat, bool visible)
 {
-	u8 xpos = key * 12 + 3;
+	u8 xpos = key * FXBUTTON_WIDTH + 3;
 	u16 col = theme->col_fxkeyboard_btn_label;
 	u16 smallcol1 = theme->col_fxkeyboard_minilabel_x;
 	u16 smallcol2 = theme->col_fxkeyboard_minilabel_y;
@@ -200,7 +204,7 @@ void FXKeyboard::drawButtonLabel(u8 key, u8 cat, bool visible)
 	char small_caption[3] = {0}; // one wasted byte...noone will notice
 
 	if (cat == FX_CATEGORY_E)
-		snprintf(small_caption, 3, "E%1X", fxkb_vals[key]);
+		snprintf(small_caption, 3, "%1XX", fxkb_vals[key]);
 	else if (cat == FX_CATEGORY_NORMAL)
 		sprintf(small_caption, "X%s", ((labels_cat0 >> key) & 0x1) ? "Y" : "X");
 	else
@@ -226,7 +230,6 @@ void FXKeyboard::eraseButtonLabels(void)
 void FXKeyboard::draw(void) {
 	if (!isExposed()) return;
 
-	int row;
 	u16 lstate, rstate;
 
 	/* 
@@ -244,25 +247,28 @@ void FXKeyboard::draw(void) {
 	  basically this depends on the order of the tiles in
 	  effectinput.png, so dont rearrange them (˘︶˘)
 	*/
+
+	int row,col;
+
 	for (int pair=0;pair<NUM_FXKEYS/2;++pair)
 	{
 		lstate=fxkb_state[pair*2];
 		rstate=fxkb_state[pair*2+1];
 
-		u16 buttontiles[15]={
+		const u16 buttontiles[15]={
 			TILE_BLANK, TILE_LCORNER+lstate, 			 TILE_LEDGE+lstate, 			TILE_LEDGE+lstate, 			VFLIP(TILE_LCORNER+lstate),
 			TILE_BLANK, TILE_MID_EDGE+(3*rstate)+lstate, TILE_MID+(3*rstate)+lstate, 	TILE_MID+(3*rstate)+lstate, VFLIP(TILE_MID_EDGE+(3*rstate)+lstate),
 			TILE_BLANK, TILE_EVEN_END_EDGE+rstate, 		 TILE_EVEN_END_MID+rstate, 		TILE_EVEN_END_MID+rstate, 	VFLIP(TILE_EVEN_END_EDGE+rstate), 		//  btm edge=y flipped top edge
 		};
 
-		int abs_col=pair*3;
+		int tile_pos_x=pair*3;
 
-		for (int j=0;j<3;++j)
+		for (col=0;col<3;++col)
 		{
-			for (row=0;row<5;++row)
+			for (row=0;row<FXKEYBOARD_HEIGHT_TILES;++row)
 			{
-				u8 pos = (row * 28) + abs_col + j;
-				fxkb_map[pos]=buttontiles[row + (j*5)];
+				u8 pos = (row * FXKEYBOARD_WIDTH_TILES) + tile_pos_x + col;
+				fxkb_map[pos]=buttontiles[row + (col*FXKEYBOARD_HEIGHT_TILES)];
 			}
 		}
 	}
@@ -271,24 +277,24 @@ void FXKeyboard::draw(void) {
 	if (NUM_FXKEYS % 2 == 1)
 	{
 		rstate=fxkb_state[NUM_FXKEYS-1];
-
-		u16 oddend[10]={
+		
+		const u16 oddend[10]={
 			TILE_BLANK, TILE_LCORNER+rstate, TILE_LEDGE+rstate, TILE_LEDGE+rstate, VFLIP(TILE_LCORNER+rstate), 
 			TILE_BLANK, TILE_ODD_END_EDGE+rstate, TILE_ODD_END_MID+rstate, TILE_ODD_END_MID+rstate, VFLIP(TILE_ODD_END_EDGE+rstate)
 		};
 
-		for (int j=0;j<2;++j)
+		for (col=0;col<2;++col)
 		{
-			for (row=0;row<5;++row)
+			for (row=0;row<FXKEYBOARD_HEIGHT_TILES;++row)
 			{
-				u8 pos = (row * 28) + ((NUM_FXKEYS/2)*3) + j;
-				fxkb_map[pos]=oddend[row + (j*5)];
+				u8 pos = (row * FXKEYBOARD_WIDTH_TILES) + ((NUM_FXKEYS/2)*3) + col;
+				fxkb_map[pos]=oddend[row + (col*FXKEYBOARD_HEIGHT_TILES)];
 			}
 		}
 	}
 
-	for(int py=0; py<5; ++py)
-		memcpy(map_base + (32*(py+y/8)+(x/8)), fxkb_map + (28 * py), 28 * 2);
+	for(int py=0; py<FXKEYBOARD_HEIGHT_TILES; ++py)
+		memcpy(map_base + (32*(py+y/8)+(x/8)), fxkb_map + (FXKEYBOARD_WIDTH_TILES * py), FXKEYBOARD_WIDTH_TILES * 2);
 	
 	drawButtonLabels();
 	drawCaption();
