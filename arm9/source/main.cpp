@@ -2266,6 +2266,9 @@ void handleToggleEffectsVisibility(bool on)
 	// inappropriate bg overdraw over widgets
 	if (on)
 	{
+		if (tbmultisample->getState())
+			setMultisamplesEnabled(false);
+
 		cbtoggleeffects->setChecked(true);
 
 		kb->hide();
