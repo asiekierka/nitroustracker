@@ -29,7 +29,7 @@ using namespace tobkit;
 
 
 FXKeyboard::FXKeyboard(u8 _x, u8 _y, u16 *_char_base, u16 *_map_base, uint16** _vram, void (*_onFxKeypress)(u8 pressedValue), bool _visible)
-	: Widget(_x, _y, FXKEYBOARD_WIDTH, FXKEYBOARD_HEIGHT, _vram, _visible),
+	: Widget(_x, _y, FXKEYBOARD_WIDTH+4, FXKEYBOARD_HEIGHT, _vram, _visible),
 	char_base(_char_base), map_base(_map_base), last_cmd(0), caption(0), darken_title(false), onFxKeypress(_onFxKeypress)
 {
 	setCaption("");
@@ -50,6 +50,7 @@ void FXKeyboard::penDown(u8 px, u8 py)
 	if (fxkb_state[bt_ind] != FXBUTTON_DISABLED) {
 		fxkb_state[bt_ind] |= 0x1; // set pushed
 		setLastCmd(fxkb_vals[bt_ind]);
+		useDarkTitle(false);
 	} else {
 		useDarkTitle(true);
 		setLastCmd(NO_EFFECT);
@@ -77,9 +78,12 @@ void FXKeyboard::setTheme(Theme* theme_, u16 bgcolor_)
 	};
 
 	genPal(fxkb_cols, fxkb_pal);
+	Widget::setTheme(theme_, bgcolor_);
+	
+	if (!isExposed()) return;
+
 	memcpy(BG_PALETTE_SUB, fxkb_pal, 32);
-	theme = theme_;
-	bgcolor = bgcolor_;
+	
 	draw();
 }
 

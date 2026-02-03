@@ -2076,7 +2076,7 @@ void setEffectCommand(u16 eff)
 	}
 }
 
-void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false)
+void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false, bool overwrite=true)
 {
 	u16 sel_x1, sel_y1, sel_x2, sel_y2;
 	uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, false);
@@ -2088,13 +2088,14 @@ void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false)
 			{
 				Cell cell = song->getPattern(song->getPotEntry(state->potpos))[chn][row];
 
+				bool cell_has_param = cell.effect_param != 0xff && cell.effect_param != 0x0;
+				
+
 				if (force_clear)
 					eff_par = 0x00;
 				// this gets messy because Exy commands use the param for both command and param info D:
 				else if (fxkb->getCategory() == FX_CATEGORY_E)
 				{
-					bool cell_has_param = cell.effect_param != 0xff && cell.effect_param != 0x0;
-
 					u8 ecmd_cmd = eff_par & 0xF0;
 					u8 ecmd_par = eff_par & 0x0F;
 
@@ -2119,7 +2120,8 @@ void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false)
 
 					eff_par = ecmd_cmd | ecmd_par;
 				}
-				cell.effect_param = eff_par;
+
+				if (!cell_has_param || overwrite) cell.effect_param = eff_par;
 				*fill->ptr(chn - sel_x1, row - sel_y1) = cell;
 			}
         action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
@@ -2160,6 +2162,7 @@ void destroyThemeDialog(void)
 	fbtheme = 0;
 	redrawSubScreen();
 }
+
 void reloadSkin(void)
 {
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
@@ -2173,6 +2176,7 @@ void reloadSkin(void)
 	}
 	gui->draw();
 	redrawSubScreen();
+	setRecordMode(state->recording);
 	redraw_main_requested = true;
 }
 
@@ -2335,7 +2339,7 @@ void onFxKeyPressed(u8 val)
 		setEffectParam((val << 4) | (dbeffectpar->getValue() & 0x0f), true);
 	} else {
 		setEffectCommand(val);
-		setEffectParam(dbeffectpar->getValue(), false);
+		setEffectParam(dbeffectpar->getValue(), false, false, false);
 	}
 	
 	pv->clearSelection();
@@ -2352,7 +2356,8 @@ void handleEffectParamChanged(u8 eff_par)
 // "set" button
 void handleSetEffectParam(void)
 {
-	setEffectParam(dbeffectpar->getValue(), false, true);
+	setEffectParam(dbeffectpar->getValue(), false);
+	pv->clearSelection();
 	handleNoteAdvanceRow();
 }
 
@@ -2360,6 +2365,7 @@ void handleClearFx(void)
 {
 	setEffectParam(0, false, true);
 	setEffectCommand(0xff);
+	pv->clearSelection();
 }
 void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void), void (*clearCallback)(void), void (*cancelCallback)(void))
 {
@@ -3184,6 +3190,7 @@ void handleLerp(void)
 			*fill->ptr(sel_x1 - sel_x1, row - sel_y1) = cell;
 		}
 		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
+		pv->clearSelection();
 		redraw_main_requested = true;
 	}
 }
