@@ -227,6 +227,16 @@ void PatternView::toggleEffectsVisibility(bool on)
   effects_visible = on;
 }
 
+// if the cursor would be beyond the max visible chn
+void PatternView::recalcHscroll(void)
+{
+	u8 rel_cursor_x = state->channel - hscrollpos;
+
+	if (effects_visible && rel_cursor_x > getNumVisibleChannels())
+	{
+		hscrollpos = state->channel - getNumVisibleChannels();
+	}
+}
 /* ===================== PRIVATE ===================== */
 
 // This is a fullscreen widget so it does not give a damn

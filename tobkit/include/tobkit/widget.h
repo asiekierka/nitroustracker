@@ -36,6 +36,10 @@ struct Font {
 	const u8* data;
 };
 
+#define GLYPH_3X5_COUNT 47
+#define GLYPH_3X5(c) (c == ':') ? 40 : ((c < 58 && c > 47) ? (c - 48) : (c - 55))
+#define GLYPH_3X5_WIDTH 4
+
 class Widget {
 	public:
 		// Constructor sets base variables
@@ -62,6 +66,7 @@ class Widget {
 		virtual void hide(void);
 		bool is_visible(void) { return visible; }
 		bool set_visible(bool value);
+		void set_overdraw(bool value);
 
 		virtual void occlude(void);
 		virtual void reveal(void);
@@ -89,12 +94,27 @@ class Widget {
 	protected:
 		u16 x, y, width, height;
 		bool enabled;
+		bool do_overdraw;
 		u16 **vram;
 		Theme *theme;
 		u16 bgcolor; // Color of the background (for hiding the widget)
 
 		// Draw utility functions
 		void drawString(const char* str, u8 tx, u8 ty, u16 color, u8 maxwidth=255, u8 maxheight=255);
+
+		inline void drawSmallString(const char *message, u8 sx, u8 sy, u16 col)
+		{
+			size_t n_chars = strlen(message);
+			for (size_t c = 0; c < n_chars; ++c)
+			{
+				char _c = message[c];
+				if (_c == ' ') continue;
+
+				drawSmallChar(GLYPH_3X5(_c), sx + c * GLYPH_3X5_WIDTH, sy, col);
+			}
+		}
+
+		void drawSmallChar(u8 c, u8 cx, u8 cy, u16 col);
 		void drawBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col);
 		void drawFullBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col);
 		void drawBorder(u16 col);

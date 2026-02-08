@@ -124,6 +124,15 @@ ColorScheme::ColorScheme() {
 	col_messagebox_title_col1 = col_list_highlight1;
 	col_messagebox_title_col2 = col_list_highlight2;
 	col_messagebox_title_text = col_text;
+	col_fxkeyboard_col1 = col_piano_full_col1;
+	col_fxkeyboard_col2 = col_piano_full_col2;
+	col_fxkeyboard_col1_disabled = col_light_ctrl_disabled;	
+	col_fxkeyboard_col2_disabled = col_dark_ctrl_disabled;
+	col_fxkeyboard_btn_label = col_piano_label;
+	col_fxkeyboard_cmd_desc = col_text_light;	
+	col_fxkeyboard_cmd_desc_disabled = col_dark_ctrl_disabled;	
+	col_fxkeyboard_minilabel_x = col_pv_notes &~ BIT(15);	
+	col_fxkeyboard_minilabel_y = col_pv_effect &~ BIT(15);
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -145,6 +154,9 @@ bool Theme::loadTheme(const char* themefile) {
 			memcpy(data, scheme.data, sizeof(data));
 			col_piano_label &= ~BIT(15);
 			col_piano_label_inv &= ~BIT(15);
+			col_fxkeyboard_btn_label &= ~BIT(15);
+			col_fxkeyboard_minilabel_x &= ~BIT(15);
+			col_fxkeyboard_minilabel_y &= ~BIT(15);
 
 			debugprintf("loaded theme '%s'\n", themefile);
 			return true;
@@ -226,6 +238,16 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (!theme_has_key[100]) theme_cols[100] = theme_cols[13];	// Message box title gradient col1
 	if (!theme_has_key[101]) theme_cols[101] = theme_cols[14];	// Message box title gradient col2
 	if (!theme_has_key[102]) theme_cols[102] = theme_cols[27];	// Message box title text
+
+	if (!theme_has_key[103]) theme_cols[103] = theme_cols[84];	// Fxkb button gradient 1
+	if (!theme_has_key[104]) theme_cols[104] = theme_cols[85];	// Fxkb button gradient 2
+	if (!theme_has_key[105]) theme_cols[105] = theme_cols[7];	// Fxkb disabled button gradient 1 
+	if (!theme_has_key[106]) theme_cols[106] = theme_cols[8];	// Fxkb disabled button gradient 2
+	if (!theme_has_key[107]) theme_cols[107] = theme_cols[35];	// Fxkb big button label
+	if (!theme_has_key[108]) theme_cols[108] = theme_cols[28];	// Fxkb command desc label
+	if (!theme_has_key[109]) theme_cols[109] = theme_cols[8];	// Fxkb disabled command desc label
+	if (!theme_has_key[110]) theme_cols[110] = theme_cols[61];	// Fxkb button param label 'X'
+	if (!theme_has_key[111]) theme_cols[111] = theme_cols[67];	// Fxkb button param label 'Y'
 
 	return true;
 }

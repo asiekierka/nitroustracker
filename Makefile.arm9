@@ -13,10 +13,10 @@ ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 
 SOURCEDIRS	:= arm9/source
 INCLUDEDIRS	:=
-GFXDIRS		:=
+GFXDIRS		:= arm9/graphics
 BINDIRS		:= arm9/data
 AUDIODIRS	:=
-FONTSDIRS	:= arm9/fonts
+FONTSDIRS	:=
 BITMAPSDIRS	:= arm9/bitmaps
 TOOLSDIR	:= tools
 
@@ -89,10 +89,6 @@ endif
 ifneq ($(GFXDIRS),)
     SOURCES_PNG	:= $(shell find -L $(GFXDIRS) -name "*.png")
     INCLUDEDIRS	+= $(addprefix $(BUILDDIR)/,$(GFXDIRS))
-endif
-ifneq ($(FONTSDIRS),)
-    SOURCES_FONTS := $(shell find -L $(FONTSDIRS) -name "*.png")
-    INCLUDEDIRS	+= $(addprefix $(BUILDDIR)/,$(FONTSDIRS))
 endif
 ifneq ($(BITMAPSDIRS),)
     SOURCES_BITMAPS := $(shell find -L $(BITMAPSDIRS) -name "*.png")
@@ -230,13 +226,6 @@ $(BUILDDIR)/%.png.o $(BUILDDIR)/%.h : %.png %.grit
 	$(V)$(BLOCKSDS)/tools/grit/grit $< -ftc -W1 -o$(BUILDDIR)/$*
 	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(BUILDDIR)/$*.png.o $(BUILDDIR)/$*.c
 	$(V)touch $(BUILDDIR)/$*.png.o $(BUILDDIR)/$*.h
-
-$(BUILDDIR)/arm9/fonts/font_3x5.raw.o : arm9/fonts/font_3x5.png
-	@echo $(notdir $<)
-	@$(MKDIR) -p $(@D)
-	$(V)python3 $(TOOLSDIR)/font_3x5_pack.py $< $(basename $(basename $@)).raw
-	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $(basename $(basename $@)).raw $(@D)
-	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.c
 
 $(BUILDDIR)/%.raw.o : %.png
 	@echo $(notdir $<)

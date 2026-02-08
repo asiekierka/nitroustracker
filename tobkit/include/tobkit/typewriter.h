@@ -57,7 +57,7 @@ class Typewriter: public Widget {
 		void setTheme(Theme *theme_, u16 bgcolor_);
 		
 	private:
-		unsigned short typewriterPal[16] __attribute__((aligned(4))) __attribute__((visibility("hidden")));
+		unsigned short typewriterPal[16] __attribute__((aligned(4)));
 
 
 		void (*onOk)(void);

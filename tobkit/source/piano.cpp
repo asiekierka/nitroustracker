@@ -51,13 +51,27 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 						theme_->col_piano_half_highlight_col2, theme_->col_piano_outline};
 	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
 	Widget::setTheme(theme_, bgcolor_);
-	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+
+	// doesn't conflict with fx keyboard, so safe to write these
 	memcpy(BG_PALETTE_SUB+16, piano_fullnotehighlight_Palette, 32);
 	memcpy(BG_PALETTE_SUB+32, piano_halfnotehighlight_Palette, 32);
+
+	if (!isExposed()) return;
+
+	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+	
+
 	setInMappingMode(mapping_instrument);
 	pleaseDraw();
 }
 
+void Piano::show(void)
+{
+	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
+	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+
+	Widget::show();
+}
 
 // Drawing request
 void Piano::pleaseDraw(void) {

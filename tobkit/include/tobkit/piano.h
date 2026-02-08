@@ -47,7 +47,8 @@ class Piano: public Widget {
 		void setKeyLabel(u8 key, char label);
 		void setInMappingMode(bool instmap);
 		void setTheme(Theme *theme_, u16 bgcolor_);
-
+		void show(void);
+		
 	private:
 		void (*onNote)(u8);
 		void (*onRelease)(u8, bool);

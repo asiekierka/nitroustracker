@@ -88,3 +88,5 @@
 96=392e5b ; Text entry modifier keys
 97=14ff8b ; Text entry pressed keys
 98=000000 ; Text entry key labels
+108=14ff8b ; FX input keyboard command description label
+109=5a4a84 ; FX input keyboard command description label (disabled)

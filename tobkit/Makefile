@@ -203,6 +203,13 @@ $(BUILDDIR)/fonts/font_8x11.raw.o : fonts/font_8x11.png fonts/font_8x11.png.txt
 	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $(basename $(basename $@)).raw $(@D)
 	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.c
 
+$(BUILDDIR)/fonts/font_3x5.raw.o : fonts/font_3x5.png
+	@echo $(notdir $<)
+	@$(MKDIR) -p $(@D)
+	$(V)python3 $(TOOLSDIR)/font_3x5_pack.py $< $(basename $(basename $@)).raw
+	$(V)$(BLOCKSDS)/tools/bin2c/bin2c $(basename $(basename $@)).raw $(@D)
+	$(V)$(CC) $(CFLAGS) -MMD -MP -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.c
+
 $(BUILDDIR)/%.raw.o : %.png
 	@echo $(notdir $<)
 	@$(MKDIR) -p $(@D)

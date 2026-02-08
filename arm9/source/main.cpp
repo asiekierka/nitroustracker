@@ -25,7 +25,7 @@
 // #define SHOW_ALL_SETTINGS
 #define GURU // Show guru meditations
 #define USE_FAT
-// #define ENABLE_EFFECT_MENU
+#define ENABLE_EFFECT_MENU
 
 #include <nds.h>
 #include <nds/arm9/console.h>
@@ -49,6 +49,8 @@
 #include "tobkit/patternview.h"
 #include "tobkit/normalizebox.h"
 #include "tobkit/themeselectorbox.h"
+#include "tobkit/fxkeyboard.h"
+#include "tobkit/digitbox.h"
 using namespace tobkit;
 
 #include <ntxm/fifocommand.h>
@@ -141,14 +143,15 @@ u16 mykey_LEFT = KEY_LEFT, mykey_UP = KEY_UP, mykey_RIGHT = KEY_RIGHT, mykey_DOW
 GUI *gui;
 
 // <Misc GUI>
-	Button *buttonrenameinst, *buttonrenamesample, *buttontest, *buttonstopnote, *buttonemptynote, *buttondelnote, *buttoninsnote2,
-		*buttondelnote2, *buttoninsnote;
+	Button *buttonrenameinst, *buttonrenamesample, *buttontest, *buttonstopnote, *buttoncpprm, *buttonemptynote, *buttonemptyfx, *buttondelnote, *buttoninsnote2,
+		*buttondelnote2, *buttoninsnote, *buttonlerpfx;
 	BitButton *buttonswitchsub, *buttonplay, *buttonstop, *buttonpause;
 	CheckBox *cbscrolllock;
 	ToggleButton *tbrecord, *tbmultisample;
-	Label *labeladd, *labeloct;
-	NumberBox *numberboxadd, *numberboxoctave;
+	Label *labeladd, *labeloct, *labelfxcat, *labelfxop, *labeleffectpar;
+	NumberBox *numberboxadd, *numberboxoctave, *numberboxfxcat;
 	Piano *kb;
+	FXKeyboard *fxkb;
 	ListBox *lbinstruments, *lbsamples;
 	TabBox *tabbox;
 	GradientIcon *pixmaplogo;
@@ -228,12 +231,14 @@ GUI *gui;
 // <Main Screen>
 	Button *buttonins, *buttondel, *buttonstopnote2, *buttoncolselect, *buttonemptynote2, *buttonunmuteall;
 	BitButton *buttonswitchmain;
-	Button *buttoncut, *buttoncopy, *buttonpaste, *buttonsetnotevol, *buttonseteffectcmd, *buttonseteffectpar;
+	Button *buttoncut, *buttoncopy, *buttonpaste, *buttonsetnotevol;
 	Button *buttontransposedown, *buttontransposeup;
+	Button *buttonseteffectpar;
 	BitButton *buttonundo, *buttonredo;
 	PatternView *pv;
-	NumberSlider *nsnotevolume, *nseffectcmd, *nseffectpar;
-	Label *labelnotevol, *labeleffectcmd, *labeleffectpar, *labeltranspose;
+	NumberSlider *nsnotevolume;
+	DigitBox *dbeffectpar;
+	Label *labelnotevol, *labeleffectcmd, *labeltranspose;
 	CheckBox *cbtoggleeffects;
 // </Main Screen>
 
@@ -275,6 +280,8 @@ void showMessage(const char *msg, bool error);
 void deleteMessageBox(void);
 void stopPlay(void);
 void setHasUnsavedChanges(bool unsaved);
+void handleClearFx(void);
+
 
 
 #ifdef DEBUG
@@ -294,13 +301,8 @@ void clearSubScreen(void)
 {
 	u16 col = settings->getTheme()->col_bg;
 	u32 colcol = col | col << 16;
-	// Fill the bg with the bg color except for the place where the keyboard is
-	dmaFillWords(colcol, sub_vram, 256 * 153 * 2);
-	for(int y=153;y<192;++y)
-	{
-		dmaFillWords(0, sub_vram + (256*y), 224 * 2);
-		dmaFillWords(colcol, sub_vram + (256*y) + 224, (256 - 224) * 2);
-	}
+	// Fill the bg with the bg color
+	dmaFillWords(colcol, sub_vram, 256 * 192 * 2);
 }
 
 void drawSampleNumbers(void)
@@ -825,6 +827,11 @@ void setSong(Song *newsong)
 	drawMainScreen();
 }
 
+bool areScreensSwapped(void)
+{
+	return !(REG_POWERCNT & POWER_SWAP_LCDS);
+}
+
 bool loadSample(const char *filename_with_path)
 {
 	const char *filename = strrchr(filename_with_path, '/') + 1;
@@ -1216,6 +1223,29 @@ void stopNoteStroke(void) {
 	redraw_main_requested = true;
 }
 
+void copyFxParam(void) {
+	u16 sel_x1, sel_y1, sel_x2, sel_y2;
+	uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, false);
+
+	// if multiple cells are selected, it's ambiguous which one they want to
+	// get the param of
+	if (sel_x1 != sel_x2 || sel_y1 != sel_y2)
+		return;
+
+	Cell targetcell = song->getPattern(song->getPotEntry(state->potpos))[sel_x1][sel_y1];
+
+	u8 prm = targetcell.effect_param;
+	u8 prm2 = targetcell.effect2_param; // if no main param
+
+	if (prm == 0 && prm2 != 0)
+		dbeffectpar->setValue(prm2);
+	else
+		dbeffectpar->setValue(prm);
+
+
+	redraw_main_requested = true;
+}
+
 static void actionBufferChangeCallback(void) {
 	buttonundo->set_enabled(action_buffer->can_undo());
 	buttonredo->set_enabled(action_buffer->can_redo());
@@ -1265,6 +1295,12 @@ void changeOctave(u8 newoctave)
 
 	if(lbsamples->is_visible() == true)
 		drawSampleNumbers();
+}
+
+void handleEffectsCategoryChange(u8 newcat)
+{
+	fxkb->setCategory(newcat);
+	dbeffectpar->setSingleDigit(newcat == FX_CATEGORY_E);
 }
 
 
@@ -1433,7 +1469,10 @@ void updateGuiToNewPattern(u8 newpattern)
 
 // Callback called from song when the pot element changes during playback
 void handlePotPosChangeFromSong(u16 newpotpos)
-{
+{	
+	if (newpotpos != state->potpos)
+			pv->clearSelection();
+			
 	if (state->queued_potpos >= 0) {
 		state->potpos = state->queued_potpos;
 		state->setPlaybackRow(0);
@@ -2037,7 +2076,7 @@ void setEffectCommand(u16 eff)
 	}
 }
 
-void setEffectParam(u16 eff_par)
+void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false, bool overwrite=true)
 {
 	u16 sel_x1, sel_y1, sel_x2, sel_y2;
 	uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, false);
@@ -2048,7 +2087,41 @@ void setEffectParam(u16 eff_par)
 			for (u16 row = sel_y1; row <= sel_y2; row++)
 			{
 				Cell cell = song->getPattern(song->getPotEntry(state->potpos))[chn][row];
-				cell.effect_param = eff_par;
+
+				bool cell_has_param = cell.effect_param != 0xff && cell.effect_param != 0x0;
+				
+
+				if (force_clear)
+					eff_par = 0x00;
+				// this gets messy because Exy commands use the param for both command and param info D:
+				else if (fxkb->getCategory() == FX_CATEGORY_E)
+				{
+					u8 ecmd_cmd = eff_par & 0xF0;
+					u8 ecmd_par = eff_par & 0x0F;
+
+					if (new_e_cmd) {
+						// if existing fx parameter in cell, only update the E command (the first digit)
+						if (cell_has_param) {
+							ecmd_cmd = eff_par & 0xF0;
+							ecmd_par = cell.effect_param & 0x0F;
+						}
+					} else {
+						// ..or if only new param, only alter the second digit, to keep the E command
+						if (cell_has_param) {
+							ecmd_cmd = cell.effect_param & 0xF0;
+							ecmd_par = eff_par & 0x0F;
+						// ....OR if the cell has no parameter, use whatever E button they last pressed
+						// (otherwise 0)
+						} else {
+							ecmd_cmd = fxkb->getLastCmd() << 4;
+							ecmd_par = eff_par & 0x0F;
+						}
+					}
+
+					eff_par = ecmd_cmd | ecmd_par;
+				}
+
+				if (!cell_has_param || overwrite) cell.effect_param = eff_par;
 				*fill->ptr(chn - sel_x1, row - sel_y1) = cell;
 			}
         action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
@@ -2089,6 +2162,7 @@ void destroyThemeDialog(void)
 	fbtheme = 0;
 	redrawSubScreen();
 }
+
 void reloadSkin(void)
 {
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
@@ -2102,6 +2176,7 @@ void reloadSkin(void)
 	}
 	gui->draw();
 	redrawSubScreen();
+	setRecordMode(state->recording);
 	redraw_main_requested = true;
 }
 
@@ -2185,31 +2260,115 @@ void handleSetNoteVol(void)
 
 void handleToggleEffectsVisibility(bool on)
 {
-  pv->toggleEffectsVisibility(on);
+	pv->toggleEffectsVisibility(on);
+
+	// order of hiding/showing is important to avoid
+	// inappropriate bg overdraw over widgets
+	if (on)
+	{
+		if (tbmultisample->getState())
+			setMultisamplesEnabled(false);
+
+		cbtoggleeffects->setChecked(true);
+
+		kb->hide();
+		kb->disable();
+		
+		labeloct->hide();
+		labelfxcat->show();
+		numberboxoctave->hide();
+		numberboxfxcat->show();
+		fxkb->show();
+		fxkb->enable();
+		fxkb->setCategory(fxkb->getCategory());
+
+		dbeffectpar->show();
+		labeleffectpar->show();
+		buttonseteffectpar->show();
+		
+		buttoninsnote2->hide();
+		buttondelnote2->hide();
+		buttonemptynote->hide();
+		buttonstopnote->hide();
+
+		labelfxop->show();
+		buttonlerpfx->show();
+		buttonemptyfx->show();
+		buttoncpprm->show();
+	}
+	else
+	{
+		cbtoggleeffects->setChecked(false);
+
+		if (!areScreensSwapped())
+			pv->clearSelection();
+
+		kb->show();
+		fxkb->hide();
+		numberboxfxcat->hide();
+		labelfxcat->hide();
+		labeloct->show();
+		numberboxoctave->show();
+		kb->enable();
+		fxkb->disable();
+		dbeffectpar->hide();
+		labeleffectpar->hide();
+		buttonseteffectpar->hide();
+
+		labelfxop->hide();
+		buttonlerpfx->hide();
+		buttonemptyfx->hide();
+		buttoncpprm->hide();
+
+		buttoninsnote2->show();
+		buttondelnote2->show();
+		buttonemptynote->show();
+		buttonstopnote->show();
+	}
+
+	buttonundo->pleaseDraw(); // gets occluded by oct/cat label bg otherwise
+
+	pv->recalcHscroll();
+	setRecordMode(state->recording); // ensure red border gets drawn!
 }
 
-// number slider
-void handleEffectCommandChanged(s32 eff)
+void onFxKeyPressed(u8 val)
+{	
+	if (val == NO_EFFECT || !state->recording) return;
+	// for E effects, the button's val is the E sub-command, rather than just 'E'
+
+	if (fxkb->getCategory() == FX_CATEGORY_E) {
+		setEffectCommand(0xE);
+		setEffectParam((val << 4) | (dbeffectpar->getValue() & 0x0f), true);
+	} else {
+		setEffectCommand(val);
+		setEffectParam(dbeffectpar->getValue(), false, false, false);
+	}
+	
+	pv->clearSelection();
+	handleNoteAdvanceRow();
+}
+
+// box arrows or pen slide
+void handleEffectParamChanged(u8 eff_par)
 {
-	setEffectCommand(eff);
+	if (!state->recording) return;
+	setEffectParam(eff_par, false);
 }
 
-// button
-void handleSetEffectCommand(void)
-{
-	setEffectCommand(nseffectcmd->getValue());
-}
-
-// number slider
-void handleEffectParamChanged(s32 eff_par)
-{
-	setEffectParam(eff_par);
-}
-
-// button
+// "set" button
 void handleSetEffectParam(void)
 {
-	setEffectParam(nseffectpar->getValue());
+	setEffectParam(dbeffectpar->getValue(), false);
+	pv->clearSelection();
+	handleNoteAdvanceRow();
+}
+
+void handleClearFx(void)
+{
+	setEffectParam(0, false, true);
+	setEffectCommand(0xff);
+	pv->clearSelection();
 }
 void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void), void (*clearCallback)(void), void (*cancelCallback)(void))
 {
@@ -2561,10 +2720,12 @@ void switchScreens(void)
 {
 	lcdSwap();
 	gui->switchScreens();
-	pv->clearSelection();
+	if (!fxkb->is_visible())
+		pv->clearSelection();
 	redraw_main_requested = false;
 	drawMainScreen();
 }
+
 
 
 // Create the song and do other init stuff yet to be determined.
@@ -2968,6 +3129,9 @@ void setMultisamplesEnabled(bool show)
 {
 	if (show)
 	{
+		if (fxkb->is_visible())
+			handleToggleEffectsVisibility(false);
+
 		drawSampleNumbers();
 		kb->showKeyLabels();
 		lbinstruments->resize(114, 67);
@@ -2983,6 +3147,55 @@ void setMultisamplesEnabled(bool show)
 	tbmultisample->setCaption(show ? "-" : "+");
 	tbmultisample->setState(show);
 	buttonrenamesample->set_visible(show);
+}
+
+void handleLerp(void)
+{
+	if (!fxkb->is_visible()) return;
+	u16 sel_x1, sel_y1, sel_x2, sel_y2;
+	uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, false);
+	CellArray *fill = new CellArray(sel_x2 - sel_x1 + 1, sel_y2 - sel_y1 + 1);
+
+	Cell start = song->getPattern(song->getPotEntry(state->potpos))[sel_x1][sel_y1];
+	Cell end = song->getPattern(song->getPotEntry(state->potpos))[sel_x2][sel_y2];
+
+	if (sel_x1 != sel_x2)
+	{
+		ntxm_dprintf("select one col only!\n");
+		return;
+	}
+
+	u16 starteff = start.effect_param;
+	u16 endeff = end.effect_param;
+
+	u16 maxeff = std::max(starteff, endeff);
+	u16 mineff = std::min(starteff, endeff);
+
+	u16 diff = std::max(sel_y1, sel_y2) - std::min(sel_y1, sel_y2);
+	u16 step = (maxeff - mineff) / diff;
+	int i = 0;
+	if (fill != NULL && fill->valid())
+	{
+		for (u16 row = sel_y1; row <= sel_y2; row++)
+		{
+			Cell cell = song->getPattern(song->getPotEntry(state->potpos))[sel_x1][row];
+			if (start.effect_param != end.effect_param)
+			{
+				if (starteff < endeff)
+				{
+					cell.effect_param = mineff + (step * i++);
+				}
+				else
+				{
+					cell.effect_param = maxeff - (step * i++);
+				}
+			}
+			*fill->ptr(sel_x1 - sel_x1, row - sel_y1) = cell;
+		}
+		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
+		pv->clearSelection();
+		redraw_main_requested = true;
+	}
 }
 
 void handleToggleMapSamples(bool is_active)
@@ -3163,8 +3376,13 @@ void setupGUI(bool dldi_enabled)
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 
 	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
+	kb->set_overdraw(false);
 	kb->registerNoteCallback(handleNoteStroke);
 	kb->registerReleaseCallback(handleNoteRelease);
+
+	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram, onFxKeyPressed, false);
+	fxkb->set_overdraw(false);
+	
 
 	pixmaplogo = new GradientIcon(98, 1, 80, 17,
 		(const u32*) nitrotracker_logo_raw, &sub_vram);
@@ -3675,8 +3893,11 @@ void setupGUI(bool dldi_enabled)
 	buttonredo         = new BitButton(RIGHT_SIDE_BUTTON_X + RIGHT_SIDE_BUTTON_WIDTH - 14, 127, 14, 12, &sub_vram, icon_redo_raw, 8, 8, 3, 2);
 	buttoninsnote2     = new Button(RIGHT_SIDE_BUTTON_X, 140, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
 	buttondelnote2     = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
+	buttonlerpfx       = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false);
 	buttonemptynote    = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
+	buttonemptyfx      = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false);
 	buttonstopnote     = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
+	buttoncpprm        = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false);
 	buttonrenamesample = new Button(141, 124, 23, 12, &sub_vram, false);
 	buttonrenameinst   = new Button(141, 19 , 23, 12, &sub_vram);
 
@@ -3697,9 +3918,23 @@ void setupGUI(bool dldi_enabled)
 	labeladd->setCaption("add");
 	labeloct = new Label(206, 126, 25, 12, &sub_vram, false, true);
 	labeloct->setCaption("oct");
+	labelfxcat = new Label(206, 126, 25, 12, &sub_vram, false, true);
+	labelfxcat->setCaption("cat");
+	labeleffectpar = new Label(185, 153, 38, 10, &sub_vram, false, true, true);
+	labeleffectpar->set_overdraw(false);
+	labeleffectpar->setCaption("param");
+	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X, 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false, true, true);
+	labelfxop->setCaption("fx op");
+	numberboxfxcat = new NumberBox(206, 135, 18, 17, &sub_vram, 0, 0, 3, 1);
 	numberboxadd    = new NumberBox(185, 135, 18, 17, &sub_vram, state->add, 0, 8, 1);
 	numberboxoctave = new NumberBox(206, 135, 18, 17, &sub_vram, state->basenote/12, 0, 6, 1);
-
+	dbeffectpar	 = new DigitBox(185, 164, 35, 17, &sub_vram, 0, 0, 255, 2);
+	dbeffectpar->set_overdraw(false);
+	dbeffectpar->registerChangeCallback(handleEffectParamChanged);
+	buttonseteffectpar = new Button(185, 180, 35, 10, &sub_vram);
+	buttonseteffectpar->setCaption("set");
+	buttonseteffectpar->set_overdraw(false);
+	buttonseteffectpar->registerPushCallback(handleSetEffectParam);
 	buttonswitchsub->registerPushCallback(switchScreens);
 	buttonplay->registerPushCallback(startPlay);
 	buttonstop->registerPushCallback(stopPlay);
@@ -3709,6 +3944,9 @@ void setupGUI(bool dldi_enabled)
 	buttondelnote2->registerPushCallback(delNote);
 	buttonemptynote->registerPushCallback(emptyNoteStroke);
 	buttonstopnote->registerPushCallback(stopNoteStroke);
+	buttonlerpfx->registerPushCallback(handleLerp);
+	buttonemptyfx->registerPushCallback(handleClearFx);
+	buttoncpprm->registerPushCallback(copyFxParam);
 	buttonrenameinst->registerPushCallback(showTypewriterForInstRename);
 	buttonrenamesample->registerPushCallback(showTypewriterForSampleRename);
 
@@ -3716,6 +3954,7 @@ void setupGUI(bool dldi_enabled)
 
 	numberboxadd->registerChangeCallback(changeAdd);
 	numberboxoctave->registerChangeCallback(changeOctave);
+	numberboxfxcat->registerChangeCallback(handleEffectsCategoryChange);
 
 	lbinstruments->registerChangeCallback(handleInstChangeReset);
 	lbsamples->registerChangeCallback(handleSampleChange);
@@ -3724,6 +3963,9 @@ void setupGUI(bool dldi_enabled)
 	buttondelnote2->setCaption("del");
 	buttonemptynote->setCaption("clr");
 	buttonstopnote->setCaption("--");
+	buttonlerpfx->setCaption("lerp");
+	buttonemptyfx->setCaption("clr");
+	buttoncpprm->setCaption("get");
 	buttonrenameinst->setCaption("ren");
 	buttonrenamesample->setCaption("ren");
 
@@ -3755,31 +3997,9 @@ void setupGUI(bool dldi_enabled)
 		buttontransposeup->setCaption("+");
 		buttontransposeup->registerPushCallback(handleTransposeUp);
 
-#ifdef ENABLE_EFFECT_MENU
-		cbtoggleeffects = new CheckBox(195, 32, 30, 12, &main_vram_back, true, true, true);
+		cbtoggleeffects = new CheckBox(157, 138, 24, 12, &sub_vram, true, false, true);
 		cbtoggleeffects->setCaption("fx");
 		cbtoggleeffects->registerToggleCallback(handleToggleEffectsVisibility);
-
-		labeleffectcmd = new Label(200, 44, 23, 10, &main_vram_back, false, true);
-		labeleffectcmd->setCaption("cmd");
-
-		nseffectcmd	= new NumberSlider(196, 54, 28, 17, &main_vram_back, 0, -1, 26, true, true);
-		nseffectcmd->registerPostChangeCallback(handleEffectCommandChanged);
-
-		buttonseteffectcmd = new Button(196, 70, 28, 12, &main_vram_back);
-		buttonseteffectcmd->setCaption("set");
-		buttonseteffectcmd->registerPushCallback(handleSetEffectCommand);
-
-		labeleffectpar = new Label(200, 84, 23, 10, &main_vram_back, false, true);
-		labeleffectpar->setCaption("val");
-
-		nseffectpar	= new NumberSlider(196, 94, 28, 17, &main_vram_back, 0, 0, 255, true, true);
-		nseffectpar->registerPostChangeCallback(handleEffectParamChanged);
-
-		buttonseteffectpar = new Button(196, 110, 28, 12, &main_vram_back);
-		buttonseteffectpar->setCaption("set");
-		buttonseteffectpar->registerPushCallback(handleSetEffectParam);
-#endif
 
 		//buttoncut         = new BitButton(232,  52, 22, 21, &main_vram_back, icon_cut_raw, 16, 16, 3, 2);
 		//buttoncopy        = new BitButton(232,  74, 22, 21, &main_vram_back, icon_copy_raw, 16, 16, 3, 3);
@@ -3827,17 +4047,7 @@ void setupGUI(bool dldi_enabled)
 		/* gui->registerWidget(labeltranspose, 0, MAIN_SCREEN); */
 		gui->registerWidget(buttontransposedown, 0, MAIN_SCREEN);
 		gui->registerWidget(buttontransposeup, 0, MAIN_SCREEN);
-#ifdef ENABLE_EFFECT_MENU
-		gui->registerWidget(cbtoggleeffects, 0, MAIN_SCREEN);
-		gui->registerWidget(labeleffectcmd, 0, MAIN_SCREEN);
-		gui->registerWidget(nseffectcmd, 0, MAIN_SCREEN);
-		gui->registerWidget(buttonseteffectcmd, 0, MAIN_SCREEN);
-		gui->registerWidget(labeleffectpar, 0, MAIN_SCREEN);
-		gui->registerWidget(nseffectpar, 0, MAIN_SCREEN);
-		gui->registerWidget(buttonseteffectpar, 0, MAIN_SCREEN);
-#else
-		pv->toggleEffectsVisibility(false);
-#endif
+		gui->registerWidget(cbtoggleeffects, 0, SUB_SCREEN);
 		gui->registerWidget(buttoncut, 0, MAIN_SCREEN);
 		gui->registerWidget(buttoncopy, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonpaste, 0, MAIN_SCREEN);
@@ -3859,14 +4069,24 @@ void setupGUI(bool dldi_enabled)
 	gui->registerWidget(buttonredo, 0, SUB_SCREEN);
 	gui->registerWidget(buttoninsnote2, 0, SUB_SCREEN);
 	gui->registerWidget(buttondelnote2, 0, SUB_SCREEN);
+	gui->registerWidget(buttonlerpfx, 0, SUB_SCREEN);
+	gui->registerWidget(buttonemptyfx, 0, SUB_SCREEN);
+	gui->registerWidget(buttoncpprm, 0, SUB_SCREEN);
 	gui->registerWidget(buttonrenameinst, 0, SUB_SCREEN);
 	gui->registerWidget(buttonrenamesample, 0, SUB_SCREEN);
 	gui->registerWidget(tbmultisample, 0, SUB_SCREEN);
 	gui->registerWidget(numberboxadd, 0, SUB_SCREEN);
 	gui->registerWidget(numberboxoctave, 0, SUB_SCREEN);
+	gui->registerWidget(numberboxfxcat, 0, SUB_SCREEN);
+	gui->registerWidget(dbeffectpar, 0, SUB_SCREEN);
+	gui->registerWidget(buttonseteffectpar, 0, SUB_SCREEN);
+	gui->registerWidget(labelfxop, 0, SUB_SCREEN);
+	gui->registerWidget(labelfxcat, 0, SUB_SCREEN);
+	gui->registerWidget(labeleffectpar, 0, SUB_SCREEN);
 	gui->registerWidget(labeladd, 0, SUB_SCREEN);
 	gui->registerWidget(labeloct, 0, SUB_SCREEN);
 	gui->registerWidget(kb, 0, SUB_SCREEN);
+	gui->registerWidget(fxkb, 0, SUB_SCREEN);
 	gui->registerWidget(buttonstopnote, 0, SUB_SCREEN);
 	gui->registerWidget(tbrecord, 0, SUB_SCREEN);
 	gui->registerWidget(pixmaplogo, 0, SUB_SCREEN);
@@ -3875,12 +4095,12 @@ void setupGUI(bool dldi_enabled)
 	gui->registerWidget(lbsamples, 0, SUB_SCREEN);
 
 	gui->revealAll();
-
 	handleSampleChange(0); // disable samp ed buttons at first as we have no sample!
 	actionBufferChangeCallback();
 	updateTempoAndBpm();
 	handleLinesBeatChange(settings->getLinesPerBeat());
 	setHasUnsavedChanges(false);
+	handleToggleEffectsVisibility(false);
 
 	gui->drawSubScreen(); // GUI
 	drawMainScreen(); // Pattern view. The function also flips buffers
