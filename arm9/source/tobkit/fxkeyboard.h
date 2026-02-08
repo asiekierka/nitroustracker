@@ -103,7 +103,7 @@ namespace tobkit {
 		u8 fxkb_state[NUM_FXKEYS] = { 0 };
 		u8 fxkb_vals[NUM_FXKEYS] = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xf };
 
-		u16 labels_cat0 = 0x04f1; // whether to show "XX" or "XY" on an fx key
+		u16 labels_cat0 = 0b10011110001; // whether to show "XX" or "XY" on an fx key
 
 		char* caption;
 		bool darken_title;
