@@ -57,7 +57,7 @@ with open(sys.argv[2], "wb") as fp:
 					v = v | (1 << ix)
 					if (ix + 1) > width:
 						width = ix + 1
-			for ix in range(0, font_width, 8):
+			for ix in range(0, font_width, font_width):
 				fp.write(struct.pack("<B", (v >> ix) & 255))
 		if width == 0:
 			width = space_width
