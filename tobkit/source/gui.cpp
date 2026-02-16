@@ -30,6 +30,7 @@ GUI::GUI()
 	for(i=0;i<14;++i) {
 		shortcuts.push_back(0);
 	}
+	onOverlayChanged = 0;
 }
 
 // Sets the theme - mandatory!
@@ -103,8 +104,10 @@ void GUI::unregisterWidget(Widget *w)
 void GUI::registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen)
 {
 	if(screen == SUB_SCREEN) {
+		onOverlayChanged(SUB_SCREEN, true);
 		overlayWidgetSub = w;
 	} else {
+		onOverlayChanged(MAIN_SCREEN, true);
 		overlayWidgetMain = w;
 	}
 	overlayShortcuts = listeningButtons;
@@ -116,11 +119,13 @@ void GUI::registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen)
 void GUI::unregisterOverlayWidget(u8 screen)
 {
 	if(screen == SUB_SCREEN) {
+		onOverlayChanged(SUB_SCREEN, false);
 	        if(activeWidget==overlayWidgetSub) {
 		  activeWidget = 0;
 	        }
 		overlayWidgetSub = 0;
 	} else {
+		onOverlayChanged(MAIN_SCREEN, false);
 	        if(activeWidget==overlayWidgetMain) {
 		  activeWidget = 0;
 		}
@@ -128,6 +133,19 @@ void GUI::unregisterOverlayWidget(u8 screen)
 	}
 	overlayShortcuts = 0;
 }
+
+bool GUI::hasOverlayWidget(u8 screen)
+{
+	if (screen == SUB_SCREEN)
+		return overlayWidgetSub != NULL;
+	else
+		return overlayWidgetMain != NULL;
+}
+
+void GUI::setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool))
+{
+	onOverlayChanged = _onOverlayChanged;
+} 
 
 // Event calls
 void GUI::penDown(u8 x, u8 y)

@@ -57,6 +57,12 @@ class GUI {
 		// Remove the overlay widget
 		void unregisterOverlayWidget(u8 screen = SUB_SCREEN);
 
+		// Is there an overlay widget?
+		bool hasOverlayWidget(u8 screen = SUB_SCREEN);
+
+		// Event handler for when an overlay widget is about to draw. (so we can clean up widgets underneath)
+		void setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool));
+
 		// Event calls
 		void penDown(u8 x, u8 y);
 		void penUp(u8 x, u8 y); // Remove the coordinates here!
@@ -90,6 +96,7 @@ class GUI {
 		Widget *activeWidget;
 		u8 activeScreen;
 		Widget *overlayWidgetMain, *overlayWidgetSub;
+		void (*onOverlayChanged)(u8, bool);
 		u16 overlayShortcuts;
 		Theme *theme;
 		u16 bgcolor;

@@ -450,7 +450,7 @@ void onKeypress(u8 note)
 
 void onKeyrelease(void)
 {
-	// stop cursor
+	sampledisplay->requestRedraw();
 }
 
 void handleNoteStroke(u8 note)
@@ -645,7 +645,7 @@ void handleSampleChange(const u16 newsample)
 		return;
 	}
 
-	sampledisplay->setSample(smp);
+	sampledisplay->setSample(smp, newsample, lbinstruments->getidx());
 	sampledisplay->hideLoopPoints();
 	nssamplevolume->setValue( (smp->getVolume()+1)/4 );
 	nspanning->setValue(smp->getPanning()/2);
@@ -748,6 +748,19 @@ void updateTempoAndBpm(void)
 	nbtempo->setValue(song->getTempo());
 }
 
+void cursorTimerHandler(void)
+{
+	sampledisplay->calcCursor();
+}
+
+void startCursorTimer(void)
+{
+	TIMER1_DATA = TIMER_FREQ_64(60); // Call handler every frame
+	TIMER1_CR = TIMER_ENABLE | TIMER_IRQ_REQ | TIMER_DIV_64;
+	irqSet(IRQ_TIMER1, cursorTimerHandler);
+	irqEnable(IRQ_TIMER1);
+}
+
 void setSong(Song *newsong)
 {
 	song = newsong;
@@ -816,7 +829,7 @@ void setSong(Song *newsong)
 
 	inst = song->getInstrument(state->instrument);
 	if(inst != NULL) {
-		sampledisplay->setSample(inst->getSample(state->sample));
+		sampledisplay->setSample(inst->getSample(state->sample), state->sample, state->instrument);
 	}
 
 	strncpy(str, song->getName(), sizeof(str)-1);
@@ -1392,6 +1405,7 @@ void stopPlay(void)
 
 	stop();
 
+	sampledisplay->requestRedraw();
 	buttonpause->hide();
 	buttonplay->show();
 }
@@ -1403,6 +1417,7 @@ void pausePlay(void)
 	// Send stop command
 	CommandStopPlay();
 
+	sampledisplay->requestRedraw();
 	buttonpause->hide();
 	buttonplay->show();
 }
@@ -2963,7 +2978,7 @@ void sample_del_selection(void)
 
 	DC_FlushAll();
 
-	sampledisplay->setSample(smp);
+	sampledisplay->setSample(smp, state->sample, state->instrument);
 	setHasUnsavedChanges(true);
 }
 
@@ -2985,7 +3000,7 @@ void sample_fade_in(void)
 
 	DC_FlushAll();
 
-	sampledisplay->setSample(smp);
+	sampledisplay->setSample(smp, state->sample, state->instrument);
 	setHasUnsavedChanges(true);
 }
 
@@ -3007,7 +3022,7 @@ void sample_fade_out(void)
 
 	DC_FlushAll();
 
-	sampledisplay->setSample(smp);
+	sampledisplay->setSample(smp, state->sample, state->instrument);
 	setHasUnsavedChanges(true);
 }
 
@@ -3032,7 +3047,7 @@ void sample_reverse(void)
 
 	DC_FlushAll();
 
-	sampledisplay->setSample(smp);
+	sampledisplay->setSample(smp, state->sample, state->instrument);
 	setHasUnsavedChanges(true);
 }
 
@@ -3367,6 +3382,19 @@ void sampleDrawToggle(bool on)
 	sampledisplay->setDrawMode(on);
 }
 
+void handleOverlayWidgetChange(u8 screen, bool visible)
+{
+	if (screen == SUB_SCREEN)
+	{
+		if (sampledisplay != NULL && sampledisplay->is_visible())
+		{
+			if (visible) sampledisplay->hideCursor();
+			else sampledisplay->showCursor();
+			sampledisplay->pleaseDraw();
+		}
+	}
+}
+
 #define RIGHT_SIDE_BUTTON_WIDTH 30
 #define RIGHT_SIDE_BUTTON_X 225
 
@@ -3374,6 +3402,7 @@ void setupGUI(bool dldi_enabled)
 {
 	gui = new GUI();
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
+	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
 	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
 	kb->set_overdraw(false);
@@ -4220,6 +4249,9 @@ void VblankHandler(void)
 	u16 keysup = keysUp();
 	u16 keysheld = keysHeld();
 	touchRead(&touch);
+	
+	if (sampledisplay != NULL && !gui->hasOverlayWidget(SUB_SCREEN))
+		sampledisplay->pleaseDraw();
 
 
 	if(keysdown & KEY_TOUCH)
@@ -4530,6 +4562,12 @@ int main(int argc, char **argv) {
 	CommandSetSong(song);
 
 	setupGUI(fat_success);
+
+	startCursorTimer();
+	SampleCursor *scursors = (SampleCursor*)ntxm_ccalloc(MAX_CHANNELS, sizeof(SampleCursor));
+	CommandSetCursorPosPtr(scursors);
+	sampledisplay->setCursorPosPtr((SampleCursor*)memUncached(scursors));
+	
 	action_buffer->register_change_callback({&actionBufferChangeCallback});
 
 	applySettings();
