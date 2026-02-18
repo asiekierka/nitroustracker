@@ -40,7 +40,7 @@ namespace tobkit {
 
 #define SCROLLPIXELS				25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH		15
-#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-3) // height of the visible window
+#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-2) // height of the visible window
 
 class SampleDisplay: public Widget {
 	public:

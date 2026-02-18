@@ -657,7 +657,8 @@ void handleSampleChange(const u16 newsample)
 	else
 		rbg_sampleloop->setActive(0);
 		
-	updateKeyLabels();
+	if (fxkb->is_visible()) updateKeyLabels();
+	
 	if (!had_changes) setHasUnsavedChanges(false);
 	/*
 	printf("Selected:");

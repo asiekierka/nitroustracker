@@ -262,7 +262,7 @@ void SampleDisplay::calcCursor()
 		u8& looprev = playingNote->looprev;
 		u64& playpos = playingNote->playbackpos;
 
-		const u64 step = (((u64)(smp->getPlaybackFreq(playingNote->note)) /* * (u64)n_ticks */) << 32) / 60; // timer
+		const u64 step = (((u64)(playingNote->playbackfreq) /* * (u64)n_ticks */) << 32) / 60; // timer
 
 		// are we going backwards?
 		if (looprev) {
