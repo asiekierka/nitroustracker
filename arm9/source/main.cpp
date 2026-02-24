@@ -450,7 +450,6 @@ void onKeypress(u8 note)
 
 void onKeyrelease(void)
 {
-	sampledisplay->requestRedraw();
 }
 
 void handleNoteStroke(u8 note)
@@ -660,21 +659,13 @@ void handleSampleChange(const u16 newsample)
 	if (fxkb->is_visible()) updateKeyLabels();
 	
 	if (!had_changes) setHasUnsavedChanges(false);
-	/*
-	printf("Selected:");
-	if(smp->is16bit()) {
-		printf("16bit ");
-	} else {
-		printf("8bit ");
-	}
-	if(smp->getLoop() != 0) {
-		printf("looping ");
-	}
-	printf("Sample.\n");
-	printf("length: %u\n", smp->getNSamples());
-	*/
 }
 
+void handleCursorUpdate(u8 chn, u8 x, bool shouldHide)
+{
+	bool hide = shouldHide || gui->hasOverlayWidget(SUB_SCREEN);
+	oamSub.oamMemory[chn].x = hide ? 199 : x-3; // can't hide sprites if we scale them, so let's just draw them offscreen
+}
 
 void volEnvSetInst(Instrument *inst)
 {
@@ -761,6 +752,8 @@ void startCursorTimer(void)
 	irqSet(IRQ_TIMER1, cursorTimerHandler);
 	irqEnable(IRQ_TIMER1);
 }
+
+
 
 void setSong(Song *newsong)
 {
@@ -1406,7 +1399,6 @@ void stopPlay(void)
 
 	stop();
 
-	sampledisplay->requestRedraw();
 	buttonpause->hide();
 	buttonplay->show();
 }
@@ -1418,7 +1410,6 @@ void pausePlay(void)
 	// Send stop command
 	CommandStopPlay();
 
-	sampledisplay->requestRedraw();
 	buttonpause->hide();
 	buttonplay->show();
 }
@@ -2190,6 +2181,9 @@ void reloadSkin(void)
 		u32 colcol = col | col << 16;
 		dmaFillWords(colcol, sub_vram + (256 * y) + 224, (256 - 224) * 2);
 	}
+
+	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+
 	gui->draw();
 	redrawSubScreen();
 	setRecordMode(state->recording);
@@ -3383,19 +3377,6 @@ void sampleDrawToggle(bool on)
 	sampledisplay->setDrawMode(on);
 }
 
-void handleOverlayWidgetChange(u8 screen, bool visible)
-{
-	if (screen == SUB_SCREEN)
-	{
-		if (sampledisplay != NULL && sampledisplay->is_visible())
-		{
-			if (visible) sampledisplay->hideCursor();
-			else sampledisplay->showCursor();
-			sampledisplay->pleaseDraw();
-		}
-	}
-}
-
 #define RIGHT_SIDE_BUTTON_WIDTH 30
 #define RIGHT_SIDE_BUTTON_X 225
 
@@ -3403,7 +3384,6 @@ void setupGUI(bool dldi_enabled)
 {
 	gui = new GUI();
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
-	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
 	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
 	kb->set_overdraw(false);
@@ -3413,6 +3393,7 @@ void setupGUI(bool dldi_enabled)
 	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram, onFxKeyPressed, false);
 	fxkb->set_overdraw(false);
 	
+	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
 
 	pixmaplogo = new GradientIcon(98, 1, 80, 17,
 		(const u32*) nitrotracker_logo_raw, &sub_vram);
@@ -4250,10 +4231,8 @@ void VblankHandler(void)
 	u16 keysup = keysUp();
 	u16 keysheld = keysHeld();
 	touchRead(&touch);
-	
-	if (sampledisplay != NULL && !gui->hasOverlayWidget(SUB_SCREEN))
-		sampledisplay->pleaseDraw();
 
+	oamUpdate(&oamSub);
 
 	if(keysdown & KEY_TOUCH)
 	{
@@ -4461,10 +4440,11 @@ int main(int argc, char **argv) {
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE);
 
 	// Sub screen: Keyboard tiles, Typewriter tiles and ERB
-	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE);
+	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D);
 
 	vramSetPrimaryBanks(VRAM_A_MAIN_BG_0x06000000, VRAM_B_MAIN_BG_0x06020000,
-	           VRAM_C_SUB_BG_0x06200000 , VRAM_D_LCD);
+	           VRAM_C_SUB_BG_0x06200000 , VRAM_D_SUB_SPRITE);
+
 
 	// SUB_BG0 for Piano Tiles
 	videoBgEnableSub(0);
@@ -4493,6 +4473,34 @@ int main(int argc, char **argv) {
 	int sub_bg = bgInitSub(2, BgType_Bmp16, BgSize_B16_256x256, 2, 0);
 	bgSetPriority(sub_bg, 0);
 
+	oamInit(&oamSub, SpriteMapping_1D_32, false);
+
+	windowEnableSub(WINDOW_0);
+
+	bgWindowEnable(sub_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+
+	windowSetBoundsSub(WINDOW_0, 4, 24, 4+128, 23+61); // sampledisplay x1,y1,x2,y2
+	oamWindowEnable(&oamSub, WINDOW_0);
+
+	u16 *gfxSub = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
+
+	*(gfxSub+64)=1;
+	// *(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+	oamSub.oamRotationMemory[0].vdy = 0; // max y scale
+
+	for (int c=0;c<16;++c)
+	{
+		oamSet(&oamSub, c, 256, 23, 0, 0, 
+		SpriteSize_16x32,
+		   SpriteColorFormat_16Color,
+		   gfxSub, 
+		   0, true, false, false, false, false);
+	}
+
+	//for (int i=0;i<16;++i) oamSetHidden(&oamSub, i, true); // using hide=true in oamSet makes the draw broken fsr
+	
 	// Special effects
 #ifdef DEBUG
 	REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG0 | BLEND_DST_BG2;
@@ -4563,15 +4571,18 @@ int main(int argc, char **argv) {
 	CommandSetSong(song);
 
 	setupGUI(fat_success);
-
+	
 	startCursorTimer();
 	SampleCursor *scursors = (SampleCursor*)ntxm_ccalloc(MAX_CHANNELS, sizeof(SampleCursor));
 	CommandSetCursorPosPtr(scursors);
 	sampledisplay->setCursorPosPtr((SampleCursor*)memUncached(scursors));
-	
+	sampledisplay->setOnCursorUpdate(handleCursorUpdate);
+
 	action_buffer->register_change_callback({&actionBufferChangeCallback});
 
 	applySettings();
+
+	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
 	setSong(song);
 
 #ifndef DEBUG

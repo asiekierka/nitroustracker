@@ -37,13 +37,13 @@ using namespace tobkit;
 // Constructor sets base variables
 SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, Sample *_smp)
 	:Widget(_x, _y, _width, _height, _vram),
-	smp(_smp), smpidx(0), instidx(0),
+	smp(_smp),
 	selstart(0), selend(0), selection_exists(false), pen_is_down(false), active(false), loop_points_visible(false),
 	pen_on_loop_start_point(false), pen_on_loop_end_point(false),
 	pen_on_zoom_in(false), pen_on_zoom_out(false),
 	pen_on_scroll_left(false), pen_on_scroll_right(false), pen_on_scrollthingy(false), pen_on_scrollbar(false),
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
-	snap_to_zero_crossings(true), draw_mode(false), cursor_draw_mode(true), do_redraw(true)
+	snap_to_zero_crossings(true), draw_mode(false)
 {
 
 }
@@ -51,6 +51,11 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, S
 SampleDisplay::~SampleDisplay(void)
 {
 
+}
+
+void SampleDisplay::setOnCursorUpdate(void(*_onCursorUpdate)(u8, u8, bool))
+{
+	onCursorUpdate = _onCursorUpdate;
 }
 
 void SampleDisplay::penDown(u8 px, u8 py)
@@ -113,7 +118,7 @@ void SampleDisplay::penDown(u8 px, u8 py)
 		else if(active) {
 			selstart = selend = pixelToSample(px - x);
 			selection_exists = false;
-			requestRedraw();
+			draw();
 		}
 	}
 }
@@ -129,14 +134,14 @@ void SampleDisplay::penUp(u8 px, u8 py)
 
 	if( pen_on_zoom_in || pen_on_zoom_out || pen_on_scroll_left || pen_on_scroll_right || pen_on_scrollthingy || pen_on_scrollbar) {
 		pen_on_zoom_in = pen_on_zoom_out = pen_on_scroll_left = pen_on_scroll_right = pen_on_scrollthingy = pen_on_scrollbar = false;
-		requestRedraw();
+		draw();
 	} else if(pen_on_loop_start_point) {
 		if(snap_to_zero_crossings) {
 			s32 oldstart = smp->getLoopStart();
 			s32 zerocrossing = find_zero_crossing_near(smp->getLoopStart());
 			if(zerocrossing != -1) {
 				smp->setLoopStartAndLength(zerocrossing, smp->getLoopLength() - (zerocrossing - oldstart));
-				requestRedraw();
+				draw();
 			}
 		}
 	} else if(pen_on_loop_end_point) {
@@ -150,7 +155,7 @@ void SampleDisplay::penUp(u8 px, u8 py)
 					newlength = 0;
 				}
 				smp->setLoopStartAndLength(newstart, newlength);
-				requestRedraw();
+				draw();
 			}
 		}
 	}
@@ -223,7 +228,7 @@ void SampleDisplay::penMove(u8 px, u8 py)
 		}
 	}
 
-	requestRedraw();
+	draw();
 }
 
 void SampleDisplay::setCursorPosPtr(SampleCursor *cursorpos_)
@@ -231,24 +236,18 @@ void SampleDisplay::setCursorPosPtr(SampleCursor *cursorpos_)
 	cursorpos = cursorpos_;
 }
 
-void tobkit::SampleDisplay::hideCursor(void)
-{
-	cursor_draw_mode = false;
-	requestRedraw();
-}
-
-void tobkit::SampleDisplay::showCursor(void)
-{
-	cursor_draw_mode = true;
-	requestRedraw();
-}
-
 void SampleDisplay::calcCursor()
 {
 	if (smp == 0) return;
 	for (int chn = 0; chn < 16; ++chn)
 	{
-		if (cursorpos[chn].instidx == 255 || !(cursorpos[chn].active)) continue;
+		bool drawCursor = false;
+
+		if (cursorpos[chn].instidx == 255 || !(cursorpos[chn].active)) 
+		{
+			oamSub.oamMemory[chn].x = 256;
+			continue;
+		}
 
 		SampleCursor *playingNote = &cursorpos[chn];
 
@@ -293,10 +292,11 @@ void SampleDisplay::calcCursor()
 				looprev = true;
 			}
 		}
-
+		u16 draw_cursor_at=0;
 		if (looptype == NO_LOOP && playpos >= nsamps) {
-			requestRedraw();
-			continue;
+			cursorpos[chn].active=false;
+			playpos = 0;
+			drawCursor = false;
 		}
 
 		if (looptype != NO_LOOP && looplen <= step && playpos > loopstart)
@@ -305,15 +305,13 @@ void SampleDisplay::calcCursor()
 			else
 				playpos = loopstart + (step % looplen);
 
-		if (looptype == NO_LOOP && playpos >= nsamps)
-			playpos = 0;
+		draw_cursor_at = sampleToPixel(playpos >> 32);
 
-		u16 draw_cursor_at = sampleToPixel(playpos >> 32);
+		if (draw_cursor_at != 0 && cursorpos[chn].instidx == instidx && cursorpos[chn].smpidx == smpidx)
+			drawCursor = true;
 
-		if (draw_cursor_at < width)
-			cursors_xpos[chn] = draw_cursor_at;
-
-		requestRedraw();	
+		if (onCursorUpdate)
+			onCursorUpdate(chn, draw_cursor_at, !(drawCursor && (playpos+step<=nsamps)));
 	}
 
 }
@@ -321,19 +319,21 @@ void SampleDisplay::calcCursor()
 
 void SampleDisplay::setSample(Sample *_smp, u8 _smpidx, u8 _instidx)
 {
-	smpidx = _smpidx;
-	instidx = _instidx;
-
+	bool changed = false;
 	selection_exists = false;
 	selstart = selend = 0;
 	if(_smp == 0) {
 		loop_points_visible = false;
 	}
 
-	if (_smp != smp || instidx != _instidx)
-		requestRedraw();
+	if (smp != _smp || _smpidx != smpidx || instidx != _instidx)
+		changed = true;
 
+	smpidx = _smpidx;
+	instidx = _instidx;
 	smp = _smp;
+
+	if (changed) draw();
 }
 
 void SampleDisplay::select_all(void)
@@ -343,7 +343,7 @@ void SampleDisplay::select_all(void)
 	selection_exists = true;
 	selstart = 0;
 	selend = smp->getNSamples();
-	requestRedraw();
+	draw();
 }
 
 void SampleDisplay::clear_selection(void)
@@ -353,7 +353,7 @@ void SampleDisplay::clear_selection(void)
 	selection_exists = false;
 	selstart = 0;
 	selend = 0;
-	requestRedraw();
+	draw();
 }
 
 bool SampleDisplay::getSelection(u32 *startsample, u32 *endsample)
@@ -376,7 +376,7 @@ void SampleDisplay::pleaseDraw(void)
 void SampleDisplay::setActive(void)
 {
 	active = true;
-	requestRedraw();
+	draw();
 }
 
 void SampleDisplay::setInactive(void)
@@ -384,20 +384,20 @@ void SampleDisplay::setInactive(void)
 	active = false;
 	selection_exists = false;
 	selstart = selend = 0;
-	requestRedraw();
+	draw();
 }
 
 void SampleDisplay::setDrawMode(bool _on)
 {
 	draw_mode = _on;
-	requestRedraw();
+	draw();
 }
 
 void SampleDisplay::showLoopPoints(void)
 {
 	if(loop_points_visible == false) {
 		loop_points_visible = true;
-		requestRedraw();
+		draw();
 	}
 }
 
@@ -406,7 +406,7 @@ void SampleDisplay::hideLoopPoints(void)
 	if(loop_points_visible == true)
 	{
 		loop_points_visible = false;
-		requestRedraw();
+		draw();
 	}
 }
 
@@ -415,15 +415,19 @@ void SampleDisplay::setSnapToZeroCrossing(bool snap)
 	snap_to_zero_crossings = snap;
 }
 
-void SampleDisplay::requestRedraw(void)
-{
-	do_redraw = true;
-}
 
 void SampleDisplay::reveal(void)
 {
-	requestRedraw();
+	oamEnable(&oamSub);
 	Widget::reveal();
+}
+
+void SampleDisplay::occlude(void)
+{
+	//if (onCursorUpdate) for (int i=0;i<16;++i) onCursorUpdate(i, cursors_xpos[i], false);
+	oamDisable(&oamSub);
+
+	Widget::occlude();
 }
 
 /* ===================== PRIVATE ===================== */
@@ -496,10 +500,8 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 
 void SampleDisplay::draw(void)
 {
-	if(!isExposed() || !do_redraw)
+	if(!isExposed())
 		return;
-
-	do_redraw = false;
 
 	// Border
 	if(active==false) {
@@ -613,24 +615,9 @@ void SampleDisplay::draw(void)
 
 		for(s32 i=1; i<s32(width-1); ++i)
 		{
-			bool draw_cursor_here = false;
-
-			for (int k=0;k<16;++k)
-			{
-				if ((s32)cursors_xpos[k] == i)
-				{
-					if (cursorpos[k].smpidx == smpidx && cursorpos[k].instidx == instidx)
-						draw_cursor_here = cursor_draw_mode;
-
-					cursors_xpos[k] = 0;
-					break;
-				}
-			}
-
 			bool draw_selection_here = (draw_selection && i >= selleft && i < selright);
-			u16 colortable_current = draw_cursor_here ? theme->col_env_sustain : (draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform);
-			u16 bg_current = draw_cursor_here ? theme->col_env_sustain : (draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg);
-			
+			u16 colortable_current = draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform;
+			u16 bg_current = draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg;
 			data = &(base[f32toint(pos)]);
 
 			s32 maxsmp = -32767, minsmp = 32767;
@@ -674,24 +661,9 @@ void SampleDisplay::draw(void)
 
 		for(s32 i=1; i<s32(width-1); ++i)
 		{
-			bool draw_cursor_here = false;
-
-			for (int k=0;k<16;++k)
-			{
-				if ((s32)cursors_xpos[k] == i)
-				{
-					if (cursorpos[k].smpidx == smpidx && cursorpos[k].instidx == instidx)
-						draw_cursor_here = cursor_draw_mode;
-
-					cursors_xpos[k] = 0;
-					break;
-				}
-			}
-
 			bool draw_selection_here = (draw_selection && i >= selleft && i < selright);
-			u16 colortable_current = draw_cursor_here ? theme->col_env_sustain : (draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform);
-			u16 bg_current = draw_cursor_here ? theme->col_env_sustain : (draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg);
-
+			u16 colortable_current = draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform;
+			u16 bg_current = draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg;
 			data = &(base[f32toint(pos)]);
 
 			s8 maxsmp = -127, minsmp = 127;
@@ -867,7 +839,7 @@ void SampleDisplay::scroll(u32 newscrollpos)
 	scrollthingypos = scrollpos * scroll_width / (disp_width - window_width);
 
 	calcScrollThingy();
-	requestRedraw();
+	draw();
 }
 
 // Calculate height and position of the scroll thingy

@@ -133,6 +133,7 @@ ColorScheme::ColorScheme() {
 	col_fxkeyboard_cmd_desc_disabled = col_dark_ctrl_disabled;	
 	col_fxkeyboard_minilabel_x = col_pv_notes &~ BIT(15);	
 	col_fxkeyboard_minilabel_y = col_pv_effect &~ BIT(15);
+	col_sample_cursor = col_env_sustain;
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -234,7 +235,7 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	
 	// check if specific colours were specified by the theme
 	// if not replace them with their previous colour from the same theme
-	if (!theme_has_key[99]) theme_cols[99] = theme_cols[3];		// Sample editor zoom buttons
+	if (!theme_has_key[99]) theme_cols[99] 	= theme_cols[3];		// Sample editor zoom buttons
 	if (!theme_has_key[100]) theme_cols[100] = theme_cols[13];	// Message box title gradient col1
 	if (!theme_has_key[101]) theme_cols[101] = theme_cols[14];	// Message box title gradient col2
 	if (!theme_has_key[102]) theme_cols[102] = theme_cols[27];	// Message box title text
@@ -248,6 +249,8 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (!theme_has_key[109]) theme_cols[109] = theme_cols[8];	// Fxkb disabled command desc label
 	if (!theme_has_key[110]) theme_cols[110] = theme_cols[61];	// Fxkb button param label 'X'
 	if (!theme_has_key[111]) theme_cols[111] = theme_cols[67];	// Fxkb button param label 'Y'
+	if (!theme_has_key[112]) theme_cols[112] = theme_cols[38];	// Sample cursor
+
 
 	return true;
 }

@@ -22,7 +22,7 @@ limitations under the License.
 #include "../../arm9/source/tools.h" 
 #include <nds.h>
 
-#define NUM_COLORS 112
+#define NUM_COLORS 113
 
 namespace tobkit {
 
@@ -142,6 +142,7 @@ struct ColorScheme {
 			u16 col_fxkeyboard_cmd_desc_disabled;
 			u16 col_fxkeyboard_minilabel_x;
 			u16 col_fxkeyboard_minilabel_y;
+			u16 col_sample_cursor;
 		};
 	};
 

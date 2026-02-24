@@ -40,7 +40,7 @@ namespace tobkit {
 
 #define SCROLLPIXELS				25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH		15
-#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-2) // height of the visible window
+#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-3) // height of the visible window
 
 class SampleDisplay: public Widget {
 	public:
@@ -55,7 +55,6 @@ class SampleDisplay: public Widget {
 
 		// Drawing request
 		void pleaseDraw(void);
-		void requestRedraw(void);
 		void reveal(void);
 		
 		void setSample(Sample *_smp, u8 smpidx=0, u8 instidx=255);
@@ -64,8 +63,6 @@ class SampleDisplay: public Widget {
 
 		void calcCursor();
 		void setCursorPosPtr(SampleCursor *cursorpos);
-		void hideCursor(void);
-		void showCursor(void);
 
 		// Return start and end sample of selection
 		bool getSelection(u32 *startsample, u32 *endsample);
@@ -81,6 +78,10 @@ class SampleDisplay: public Widget {
 
 		void setSnapToZeroCrossing(bool snap);
 
+		void setOnCursorUpdate(void (*onCursorUpdate)(u8, u8, bool));
+		void (*onCursorUpdate)(u8, u8, bool);
+
+		void occlude(void);
 	private:
 		// Finds a zero corssing in the sample near pos, returns sample when successful, -1 else
 		long find_zero_crossing_near(long pos);
@@ -122,13 +123,10 @@ class SampleDisplay: public Widget {
 		bool snap_to_zero_crossings;
 
 		bool draw_mode;
-		bool cursor_draw_mode;
-		bool do_redraw;
 
 		u8 draw_last_x, draw_last_y;
 
 		SampleCursor *cursorpos;
-		u32 cursors_xpos[16] = {0};
 };
 
 };
