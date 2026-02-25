@@ -709,27 +709,25 @@ void SampleDisplay::draw(void)
 	// Loop Points
 	//
 
+	u32 loop_start_pos = sampleToPixel(smp->getLoopStart());
+	u32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
+
 	if( (loop_points_visible) && (smp->getLoop() != NO_LOOP) && !draw_mode )
 	{
-		u32 loop_start_pos = sampleToPixel(smp->getLoopStart());
-		u32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
+		
 
 		if( (loop_start_pos >= 0) && (loop_start_pos <= width-2) )
 		{
-			oamSetXY(&oamSub, 16, loop_start_pos-4, DRAW_HEIGHT+18);
-			oamSetXY(&oamSub, 17, loop_start_pos-4+8-1, DRAW_HEIGHT+18);
-			oamSetXY(&oamSub, 18, loop_end_pos-4, y);
-			oamSetXY(&oamSub, 19, loop_end_pos-4+8-1, y);
-			oamSetXY(&oamSub, 20, loop_start_pos-5, y);
-			oamSetXY(&oamSub, 21, loop_end_pos-5, y);
+			oamSetXY(&oamSub, 16, loop_start_pos-2, DRAW_HEIGHT+18);
+			oamSetXY(&oamSub, 17, loop_start_pos-2+8-1, DRAW_HEIGHT+18);
+			oamSetXY(&oamSub, 18, loop_end_pos-2, y);
+			oamSetXY(&oamSub, 19, loop_end_pos-2+8-1, y);
+			oamSetXY(&oamSub, 20, loop_start_pos-2-1, y);
+			oamSetXY(&oamSub, 21, loop_end_pos-2-1, y);
 		}
-		else
-			goto delt;
-		
 	}
 	else
 	{
-	delt:
 		oamSetXY(&oamSub, 20, width, y);
 		oamSetXY(&oamSub, 21, width, y);
 	}
