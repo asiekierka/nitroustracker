@@ -712,123 +712,34 @@ void SampleDisplay::draw(void)
 	u32 loop_start_pos = sampleToPixel(smp->getLoopStart());
 	u32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
+	bool draw_loop_end = ( (loop_end_pos >= 0) && (loop_end_pos <= width-2) );
+	bool draw_loop_start = (loop_start_pos >= 0) && (loop_start_pos <= width-2);
+
 	if( (loop_points_visible) && (smp->getLoop() != NO_LOOP) && !draw_mode )
 	{
-		
-
-		if( (loop_start_pos >= 0) && (loop_start_pos <= width-2) )
+		if(draw_loop_start)
 		{
 			oamSetXY(&oamSub, 16, loop_start_pos-2, DRAW_HEIGHT+18);
 			oamSetXY(&oamSub, 17, loop_start_pos-2+8-1, DRAW_HEIGHT+18);
+			oamSetXY(&oamSub, 20, loop_start_pos-2-1, y);
+		}
+		else
+			oamSetXY(&oamSub, 20, width+1, y);
+
+		if(draw_loop_end)
+		{
 			oamSetXY(&oamSub, 18, loop_end_pos-2, y);
 			oamSetXY(&oamSub, 19, loop_end_pos-2+8-1, y);
-			oamSetXY(&oamSub, 20, loop_start_pos-2-1, y);
 			oamSetXY(&oamSub, 21, loop_end_pos-2-1, y);
 		}
+		else
+			oamSetXY(&oamSub, 21, width+1, y);
 	}
-	else
-	{
-		oamSetXY(&oamSub, 20, width, y);
-		oamSetXY(&oamSub, 21, width, y);
-	}
-	oamSetHidden(&oamSub, 16, !loop_points_visible);
-	oamSetHidden(&oamSub, 17, !loop_points_visible);
-	oamSetHidden(&oamSub, 18, !loop_points_visible);
-	oamSetHidden(&oamSub, 19, !loop_points_visible);	
-	// oamSetHidden(&oamSub, 20, !loop_points_visible);
-	// oamSetHidden(&oamSub, 21, !loop_points_visible);
 
-
-	// 	s32 loop_start_pos = sampleToPixel(smp->getLoopStart());
-	// 	s32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
-
-	// 	// Loop Start
-
-
-	// 	if(1)
-	// 	{
-	// 	if( (loop_start_pos >= 0) && (loop_start_pos <= width-2) ) {
-	// 	// Line
-	// 	for(u8 i=1; i<DRAW_HEIGHT+1; ++i)
-	// 		*(*vram+SCREEN_WIDTH*(y+i)+x+loop_start_pos) = theme->col_loop;
-
-	// 	/* unused
-	// 	u8 cutoff = 0;
-	// 	if(loop_start_pos < 1+LOOP_TRIANGLE_SIZE)
-	// 		cutoff = 1+LOOP_TRIANGLE_SIZE - loop_start_pos;
-	// 	*/
-
-	// 	// Left Triangle
-	// 	if(loop_start_pos > 1 + LOOP_TRIANGLE_SIZE)
-	// 	{
-	// 		drawHLine(loop_start_pos-2, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-
-	// 		for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
-	// 		{
-	// 			drawHLine(loop_start_pos-i-2, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, i+2, theme->col_loop);
-	// 			drawPixel(loop_start_pos-i-3, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
-	// 		}
-
-	// 		drawHLine(loop_start_pos-LOOP_TRIANGLE_SIZE+1, DRAW_HEIGHT, LOOP_TRIANGLE_SIZE-1,
-	// 			theme->col_loop);
-	// 		drawPixel(loop_start_pos-LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
-	// 	}
-
-	// 	// Right Triangle
-	// 	if(loop_start_pos < width - 2 - LOOP_TRIANGLE_SIZE)
-	// 	{
-	// 		drawHLine(loop_start_pos+1, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-	// 		for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i) {
-	// 			drawHLine(loop_start_pos+1, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, 2+i, theme->col_loop);
-	// 			drawPixel(loop_start_pos+3+i, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
-	// 		}
-	// 		drawHLine(loop_start_pos+1, DRAW_HEIGHT-LOOP_TRIANGLE_SIZE+LOOP_TRIANGLE_SIZE, LOOP_TRIANGLE_SIZE-1,
-	// 			theme->col_loop);
-	// 		drawPixel(loop_start_pos+LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
-	// 	}
-	// 	}
-	// 	}
-
-	
-	// 	// Loop End
-
-	// 	if( (loop_end_pos >= 0) && (loop_end_pos <= width-2) ) {
-	// 		// Line
-	// 		for(u8 i=1; i<DRAW_HEIGHT+1; ++i)
-	// 			*(*vram+SCREEN_WIDTH*(y+i)+x+loop_end_pos) = theme->col_loop;
-
-	// 		// Left Triangle
-	// 		if(loop_end_pos > 1 + LOOP_TRIANGLE_SIZE)
-	// 		{
-	// 			drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+1, 1, LOOP_TRIANGLE_SIZE-1,
-	// 				theme->col_loop);
-	// 			drawPixel(loop_end_pos-LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
-
-	// 			for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
-	// 			{
-	// 				drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+i+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
-	// 				drawPixel(loop_end_pos-1-LOOP_TRIANGLE_SIZE+i+1, 2+i, theme->col_outline);
-	// 			}
-
-	// 			drawHLine(loop_end_pos-2, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-	// 		}
-
-	// 		// Right Triangle
-	// 		if(loop_end_pos < width-1-LOOP_TRIANGLE_SIZE)
-	// 		{
-	// 			drawHLine(loop_end_pos+1, 1, LOOP_TRIANGLE_SIZE-1, theme->col_loop);
-	// 			drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
-
-	// 			for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
-	// 			{
-	// 				drawHLine(loop_end_pos+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
-	// 				drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE-i, 2+i, theme->col_outline);
-	// 			}
-
-	// 			drawHLine(loop_end_pos+1, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-	// 		}
-	// 	}
-	// }
+	oamSetHidden(&oamSub, 16, !draw_loop_start);
+	oamSetHidden(&oamSub, 17, !draw_loop_start);
+	oamSetHidden(&oamSub, 18, !draw_loop_end);
+	oamSetHidden(&oamSub, 19, !draw_loop_end);	
 
 	//
 	// Zoom buttons

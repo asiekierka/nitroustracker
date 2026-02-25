@@ -4546,7 +4546,7 @@ int main(int argc, char **argv) {
 	for (int i=16;i<20;++i)
 	{
 		oamSet(&oamSub, i,
-		   50, 25,
+		   199, 25,
 		   0,
 		   1,
 		SpriteSize_8x8, SpriteColorFormat_16Color,
@@ -4562,7 +4562,7 @@ int main(int argc, char **argv) {
 	for (int i=20;i<22;++i)
 	{
 		oamSet(&oamSub, i,
-		   50, 25,
+		   199, 0,
 		   0, 
 		   1,
 		SpriteSize_16x32, SpriteColorFormat_16Color,
