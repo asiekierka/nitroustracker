@@ -659,12 +659,25 @@ void handleSampleChange(const u16 newsample)
 	if (fxkb->is_visible()) updateKeyLabels();
 	
 	if (!had_changes) setHasUnsavedChanges(false);
+	/*
+	printf("Selected:");
+	if(smp->is16bit()) {
+		printf("16bit ");
+	} else {
+		printf("8bit ");
+	}
+	if(smp->getLoop() != 0) {
+		printf("looping ");
+	}
+	printf("Sample.\n");
+	printf("length: %u\n", smp->getNSamples());
+	*/
 }
 
 void handleCursorUpdate(u8 chn, u8 x, bool shouldHide)
 {
 	bool hide = shouldHide || gui->hasOverlayWidget(SUB_SCREEN);
-	oamSub.oamMemory[chn].x = hide ? 199 : x-3; // can't hide sprites if we scale them, so let's just draw them offscreen
+	oamSub.oamMemory[chn].x = hide ? 199 : x-3; // can't hide sprites if we scale them, so let's just draw them offscreen	
 }
 
 void volEnvSetInst(Instrument *inst)
@@ -2170,6 +2183,17 @@ void destroyThemeDialog(void)
 	redrawSubScreen();
 }
 
+// TODO this is temp, all this stuff should be in sampledisplay
+void setSpritePals(void)
+{
+	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+
+	// palette index 1
+	*(SPRITE_PALETTE_SUB+2+16) = settings->getTheme()->col_outline;
+	*(SPRITE_PALETTE_SUB+3+16) = settings->getTheme()->col_loop;
+	*(SPRITE_PALETTE_SUB+1+16) = settings->getTheme()->col_loop;
+}
+
 void reloadSkin(void)
 {
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
@@ -2182,7 +2206,7 @@ void reloadSkin(void)
 		dmaFillWords(colcol, sub_vram + (256 * y) + 224, (256 - 224) * 2);
 	}
 
-	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+	setSpritePals();
 
 	gui->draw();
 	redrawSubScreen();
@@ -3393,7 +3417,8 @@ void setupGUI(bool dldi_enabled)
 	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram, onFxKeyPressed, false);
 	fxkb->set_overdraw(false);
 	
-	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+	setSpritePals();
+	
 
 	pixmaplogo = new GradientIcon(98, 1, 80, 17,
 		(const u32*) nitrotracker_logo_raw, &sub_vram);
@@ -4232,7 +4257,6 @@ void VblankHandler(void)
 	u16 keysheld = keysHeld();
 	touchRead(&touch);
 
-	oamUpdate(&oamSub);
 
 	if(keysdown & KEY_TOUCH)
 	{
@@ -4287,6 +4311,9 @@ void VblankHandler(void)
 			fastscroll = false;
 	}
 	
+	oamUpdate(&oamSub);
+
+
 	// Easy Piano pak handling logic
 	if (pianoIsInserted())
 	{
@@ -4481,13 +4508,15 @@ int main(int argc, char **argv) {
 	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
 	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
 
-	windowSetBoundsSub(WINDOW_0, 4, 24, 4+128, 23+61); // sampledisplay x1,y1,x2,y2
+	windowSetBoundsSub(WINDOW_0, 5, 24, 5+129, 23+61); // sampledisplay x1,y1,x2,y2
 	oamWindowEnable(&oamSub, WINDOW_0);
 
-	u16 *gfxSub = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
+	u16 *gfxSampleCursor = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 
-	*(gfxSub+64)=1;
-	// *(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+	u16 *gfxLoopHandles = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
+	
+	*(gfxSampleCursor+64)=1;
+	
 	oamSub.oamRotationMemory[0].vdy = 0; // max y scale
 
 	for (int c=0;c<16;++c)
@@ -4495,9 +4524,57 @@ int main(int argc, char **argv) {
 		oamSet(&oamSub, c, 256, 23, 0, 0, 
 		SpriteSize_16x32,
 		   SpriteColorFormat_16Color,
-		   gfxSub, 
+		gfxSampleCursor, 
 		   0, true, false, false, false, false);
 	}
+
+	const unsigned int loophandleTiles[8] __attribute__((aligned(4)))=
+	{
+		0x22000000,
+		0x33200000,
+		0x33320000,
+		0x33332000,
+		0x33333200,
+		0x33333320,
+		0x33333332,
+		0x33333332
+	};
+
+	memcpy(gfxLoopHandles, loophandleTiles, 32);
+
+	// handles
+	for (int i=16;i<20;++i)
+	{
+		oamSet(&oamSub, i,
+		   50, 25,
+		   0,
+		   1,
+		SpriteSize_8x8, SpriteColorFormat_16Color,
+		gfxLoopHandles,
+		   -1,
+		   false,
+		   false,
+		   i % 2 == 1, i > 17, // h-flip every other handle, v-flip the last two handles
+		   false);
+	}
+
+	// reuse cursors as part of the loop handles
+	for (int i=20;i<22;++i)
+	{
+		oamSet(&oamSub, i,
+		   50, 25,
+		   0, 
+		   1,
+		SpriteSize_16x32, SpriteColorFormat_16Color,
+		gfxSampleCursor, 
+		   0, 
+		   true, 
+		   false,
+		   false, false,
+		   false);
+	}
+
+
 
 	//for (int i=0;i<16;++i) oamSetHidden(&oamSub, i, true); // using hide=true in oamSet makes the draw broken fsr
 	
@@ -4582,7 +4659,8 @@ int main(int argc, char **argv) {
 
 	applySettings();
 
-	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
+	
+
 	setSong(song);
 
 #ifndef DEBUG
