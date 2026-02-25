@@ -674,12 +674,6 @@ void handleSampleChange(const u16 newsample)
 	*/
 }
 
-void handleCursorUpdate(u8 chn, u8 x, bool shouldHide)
-{
-	bool hide = shouldHide || gui->hasOverlayWidget(SUB_SCREEN);
-	oamSub.oamMemory[chn].x = hide ? 199 : x-3; // can't hide sprites if we scale them, so let's just draw them offscreen	
-}
-
 void volEnvSetInst(Instrument *inst)
 {
 	bool had_unsaved = state->unsaved_changes;
@@ -2183,16 +2177,6 @@ void destroyThemeDialog(void)
 	redrawSubScreen();
 }
 
-// TODO this is temp, all this stuff should be in sampledisplay
-void setSpritePals(void)
-{
-	*(SPRITE_PALETTE_SUB+1) = settings->getTheme()->col_sample_cursor;
-
-	// palette index 1
-	*(SPRITE_PALETTE_SUB+2+16) = settings->getTheme()->col_outline;
-	*(SPRITE_PALETTE_SUB+3+16) = settings->getTheme()->col_loop;
-	*(SPRITE_PALETTE_SUB+1+16) = settings->getTheme()->col_loop;
-}
 
 void reloadSkin(void)
 {
@@ -2205,8 +2189,6 @@ void reloadSkin(void)
 		u32 colcol = col | col << 16;
 		dmaFillWords(colcol, sub_vram + (256 * y) + 224, (256 - 224) * 2);
 	}
-
-	setSpritePals();
 
 	gui->draw();
 	redrawSubScreen();
@@ -3401,6 +3383,15 @@ void sampleDrawToggle(bool on)
 	sampledisplay->setDrawMode(on);
 }
 
+void handleOverlayWidgetChange(u8 screen, bool visible)
+{
+	if (screen == SUB_SCREEN)
+	{
+		if (visible) oamDisable(&oamSub);
+		else oamEnable(&oamSub);
+	}
+}
+
 #define RIGHT_SIDE_BUTTON_WIDTH 30
 #define RIGHT_SIDE_BUTTON_X 225
 
@@ -3408,7 +3399,7 @@ void setupGUI(bool dldi_enabled)
 {
 	gui = new GUI();
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
-
+	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
 	kb->set_overdraw(false);
 	kb->registerNoteCallback(handleNoteStroke);
@@ -3416,9 +3407,7 @@ void setupGUI(bool dldi_enabled)
 
 	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram, onFxKeyPressed, false);
 	fxkb->set_overdraw(false);
-	
-	setSpritePals();
-	
+		
 
 	pixmaplogo = new GradientIcon(98, 1, 80, 17,
 		(const u32*) nitrotracker_logo_raw, &sub_vram);
@@ -4500,6 +4489,7 @@ int main(int argc, char **argv) {
 	int sub_bg = bgInitSub(2, BgType_Bmp16, BgSize_B16_256x256, 2, 0);
 	bgSetPriority(sub_bg, 0);
 
+	// Sample display cursors and loop handles
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
 
 	windowEnableSub(WINDOW_0);
@@ -4511,72 +4501,7 @@ int main(int argc, char **argv) {
 	windowSetBoundsSub(WINDOW_0, 5, 24, 5+129, 23+61); // sampledisplay x1,y1,x2,y2
 	oamWindowEnable(&oamSub, WINDOW_0);
 
-	u16 *gfxSampleCursor = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 
-	u16 *gfxLoopHandles = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
-	
-	*(gfxSampleCursor+64)=1;
-	
-	oamSub.oamRotationMemory[0].vdy = 0; // max y scale
-
-	for (int c=0;c<16;++c)
-	{
-		oamSet(&oamSub, c, 256, 23, 0, 0, 
-		SpriteSize_16x32,
-		   SpriteColorFormat_16Color,
-		gfxSampleCursor, 
-		   0, true, false, false, false, false);
-	}
-
-	const unsigned int loophandleTiles[8] __attribute__((aligned(4)))=
-	{
-		0x22000000,
-		0x33200000,
-		0x33320000,
-		0x33332000,
-		0x33333200,
-		0x33333320,
-		0x33333332,
-		0x33333332
-	};
-
-	memcpy(gfxLoopHandles, loophandleTiles, 32);
-
-	// handles
-	for (int i=16;i<20;++i)
-	{
-		oamSet(&oamSub, i,
-		   199, 25,
-		   0,
-		   1,
-		SpriteSize_8x8, SpriteColorFormat_16Color,
-		gfxLoopHandles,
-		   -1,
-		   false,
-		   false,
-		   i % 2 == 1, i > 17, // h-flip every other handle, v-flip the last two handles
-		   false);
-	}
-
-	// reuse cursors as part of the loop handles
-	for (int i=20;i<22;++i)
-	{
-		oamSet(&oamSub, i,
-		   199, 0,
-		   0, 
-		   1,
-		SpriteSize_16x32, SpriteColorFormat_16Color,
-		gfxSampleCursor, 
-		   0, 
-		   true, 
-		   false,
-		   false, false,
-		   false);
-	}
-
-
-
-	//for (int i=0;i<16;++i) oamSetHidden(&oamSub, i, true); // using hide=true in oamSet makes the draw broken fsr
 	
 	// Special effects
 #ifdef DEBUG
@@ -4653,7 +4578,6 @@ int main(int argc, char **argv) {
 	SampleCursor *scursors = (SampleCursor*)ntxm_ccalloc(MAX_CHANNELS, sizeof(SampleCursor));
 	CommandSetCursorPosPtr(scursors);
 	sampledisplay->setCursorPosPtr((SampleCursor*)memUncached(scursors));
-	sampledisplay->setOnCursorUpdate(handleCursorUpdate);
 
 	action_buffer->register_change_callback({&actionBufferChangeCallback});
 

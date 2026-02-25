@@ -33,14 +33,22 @@ namespace tobkit {
 #define LOOP_TRIANGLE_SIZE				8
 #define SNAP_TO_ZERO_CROSSING_RADIUS	32 // Search 32 samples to the left and to the right to find a zero crossing
 
-#define SCROLLBAR_WIDTH				9
-#define SCROLLBUTTON_HEIGHT			9
+#define SCROLLBAR_WIDTH					9
+#define SCROLLBUTTON_HEIGHT				9
 
 #define SAMPLE_MAX_ZOOM					16
 
-#define SCROLLPIXELS				25 // Scroll that many pixels when a scroll button is pressed
-#define MIN_SCROLLTHINGY_WIDTH		15
-#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-3) // height of the visible window
+#define SCROLLPIXELS					25 // Scroll that many pixels when a scroll button is pressed
+#define MIN_SCROLLTHINGY_WIDTH			15
+#define DRAW_HEIGHT						(height-SCROLLBUTTON_HEIGHT-3) // height of the visible window
+
+#define SPR_SCURSOR(n)					(n)
+#define SPR_LOOPHANDLE_1_L				16
+#define SPR_LOOPHANDLE_1_R				17
+#define SPR_LOOPHANDLE_2_L				18
+#define SPR_LOOPHANDLE_2_R				19
+#define SPR_LOOPLINE_1					20
+#define SPR_LOOPLINE_2					21
 
 class SampleDisplay: public Widget {
 	public:
@@ -71,15 +79,14 @@ class SampleDisplay: public Widget {
 		void setActive(void);
 		void setInactive(void);
 
+		void setTheme(Theme *theme_, u16 bgcolor_);
+
 		void setDrawMode(bool _on);
 
 		void showLoopPoints(void);
 		void hideLoopPoints(void);
 
 		void setSnapToZeroCrossing(bool snap);
-
-		void setOnCursorUpdate(void (*onCursorUpdate)(u8, u8, bool));
-		void (*onCursorUpdate)(u8, u8, bool);
 
 		void occlude(void);
 	private:
@@ -127,6 +134,7 @@ class SampleDisplay: public Widget {
 		u8 draw_last_x, draw_last_y;
 
 		SampleCursor *cursorpos;
+		u16 *gfxSampleCursor, *gfxLoopHandles;
 };
 
 };

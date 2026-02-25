@@ -45,17 +45,74 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, S
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
 	snap_to_zero_crossings(true), draw_mode(false)
 {
+	gfxSampleCursor = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 
+	gfxLoopHandles = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
+	
+	*(gfxSampleCursor+64)=1;
+	
+	oamSub.oamRotationMemory[0].vdy = 0; // max y scale
+
+	for (int c=0;c<16;++c)
+	{
+		oamSet(&oamSub, c, 256, 23, 0, 0, 
+		SpriteSize_16x32,
+		   SpriteColorFormat_16Color,
+		gfxSampleCursor, 
+		   0, true, false, false, false, false);
+	}
+
+	const unsigned int loophandleTiles[8] __attribute__((aligned(4)))=
+	{
+		0x22000000,
+		0x33200000,
+		0x33320000,
+		0x33332000,
+		0x33333200,
+		0x33333320,
+		0x33333332,
+		0x33333332
+	};
+
+	memcpy(gfxLoopHandles, loophandleTiles, 32);
+
+	// handles
+	for (int i=SPR_LOOPHANDLE_1_L;i<=SPR_LOOPHANDLE_2_R;++i)
+	{
+		oamSet(&oamSub, i,
+		   199, 25,
+		   0,
+		   1,
+		SpriteSize_8x8, SpriteColorFormat_16Color,
+		gfxLoopHandles,
+		   -1,
+		   false,
+		   false,
+		   i % 2 == 1, i > 17, // h-flip every other handle, v-flip the last two handles
+		   false);
+	}
+
+	// reuse cursors as part of the loop handles
+	for (int i=SPR_LOOPLINE_1;i<=SPR_LOOPLINE_2;++i)
+	{
+		oamSet(&oamSub, i,
+		   199, 0,
+		   0, 
+		   1,
+		SpriteSize_16x32, SpriteColorFormat_16Color,
+		gfxSampleCursor, 
+		   0, 
+		   true, 
+		   false,
+		   false, false,
+		   false);
+	}
 }
 
 SampleDisplay::~SampleDisplay(void)
 {
-
-}
-
-void SampleDisplay::setOnCursorUpdate(void(*_onCursorUpdate)(u8, u8, bool))
-{
-	onCursorUpdate = _onCursorUpdate;
+	oamFreeGfx(&oamSub, gfxSampleCursor);
+	oamFreeGfx(&oamSub, gfxLoopHandles);
 }
 
 void SampleDisplay::penDown(u8 px, u8 py)
@@ -313,8 +370,8 @@ void SampleDisplay::calcCursor()
 		if (draw_cursor_at != 0 && cursorpos[chn].instidx == instidx && cursorpos[chn].smpidx == smpidx)
 			drawCursor = true;
 
-		if (onCursorUpdate)
-			onCursorUpdate(chn, draw_cursor_at, !(drawCursor && (playpos+step<=nsamps)));
+
+		oamSub.oamMemory[chn].x = !drawCursor ? 199 : draw_cursor_at-3;
 	}
 
 }
@@ -390,6 +447,18 @@ void SampleDisplay::setInactive(void)
 	draw();
 }
 
+void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
+{
+	*(SPRITE_PALETTE_SUB+1) = theme_->col_sample_cursor;
+
+	// palette index 1
+	*(SPRITE_PALETTE_SUB+2+16) = theme_->col_outline;
+	*(SPRITE_PALETTE_SUB+3+16) = theme_->col_loop;
+	*(SPRITE_PALETTE_SUB+1+16) = theme_->col_loop;
+
+	Widget::setTheme(theme_, bgcolor_);
+}
+
 void SampleDisplay::setDrawMode(bool _on)
 {
 	draw_mode = _on;
@@ -427,7 +496,6 @@ void SampleDisplay::reveal(void)
 
 void SampleDisplay::occlude(void)
 {
-	//if (onCursorUpdate) for (int i=0;i<16;++i) onCursorUpdate(i, cursors_xpos[i], false);
 	oamDisable(&oamSub);
 
 	Widget::occlude();
@@ -719,27 +787,27 @@ void SampleDisplay::draw(void)
 	{
 		if(draw_loop_start)
 		{
-			oamSetXY(&oamSub, 16, loop_start_pos-2, DRAW_HEIGHT+18);
-			oamSetXY(&oamSub, 17, loop_start_pos-2+8-1, DRAW_HEIGHT+18);
-			oamSetXY(&oamSub, 20, loop_start_pos-2-1, y);
+			oamSetXY(&oamSub, SPR_LOOPHANDLE_1_L, loop_start_pos-2, DRAW_HEIGHT+18);
+			oamSetXY(&oamSub, SPR_LOOPHANDLE_1_R, loop_start_pos-2+8-1, DRAW_HEIGHT+18);
+			oamSetXY(&oamSub, SPR_LOOPLINE_1, loop_start_pos-2-1, y);
 		}
 		else
-			oamSetXY(&oamSub, 20, width+1, y);
+			oamSetXY(&oamSub, SPR_LOOPLINE_1, width+1, y);
 
 		if(draw_loop_end)
 		{
-			oamSetXY(&oamSub, 18, loop_end_pos-2, y);
-			oamSetXY(&oamSub, 19, loop_end_pos-2+8-1, y);
-			oamSetXY(&oamSub, 21, loop_end_pos-2-1, y);
+			oamSetXY(&oamSub, SPR_LOOPHANDLE_2_L, loop_end_pos-2, y);
+			oamSetXY(&oamSub, SPR_LOOPHANDLE_2_R, loop_end_pos-2+8-1, y);
+			oamSetXY(&oamSub, SPR_LOOPLINE_2, loop_end_pos-2-1, y);
 		}
 		else
-			oamSetXY(&oamSub, 21, width+1, y);
+			oamSetXY(&oamSub, SPR_LOOPLINE_2, width+1, y);
 	}
 
-	oamSetHidden(&oamSub, 16, !draw_loop_start);
-	oamSetHidden(&oamSub, 17, !draw_loop_start);
-	oamSetHidden(&oamSub, 18, !draw_loop_end);
-	oamSetHidden(&oamSub, 19, !draw_loop_end);	
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_1_L, !draw_loop_start);
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_1_R, !draw_loop_start);
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_L, !draw_loop_end);
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_R, !draw_loop_end);	
 
 	//
 	// Zoom buttons
