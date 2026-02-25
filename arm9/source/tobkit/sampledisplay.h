@@ -27,6 +27,7 @@
 
 #include "tobkit/widget.h"
 #include "ntxm/sample.h"
+#include "sampleed_zoom.h"
 
 namespace tobkit {
 
@@ -40,7 +41,15 @@ namespace tobkit {
 
 #define SCROLLPIXELS				25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH		15
-#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-2) // height of the visible window
+#define DRAW_HEIGHT					(height-SCROLLBUTTON_HEIGHT-3) // height of the visible window
+
+#define SPR_LOOPHANDLE_1_L				16
+#define SPR_LOOPHANDLE_1_R				17
+#define SPR_LOOPHANDLE_2_L				18
+#define SPR_LOOPHANDLE_2_R				19
+#define SPR_LOOPLINE_1					20
+#define SPR_LOOPLINE_2					21
+#define SPR_ZOOM_BUTTONS				22
 
 class SampleDisplay: public Widget {
 	public:
@@ -75,11 +84,27 @@ class SampleDisplay: public Widget {
 
 		void setSnapToZeroCrossing(bool snap);
 
+		void reveal(void);
+		void occlude(void);
+		void setTheme(Theme *theme_, u16 bgcolor_);
 	private:
 		// Finds a zero corssing in the sample near pos, returns sample when successful, -1 else
 		long find_zero_crossing_near(long pos);
 
 		void draw(void);
+		void drawLoopHandles(void);
+
+		// https://codeberg.org/blocksds/sdk/src/branch/master/examples/graphics_2d/sprites_animated/source/main.c
+		inline void copy_sprite_frame(void *dst, int frame)
+		{
+			uint32_t frame_size = 32 * 16 / 2;
+			uint32_t offset = frame_size * frame;
+			uint8_t *base = (uint8_t *)sampleed_zoomTiles;
+
+			dmaCopy(base + offset, dst, frame_size);
+		}
+		u16 *gfxZoomButtonStates[3];
+		
 		void scroll(u32 newscrollpos);
 		void calcScrollThingy(void);
 		void zoomIn(void);
@@ -118,6 +143,8 @@ class SampleDisplay: public Widget {
 		bool draw_mode;
 
 		u8 draw_last_x, draw_last_y;
+
+		u16 *gfxLoopHandle, *gfxLine, *gfxZoomButtons;
 };
 
 };

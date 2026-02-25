@@ -27,6 +27,7 @@
 #include <cmath>
 #include <cstdio>
 
+#include "loophandle.h"
 #include "ntxm/ntxmtools.h"
 #include "../tools.h"
 
@@ -45,12 +46,62 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, S
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
 	snap_to_zero_crossings(true), draw_mode(false)
 {
+	gfxLine = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
+	gfxLoopHandle = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
+	gfxZoomButtons = oamAllocateGfx(&oamSub, SpriteSize_32x16, SpriteColorFormat_16Color);
 
+	// draw a single pixel then use max y-scale to make a line
+	*(gfxLine+64)=1;
+	oamSub.oamRotationMemory[0].vdy = 0;
+
+	for (int i=SPR_LOOPHANDLE_1_L;i<=SPR_LOOPHANDLE_2_R;++i)
+	{
+		bool top = i > 17;
+		bool right = i % 2 == 1;
+
+		oamSet(&oamSub, i,
+		   width+8, top ? y : DRAW_HEIGHT+18,
+		   0, // priority 0
+		   1, // pallette index 1
+		SpriteSize_8x8, SpriteColorFormat_16Color,
+		gfxLoopHandle,
+		   -1,
+		   false,
+		   false,
+		   right, top, // h-flip every other handle, v-flip the last two handles
+		   false);
+	}
+
+
+	memcpy(gfxLoopHandle, loophandleTiles, loophandleTilesLen);
+
+	for (int i=SPR_LOOPLINE_1;i<=SPR_LOOPLINE_2;++i)
+	{
+		oamSet(&oamSub, i, 199, y, 0, 0,
+			SpriteSize_16x32, SpriteColorFormat_16Color,
+			gfxLine, 0, true, false, false, false, false);
+	}
+
+	memcpy(gfxZoomButtons, sampleed_zoomTiles, sampleed_zoomTilesLen);
+	copy_sprite_frame(gfxZoomButtons, 0);
+
+	for (int i=0;i<3;++i)
+	{
+		gfxZoomButtonStates[i] = oamAllocateGfx(&oamSub, SpriteSize_32x16,
+								SpriteColorFormat_16Color);
+		copy_sprite_frame(gfxZoomButtonStates[i], i);
+	}
+
+	oamSet(&oamSub, SPR_ZOOM_BUTTONS, x+1, y+1, 0, 2,
+		SpriteSize_32x16, SpriteColorFormat_16Color, gfxZoomButtons,
+		-1, false, false, false, false, false);
 }
 
 SampleDisplay::~SampleDisplay(void)
 {
-
+	oamFreeGfx(&oamSub, gfxLine);
+	oamFreeGfx(&oamSub, gfxLoopHandle);
+	oamFreeGfx(&oamSub, gfxZoomButtons);
 }
 
 void SampleDisplay::penDown(u8 px, u8 py)
@@ -80,8 +131,8 @@ void SampleDisplay::penDown(u8 px, u8 py)
 		}
 
 		// Else: Stylus on a zoom button?
-		else if(isInRect(px-x, py-y, 1, 1, 18, 10))	{
-			if(px-x < 10) {
+		else if(isInRect(px-x, py-y, 1, 1, 22, 12))	{
+			if(px-x < 12) {
 				pen_on_zoom_in = true;
 				zoomIn();
 			} else {
@@ -164,10 +215,13 @@ void SampleDisplay::penMove(u8 px, u8 py)
 	if((smp==0) || ( (active==false) && (loop_points_visible==false) && (draw_mode == false) ) )
 		   return;
 
+	bool redraw = !(pen_on_loop_start_point || pen_on_loop_end_point);
+
 	if(pen_on_loop_start_point) {
 		s32 olstart = smp->getLoopStart();
 		s32 newstart = pixelToSample((s32)px-(s32)x-1-(s32)loop_touch_offset);
 		smp->setLoopStartAndLength(newstart, std::max((s32)0, (s32)smp->getLoopLength() - (newstart - olstart)));
+		drawLoopHandles();
 	}
 	else if(pen_on_loop_end_point) {
 		s32 newlength = (s32)pixelToSample((s32)px-(s32)x-1-(s32)loop_touch_offset) - smp->getLoopStart();
@@ -177,6 +231,7 @@ void SampleDisplay::penMove(u8 px, u8 py)
 			newlength = 0;
 		}
 		smp->setLoopStartAndLength(newstart, newlength);
+		drawLoopHandles();
 	}
 	else if(pen_on_scrollthingy)
 	{
@@ -223,7 +278,7 @@ void SampleDisplay::penMove(u8 px, u8 py)
 		}
 	}
 
-	draw();
+	if(redraw) draw();
 }
 
 void SampleDisplay::setSample(Sample *_smp)
@@ -233,7 +288,10 @@ void SampleDisplay::setSample(Sample *_smp)
 	selstart = selend = 0;
 	if(_smp == 0) {
 		loop_points_visible = false;
+		oamDisable(&oamSub);
 	}
+	else if (isExposed())
+		oamEnable(&oamSub);
 	draw();
 }
 
@@ -291,14 +349,18 @@ void SampleDisplay::setInactive(void)
 void SampleDisplay::setDrawMode(bool _on)
 {
 	draw_mode = _on;
-	draw();
+
+	if (draw_mode)
+		oamDisable(&oamSub);
+	else
+		oamEnable(&oamSub);
 }
 
 void SampleDisplay::showLoopPoints(void)
 {
 	if(loop_points_visible == false) {
 		loop_points_visible = true;
-		draw();
+		drawLoopHandles();
 	}
 }
 
@@ -307,13 +369,35 @@ void SampleDisplay::hideLoopPoints(void)
 	if(loop_points_visible == true)
 	{
 		loop_points_visible = false;
-		draw();
+		drawLoopHandles();
 	}
 }
 
 void SampleDisplay::setSnapToZeroCrossing(bool snap)
 {
 	snap_to_zero_crossings = snap;
+}
+
+void SampleDisplay::reveal(void)
+{
+	oamEnable(&oamSub);
+	Widget::reveal();
+}
+
+void SampleDisplay::occlude(void)
+{
+	oamDisable(&oamSub);
+	Widget::occlude();
+}
+
+void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
+{
+	*(SPRITE_PALETTE_SUB+1) = theme_->col_loop;
+	*(SPRITE_PALETTE_SUB+1+16) = theme_->col_outline;
+	*(SPRITE_PALETTE_SUB+2+16) = theme_->col_loop;
+	*(SPRITE_PALETTE_SUB+1+32) = theme_->col_smp_zoom;
+
+	Widget::setTheme(theme_, bgcolor_);
 }
 
 /* ===================== PRIVATE ===================== */
@@ -384,6 +468,32 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 	}
 }
 
+void SampleDisplay::drawLoopHandles(void)
+{
+	u16 loop_start_pos = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart());
+	u16 loop_end_pos   = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
+
+	if(!draw_mode)
+	{
+		oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos-2;
+		oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos-2+8-1;
+			
+		oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos-3;
+		oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos-3+8-1;
+	}
+
+	bool draw_loop_end 	 = loop_points_visible && (loop_end_pos <= width+8);
+	bool draw_loop_start = loop_points_visible && (loop_start_pos <= width+8);
+
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_1_L, !draw_loop_start);
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_1_R, !draw_loop_start);
+	oamSub.oamMemory[SPR_LOOPLINE_1].x = draw_loop_start ? loop_start_pos-2-1 : width+1;
+
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_L, !draw_loop_end);
+	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_R, !draw_loop_end);
+	oamSub.oamMemory[SPR_LOOPLINE_2].x = draw_loop_end ? loop_end_pos-2-2 : width+1;
+}
+
 void SampleDisplay::draw(void)
 {
 	if(!isExposed())
@@ -395,6 +505,11 @@ void SampleDisplay::draw(void)
 	} else {
 		drawBorder(theme->col_signal);
 	}
+
+	//
+	// Loop Points
+	//
+	drawLoopHandles(); // Hides loop points if no sample/loop
 
 	// Now comes sample-dependant stuff, so return if we have no sample
 	if((smp==0)||(smp->getNSamples()==0)) {
@@ -589,128 +704,21 @@ void SampleDisplay::draw(void)
 	}
 
 	//
-	// Loop Points
-	//
-	if( (loop_points_visible) && (smp->getLoop() != NO_LOOP) && !draw_mode )
-	{
-		s32 loop_start_pos = sampleToPixel(smp->getLoopStart());
-		s32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
-
-		// Loop Start
-
-		if( (loop_start_pos >= 0) && (loop_start_pos <= width-2) ) {
-			// Line
-			for(u8 i=1; i<DRAW_HEIGHT+1; ++i)
-				*(*vram+SCREEN_WIDTH*(y+i)+x+loop_start_pos) = theme->col_loop;
-
-			/* unused
-			u8 cutoff = 0;
-			if(loop_start_pos < 1+LOOP_TRIANGLE_SIZE)
-				cutoff = 1+LOOP_TRIANGLE_SIZE - loop_start_pos;
-			*/
-
-			// Left Triangle
-			if(loop_start_pos > 1 + LOOP_TRIANGLE_SIZE)
-			{
-				drawHLine(loop_start_pos-2, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-
-				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
-				{
-					drawHLine(loop_start_pos-i-2, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, i+2, theme->col_loop);
-					drawPixel(loop_start_pos-i-3, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
-				}
-
-				drawHLine(loop_start_pos-LOOP_TRIANGLE_SIZE+1, DRAW_HEIGHT, LOOP_TRIANGLE_SIZE-1,
-					theme->col_loop);
-				drawPixel(loop_start_pos-LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
-			}
-
-			// Right Triangle
-			if(loop_start_pos < width - 2 - LOOP_TRIANGLE_SIZE)
-			{
-				drawHLine(loop_start_pos+1, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i) {
-					drawHLine(loop_start_pos+1, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, 2+i, theme->col_loop);
-					drawPixel(loop_start_pos+3+i, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
-				}
-				drawHLine(loop_start_pos+1, DRAW_HEIGHT-LOOP_TRIANGLE_SIZE+LOOP_TRIANGLE_SIZE, LOOP_TRIANGLE_SIZE-1,
-					theme->col_loop);
-				drawPixel(loop_start_pos+LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
-			}
-		}
-
-		// Loop End
-
-		if( (loop_end_pos >= 0) && (loop_end_pos <= width-2) ) {
-			// Line
-			for(u8 i=1; i<DRAW_HEIGHT+1; ++i)
-				*(*vram+SCREEN_WIDTH*(y+i)+x+loop_end_pos) = theme->col_loop;
-
-			// Left Triangle
-			if(loop_end_pos > 1 + LOOP_TRIANGLE_SIZE)
-			{
-				drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+1, 1, LOOP_TRIANGLE_SIZE-1,
-					theme->col_loop);
-				drawPixel(loop_end_pos-LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
-
-				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
-				{
-					drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+i+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
-					drawPixel(loop_end_pos-1-LOOP_TRIANGLE_SIZE+i+1, 2+i, theme->col_outline);
-				}
-
-				drawHLine(loop_end_pos-2, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-			}
-
-			// Right Triangle
-			if(loop_end_pos < width-1-LOOP_TRIANGLE_SIZE)
-			{
-				drawHLine(loop_end_pos+1, 1, LOOP_TRIANGLE_SIZE-1, theme->col_loop);
-				drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
-
-				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
-				{
-					drawHLine(loop_end_pos+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
-					drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE-i, 2+i, theme->col_outline);
-				}
-
-				drawHLine(loop_end_pos+1, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
-			}
-		}
-	}
-
-	//
 	// Zoom buttons
 	//
-
 	if(!draw_mode) {
-		// Outlines
-		drawHLine(2, 1, 7, theme->col_smp_zoom);
-		drawHLine(10, 1, 7, theme->col_smp_zoom);
-
-		drawHLine(2, 9, 7, theme->col_smp_zoom);
-		drawHLine(10, 9, 7, theme->col_smp_zoom);
-
-		drawVLine(1, 2, 7, theme->col_smp_zoom);
-		drawVLine(9, 2, 7, theme->col_smp_zoom);
-		drawVLine(17, 2, 7, theme->col_smp_zoom);
-
 		// +
 		if(pen_on_zoom_in) {
-			drawFullBox(2, 2, 7, 7, theme->col_smp_zoom);
-			drawHLine(3, 5, 5, theme->col_smp_bg);
-			drawVLine(5, 3, 5, theme->col_smp_bg);
-		} else {
-			drawHLine(3, 5, 5, theme->col_smp_zoom);
-			drawVLine(5, 3, 5, theme->col_smp_zoom);
+			copy_sprite_frame(gfxZoomButtons, 1);
 		}
 
 		// -
-		if(pen_on_zoom_out) {
-			drawFullBox(10, 2, 7, 7, theme->col_smp_zoom);
-			drawHLine(11, 5, 5, theme->col_smp_bg);
-		} else {
-			drawHLine(11, 5, 5, theme->col_smp_zoom);
+		else if(pen_on_zoom_out) {
+			copy_sprite_frame(gfxZoomButtons, 2);
+		}
+
+		else {
+			copy_sprite_frame(gfxZoomButtons, 0);
 		}
 	}
 }
@@ -771,7 +779,7 @@ void SampleDisplay::zoomOut(void)
 
 u32 SampleDisplay::pixelToSample(s32 pixel)
 {
-	pixel=std::max(0,std::min(width-2,(int)pixel));
+	pixel=ntxm_clamp(pixel, 0, width-2);
 	u64 abspos = scrollpos + pixel;
 	return u32( abspos * smp->getNSamples() / ( u64(width-2)<<zoom_level ) );
 }

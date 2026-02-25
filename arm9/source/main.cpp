@@ -674,6 +674,14 @@ void handleSampleChange(const u16 newsample)
 	*/
 }
 
+void handleOverlayWidgetChange(u8 screen, bool visible)
+{
+	if (screen == SUB_SCREEN)
+	{
+		if (visible) oamDisable(&oamSub);
+		else if (!sampledisplay->is_occluded()) oamEnable(&oamSub);
+	}
+}
 
 void volEnvSetInst(Instrument *inst)
 {
@@ -3374,6 +3382,7 @@ void setupGUI(bool dldi_enabled)
 {
 	gui = new GUI();
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
+	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
 	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
 	kb->set_overdraw(false);
@@ -4298,6 +4307,8 @@ void VblankHandler(void)
  		}
 	}
 
+	oamUpdate(&oamSub);
+
 	// Constantly update pattern view while playing
 	if(redraw_main_requested)
 	{
@@ -4428,10 +4439,11 @@ int main(int argc, char **argv) {
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE);
 
 	// Sub screen: Keyboard tiles, Typewriter tiles and ERB
-	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE);
+	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D);
+
 
 	vramSetPrimaryBanks(VRAM_A_MAIN_BG_0x06000000, VRAM_B_MAIN_BG_0x06020000,
-	           VRAM_C_SUB_BG_0x06200000 , VRAM_D_LCD);
+	   VRAM_C_SUB_BG_0x06200000 , VRAM_D_SUB_SPRITE);
 
 	// SUB_BG0 for Piano Tiles
 	videoBgEnableSub(0);
@@ -4458,7 +4470,19 @@ int main(int argc, char **argv) {
 
 	// Sub screen framebuffer
 	int sub_bg = bgInitSub(2, BgType_Bmp16, BgSize_B16_256x256, 2, 0);
-	bgSetPriority(sub_bg, 0);
+	bgSetPriority(sub_bg, 1);
+
+	oamInit(&oamSub, SpriteMapping_1D_32, false);
+
+	// Create a window the same size as the sample display. (so we can occclude loop handles, etc)
+	windowEnableSub(WINDOW_0);
+
+	bgWindowEnable(sub_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+
+	windowSetBoundsSub(WINDOW_0, 5, 24, 5+129, 23+61); // sampledisplay x1,y1,x2,y2
+	oamWindowEnable(&oamSub, WINDOW_0);
 
 	// Special effects
 #ifdef DEBUG
