@@ -23,8 +23,8 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 GUI::GUI()
-	:activeWidget(0), activeScreen(SUB_SCREEN), overlayWidgetMain(0),
-	overlayWidgetSub(0), overlayShortcuts(0)
+	:activeWidget(0), activeScreen(SUB_SCREEN), onOverlayChanged(0), 
+	overlayWidgetMain(0), overlayWidgetSub(0), overlayShortcuts(0)
 {
 	u8 i;
 	for(i=0;i<14;++i) {
@@ -103,8 +103,10 @@ void GUI::unregisterWidget(Widget *w)
 void GUI::registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen)
 {
 	if(screen == SUB_SCREEN) {
+		onOverlayChanged(SUB_SCREEN, true);
 		overlayWidgetSub = w;
 	} else {
+		onOverlayChanged(MAIN_SCREEN, true);
 		overlayWidgetMain = w;
 	}
 	overlayShortcuts = listeningButtons;
@@ -116,18 +118,25 @@ void GUI::registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen)
 void GUI::unregisterOverlayWidget(u8 screen)
 {
 	if(screen == SUB_SCREEN) {
-	        if(activeWidget==overlayWidgetSub) {
+		onOverlayChanged(SUB_SCREEN, false);
+			if(activeWidget==overlayWidgetSub) {
 		  activeWidget = 0;
-	        }
+			}
 		overlayWidgetSub = 0;
 	} else {
-	        if(activeWidget==overlayWidgetMain) {
+		onOverlayChanged(MAIN_SCREEN, false);
+			if(activeWidget==overlayWidgetMain) {
 		  activeWidget = 0;
 		}
 		overlayWidgetMain = 0;
 	}
 	overlayShortcuts = 0;
 }
+
+void GUI::setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool))
+{
+	onOverlayChanged = _onOverlayChanged;
+} 
 
 // Event calls
 void GUI::penDown(u8 x, u8 y)

@@ -54,6 +54,9 @@ class GUI {
 		// priority, like a popup-window or something.
 		void registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen = SUB_SCREEN);
 
+		// Event handler for when an overlay widget is about to draw. (so we can clean up widgets underneath)
+		void setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool));
+
 		// Remove the overlay widget
 		void unregisterOverlayWidget(u8 screen = SUB_SCREEN);
 
@@ -89,6 +92,7 @@ class GUI {
 		std::vector<Widget*> shortcuts;
 		Widget *activeWidget;
 		u8 activeScreen;
+		void (*onOverlayChanged)(u8, bool);
 		Widget *overlayWidgetMain, *overlayWidgetSub;
 		u16 overlayShortcuts;
 		Theme *theme;
