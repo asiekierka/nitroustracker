@@ -72,6 +72,7 @@ using namespace tobkit;
 #include "icon_trumpet_raw.h"
 
 #include "icon_flp_raw.h"
+#include "icon_fx_raw.h"
 #include "icon_copy_raw.h"
 #include "icon_cut_raw.h"
 #include "icon_paste_raw.h"
@@ -239,7 +240,7 @@ GUI *gui;
 	NumberSlider *nsnotevolume;
 	DigitBox *dbeffectpar;
 	Label *labelnotevol, *labeleffectcmd, *labeltranspose;
-	CheckBox *cbtoggleeffects;
+	ToggleButton *tbeffects;
 // </Main Screen>
 
 // <Things that suddenly pop up>
@@ -2277,7 +2278,7 @@ void handleToggleEffectsVisibility(bool on)
 		if (tbmultisample->getState())
 			setMultisamplesEnabled(false);
 
-		cbtoggleeffects->setChecked(true);
+		tbeffects->setState(true);
 
 		kb->hide();
 		kb->disable();
@@ -2306,7 +2307,7 @@ void handleToggleEffectsVisibility(bool on)
 	}
 	else
 	{
-		cbtoggleeffects->setChecked(false);
+		tbeffects->setState(false);
 
 		if (!areScreensSwapped())
 			pv->clearSelection();
@@ -3919,7 +3920,7 @@ void setupGUI(bool dldi_enabled)
 	cbscrolllock->setCaption("scr lock");
 	cbscrolllock->registerToggleCallback(handleToggleScrollLock);
 
-	tbrecord = new ToggleButton(141, 136, 16, 16, &sub_vram);
+	tbrecord = new ToggleButton(141, 136, 16, 16, &sub_vram, true, true);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
 	tbrecord->registerToggleCallback(setRecordMode);
 
@@ -4006,9 +4007,9 @@ void setupGUI(bool dldi_enabled)
 		buttontransposeup->setCaption("+");
 		buttontransposeup->registerPushCallback(handleTransposeUp);
 
-		cbtoggleeffects = new CheckBox(157, 138, 24, 12, &sub_vram, true, false, true);
-		cbtoggleeffects->setCaption("fx");
-		cbtoggleeffects->registerToggleCallback(handleToggleEffectsVisibility);
+		tbeffects = new ToggleButton(158, 136, 16, 16, &sub_vram);
+		tbeffects->setBitmap(icon_fx_raw, 12, 12);
+		tbeffects->registerToggleCallback(handleToggleEffectsVisibility);
 
 		//buttoncut         = new BitButton(232,  52, 22, 21, &main_vram_back, icon_cut_raw, 16, 16, 3, 2);
 		//buttoncopy        = new BitButton(232,  74, 22, 21, &main_vram_back, icon_copy_raw, 16, 16, 3, 3);
@@ -4056,7 +4057,6 @@ void setupGUI(bool dldi_enabled)
 		/* gui->registerWidget(labeltranspose, 0, MAIN_SCREEN); */
 		gui->registerWidget(buttontransposedown, 0, MAIN_SCREEN);
 		gui->registerWidget(buttontransposeup, 0, MAIN_SCREEN);
-		gui->registerWidget(cbtoggleeffects, 0, SUB_SCREEN);
 		gui->registerWidget(buttoncut, 0, MAIN_SCREEN);
 		gui->registerWidget(buttoncopy, 0, MAIN_SCREEN);
 		gui->registerWidget(buttonpaste, 0, MAIN_SCREEN);
@@ -4098,6 +4098,7 @@ void setupGUI(bool dldi_enabled)
 	gui->registerWidget(fxkb, 0, SUB_SCREEN);
 	gui->registerWidget(buttonstopnote, 0, SUB_SCREEN);
 	gui->registerWidget(tbrecord, 0, SUB_SCREEN);
+	gui->registerWidget(tbeffects, 0, SUB_SCREEN);
 	gui->registerWidget(pixmaplogo, 0, SUB_SCREEN);
 	gui->registerWidget(tabbox, 0, SUB_SCREEN);
 	gui->registerWidget(lbinstruments, 0, SUB_SCREEN);

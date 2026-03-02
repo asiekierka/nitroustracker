@@ -23,9 +23,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ToggleButton::ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible)
+ToggleButton::ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible, bool _is_record)
 	:Widget(_x, _y, _width, _height, _vram, _visible),
-	penIsDown(false), on(false), has_bitmap(false)
+	penIsDown(false), on(false), has_bitmap(false), is_record(_is_record)
 {
 	onToggle = 0;
 	caption = NULL;
@@ -130,7 +130,7 @@ void ToggleButton::draw(void)
 		if(on) {
 			col = theme->col_tb_fg_on;
 		} else {
-			col = has_bitmap ? theme->col_signal_off : theme->col_tb_fg_off;
+			col = is_record ? theme->col_signal_off : theme->col_tb_fg_off;
 		}
 	}
 	if(has_bitmap) {
