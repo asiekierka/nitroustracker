@@ -380,7 +380,7 @@ void SampleDisplay::setSnapToZeroCrossing(bool snap)
 
 void SampleDisplay::reveal(void)
 {
-	oamEnable(&oamSub);
+	if(smp) oamEnable(&oamSub);
 	Widget::reveal();
 }
 
