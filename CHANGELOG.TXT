@@ -1,3 +1,26 @@
+-- NitrousTracker v0.6.0 (2026-03-02)
+
+New features:
+
+- effect editing keyboard (prayerie, exelotl)
+- support for loading 24/32-bit WAV files (asie)
+- support for loading WAV files with JUNK headers (prayerie)
+- support for 09xx sample offset effect (prayerie)
+- support for E1x/E2x/X1x/X2x fine portamento effects (exelotl)
+
+Improvements:
+
+- improved portamento accuracy (exelotl)
+- optimized sample display drawing (prayerie)
+- separated message box and sample editor zoom button colors
+  (prayerie)
+- updated BlocksDS to 1.18.0
+
+Fixes:
+
+- fixed disk tab being visible without DLDI driver (asie)
+- fixed scroll bar not working in sample drawing mode (asie)
+
 -- NitrousTracker v0.5.2 (2025-11-29)
 
 New features:

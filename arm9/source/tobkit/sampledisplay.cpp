@@ -109,7 +109,24 @@ void SampleDisplay::penDown(u8 px, u8 py)
 	if( (smp==0) || ( (active==false) && (loop_points_visible==false) && (draw_mode == false) ) )
 		return;
 
-	if(draw_mode) {
+	// Stylus on the scroll bar?
+	if(py - y >= height - SCROLLBAR_WIDTH)	{
+		if(px - x <= SCROLLBUTTON_HEIGHT) {
+			pen_on_scroll_left = true;
+			scroll(scrollpos-SCROLLPIXELS);
+		} else if(px - x >= width - SCROLLBUTTON_HEIGHT) {
+			pen_on_scroll_right = true;
+			scroll(scrollpos+SCROLLPIXELS);
+		} else if(px - x < scrollthingypos + SCROLLBUTTON_HEIGHT)	{
+			scroll(scrollpos-width+2);
+		} else if(px - x > scrollthingypos + SCROLLBUTTON_HEIGHT + scrollthingywidth) {
+			scroll(scrollpos+width-2);
+		} else {
+			pen_on_scrollthingy = true;
+			pen_x_on_scrollthingy = px - x - SCROLLBUTTON_HEIGHT-scrollthingypos;
+		}
+		pen_on_scrollbar = true;
+	} else if(draw_mode) {
 		draw_last_x = px - x;
 		draw_last_y = py - y;
 	} else {
@@ -139,25 +156,6 @@ void SampleDisplay::penDown(u8 px, u8 py)
 				pen_on_zoom_out = true;
 				zoomOut();
 			}
-		}
-
-		// Else: Stylus on the scrollar?
-		else if(py - y >= height - SCROLLBAR_WIDTH)	{
-			if(px - x <= SCROLLBUTTON_HEIGHT) {
-				pen_on_scroll_left = true;
-				scroll(scrollpos-SCROLLPIXELS);
-			} else if(px - x >= width - SCROLLBUTTON_HEIGHT) {
-				pen_on_scroll_right = true;
-				scroll(scrollpos+SCROLLPIXELS);
-			} else if(px - x < scrollthingypos + SCROLLBUTTON_HEIGHT)	{
-				scroll(scrollpos-width+2);
-			} else if(px - x > scrollthingypos + SCROLLBUTTON_HEIGHT + scrollthingywidth) {
-				scroll(scrollpos+width-2);
-			} else {
-				pen_on_scrollthingy = true;
-				pen_x_on_scrollthingy = px - x - SCROLLBUTTON_HEIGHT-scrollthingypos;
-			}
-			pen_on_scrollbar = true;
 		}
 
 		// Else: Stylus on the sample.
