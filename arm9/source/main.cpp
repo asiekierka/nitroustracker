@@ -332,6 +332,8 @@ void drawSampleNumbers(void)
 
 void updateKeyLabels(void)
 {
+	if (fxkb->is_visible()) return;
+
 	kb->hideKeyLabels();
 	if(lbsamples->is_visible() == true)
 	{
