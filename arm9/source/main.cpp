@@ -244,8 +244,8 @@ GUI *gui;
 // </Main Screen>
 
 // <Things that suddenly pop up>
-	Typewriter *tw;
-	MessageBox *mb;
+	Typewriter *tw = NULL;
+	MessageBox *mb = NULL;
 // </Things that suddenly pop up>
 
 u16 *b1n, *b1d;
@@ -631,7 +631,8 @@ void handleSampleChange(const u16 newsample)
 	buttonsmpnormalize->set_enabled(smp != NULL);
 	cbsnapto0xing->set_enabled(smp != NULL);
 	buttonsmpdraw->set_enabled(smp != NULL);
-
+	buttonrenameinst->set_enabled(inst != NULL);
+	buttonrenamesample->set_enabled(smp != NULL);
 	lbsamples->select(newsample);
 
 	if(smp == NULL)
@@ -1167,6 +1168,7 @@ void deleteTypewriter(void)
 	gui->unregisterOverlayWidget();
 	typewriter_active = false;
 	delete tw;
+	tw = NULL;
 	redrawSubScreen();
 }
 
@@ -1499,6 +1501,9 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 
 	// Update other GUI Elements
 	updateGuiToNewPattern(song->getPotEntry(state->potpos));
+
+	if (tw)
+		tw->pleaseDraw();
 }
 
 #ifdef MIDI
@@ -2452,9 +2457,7 @@ void handleTypewriterSongnameOk(void)
 
 void showTypewriterForSongRename(void)
 {
-	if(!state->playing || state->pause) {
-		showTypewriter("song name", song->getName(), handleTypewriterSongnameOk, clearTypewriterText, deleteTypewriter);
-	}
+	showTypewriter("song name", song->getName(), handleTypewriterSongnameOk, clearTypewriterText, deleteTypewriter);
 }
 
 void handleTypewriterSampleOk(void)
