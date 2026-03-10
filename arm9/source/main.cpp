@@ -399,21 +399,11 @@ static bool uiPotSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2, u16 *sel_y2, b
 	return is_box;
 }
 
-void handleNoteFill(u8 note, bool while_playing)
+void handleNoteFill(u8 note)
 {
 	u16 sel_x1, sel_y1, sel_x2, sel_y2;
 	bool is_box;
-	if (while_playing)
-	{
-		sel_x1 = 0;
-		sel_x2 = song->getChannels()-1;
-		sel_y1 = sel_y2 = state->getCursorRow();
-		is_box = true;
-	}
-	else
-	{
-		is_box = uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, true);
-	}
+	is_box = uiPotSelection(&sel_x1, &sel_y1, &sel_x2, &sel_y2, true);
 
 	if (!is_box)
 	{
@@ -1226,13 +1216,13 @@ void handleTypewriterFilenameOk(void)
 
 
 void emptyNoteStroke(void) {
-	handleNoteFill(EMPTY_NOTE, false);
+	handleNoteFill(EMPTY_NOTE);
 	redraw_main_requested = true;
 }
 
 
 void stopNoteStroke(void) {
-	handleNoteFill(STOP_NOTE, false);
+	handleNoteFill(STOP_NOTE);
 	redraw_main_requested = true;
 }
 
@@ -1921,9 +1911,6 @@ void handleRowChangeFromSong(u16 row)
 
 	if(!state->playing)
 		return;
-
-	if(buttonemptynote->isPenDown())
-		handleNoteFill(EMPTY_NOTE, true);
 	
 	redraw_main_requested = true;
 
