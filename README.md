@@ -2,7 +2,7 @@
 
 Originally by 0xtob ^ 0x80
 
-Forked by NitrousTracker deelopersvs
+Forked by NitrousTracker developers
 
 ## About
 
