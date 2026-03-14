@@ -19,8 +19,7 @@ limitations under the License.
 #ifndef THEME_H
 #define THEME_H
 
-#include "../../arm9/source/tools.h" 
-#include <nds.h>
+#include "../../common/source/tools.h" 
 
 #define NUM_COLORS 112
 

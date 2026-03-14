@@ -98,6 +98,9 @@ int main(int argc, char ** argv) {
 	irqSet(IRQ_TIMER0, ntxmTimerHandler);
 	irqEnable(IRQ_TIMER0);
 
+	TIMER0_DATA = TIMER_FREQ_64(ntxm7->getPlayTimerFrequency());
+	TIMER0_CR = TIMER_ENABLE | TIMER_IRQ_REQ | TIMER_DIV_64;
+
 	setPowerButtonCB(powerButtonHandler);
 
 	// Keep the ARM7 out of main RAM

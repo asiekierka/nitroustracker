@@ -11,13 +11,13 @@ ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 # Source code paths
 # -----------------
 
-SOURCEDIRS	:= arm9/source
-INCLUDEDIRS	:=
-GFXDIRS		:= arm9/graphics
-BINDIRS		:= arm9/data
+SOURCEDIRS	:= nds/arm9/source common/source
+INCLUDEDIRS	:= $(SOURCEDIRS)
+GFXDIRS		:= nds/arm9/graphics
+BINDIRS		:= nds/arm9/data
 AUDIODIRS	:=
 FONTSDIRS	:=
-BITMAPSDIRS	:= arm9/bitmaps
+BITMAPSDIRS	:= nds/arm9/bitmaps
 TOOLSDIR	:= tools
 
 # Defines passed to all files

@@ -1,7 +1,6 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-#include <nds.h>
 #include <functional>
 #include "state.h"
 #include "cell_array.h"

@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "../tools.h"
+#include "tools.h"
 #include "ntxm/instrument.h"
 #include "ntxm/fifocommand.h"
 #include "ntxm/ntxmtools.h"

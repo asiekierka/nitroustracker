@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
-#include <nds.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/dir.h>

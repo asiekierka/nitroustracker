@@ -29,7 +29,7 @@
 
 #include "loophandle.h"
 #include "ntxm/ntxmtools.h"
-#include "../tools.h"
+#include "tools.h"
 
 using namespace tobkit;
 

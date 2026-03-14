@@ -28,7 +28,6 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include <nds.h>
 #include "ntxm/song.h"
 
 #define STATE_FILENAME_LEN 255

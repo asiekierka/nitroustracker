@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include <nds.h>
 
 #include "action.h"
 #include "tools.h"
@@ -288,7 +287,7 @@ bool ActionBuffer::add(Song *song, Action *action)
         a_pos = a_tail;
         on_change();
         debugprintf("undo push => %d\n", queue_length());
-		DC_FlushAll();
+        ntxm_flush_dcache();
         return true;
     }
     else

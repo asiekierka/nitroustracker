@@ -23,7 +23,7 @@
  */
 
 #include "patternview.h"
-#include "../tools.h"
+#include "tools.h"
 
 #include <cstring>
 #include <cstdio>
