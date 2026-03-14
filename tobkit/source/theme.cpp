@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
+#include "tobkit/platform.h"
 #include "tobkit/theme.h"
 #include <stdio.h>
 #include <string.h>
@@ -21,78 +22,78 @@ limitations under the License.
 using namespace tobkit;
 
 ColorScheme::ColorScheme() {
-	col_bg = RGB15(4, 6, 15) | BIT(15);
+	col_bg = RGB5A1(4, 6, 15, 1);
 	col_env_bg = col_bg;
-	col_medium_bg = RGB15(9, 11, 17) | BIT(15);
-	col_light_bg = RGB15(16, 18, 24) | BIT(15);
-	col_lighter_bg = RGB15(23, 25, 31) | BIT(15);
-	col_light_ctrl = RGB15(31, 31, 0) | BIT(15); // RGB15(26,26,26)|BIT(15)
-	col_dark_ctrl = RGB15(31, 18, 0) | BIT(15);
+	col_medium_bg = RGB5A1(9, 11, 17, 1);
+	col_light_bg = RGB5A1(16, 18, 24, 1);
+	col_lighter_bg = RGB5A1(23, 25, 31, 1);
+	col_light_ctrl = RGB5A1(31, 31, 0, 1); // RGB5A1(26,26,26)|BIT(15)
+	col_dark_ctrl = RGB5A1(31, 18, 0, 1);
 	col_light_ctrl_disabled = col_light_bg;
 	col_dark_ctrl_disabled = col_medium_bg;
 	col_selected_tab = col_light_bg;
 	col_unselected_tab = col_medium_bg;
 	col_list_1 = col_medium_bg;
 	col_list_2 = col_light_bg;
-	col_list_highlight1 = RGB15(28, 15, 0) | BIT(15);
-	col_list_highlight2 = RGB15(28, 28, 0) | BIT(15);
+	col_list_highlight1 = RGB5A1(28, 15, 0, 1);
+	col_list_highlight2 = RGB5A1(28, 28, 0, 1);
 	col_scrollbar_bg1 = col_medium_bg;
 	col_scrollbar_bg2 = col_light_bg;
 	col_scrollbar_inactive = col_dark_ctrl;
 	col_scrollbar_active = col_light_ctrl;
 	col_scrollbar_arr_bg1 = col_dark_ctrl;
 	col_scrollbar_arr_bg2 = col_light_ctrl;
-	col_outline = RGB15(0, 0, 0) | BIT(15);
+	col_outline = RGB5A1(0, 0, 0, 1);
 	col_tab_outline = col_outline;
-	col_sepline = RGB15(31, 31, 0) | BIT(15);
-	col_icon = RGB15(0, 0, 0) | BIT(15);
+	col_sepline = RGB5A1(31, 31, 0, 1);
+	col_icon = RGB5A1(0, 0, 0, 1);
 	col_icon_bt = col_icon;
 	col_checkmark = col_icon;
-	col_text = RGB15(0, 0, 0) | BIT(15);
+	col_text = RGB5A1(0, 0, 0, 1);
 	col_text_light = col_light_bg;
 	col_text_bt = col_text;
 	col_text_value = col_text;
 	col_text_lb = col_text;
 	col_text_lb_highlight = col_text;
-	col_signal = RGB15(31, 0, 0) | BIT(15);
-	col_signal_off = RGB15(18, 0, 0) | BIT(15);
-	col_piano_label = RGB15(0, 0, 0);
-	col_piano_label_inv = RGB15(31, 31, 31);
-	col_loop = RGB15(7, 25, 5) | BIT(15);
-	col_env_sustain = RGB15(0, 31, 0) | BIT(15);
+	col_signal = RGB5A1(31, 0, 0, 1);
+	col_signal_off = RGB5A1(18, 0, 0, 1);
+	col_piano_label = RGB5A1(0, 0, 0, 1);
+	col_piano_label_inv = RGB5A1(31, 31, 31, 1);
+	col_loop = RGB5A1(7, 25, 5, 1);
+	col_env_sustain = RGB5A1(0, 31, 0, 1);
 	col_env_line = col_dark_ctrl;
 	col_env_pt = col_light_ctrl;
 	col_env_pt_border = col_outline;
 	col_env_pt_border_active = col_signal;
-	col_mem_ok = RGB15(17, 24, 16) | BIT(15);
-	col_mem_warn = RGB15(31, 31, 0) | BIT(15);
-	col_mem_alert = RGB15(31, 0, 0) | BIT(15);
-	col_typewriter_cursor = RGB15(0, 0, 0) | BIT(15);
+	col_mem_ok = RGB5A1(17, 24, 16, 1);
+	col_mem_warn = RGB5A1(31, 31, 0, 1);
+	col_mem_alert = RGB5A1(31, 0, 0, 1);
+	col_typewriter_cursor = RGB5A1(0, 0, 0, 1);
 	col_smp_bg = col_bg;
 	col_smp_bg_sel = col_light_ctrl;
-	col_smp_waveform = RGB15(31, 19, 0) | BIT(15);
-	col_smp_waveform_sel = RGB15(0, 0, 0) | BIT(15);
+	col_smp_waveform = RGB5A1(31, 19, 0, 1);
+	col_smp_waveform_sel = RGB5A1(0, 0, 0, 1);
 	col_pv_bg = col_bg;
 	col_pv_chn = col_light_bg;
 	col_pv_lines = col_light_bg;
-	col_pv_sublines = RGB15(7, 9, 17) | BIT(15);
+	col_pv_sublines = RGB5A1(7, 9, 17, 1);
 	col_pv_lines_record = col_dark_ctrl;
 	col_pv_cb_col1 = col_medium_bg;
 	col_pv_cb_col2 = col_light_bg;
 	col_pv_cb_col1_highlight = col_list_highlight1;
 	col_pv_cb_col2_highlight = col_list_highlight2;
 	col_pv_left_numbers = col_list_highlight1;
-	col_pv_notes = RGB15(9, 15, 31) | BIT(15);
-	col_pv_notes_dark = RGB15(0, 6, 26) | BIT(15);
-	col_pv_instr = RGB15(31, 11, 0) | BIT(15);
-	col_pv_instr_dark = RGB15(20, 6, 0) | BIT(15);
-	col_pv_volume = RGB15(0, 27, 0) | BIT(15);
-	col_pv_volume_dark = RGB15(0, 16, 0) | BIT(15);
-	col_pv_effect = RGB15(31, 12, 29) | BIT(15);
-	col_pv_effect_dark = RGB15(12, 6, 18) | BIT(15);
-	col_pv_effect_param = RGB15(30, 26, 8) | BIT(15);
-	col_pv_effect_param_dark = RGB15(9, 8, 5) | BIT(15);
-	col_pv_cb_sel_highlight = RGB15(31, 24, 0) | BIT(15);
+	col_pv_notes = RGB5A1(9, 15, 31, 1);
+	col_pv_notes_dark = RGB5A1(0, 6, 26, 1);
+	col_pv_instr = RGB5A1(31, 11, 0, 1);
+	col_pv_instr_dark = RGB5A1(20, 6, 0, 1);
+	col_pv_volume = RGB5A1(0, 27, 0, 1);
+	col_pv_volume_dark = RGB5A1(0, 16, 0, 1);
+	col_pv_effect = RGB5A1(31, 12, 29, 1);
+	col_pv_effect_dark = RGB5A1(12, 6, 18, 1);
+	col_pv_effect_param = RGB5A1(30, 26, 8, 1);
+	col_pv_effect_param_dark = RGB5A1(9, 8, 5, 1);
+	col_pv_cb_sel_highlight = RGB5A1(31, 24, 0, 1);
 	col_pv_pb = col_outline;
 	col_pv_pb_cell = col_outline;
 	col_pv_mutesolo_text = col_text;
@@ -105,19 +106,19 @@ ColorScheme::ColorScheme() {
 	col_tb_bg = col_dark_ctrl;
 	col_tb_fg_off = col_text_bt;
 	col_tb_fg_on = col_light_ctrl;
-	col_piano_full_col1 = RGB15(31, 31, 31) | BIT(15);
-	col_piano_full_col2 = RGB15(25, 25, 25) | BIT(15);
-	col_piano_half_col1 = RGB15(0, 0, 0) | BIT(15);
-	col_piano_half_col2 = RGB15(8, 8, 8) | BIT(15);
-	col_piano_full_highlight_col1 = RGB15(24, 24, 30) | BIT(15);
-	col_piano_full_highlight_col2 = RGB15(20, 20, 26) | BIT(15);
-	col_piano_half_highlight_col1 = RGB15(20, 8, 8) | BIT(15);
-	col_piano_half_highlight_col2 = RGB15(13, 0, 0) | BIT(15);
-	col_piano_outline = RGB15(0, 0, 0) | BIT(15);
-	col_typewriter_bg = RGB15(31, 31, 31) | BIT(15);
-	col_typewriter_key = RGB15(22, 22, 28) | BIT(15);
-	col_typewriter_key_label = RGB15(0, 0, 0) | BIT(15);
-	col_typewriter_mod_key = RGB15(17, 17, 26) | BIT(15);
+	col_piano_full_col1 = RGB5A1(31, 31, 31, 1);
+	col_piano_full_col2 = RGB5A1(25, 25, 25, 1);
+	col_piano_half_col1 = RGB5A1(0, 0, 0, 1);
+	col_piano_half_col2 = RGB5A1(8, 8, 8, 1);
+	col_piano_full_highlight_col1 = RGB5A1(24, 24, 30, 1);
+	col_piano_full_highlight_col2 = RGB5A1(20, 20, 26, 1);
+	col_piano_half_highlight_col1 = RGB5A1(20, 8, 8, 1);
+	col_piano_half_highlight_col2 = RGB5A1(13, 0, 0, 1);
+	col_piano_outline = RGB5A1(0, 0, 0, 1);
+	col_typewriter_bg = RGB5A1(31, 31, 31, 1);
+	col_typewriter_key = RGB5A1(22, 22, 28, 1);
+	col_typewriter_key_label = RGB5A1(0, 0, 0, 1);
+	col_typewriter_mod_key = RGB5A1(17, 17, 26, 1);
 	col_typewriter_pressed_key = col_typewriter_bg;
 	col_typewriter_mod_key_label = col_typewriter_key_label;
 	col_smp_zoom = col_light_bg;
@@ -191,7 +192,7 @@ bool Theme::stringToRGB15(char* str, u16* col)
 	int res = sscanf(str, "%02x%02x%02x", &r, &g, &b);
 	if (res < 3)
 		return false;
-	*col = (u16)(RGB15(r >> 3, g >> 3, b >> 3) | BIT(15));
+	*col = (u16)(RGB5A1(r >> 3, g >> 3, b >> 3, 1));
 	return true;
 }
 
@@ -223,7 +224,7 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 			debugprintf("theme parse error on line %d (key out of bounds, max %d)  \n", l + 1, NUM_COLORS - 1);
 			return false;
 		}
-		theme_cols[k] = RGB15(r >> 3, g >> 3, b >> 3) | BIT(15);
+		theme_cols[k] = RGB5A1(r >> 3, g >> 3, b >> 3, 1);
 		theme_has_key[k] = true;
 	}
 
