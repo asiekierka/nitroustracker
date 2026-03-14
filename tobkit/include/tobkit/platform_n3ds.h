@@ -19,6 +19,9 @@ limitations under the License.
 
 #include <3ds.h>
 
+// For printf() and scanf() defines
+#include "ntxm/common.h"
+
 typedef u16 tobkit_pixel_t;
 
 #define RGB5A1(r,g,b,a) (((r) << 11) | ((g) << 6) | ((b) << 1) | (a))
