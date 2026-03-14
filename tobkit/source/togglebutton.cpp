@@ -23,7 +23,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ToggleButton::ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible, bool _is_record)
+ToggleButton::ToggleButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible, bool _is_record)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	penIsDown(false), on(false), has_bitmap(false), is_record(_is_record)
 {
@@ -48,7 +48,7 @@ void ToggleButton::pleaseDraw(void) {
 }
 
 // Event calls
-void ToggleButton::penDown(u8 x, u8 y)
+void ToggleButton::penDown(u16 x, u16 y)
 {
 	if (!enabled) return;
 	penIsDown = true;
@@ -59,7 +59,7 @@ void ToggleButton::penDown(u8 x, u8 y)
 	}
 }
 
-void ToggleButton::penUp(u8 x, u8 y)
+void ToggleButton::penUp(u16 x, u16 y)
 {
 	penIsDown = false;
 	draw();

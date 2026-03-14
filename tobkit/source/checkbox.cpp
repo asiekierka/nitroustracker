@@ -25,7 +25,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-CheckBox::CheckBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible, bool checked,
+CheckBox::CheckBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible, bool checked,
 		  bool albino)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	label(0), checked(checked), albino(albino), onToggle(0)
@@ -58,7 +58,7 @@ void CheckBox::pleaseDraw(void)
 }
 
 // Event calls
-void CheckBox::penDown(u8 px, u8 py)
+void CheckBox::penDown(u16 px, u16 py)
 {
 	if(!enabled)
 		return;

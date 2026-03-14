@@ -125,11 +125,11 @@ void MessageBox::pleaseDraw(void) {
 
 
 // Event calls
-void MessageBox::penDown(u8 x, u8 y) {
+void MessageBox::penDown(u16 x, u16 y) {
 	gui.penDown(x, y);
 }
 
-void MessageBox::penUp(u8 x, u8 y) {
+void MessageBox::penUp(u16 x, u16 y) {
 	gui.penUp(x, y);
 }
 

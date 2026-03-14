@@ -33,7 +33,6 @@
 namespace tobkit {
 
 #define PV_BORDER_WIDTH	10
-#define PV_CURSORBAR_Y	88
 #define PV_CELL_HEIGHT	8
 #define PV_CHAR_WIDTH	4
 #define PV_CHAR_HEIGHT	8
@@ -106,15 +105,15 @@ const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
 class PatternView: public Widget {
 	public:
 		// Constructor sets base variables
-		PatternView(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, State *_state);
+		PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, State *_state);
 		
 		// Drawing request
 		void pleaseDraw(void);
 		
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
 		void buttonPress(u16 button);
 		
 		void updateSelection(void);
@@ -162,7 +161,7 @@ class PatternView: public Widget {
 		void draw(void);
 		
 
-		inline void drawHexByte(u8 byte, u8 cx, u8 cy, u16 col)
+		inline void drawHexByte(u8 byte, u16 cx, u16 cy, u16 col)
 		{
 			//drawSmallChar(byte/0x10, cx  , cy, col);
 			//drawSmallChar(byte%0x10, cx+1, cy, col);
@@ -170,7 +169,7 @@ class PatternView: public Widget {
 			drawSmallChar(byte%0x10, cx+PV_CHAR_WIDTH, cy, col);
 		}
 
-		inline void drawCell(u8 cellx, u8 celly, u8 px, u8 py, bool dark)
+		inline void drawCell(u16 cellx, u16 celly, u16 px, u16 py, bool dark)
 		{
 			u16 notecol = dark?col_notes_dark:col_notes;
 			u16 instrcol = dark?col_instr_dark:col_instr;
@@ -189,8 +188,8 @@ class PatternView: public Widget {
 			
 			Cell *cell = &(pattern[cellx][celly]);
 
-			u8 realx = PV_BORDER_WIDTH+1+px*getCellWidth();
-			u8 realy = 2+py*PV_CELL_HEIGHT;
+			u16 realx = PV_BORDER_WIDTH+1+px*getCellWidth();
+			u16 realy = 2+py*PV_CELL_HEIGHT;
 
 			// Check for empty note or stop-note
 			if(cell->note == STOP_NOTE) {
@@ -268,7 +267,7 @@ class PatternView: public Widget {
 		
 		void updateFromState(void);
 	
-		inline u8 getCellWidth(void)
+		inline u16 getCellWidth(void)
 		{
 			if (effects_visible) {
 				cell_width = 45;
@@ -278,14 +277,14 @@ class PatternView: public Widget {
 			return cell_width;
 		}
 
-		inline u8 getEffectiveWidth(void)
+		inline u16 getEffectiveWidth(void)
 		{
 			return PV_BORDER_WIDTH + getNumVisibleChannels() * getCellWidth();
 		}
 
-		inline u8 getNumVisibleChannels(void)
+		inline u16 getNumVisibleChannels(void)
 		{
-			u8 cw = (width-PV_BORDER_WIDTH) / getCellWidth();
+			u16 cw = (width-PV_BORDER_WIDTH) / getCellWidth();
 			if(cw < song->getChannels()) {
 				return cw;
 			} else {
@@ -293,12 +292,12 @@ class PatternView: public Widget {
 			}
 		}
 
-		inline u8 getNumVisibleRows(void)
+		inline u16 getNumVisibleRows(void)
 		{
 			return height / PV_CELL_HEIGHT;
 		}
 
-		inline u8 getCursorBarPos(void)
+		inline u16 getCursorBarPos(void)
 		{
 			return getNumVisibleRows()/2-1;
 		}
@@ -308,7 +307,7 @@ class PatternView: public Widget {
 		
 		void (*onMute)(bool *channels_muted);
 		
-		bool pickCell(u8 px, u8 py, u16 *cx, u16 *cy);
+		bool pickCell(u16 px, u16 py, u16 *cx, u16 *cy);
 		
 		Cell **pattern;
 		Song *song;
@@ -322,8 +321,8 @@ class PatternView: public Widget {
 		bool selection_exists, pen_down;
 		bool effects_visible;
 		
-		u8 cell_width;
-		u8 px, py;
+		u16 cell_width;
+		u16 px, py;
 		u16 sel_start_x, sel_end_x, sel_start_y, sel_end_y;
 		u16 sel_x, sel_y, sel_w, sel_h;
 		

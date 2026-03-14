@@ -60,9 +60,9 @@ class GUI {
 		void unregisterOverlayWidget(u8 screen = SUB_SCREEN);
 
 		// Event calls
-		void penDown(u8 x, u8 y);
-		void penUp(u8 x, u8 y); // Remove the coordinates here!
-		void penMove(u8 x, u8 y);
+		void penDown(u16 x, u16 y);
+		void penUp(u16 x, u16 y); // Remove the coordinates here!
+		void penMove(u16 x, u16 y);
 		void buttonPress(u16 buttons);
 		void buttonRelease(u16 buttons);
 
@@ -98,7 +98,7 @@ class GUI {
 		u16 bgcolor;
 
 		// Find the widget that got hit
-		Widget *getWidgetAt(u8 x, u8 y);
+		Widget *getWidgetAt(u16 x, u16 y);
 		Widget *getWidgetForButtons(u16 buttons);
 };
 

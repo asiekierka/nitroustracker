@@ -24,7 +24,7 @@ namespace tobkit {
 class MemoryIndicator : public Widget
 {
 	public:
-		MemoryIndicator(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible=true);
+		MemoryIndicator(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible=true);
 		~MemoryIndicator();
 	
 	// Drawing request

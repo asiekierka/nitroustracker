@@ -21,7 +21,9 @@ limitations under the License.
 #include <stdlib.h>
 
 #include "fxkeyboard.h"
+#ifdef __NDS__
 #include "effectinput.h"
+#endif
 
 using namespace tobkit;
 
@@ -41,7 +43,7 @@ void FXKeyboard::pleaseDraw(void) {
 }
 
 // Event calls
-void FXKeyboard::penDown(u8 px, u8 py)
+void FXKeyboard::penDown(u16 px, u16 py)
 {
 	if (px > FXBUTTON_WIDTH * NUM_FXKEYS) return;
 
@@ -61,7 +63,7 @@ void FXKeyboard::penDown(u8 px, u8 py)
 }
 
 
-void FXKeyboard::penUp(u8 px, u8 py)
+void FXKeyboard::penUp(u16 px, u16 py)
 {
 	for (int i=0;i<NUM_FXKEYS;++i) fxkb_state[i] &= ~0x1; // clear pushed
 	onFxKeypress(getLastCmd());
@@ -82,7 +84,9 @@ void FXKeyboard::setTheme(Theme* theme_, u16 bgcolor_)
 	
 	if (!isExposed()) return;
 
+#ifdef __NDS__
 	memcpy(BG_PALETTE_SUB, fxkb_pal, 32);
+#endif
 	
 	draw();
 }
@@ -95,8 +99,10 @@ void FXKeyboard::hide(void)
 
 void tobkit::FXKeyboard::show(void)
 {
+#ifdef __NDS__
 	dmaCopy(effectinputTiles, char_base, sizeof(effectinputTiles));
 	memcpy(BG_PALETTE_SUB, fxkb_pal, 32);
+#endif
 
 	Widget::show();
 }

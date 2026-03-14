@@ -23,16 +23,16 @@ namespace tobkit {
 
 class NumberSlider: public Widget {
 	public:
-		NumberSlider(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value=0, s32 _min=0, s32 _max=255,
+		NumberSlider(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value=0, s32 _min=0, s32 _max=255,
 						bool _hex=false, bool _is_8bit=false);
 	
 		// Drawing request
 		void pleaseDraw(void);
 		
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
 
 		void setValue(s32 val);
 		s32 getValue(void);

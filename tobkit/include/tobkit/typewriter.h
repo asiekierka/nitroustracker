@@ -40,8 +40,8 @@ class Typewriter: public Widget {
 		void pleaseDraw(void);
 		
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
 	
 		void buttonPress(u16 button);
 	

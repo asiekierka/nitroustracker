@@ -24,7 +24,7 @@ namespace tobkit {
 /* A button that can be toggled on and off, like a switch. It can have a caption and an icon. */
 class ToggleButton: public Widget {
 	public:
-		ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible=true, bool _is_record=false);
+		ToggleButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible=true, bool _is_record=false);
 		~ToggleButton();
 
 		// Callback registration
@@ -34,8 +34,8 @@ class ToggleButton: public Widget {
 		void pleaseDraw(void);
 
 		// Event calls
-		void penDown(u8 x, u8 y);
-		void penUp(u8 x, u8 y);
+		void penDown(u16 x, u16 y);
+		void penUp(u16 x, u16 y);
 		void buttonPress(u16 button);
 
 		void setCaption(const char *_caption);

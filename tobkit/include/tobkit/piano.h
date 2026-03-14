@@ -26,15 +26,15 @@ static constexpr int PIANO_HEIGHT_TILES = 5;
 
 class Piano: public Widget {
 	public:
-		Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_screen_base, Screen *_screen);
+		Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_screen_base, Screen *_screen);
 	
 		// Drawing request
 		void pleaseDraw(void);
 		
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
 		
 		// Callback registration
 		void registerNoteCallback(void (*onNote_)(u8));

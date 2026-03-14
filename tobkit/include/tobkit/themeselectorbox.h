@@ -35,9 +35,9 @@ class ThemeSelectorBox: public Widget {
 		~ThemeSelectorBox(void);
 
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
 	
 		// Drawing request
 		void pleaseDraw(void);

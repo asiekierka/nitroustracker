@@ -33,7 +33,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberSliderRelNote::NumberSliderRelNote(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value)
+NumberSliderRelNote::NumberSliderRelNote(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value)
 	:Widget(_x, _y, _width, _height, _screen),
 	value(_value), btnstate(0), min(-48), max(71)
 {
@@ -46,7 +46,7 @@ void NumberSliderRelNote::pleaseDraw(void) {
 }
 
 // Event calls
-void NumberSliderRelNote::penDown(u8 px, u8 py)
+void NumberSliderRelNote::penDown(u16 px, u16 py)
 {
 	if (!enabled) return;
 	if((px>x)&&(px<x+32)&&(py>y)&&(py<y+17)) {
@@ -57,14 +57,14 @@ void NumberSliderRelNote::penDown(u8 px, u8 py)
 	draw();
 }
 
-void NumberSliderRelNote::penUp(u8 px, u8 py)
+void NumberSliderRelNote::penUp(u16 px, u16 py)
 {
 	if (!enabled) return;
 	btnstate = false;
 	draw();
 }
 
-void NumberSliderRelNote::penMove(u8 px, u8 py)
+void NumberSliderRelNote::penMove(u16 px, u16 py)
 {
 	if (!enabled) return;
 	s16 dy = lasty-py;

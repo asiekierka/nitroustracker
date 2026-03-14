@@ -44,7 +44,7 @@ struct Font {
 class Widget {
 	public:
 		// Constructor sets base variables
-		Widget(u8 _x, u8 _y, u8 _width, u8 _height, Screen *screen, bool _visible=true, bool _occluded=true);
+		Widget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *screen, bool _visible=true, bool _occluded=true);
 		virtual ~Widget(void) {}
 
 		// Callback registration
@@ -54,8 +54,8 @@ class Widget {
 		virtual void pleaseDraw(void) {};
 
 		// Get/set position
-		void getPos(u8 *_x, u8 *_y, u8 *_width, u8 *_height);
-		void setPos(u8 _x, u8 _y);
+		void getPos(u16 *_x, u16 *_y, u16 *_width, u16 *_height);
+		void setPos(u16 _x, u16 _y);
 
 		// Toggle visibility
 		// Objects can be hidden either explicitly (using show/hide) or implicitly
@@ -84,9 +84,9 @@ class Widget {
 		bool set_enabled(bool value);
 
 		// Event calls
-		virtual void penDown(u8 px, u8 py) {};
-		virtual void penUp(u8 px, u8 py) {};
-		virtual void penMove(u8 px, u8 py) {};
+		virtual void penDown(u16 px, u16 py) {};
+		virtual void penUp(u16 px, u16 py) {};
+		virtual void penMove(u16 px, u16 py) {};
 		virtual void buttonPress(u16 button) {};
 		virtual void buttonRelease(u16 button) {};
 
@@ -101,9 +101,9 @@ class Widget {
 		u16 bgcolor; // Color of the background (for hiding the widget)
 
 		// Draw utility functions
-		void drawString(const char* str, u8 tx, u8 ty, u16 color, u8 maxwidth=255, u8 maxheight=255);
+		void drawString(const char* str, u16 tx, u16 ty, u16 color, u16 maxwidth=255, u16 maxheight=255);
 
-		inline void drawSmallString(const char *message, u8 sx, u8 sy, u16 col)
+		inline void drawSmallString(const char *message, u16 sx, u16 sy, u16 col)
 		{
 			size_t n_chars = strlen(message);
 			for (size_t c = 0; c < n_chars; ++c)
@@ -115,17 +115,17 @@ class Widget {
 			}
 		}
 
-		void drawSmallChar(u8 c, u8 cx, u8 cy, u16 col);
-		void drawBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col);
-		void drawFullBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col);
+		void drawSmallChar(u8 c, u16 cx, u16 cy, u16 col);
+		void drawBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col);
+		void drawFullBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col);
 		void drawBorder(u16 col);
-		void drawHLine(u8 tx, u8 ty, u8 length, u16 col);
-		void drawVLine(u8 tx, u8 ty, u8 length, u16 col);
-		void drawBresLine(u8 tx1, u8 ty1, u8 tx2, u8 ty2, u16 col);
-		inline void drawPixel(u8 tx, u8 ty, u16 col) {
+		void drawHLine(u16 tx, u16 ty, u16 length, u16 col);
+		void drawVLine(u16 tx, u16 ty, u16 length, u16 col);
+		void drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col);
+		inline void drawPixel(u16 tx, u16 ty, u16 col) {
 			screen->drawPixel(x+tx, y+ty, col);
 		}
-		void drawGradient(u16 col1, u16 col2, u8 tx, u8 ty, u8 tw, u8 th);
+		void drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th);
 
 		inline const u16 interpolateColor(u16 col1, u16 col2, int alpha /* 0..4095 */) {
 			return RGB5A1(
@@ -135,11 +135,11 @@ class Widget {
 				1);
 		}
 
-		void drawMonochromeIcon(u8 tx, u8 ty, u8 tw, u8 th, const u8 *icon, u16 color);
-		void drawMonochromeIconOffset(u8 tx, u8 ty, u8 tw, u8 th, u8 ix, u8 iy, u8 iw, u8 ih, const u8 *icon, u16 color);
+		void drawMonochromeIcon(u16 tx, u16 ty, u16 tw, u16 th, const u8 *icon, u16 color);
+		void drawMonochromeIconOffset(u16 tx, u16 ty, u16 tw, u16 th, u16 ix, u16 iy, u16 iw, u16 ih, const u8 *icon, u16 color);
 
 		// Stylus utility functions
-		bool isInRect(u8 x, u8 y, u8 x1, u8 y1, u8 x2, u8 y2);
+		bool isInRect(u16 x, u16 y, u16 x1, u16 y1, u16 x2, u16 y2);
 
 		// How wide is the string when rendered?
 		u32 getStringWidth(const char *str, u16 limit=USHRT_MAX);

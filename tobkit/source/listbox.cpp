@@ -23,7 +23,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ListBox::ListBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u16 n_items,
+ListBox::ListBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u16 n_items,
 	bool _show_numbers, bool _visible, bool _zero_offset)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	buttonstate(0), activeelement(0), highlightedelement(-1), scrollpos(0),
@@ -47,7 +47,7 @@ void ListBox::pleaseDraw(void)
 
 
 // Event calls
-void ListBox::penDown(u8 px, u8 py)
+void ListBox::penDown(u16 px, u16 py)
 {
 	u8 relx = px-x, rely = py-y;
 	if(relx<width-SCROLLBAR_WIDTH) {
@@ -112,7 +112,7 @@ void ListBox::penDown(u8 px, u8 py)
 	
 }
 
-void ListBox::penUp(u8 px, u8 py)
+void ListBox::penUp(u16 px, u16 py)
 {
 	u8 previousstate = buttonstate;
 	buttonstate = 0;
@@ -122,7 +122,7 @@ void ListBox::penUp(u8 px, u8 py)
 	}
 }
 
-void ListBox::penMove(u8 px, u8 py)
+void ListBox::penMove(u16 px, u16 py)
 {
 	if(buttonstate==SCROLLTHINGY) {
 		u16 oldscrollpos = scrollpos;

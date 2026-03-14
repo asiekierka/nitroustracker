@@ -20,7 +20,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-TabBox::TabBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen,
+TabBox::TabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
 	u8 _orientation, u8 _icon_size, bool _visible)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	orientation(_orientation), icon_size(_icon_size),
@@ -65,7 +65,7 @@ void TabBox::registerWidget(Widget *w, u16 listeningButtons, u8 tabidx, u8 scree
 }
 
 // Event calls
-void TabBox::penDown(u8 px, u8 py)
+void TabBox::penDown(u16 px, u16 py)
 {
 	u8 size_border = icon_size + 2;
 	u8 size_full = size_border;
@@ -97,11 +97,11 @@ void TabBox::penDown(u8 px, u8 py)
 	}
 }
 
-void TabBox::penUp(u8 px, u8 py) {
+void TabBox::penUp(u16 px, u16 py) {
 	guis.at(currentgui).penUp(px,py);
 }
 
-void TabBox::penMove(u8 px, u8 py) {
+void TabBox::penMove(u16 px, u16 py) {
 	// If it's on the tabs
 	
 	// If its in the box

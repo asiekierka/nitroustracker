@@ -40,7 +40,7 @@ ICON		:= icon48.png
 
 TARGET		:=	nitroustracker_3ds
 BUILD		:=	build_3ds
-SOURCES		:=	common/source common/source/tobkit n3ds/source tobkit/source
+SOURCES		:=	n3ds/source/libnds common/source common/source/tobkit n3ds/source tobkit/source
 DATA		:=	n3ds/data
 INCLUDES	:=	$(SOURCES) tobkit/include
 GRAPHICS	:=	n3ds/gfx
@@ -61,7 +61,8 @@ CFLAGS	:=	-g -Wall -O2 -mword-relocations \
 			-ffunction-sections \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -D__3DS__ -DTOBKIT_PLATFORM_3DS
+CFLAGS	+=	$(INCLUDE) -D__3DS__ -DTOBKIT_PLATFORM_3DS \
+		-DVERSION=\"$(VERSION)\" -DGIT_HASH=\"$(GIT_HASH)\"
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++23
 
@@ -241,21 +242,21 @@ $(OUTPUT).elf	:	$(OFILES)
 %.raw.o %_raw.h : %.png
 	$(SILENTMSG) $(notdir $<)
 	$(SILENTCMD)python3 $(TOOLSDIR)/icon_pack.py $< $(basename $(basename $@)).raw
-	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h  $< > $(basename $(basename $@))_raw.s
+	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h $(basename $(basename $@)).raw > $(basename $(basename $@))_raw.s
 	$(SILENTCMD)sed -i -e 's/_png/_raw/g' $(basename $(basename $@))_raw.h $(basename $(basename $@))_raw.s
 	$(SILENTCMD)$(CC) -x assembler-with-cpp $(CPPFLAGS) $(ASFLAGS) -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.s
 
 font_8x11.raw.o font_8x11_raw.h : $(TOPDIR)/tobkit/fonts/font_8x11.png $(TOPDIR)/tobkit/fonts/font_8x11.png.txt
 	$(SILENTMSG) $(notdir $<)
 	$(SILENTCMD)python3 $(TOOLSDIR)/font_pack.py $< $(basename $(basename $@)).raw
-	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h  $< > $(basename $(basename $@))_raw.s
+	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h $(basename $(basename $@)).raw > $(basename $(basename $@))_raw.s
 	$(SILENTCMD)sed -i -e 's/_png/_raw/g' $(basename $(basename $@))_raw.h $(basename $(basename $@))_raw.s
 	$(SILENTCMD)$(CC) -x assembler-with-cpp $(CPPFLAGS) $(ASFLAGS) -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.s
 
 font_3x5.raw.o font_3x5_raw.h : $(TOPDIR)/tobkit/fonts/font_3x5.png
 	$(SILENTMSG) $(notdir $<)
 	$(SILENTCMD)python3 $(TOOLSDIR)/font_3x5_pack.py $< $(basename $(basename $@)).raw
-	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h  $< > $(basename $(basename $@))_raw.s
+	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h $(basename $(basename $@)).raw > $(basename $(basename $@))_raw.s
 	$(SILENTCMD)sed -i -e 's/_png/_raw/g' $(basename $(basename $@))_raw.h $(basename $(basename $@))_raw.s
 	$(SILENTCMD)$(CC) -x assembler-with-cpp $(CPPFLAGS) $(ASFLAGS) -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.s
 

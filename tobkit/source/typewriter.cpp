@@ -111,7 +111,7 @@ void Typewriter::pleaseDraw(void) {
 }
 
 // Event calls
-void Typewriter::penDown(u8 px, u8 py)
+void Typewriter::penDown(u16 px, u16 py)
 {
 	// Inside the kb?
 	if((px>=kx)&&(px<=kx+TW_TILE_WIDTH*8)&&(py>=ky)&&(py<=ky+TW_TILE_HEIGHT*8))
@@ -192,7 +192,7 @@ void Typewriter::penDown(u8 px, u8 py)
 	}
 }
 
-void Typewriter::penUp(u8 px, u8 py)
+void Typewriter::penUp(u16 px, u16 py)
 {
 	setTile(tilex, tiley, 3);
 	gui.penUp(px, py);
@@ -320,7 +320,7 @@ void Typewriter::redraw(void)
 // Don't try this at home!
 void Typewriter::drawCursor(void)
 {
-	u8 lx, ly, lw, lh;
+	u16 lx, ly, lw, lh;
 	u16 cursorx, cursory, cursorheight;
 	label->getPos(&lx, &ly, &lw, &lh);
 	cursorx = lx - x + getStringWidth(text, cursorpos) + 1;

@@ -34,7 +34,7 @@ static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
 
 
 /* ===================== PUBLIC ===================== */
-Piano::Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
+Piano::Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
 :Widget(_x, _y, _width, _height, _screen),
 char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_instrument(false)
 {
@@ -89,7 +89,7 @@ void Piano::pleaseDraw(void) {
 
 
 // Event calls
-void Piano::penDown(u8 px, u8 py)
+void Piano::penDown(u16 px, u16 py)
 {
 	// Look up the note in the hit-array
 	s16 kbx, kby;
@@ -107,7 +107,7 @@ void Piano::penDown(u8 px, u8 py)
 	curr_note = note;
 }
 
-void Piano::penMove(u8 px, u8 py)
+void Piano::penMove(u16 px, u16 py)
 {
 	// Look up the note in the hit-array
 	s16 kbx, kby;
@@ -136,7 +136,7 @@ void Piano::penMove(u8 px, u8 py)
 }
 
 
-void Piano::penUp(u8 px, u8 py)
+void Piano::penUp(u16 px, u16 py)
 {
 	resetPals();
 	

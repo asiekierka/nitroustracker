@@ -87,15 +87,15 @@ std::string ThemeSelectorBox::getDir(void)
 	return filesel->getDir();
 }
 // Event calls
-void ThemeSelectorBox::penDown(u8 px, u8 py) {
+void ThemeSelectorBox::penDown(u16 px, u16 py) {
 	gui.penDown(px, py);
 }
 
-void ThemeSelectorBox::penUp(u8 px, u8 py) {
+void ThemeSelectorBox::penUp(u16 px, u16 py) {
 	gui.penUp(px, py);
 }
 
-void ThemeSelectorBox::penMove(u8 px, u8 py) {
+void ThemeSelectorBox::penMove(u16 px, u16 py) {
 	gui.penMove(px, py);
 }
 

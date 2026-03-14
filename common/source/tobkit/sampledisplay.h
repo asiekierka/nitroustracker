@@ -27,7 +27,9 @@
 
 #include "tobkit/widget.h"
 #include "ntxm/sample.h"
+#ifdef __NDS__
 #include "sampleed_zoom.h"
+#endif
 
 namespace tobkit {
 
@@ -54,13 +56,13 @@ namespace tobkit {
 class SampleDisplay: public Widget {
 	public:
 		// Constructor sets base variables
-		SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, Sample *_smp=0);
+		SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, Sample *_smp=0);
 		~SampleDisplay(void);
 
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
 
 		// Drawing request
 		void pleaseDraw(void);
@@ -94,6 +96,7 @@ class SampleDisplay: public Widget {
 		void draw(void);
 		void drawLoopHandles(void);
 
+#ifdef __NDS__
 		// https://codeberg.org/blocksds/sdk/src/branch/master/examples/graphics_2d/sprites_animated/source/main.c
 		inline void copy_sprite_frame(void *dst, int frame)
 		{
@@ -103,6 +106,7 @@ class SampleDisplay: public Widget {
 
 			dmaCopy(base + offset, dst, frame_size);
 		}
+#endif
 		u16 *gfxZoomButtonStates[3];
 		
 		void scroll(u32 newscrollpos);

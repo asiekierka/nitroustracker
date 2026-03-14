@@ -35,8 +35,12 @@ class Screen {
         const inline u32 getHeight(void) { return height; }
 
 		inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col) {
-			*(pixels+pitch*ty+tx) = col;
-		}
+#if defined(TOBKIT_PLATFORM_3DS)
+            *(pixels+pitch*tx+pitch-1-ty) = col;
+#else
+            *(pixels+pitch*ty+tx) = col;
+#endif
+        }
 
         inline void fillRow(u32 tx, u32 ty, u32 bw, u32 col) {
 #if defined(TOBKIT_PLATFORM_NDS)

@@ -27,7 +27,11 @@
 #include <cmath>
 #include <cstdio>
 
+#ifdef __NDS__
 #include "loophandle.h"
+#else
+#include "libnds/math.h"
+#endif
 #include "ntxm/ntxmtools.h"
 #include "tools.h"
 
@@ -36,7 +40,7 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, Sample *_smp)
+SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, Sample *_smp)
 	:Widget(_x, _y, _width, _height, _screen),
 	smp(_smp),
 	selstart(0), selend(0), selection_exists(false), pen_is_down(false), active(false), loop_points_visible(false),
@@ -46,6 +50,7 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_scree
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
 	snap_to_zero_crossings(true), draw_mode(false)
 {
+#ifdef __NDS__
 	gfxLine = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 	gfxLoopHandle = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
 	gfxZoomButtons = oamAllocateGfx(&oamSub, SpriteSize_32x16, SpriteColorFormat_16Color);
@@ -95,16 +100,19 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_scree
 	oamSet(&oamSub, SPR_ZOOM_BUTTONS, x+1, y+1, 0, 2,
 		SpriteSize_32x16, SpriteColorFormat_16Color, gfxZoomButtons,
 		-1, false, false, false, false, false);
+#endif
 }
 
 SampleDisplay::~SampleDisplay(void)
 {
+#ifdef __NDS__
 	oamFreeGfx(&oamSub, gfxLine);
 	oamFreeGfx(&oamSub, gfxLoopHandle);
 	oamFreeGfx(&oamSub, gfxZoomButtons);
+#endif
 }
 
-void SampleDisplay::penDown(u8 px, u8 py)
+void SampleDisplay::penDown(u16 px, u16 py)
 {
 	if( (smp==0) || ( (active==false) && (loop_points_visible==false) && (draw_mode == false) ) )
 		return;
@@ -167,7 +175,7 @@ void SampleDisplay::penDown(u8 px, u8 py)
 	}
 }
 
-void SampleDisplay::penUp(u8 px, u8 py)
+void SampleDisplay::penUp(u16 px, u16 py)
 {
 	// Swap selstart and selend if they are in the wrong order
 	if(selend < selstart) {
@@ -208,7 +216,7 @@ void SampleDisplay::penUp(u8 px, u8 py)
 	pen_on_loop_end_point = false;
 }
 
-void SampleDisplay::penMove(u8 px, u8 py)
+void SampleDisplay::penMove(u16 px, u16 py)
 {
 	if((smp==0) || ( (active==false) && (loop_points_visible==false) && (draw_mode == false) ) )
 		   return;
@@ -286,10 +294,14 @@ void SampleDisplay::setSample(Sample *_smp)
 	selstart = selend = 0;
 	if(_smp == 0) {
 		loop_points_visible = false;
+#ifdef __NDS__
 		oamDisable(&oamSub);
+#endif
 	}
+#ifdef __NDS__
 	else if (isExposed())
 		oamEnable(&oamSub);
+#endif
 	draw();
 }
 
@@ -348,10 +360,12 @@ void SampleDisplay::setDrawMode(bool _on)
 {
 	draw_mode = _on;
 
+#ifdef __NDS__
 	if (draw_mode)
 		oamDisable(&oamSub);
 	else
 		oamEnable(&oamSub);
+#endif
 }
 
 void SampleDisplay::showLoopPoints(void)
@@ -378,22 +392,28 @@ void SampleDisplay::setSnapToZeroCrossing(bool snap)
 
 void SampleDisplay::reveal(void)
 {
+#ifdef __NDS__
 	if(smp) oamEnable(&oamSub);
+#endif
 	Widget::reveal();
 }
 
 void SampleDisplay::occlude(void)
 {
+#ifdef __NDS__
 	oamDisable(&oamSub);
+#endif
 	Widget::occlude();
 }
 
 void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
 {
+#ifdef __NDS__
 	*(SPRITE_PALETTE_SUB+1) = theme_->col_loop;
 	*(SPRITE_PALETTE_SUB+1+16) = theme_->col_outline;
 	*(SPRITE_PALETTE_SUB+2+16) = theme_->col_loop;
 	*(SPRITE_PALETTE_SUB+1+32) = theme_->col_smp_zoom;
+#endif
 
 	Widget::setTheme(theme_, bgcolor_);
 }
@@ -468,6 +488,7 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 
 void SampleDisplay::drawLoopHandles(void)
 {
+#ifdef __NDS__
 	u16 loop_start_pos = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart());
 	u16 loop_end_pos   = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
@@ -490,6 +511,7 @@ void SampleDisplay::drawLoopHandles(void)
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_L, !draw_loop_end);
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_R, !draw_loop_end);
 	oamSub.oamMemory[SPR_LOOPLINE_2].x = draw_loop_end ? loop_end_pos-2-2 : width+1;
+#endif
 }
 
 void SampleDisplay::draw(void)
@@ -598,8 +620,8 @@ void SampleDisplay::draw(void)
 		colortable_selected[i] = theme->col_smp_waveform_sel;
 	} */
 
-	int32 step = divf32(inttof32(smp->getNSamples() >> zoom_level), inttof32(width-2));
-	int32 pos = 0;
+	s32 step = divf32(inttof32(smp->getNSamples() >> zoom_level), inttof32(width-2));
+	s32 pos = 0;
 
 	u32 renderwindow = (u32)std::max(1, std::min(100, (int) ceil_f32toint(step)));
 
@@ -701,6 +723,7 @@ void SampleDisplay::draw(void)
 
 	}
 
+#ifdef __NDS__
 	//
 	// Zoom buttons
 	//
@@ -719,6 +742,7 @@ void SampleDisplay::draw(void)
 			copy_sprite_frame(gfxZoomButtons, 0);
 		}
 	}
+#endif
 }
 
 void SampleDisplay::scroll(u32 newscrollpos)

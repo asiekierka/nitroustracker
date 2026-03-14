@@ -28,6 +28,10 @@
 #include <cstring>
 #include <cmath>
 
+#ifndef __NDS__
+#include "libnds/math.h"
+#include "libnds/trig_lut.h"
+#endif
 #include "ntxm/ntxmtools.h"
 #include "tools.h"
 
@@ -36,7 +40,7 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-EnvelopeEditor::EnvelopeEditor(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u16 _max_x, u16 _max_y, u16 _max_points)
+EnvelopeEditor::EnvelopeEditor(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u16 _max_x, u16 _max_y, u16 _max_points)
 	:Widget(_x, _y, _width, _height, _screen), onPointsChange(0), onDrawFinish(0),
 	pen_is_down(false), pen_on_point(false), points_max_x(_max_x), points_max_y(_max_y), n_points(0),
 	max_points(_max_points), active_point(0), sustain(false), sustain_point_index(0), zoom_level(0), buttonstate(0), scrollthingypos(0),
@@ -53,7 +57,7 @@ EnvelopeEditor::~EnvelopeEditor(void)
 }
 
 // Event calls
-void EnvelopeEditor::penDown(u8 px, u8 py)
+void EnvelopeEditor::penDown(u16 px, u16 py)
 {
 	if(!enabled)
 		return;
@@ -129,7 +133,7 @@ void EnvelopeEditor::penDown(u8 px, u8 py)
 	draw();
 }
 
-void EnvelopeEditor::penUp(u8 px, u8 py)
+void EnvelopeEditor::penUp(u16 px, u16 py)
 {
 	if(draw_mode == true)
 	{
@@ -168,7 +172,7 @@ void EnvelopeEditor::penUp(u8 px, u8 py)
 	draw();
 }
 
-void EnvelopeEditor::penMove(u8 px, u8 py)
+void EnvelopeEditor::penMove(u16 px, u16 py)
 {
 	s16 penX = px - x;
 	s16 penY = py - y;
@@ -238,11 +242,11 @@ void EnvelopeEditor::penMove(u8 px, u8 py)
 			s32 dx = realX - points_x[n_points-1];
 			s32 dy = realY - points_y[n_points-1];
 
-			int32 len = sqrtf32(inttof32(dx*dx + dy*dy)); /* 20.12 */
+			s32 len = sqrtf32(inttof32(dx*dx + dy*dy)); /* 20.12 */
 
 			if( (f32toint(len) > DRAW_MIN_POINT_DIST) || (realY == points_max_y) || (realY == 0) )
 			{
-				int32 last_len = sqrtf32(inttof32(last_dx*last_dx + last_dy*last_dy)); /* 20.12 */
+				s32 last_len = sqrtf32(inttof32(last_dx*last_dx + last_dy*last_dy)); /* 20.12 */
 				s16 angle = angleToDegrees(acosLerp(divf32(inttof32(last_dx*dx + last_dy*dy), mulf32(last_len, len))));
 
 				if (angle < DRAW_NEW_POINT_ANGLE)
@@ -596,7 +600,7 @@ void EnvelopeEditor::calcScrollThingy(void)
 	scrollthingyheight = sch >> zoom_level;
 }
 
-void EnvelopeEditor::drawPoint(u8 x, u8 y, bool active)
+void EnvelopeEditor::drawPoint(u16 x, u16 y, bool active)
 {
 	drawFullBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_env_pt);
 

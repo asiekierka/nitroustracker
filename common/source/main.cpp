@@ -23,11 +23,19 @@
  */
 
 // #define SHOW_ALL_SETTINGS
-#define GURU // Show guru meditations
-#define USE_FAT
-#define ENABLE_EFFECT_MENU
 
+#if defined(__NDS__)
 #include <nds.h>
+#include <fat.h>
+#define GURU // Show guru meditations
+#define ENABLE_EFFECT_MENU
+#define TODO_NDS_ONLY
+#define ENABLE_PIANO_PAK
+#elif defined(__3DS__)
+#include <3ds.h>
+#else
+#error "Unsupported target!"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,14 +48,14 @@
 #include <tobkit/tobkit.h>
 
 // Special tracker widgets
-#include "tobkit/recordbox.h"
 #include "tobkit/numbersliderrelnote.h"
-#include "tobkit/envelope_editor.h"
-#include "tobkit/sampledisplay.h"
 #include "tobkit/patternview.h"
 #include "tobkit/normalizebox.h"
 #include "tobkit/themeselectorbox.h"
+#include "tobkit/envelope_editor.h"
 #include "tobkit/fxkeyboard.h"
+#include "tobkit/recordbox.h"
+#include "tobkit/sampledisplay.h"
 #include "tobkit/digitbox.h"
 using namespace tobkit;
 
@@ -63,6 +71,7 @@ using namespace tobkit;
 #include "state.h"
 #include "settings.h"
 #include "tools.h"
+#include "platform.h"
 
 #include "icon_disk_raw.h"
 #include "icon_disk_unsaved_raw.h"
@@ -107,37 +116,20 @@ using namespace tobkit;
 #include "cell_array.h"
 #include "action.h"
 
-#include <fat.h>
-
 #define REPEAT_FREQ	10 /* Hz */
 #define REPEAT_START_DELAY 15 /* frames */
-
-#define FRONT_BUFFER	0
-#define BACK_BUFFER	1
 
 #define FILETYPE_SONG	0
 #define FILETYPE_SAMPLE	1
 #define FILETYPE_INST	2
 
-touchPosition touch;
 u8 frame = 0;
 
-u8 active_buffer = FRONT_BUFFER;
-
-u16 *main_vram_front, *main_vram_back, *sub_vram;
-Screen *main_screen, *sub_screen;
 char *launch_path = NULL;
 
 bool typewriter_active = false;
 bool exit_requested = false;
 volatile bool redraw_main_requested = false;
-
-u16 keys_that_are_repeated = KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
-u16 repeatkeys = 0, repeatkeys_last = 0;
-
-// Make the key botmasks variable for switching handedness
-u16 mykey_LEFT = KEY_LEFT, mykey_UP = KEY_UP, mykey_RIGHT = KEY_RIGHT, mykey_DOWN = KEY_DOWN,
-	mykey_A = KEY_A, mykey_B = KEY_B, mykey_X = KEY_X, mykey_Y = KEY_Y, mykey_L = KEY_L, mykey_R = KEY_R;
 
 GUI *gui;
 
@@ -219,9 +211,11 @@ GUI *gui;
 	RadioButton::RadioButtonGroup *rbgoutput;
 	RadioButton *rboutputmono, *rboutputstereo;
 	GroupBox *gboutput;
+#ifdef __NDS__
 	RadioButton::RadioButtonGroup *rbgfreq;
 	RadioButton *rbfreq32, *rbfreq47;
 	GroupBox *gbfreq;
+#endif
 	GroupBox *gblinesbeat;
 	NumberBox *nblinesbeat;
 	Button *btnconfigsave;
@@ -262,7 +256,6 @@ char last_themepath[SETTINGS_FILENAME_LEN + 1];
 bool fastscroll = false;
 bool multisamp_from_mapsamp = false;
 bool mod_loading = false;
-uint16* map;
 
 // TODO: Make own class for tracker control and remove forward declarations
 void handleButtons(u16 buttons, u16 buttonsheld);
@@ -283,15 +276,12 @@ void handleClearFx(void);
 
 void clearMainScreen(void)
 {
-	main_screen->pixels = main_vram_front;
-	main_screen->clear(settings->getTheme()->col_bg);
-	main_screen->pixels = main_vram_back;
-	main_screen->clear(settings->getTheme()->col_bg);
+	PlatformClearMainScreen(settings->getTheme()->col_bg);
 }
 
 void clearSubScreen(void)
 {
-	sub_screen->clear(settings->getTheme()->col_bg);
+	PlatformClearSubScreen(settings->getTheme()->col_bg);
 }
 
 void drawSampleNumbers(void)
@@ -641,11 +631,13 @@ void handleSampleChange(const u16 newsample)
 
 void handleOverlayWidgetChange(u8 screen, bool visible)
 {
+#ifdef __NDS__
 	if (screen == SUB_SCREEN)
 	{
 		if (visible) oamDisable(&oamSub);
 		else if (!sampledisplay->is_occluded()) oamEnable(&oamSub);
 	}
+#endif
 }
 
 void volEnvSetInst(Instrument *inst)
@@ -798,11 +790,6 @@ void setSong(Song *newsong)
 	mod_loading = false;
 	setHasUnsavedChanges(false);
 	drawMainScreen();
-}
-
-bool areScreensSwapped(void)
-{
-	return !(REG_POWERCNT & POWER_SWAP_LCDS);
 }
 
 bool loadSample(const char *filename_with_path)
@@ -1283,28 +1270,17 @@ void drawMainScreen(void)
 	// Draw widgets (to back buffer)
 	gui->drawMainScreen();
 
-	// Flip buffers
-	active_buffer = !active_buffer;
-
-	if(active_buffer == FRONT_BUFFER) {
-	    bgSetMapBase(2, 2);
-		main_vram_front = (uint16*)BG_BMP_RAM(2);
-		main_vram_back = (uint16*)BG_BMP_RAM(8);
-	} else {
-	    bgSetMapBase(2, 8);
-		main_vram_front = (uint16*)BG_BMP_RAM(8);
-		main_vram_back = (uint16*)BG_BMP_RAM(2);
-	}
-	main_screen->pixels = main_vram_back;
+	PlatformFlipMainScreen();
 }
-
 
 void redrawSubScreen(void)
 {
+#ifdef TODO_NDS_ONLY
 	// Fill screen
 	u16 col = settings->getTheme()->col_bg;
 	u32 colcol = col | col << 16;
-	dmaFillWords(colcol, sub_vram, 256 * 153 * 2);
+	dmaFillWords(colcol, sub_screen->pixels, 256 * 153 * 2);
+#endif
 
 	// Redraw GUI
 	gui->drawSubScreen();
@@ -1345,7 +1321,7 @@ void stop(void)
 	// if state->playing == true. So, by setting it to false here we might miss ticks
 	// resultsing in the pattern view being out of sync with the song. So we wait two
 	// frames to make sure the arm7 has really stopped and redraw the pattern.
-	cothread_yield_irq(IRQ_VBLANK); cothread_yield_irq(IRQ_VBLANK);
+	PlatformWaitVBlank(); PlatformWaitVBlank();
 	redraw_main_requested = false;
 	drawMainScreen();
 
@@ -1404,6 +1380,7 @@ void setRecordMode(bool is_on)
 	redraw_main_requested = false;
 	drawMainScreen(); // <- must redraw because of orange lines
 
+#ifdef TODO_NDS_ONLY
 	// Draw border
 	u16 col;
 	u32 colcol;
@@ -1414,14 +1391,15 @@ void setRecordMode(bool is_on)
 		col = settings->getTheme()->col_bg; // bg color
 	colcol = (col) | (col << 16);
 
-	dmaFillWords(colcol, sub_vram, 256 * 2);
-	dmaFillWords(colcol, sub_vram + (256*191), 256 * 2);
+	dmaFillWords(colcol, sub_screen->pixels, 256 * 2);
+	dmaFillWords(colcol, sub_screen->pixels + (256*191), 256 * 2);
 
 	for(u8 i=1; i<191; ++i)
 	{
-		sub_vram[256*i] = col;
-		sub_vram[256*i+255] = col;
+		sub_screen->pixels[256*i] = col;
+		sub_screen->pixels[256*i+255] = col;
 	}
+#endif
 }
 
 
@@ -1897,7 +1875,7 @@ void handleFileChange(File file)
 
 			// Wait until previously playing preview sample is deleted
 			while(state->preview_sample)
-				cothread_yield_irq(IRQ_VBLANK);
+				PlatformWaitVBlank();
 
 			// Play it
 			state->preview_sample = smp;
@@ -2061,13 +2039,16 @@ void reloadSkin(void)
 {
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 
+#ifdef TODO_NDS_ONLY
 	for (int y = 153; y < 192;++y)
 	{
 		// fill the quirky little square next to the piano
 		u16 col = settings->getTheme()->col_bg;
 		u32 colcol = col | col << 16;
-		dmaFillWords(colcol, sub_vram + (256 * y) + 224, (256 - 224) * 2);
+		dmaFillWords(colcol, sub_screen->pixels + (256 * y) + 224, (256 - 224) * 2);
 	}
+#endif
+
 	gui->draw();
 	redrawSubScreen();
 	setRecordMode(state->recording);
@@ -2130,14 +2111,12 @@ void handleThemeButton(void)
 
 void handleTransposeUp(void)
 {
-	u16 keysheld = keysHeld();
-	handleTranspose((keysheld & mykey_R) ? 12 : 1);
+	handleTranspose((PlatformKeysHeld & PlatformKey_R) ? 12 : 1);
 }
 
 void handleTransposeDown(void)
 {
-	u16 keysheld = keysHeld();
-	handleTranspose((keysheld & mykey_R) ? -12 : -1);
+	handleTranspose((PlatformKeysHeld & PlatformKey_R) ? -12 : -1);
 }
 
 // number slider
@@ -2194,7 +2173,7 @@ void handleToggleEffectsVisibility(bool on)
 	{
 		tbeffects->setState(false);
 
-		if (!areScreensSwapped())
+		if (!PlatformVideoAreScreensSwapped())
 			pv->clearSelection();
 
 		kb->show();
@@ -2267,14 +2246,18 @@ void handleClearFx(void)
 void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void), void (*clearCallback)(void), void (*cancelCallback)(void))
 {
     // TODO: Migrate to new TobKit to eliminate such ugliness
-#define SUB_BG1_X0 (*(vuint16*)0x04001014)
-#define SUB_BG1_Y0 (*(vuint16*)0x04001016)
+#ifdef TODO_NDS_ONLY
+#define SUB_BG1_X0 (*(vu16*)0x04001014)
+#define SUB_BG1_Y0 (*(vu16*)0x04001016)
 
-	tw = new Typewriter(prompt, (uint16*)CHAR_BASE_BLOCK_SUB(1),
-		(uint16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0);
+	tw = new Typewriter(prompt, (u16*)CHAR_BASE_BLOCK_SUB(1),
+		(u16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0);
+#else
+	tw = new Typewriter(prompt, NULL, NULL, 3, sub_screen, NULL, NULL);
+#endif
 	tw->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	tw->setText(str);
-	gui->registerOverlayWidget(tw, mykey_LEFT|mykey_RIGHT, SUB_SCREEN);
+	gui->registerOverlayWidget(tw, PlatformKey_LEFT|PlatformKey_RIGHT, SUB_SCREEN);
 	if(okCallback!=0) {
 		tw->registerOkCallback(okCallback);
 	}
@@ -2525,41 +2508,9 @@ void sample_show_normalize_window(void)
 	normalizeBox->reveal();
 }
 
-void swapControls(Handedness handedness)
-{
-	if(handedness == LEFT_HANDED)
-	{
-		mykey_UP = KEY_X;
-		mykey_DOWN = KEY_B;
-		mykey_LEFT = KEY_Y;
-		mykey_RIGHT = KEY_A;
-		mykey_L = KEY_R;
-		mykey_R = KEY_L;
-		mykey_A = KEY_RIGHT;
-		mykey_B = KEY_DOWN;
-		mykey_X = KEY_UP;
-		mykey_Y = KEY_LEFT;
-		keys_that_are_repeated = KEY_A | KEY_B | KEY_X | KEY_Y;
-	}
-	else
-	{
-		mykey_UP = KEY_UP;
-		mykey_DOWN = KEY_DOWN;
-		mykey_LEFT = KEY_LEFT;
-		mykey_RIGHT = KEY_RIGHT;
-		mykey_L = KEY_L;
-		mykey_R = KEY_R;
-		mykey_A = KEY_A;
-		mykey_B = KEY_B;
-		mykey_X = KEY_X;
-		mykey_Y = KEY_Y;
-		keys_that_are_repeated = KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
-	}
-}
-
 void swapPatternButtons(Handedness handedness)
 {
-	u8 x, y;
+	u16 x, y;
 	pv->getPos(&x, &y, NULL, NULL);
 
 	Handedness current_handedness = x == 30 ? LEFT_HANDED : RIGHT_HANDED;
@@ -2581,18 +2532,10 @@ void handleHandednessChange(u8 handedness)
 {
 	clearMainScreen();
 
-	if(handedness == 0)
-	{
-		settings->setHandedness(LEFT_HANDED);
-		swapControls(LEFT_HANDED);
-		swapPatternButtons(LEFT_HANDED);
-	}
-	else
-	{
-		settings->setHandedness(RIGHT_HANDED);
-		swapControls(RIGHT_HANDED);
-		swapPatternButtons(RIGHT_HANDED);
-	}
+	Handedness h = (handedness == 0) ? LEFT_HANDED : RIGHT_HANDED;
+	settings->setHandedness(h);
+	PlatformSetInputLayout(h);
+	swapPatternButtons(h);
 }
 
 void handleOutputModeChange(u8 outputMode)
@@ -2602,15 +2545,17 @@ void handleOutputModeChange(u8 outputMode)
 	stopPlay();
 }
 
+#ifdef __NDS__
 void handleOutputFreqChange(u8 freq)
 {
 	settings->setFreq47kHz(freq != 0);
 	soundExtSetFrequency(freq ? 47 : 32);
 }
+#endif
 
 void switchScreens(void)
 {
-	lcdSwap();
+	if (!PlatformVideoSwapScreens()) return;
 	gui->switchScreens();
 	if (!fxkb->is_visible())
 		pv->clearSelection();
@@ -2623,7 +2568,11 @@ void switchScreens(void)
 // Create the song and do other init stuff yet to be determined.
 void setupSong(void) {
 	song = new Song(6, 125);
+#ifdef __NDS__
 	action_buffer = new ActionBuffer(isDSiMode() ? 1024 : 256);
+#else
+	action_buffer = new ActionBuffer(2048);
+#endif
 	ntxm_flush_dcache();
 }
 
@@ -3279,7 +3228,7 @@ void sampleDrawToggle(bool on)
 }
 
 #define RIGHT_SIDE_BUTTON_WIDTH 30
-#define RIGHT_SIDE_BUTTON_X 225
+#define RIGHT_SIDE_BUTTON_X (main_screen->getWidth() - 1 - RIGHT_SIDE_BUTTON_WIDTH)
 
 void setupGUI(bool dldi_enabled)
 {
@@ -3287,12 +3236,20 @@ void setupGUI(bool dldi_enabled)
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
-	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen);
+#ifdef TODO_NDS_ONLY
+	kb = new Piano(0, 152, 224, 40, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen);
+#else
+	kb = new Piano(0, 152, 224, 40, NULL, NULL, sub_screen);
+#endif
 	kb->set_overdraw(false);
 	kb->registerNoteCallback(handleNoteStroke);
 	kb->registerReleaseCallback(handleNoteRelease);
 
-	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen, onFxKeyPressed, false);
+#ifdef TODO_NDS_ONLY
+	fxkb = new FXKeyboard(0, 152, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen, onFxKeyPressed, false);
+#else
+	fxkb = new FXKeyboard(0, 152, NULL, NULL, sub_screen, onFxKeyPressed, false);
+#endif
 	fxkb->set_overdraw(false);
 	
 
@@ -3743,6 +3700,7 @@ void setupGUI(bool dldi_enabled)
 		nblinesbeat = new NumberBox(93, 72, 32, 17, sub_screen, settings->getLinesPerBeat(), 1, 64);
 		nblinesbeat->registerChangeCallback(handleLinesBeatChange);
 
+#ifdef __NDS__
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
@@ -3758,6 +3716,7 @@ void setupGUI(bool dldi_enabled)
 			rbgfreq->setActive(1);
 			rbgfreq->registerChangeCallback(handleOutputFreqChange);
 		}
+#endif
 
 		btnconfigsave = new Button(97, 135, 40, 14, sub_screen);
 		btnconfigsave->setCaption("save");
@@ -3786,6 +3745,7 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(gboutput, 0, 4);
 		tabbox->registerWidget(nblinesbeat, 0, 4);
 		tabbox->registerWidget(gblinesbeat, 0, 4);
+#ifdef __NDS__
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
@@ -3794,13 +3754,14 @@ void setupGUI(bool dldi_enabled)
 			tabbox->registerWidget(rbfreq47, 0, 4);
 			tabbox->registerWidget(gbfreq, 0, 4);
 		}
+#endif
 	// </Settings Gui>
 
 	lbinstruments = new ListBox(141, 32, 114, 89, sub_screen, MAX_INSTRUMENTS, true, true, false);
 
 	lbsamples = new ListBox(141, 100, 114, 23, sub_screen, MAX_INSTRUMENT_SAMPLES, true, false, true);
 
-	buttonswitchsub    = new BitButton(236, 1  , 19, 19, sub_screen, icon_flp_raw, 15, 15);
+	buttonswitchsub    = new BitButton(sub_screen->getWidth() - 20, 1  , 19, 19, sub_screen, icon_flp_raw, 15, 15);
 	buttonplay         = new BitButton(180, 3  , 23, 15, sub_screen, icon_play_raw, 12, 12, 5, 0, true);
 	buttonpause        = new BitButton(180, 3  , 23, 15, sub_screen, icon_pause_raw, 12, 12, 5, 0, false);
 	buttonstop         = new BitButton(204, 3  , 23, 15, sub_screen, icon_stop_raw, 12, 12, 5, 0);
@@ -3888,7 +3849,7 @@ void setupGUI(bool dldi_enabled)
 	tbmultisample->setCaption("+");
 
 	// <Main Screen>
-		buttonswitchmain = new BitButton(236, 1  , 19, 19, main_screen, icon_flp_raw, 15, 15);
+		buttonswitchmain = new BitButton(main_screen->getWidth() - 20, 1 , 19, 19, main_screen, icon_flp_raw, 15, 15);
 		buttonswitchmain->registerPushCallback(switchScreens);
 
 		buttonunmuteall = new Button(RIGHT_SIDE_BUTTON_X, 22, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
@@ -3951,7 +3912,7 @@ void setupGUI(bool dldi_enabled)
 		buttondelnote->setCaption("del");
 		buttonemptynote2->setCaption("clr");
 
-		pv = new PatternView(0, 0, RIGHT_SIDE_BUTTON_X, 192, main_screen, state);
+		pv = new PatternView(0, 0, RIGHT_SIDE_BUTTON_X, main_screen->getHeight(), main_screen, state);
 		pv->setSong(song);
 		pv->registerMuteCallback(handleMuteChannelsChanged);
 
@@ -4041,9 +4002,9 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 {
 	u16 ptnlen = song->getPatternLength(song->getPotEntry(state->potpos));
 
-	if(!(buttonsheld & mykey_R))
+	if(!(buttonsheld & PlatformKey_R))
 	{
-		if(buttons & mykey_UP)
+		if(buttons & PlatformKey_UP)
 		{
 			int newrow = state->getCursorRow();
 
@@ -4062,7 +4023,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			redraw_main_requested = true;
 
 		}
-		else if(buttons & mykey_DOWN)
+		else if(buttons & PlatformKey_DOWN)
 		{
 			int newrow = state->getCursorRow();
 
@@ -4081,7 +4042,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 		}
 	}
 
-	if((buttons & mykey_LEFT)&&(!typewriter_active))
+	if((buttons & PlatformKey_LEFT)&&(!typewriter_active))
 	{
 		if(state->channel>0) {
 			state->channel--;
@@ -4089,7 +4050,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			redraw_main_requested = true;
 		}
 	}
-	else if((buttons & mykey_RIGHT)&&(!typewriter_active))
+	else if((buttons & PlatformKey_RIGHT)&&(!typewriter_active))
 	{
 		if(state->channel < song->getChannels()-1)
 		{
@@ -4119,9 +4080,9 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 #endif
 	}
 #ifdef DEBUG
-	/*else if(buttons & mykey_Y) {
+	/*else if(buttons & PlatformKey_Y) {
 		saveScreenshot();
-	} else if(buttons & mykey_R) {
+	} else if(buttons & PlatformKey_R) {
 		dumpSample();
 	}
 	*/
@@ -4130,68 +4091,62 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 
 void VblankHandler(void)
 {
-	// Check input
-	scanKeys();
-	u16 keysdown = keysDown() | (keysDownRepeat() & keys_that_are_repeated);
-	u16 keysup = keysUp();
-	u16 keysheld = keysHeld();
-	touchRead(&touch);
+	PlatformInputUpdate();
 
-
-	if(keysdown & KEY_TOUCH)
+	if(PlatformKeysDown & KEY_TOUCH)
 	{
-		gui->penDown(touch.px, touch.py);
+		gui->penDown(PlatformTouchX, PlatformTouchY);
 		redraw_main_requested = true;
 	}
 
-	if(keysup & KEY_TOUCH)
+	if(PlatformKeysUp & KEY_TOUCH)
 	{
-		gui->penUp(touch.px, touch.py);
+		gui->penUp(PlatformTouchX, PlatformTouchY);
 		lastx = -255;
 		lasty = -255;
 	}
 
-	if( (keysheld & KEY_TOUCH) && ( (abs(touch.px - lastx)>0) || (abs(touch.py - lasty)>0) ) ) // PenMove
+	if( (PlatformKeysHeld & KEY_TOUCH) && ( (abs(PlatformTouchX - lastx)>0) || (abs(PlatformTouchY - lasty)>0) ) ) // PenMove
 	{
-		gui->penMove(touch.px, touch.py);
-		lastx = touch.px;
-		lasty = touch.py;
+		gui->penMove(PlatformTouchX, PlatformTouchY);
+		lastx = PlatformTouchX;
+		lasty = PlatformTouchY;
 		if(gui->getActiveScreen() == MAIN_SCREEN)
 			redraw_main_requested = true;
 	}
 
-	if(keysheld & mykey_R)
+	if(PlatformKeysHeld & PlatformKey_R)
 	{
-		if(keysheld & mykey_DOWN)
+		if(PlatformKeysHeld & PlatformKey_DOWN)
 			move_to_bottom();
-		else if(keysheld & mykey_UP)
+		else if(PlatformKeysHeld & PlatformKey_UP)
 			move_to_top();
 	}
 
-	if(keysdown & ~KEY_TOUCH)
+	if(PlatformKeysDown & ~KEY_TOUCH)
 	{
-		if((keysdown & mykey_X)||(keysdown & mykey_L)) {
+		if((PlatformKeysDown & PlatformKey_X)||(PlatformKeysDown & PlatformKey_L)) {
 			switchScreens();
 		}
 
-		if(keysdown & mykey_B) {
+		if(PlatformKeysDown & PlatformKey_B) {
 			fastscroll = true;
 		}
 
-		gui->buttonPress(keysdown);
-		handleButtons(keysdown, keysheld);
+		gui->buttonPress(PlatformKeysDown);
+		handleButtons(PlatformKeysDown, PlatformKeysHeld);
 		pv->pleaseDraw();
 	}
 
-	if(keysup)
+	if(PlatformKeysUp)
 	{
-		gui->buttonRelease(keysup);
+		gui->buttonRelease(PlatformKeysUp);
 
-		if(keysup & mykey_B)
+		if(PlatformKeysUp & PlatformKey_B)
 			fastscroll = false;
 	}
-	
-	// Easy Piano pak handling logic
+
+#ifdef ENABLE_PIANO_PAK
 	if (pianoIsInserted())
 	{
 		pianoScanKeys();
@@ -4213,8 +4168,11 @@ void VblankHandler(void)
 			}
  		}
 	}
+#endif
 
+#ifdef __NDS__
 	oamUpdate(&oamSub);
+#endif
 
 	// Constantly update pattern view while playing
 	if(redraw_main_requested)
@@ -4224,15 +4182,6 @@ void VblankHandler(void)
 	}
 
 	frame = (frame + 1) % 2;
-}
-
-void fadeIn(void)
-{
-	for(int i=-16; i <= 0; ++i)
-	{
-	    setBrightness(3, i);
-		cothread_yield_irq(IRQ_VBLANK);
-	}
 }
 
 void applySettings(void)
@@ -4263,96 +4212,10 @@ int main(int argc, char **argv) {
 	defaultExceptionHandler();
 #endif
 
-	// Hide everything
-#ifndef DEBUG
-	setBrightness(3, 16);
-#endif
-
-	powerOn(POWER_ALL_2D);
-
-	// Adjust screens so that the main screen is the top screen
-	lcdMainOnTop();
-
-	// Main screen: Text and double buffer ERB
-	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE);
-
-	// Sub screen: Keyboard tiles, Typewriter tiles and ERB
-	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D);
-
-
-	vramSetPrimaryBanks(VRAM_A_MAIN_BG_0x06000000, VRAM_B_MAIN_BG_0x06020000,
-	   VRAM_C_SUB_BG_0x06200000 , VRAM_D_SUB_SPRITE);
-
-	// SUB_BG0 for Piano Tiles
-	videoBgEnableSub(0);
-	int piano_bg = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 1, 0);
-	bgSetScroll(piano_bg, 0, 0);
-	bgSetPriority(piano_bg, 2);
-
-	// SUB_BG1 for Typewriter Tiles
-	videoBgEnableSub(1);
-	int typewriter_bg = bgInitSub(1, BgType_Text4bpp, BgSize_T_256x256, 12, 1);
-	bgSetPriority(typewriter_bg, 0);
-
-#ifdef DEBUG
-	u8 text_priority = 0;
-	u8 bg_priority = 1;
-#else
-	u8 text_priority = 1;
-	u8 bg_priority = 0;
-#endif
-
-	// Pattern view
-	int ptn_bg = bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 2, 0);
-	bgSetPriority(ptn_bg, bg_priority);
-
-	// Sub screen framebuffer
-	int sub_bg = bgInitSub(2, BgType_Bmp16, BgSize_B16_256x256, 2, 0);
-	bgSetPriority(sub_bg, 1);
-
-	oamInit(&oamSub, SpriteMapping_1D_32, false);
-
-	// Create a window the same size as the sample display. (so we can occclude loop handles, etc)
-	windowEnableSub(WINDOW_0);
-
-	bgWindowEnable(sub_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
-	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
-	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
-
-	windowSetBoundsSub(WINDOW_0, 5, 24, 5+129, 23+61); // sampledisplay x1,y1,x2,y2
-	oamWindowEnable(&oamSub, WINDOW_0);
-
-	// Special effects
-#ifdef DEBUG
-	REG_BLDCNT = BLEND_ALPHA | BLEND_SRC_BG0 | BLEND_DST_BG2;
-	REG_BLDALPHA = 0x040C;
-#else
-	REG_BLDCNT_SUB = BLEND_FADE_BLACK | BLEND_SRC_BG2 | BLEND_SRC_BG0;
-	REG_BLDCNT = BLEND_FADE_BLACK | BLEND_SRC_BG2 | BLEND_SRC_BG0;
-#endif
-	#ifdef USE_FAT
-	bool fat_success = fatInitDefault();
-#else
-    bool fat_success = false;
-#endif
-	// Setup text
-	consoleInit(NULL, 0, BgType_Text4bpp, BgSize_T_256x256, 4, 0, true, true);
-	bgSetPriority(0, text_priority);
-
-	bgUpdate();
+	PlatformInitVideo();
+	bool fat_success = PlatformInitFilesystem();
 
 	settings = new Settings(launch_path, fat_success);
-
-	// Set draw loactions for the ERBs
-	main_vram_front = (uint16*)BG_BMP_RAM(2);
-	main_vram_back = (uint16*)BG_BMP_RAM(8);
-	sub_vram  = (uint16*)BG_BMP_RAM_SUB(2);
-
-	main_screen = new Screen(main_vram_back, 256, 192, 256);
-	sub_screen = new Screen(sub_vram, 256, 192, 256);
-
-	// Clear tile mem
-	dmaFillWords(0, BG_BMP_RAM_SUB(0), 32*1024);
 
 	// parse argv[0], if present
 	if (argc >= 1 && argv != NULL && argv[0] != NULL) {
@@ -4377,7 +4240,7 @@ int main(int argc, char **argv) {
 	clearSubScreen();
 
 	// Key repeat handling: enable repeat
-	keysSetRepeat(REPEAT_START_DELAY, 60 / REPEAT_FREQ);
+	PlatformInputSetRepeat(REPEAT_START_DELAY, 60 / REPEAT_FREQ);
 
 	// Init interprocessor communication
 	CommandInit();
@@ -4397,10 +4260,10 @@ int main(int argc, char **argv) {
 	setSong(song);
 
 #ifndef DEBUG
-	fadeIn();
+	PlatformVideoFadeIn();
 #endif
 
-#ifdef USE_FAT
+#ifdef __NDS__
 	if(!fat_success)
 		showMessage("dldi init failed", true);
 #endif
@@ -4416,11 +4279,11 @@ int main(int argc, char **argv) {
 		dsmidi_handler.tick();
 
 #ifdef DEBUG
-        if(keysHeld() == (KEY_START | KEY_SELECT | KEY_L | KEY_R)) {
+        if(PlatformKeysHeld == (KEY_START | KEY_SELECT | KEY_L | KEY_R)) {
             exit_requested = true;
         }
 #endif
-		cothread_yield_irq(IRQ_VBLANK);
+		PlatformWaitVBlank();
 	}
 
 	if (launch_path) ntxm_free(launch_path);

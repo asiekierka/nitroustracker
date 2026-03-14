@@ -139,7 +139,7 @@ void GUI::setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool))
 } 
 
 // Event calls
-void GUI::penDown(u8 x, u8 y)
+void GUI::penDown(u16 x, u16 y)
 {
 	Widget *w = getWidgetAt(x,y);
 	if(w!=0) {
@@ -148,7 +148,7 @@ void GUI::penDown(u8 x, u8 y)
 	}
 }
 
-void GUI::penUp(u8 x, u8 y)
+void GUI::penUp(u16 x, u16 y)
 {
 	if(activeWidget!=0) {
 		if(activeWidget->is_visible()==true) {
@@ -158,11 +158,11 @@ void GUI::penUp(u8 x, u8 y)
 	}
 }
 
-void GUI::penMove(u8 x, u8 y) {
+void GUI::penMove(u16 x, u16 y) {
 	// Check if the pen moved off the active widget
 	/*
 	if((activeWidget!=0)&&(activeWidget->is_visible()==true)) {
-		u8 ax, ay, aw, ah;
+		u16 ax, ay, aw, ah;
 		activeWidget->getPos(&ax, &ay, &aw, &ah);
 		if((x<ax)||(x>ax+aw)||(y<ay)||(y>ay+ah)) {
 			activeWidget->penUp(x, y);
@@ -296,9 +296,9 @@ void GUI::revealAll(void)
 
 // Find the widget that got hit
 // Does notreturn invisible widgets
-Widget *GUI::getWidgetAt(u8 x, u8 y) {
+Widget *GUI::getWidgetAt(u16 x, u16 y) {
 
-	u8 wx, wy, ww, wh;
+	u16 wx, wy, ww, wh;
 
 	// Do we have an overlay?
 	if((activeScreen == MAIN_SCREEN)&&(overlayWidgetMain!=0)) {

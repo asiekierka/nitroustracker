@@ -24,7 +24,6 @@
 
 #include "recordbox.h"
 
-#include <nds.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -41,7 +40,7 @@ using namespace tobkit;
 // Constructor sets base variables
 RecordBox::RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(void), Sample *_sample, Instrument *_instrument,
 			   u8 _smpidx)
-	:Widget((SCREEN_WIDTH-RECORDBOX_WIDTH)/2, (SCREEN_HEIGHT-RECORDBOX_HEIGHT)/2,
+	:Widget((_screen->getWidth()-RECORDBOX_WIDTH)/2, (_screen->getHeight()-RECORDBOX_HEIGHT)/2,
 		RECORDBOX_WIDTH, RECORDBOX_HEIGHT, _screen, true),
   	recording(false), btndown(false), onOk(_onOk), onCancel(_onCancel), sample(_sample),
 	instrument(_instrument), smpidx(_smpidx), sound_data(NULL)
@@ -87,9 +86,9 @@ void RecordBox::pleaseDraw(void)
 }
 
 // Event calls
-void RecordBox::penDown(u8 px, u8 py)
+void RecordBox::penDown(u16 px, u16 py)
 {
-	u8 bx, by, bw, bh;
+	u16 bx, by, bw, bh;
 	
 	buttoncancel->getPos(&bx, &by, &bw, &bh);
 	if((px >= bx)&&(px <= bx+bw)&&(py >= by)&&(py <= by+bh))
@@ -99,7 +98,7 @@ void RecordBox::penDown(u8 px, u8 py)
 	}
 }
 
-void RecordBox::penUp(u8 px, u8 py)
+void RecordBox::penUp(u16 px, u16 py)
 {
 	if(btndown == true)
 	{
@@ -209,7 +208,9 @@ void RecordBox::startRecording(void)
 void RecordBox::stopRecording()
 {
 	int size = CommandStopRecording();
+#ifdef __NDS__
 	DC_InvalidateRange(sound_data, size);
+#endif
 
 	debugprintf("orig sample size %lu @ %d Hz\n", size/2, RECORDBOX_SAMPLING_FREQ);
 		

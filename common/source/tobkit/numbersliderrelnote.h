@@ -31,15 +31,15 @@ namespace tobkit {
 
 class NumberSliderRelNote: public Widget {
 	public:
-		NumberSliderRelNote(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value=0);
+		NumberSliderRelNote(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value=0);
 	
 		// Drawing request
 		void pleaseDraw(void);
 		
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
 
 		void setValue(s32 val);
 		s32 getValue(void);

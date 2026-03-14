@@ -38,10 +38,10 @@ class File {
 
 class FileSelector: public ListBox {
 	public:
-		FileSelector(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool visible=true);
+		FileSelector(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool visible=true);
 		
 		// Calls fileselect callback or changes the directory
-		void penDown(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
 	
 		// Drawing request
 		void pleaseDraw(void);

@@ -30,14 +30,14 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-DigitBox::DigitBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u8 _value, u8 _min, u8 _max, u8 _digits)
+DigitBox::DigitBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u8 _value, u8 _min, u8 _max, u8 _digits)
 	:Widget(_x, _y - DB_MARGIN_TOP, _width, _height + DB_MARGIN_TOP, _screen),
 	value(_value), min(_min), max(_max), digits(_digits), btnstate(0), lasty(0), lastx(0)
 {
 	onChange = 0;
 }	
 
-void DigitBox::penMove(u8 px, u8 py)
+void DigitBox::penMove(u16 px, u16 py)
 {
 	if (!enabled) return;
 
@@ -81,7 +81,7 @@ void DigitBox::pleaseDraw(void) {
 }
 
 // Event calls
-void DigitBox::penDown(u8 px, u8 py) {
+void DigitBox::penDown(u16 px, u16 py) {
 	
 	u8 oldvalue = value;
 	py -= DB_MARGIN_TOP;
@@ -108,7 +108,7 @@ void DigitBox::penDown(u8 px, u8 py) {
 	}
 }
 
-void DigitBox::penUp(u8 px, u8 py) {
+void DigitBox::penUp(u16 px, u16 py) {
 	lasty=0;
 	btnstate = 0;
 	draw();

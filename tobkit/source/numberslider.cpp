@@ -24,7 +24,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberSlider::NumberSlider(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value, s32 _min, s32 _max, bool _hex, bool _is_8bit)
+NumberSlider::NumberSlider(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value, s32 _min, s32 _max, bool _hex, bool _is_8bit)
 	:Widget(_x, _y, _width, _height, _screen),
 	value(_value), btnstate(0), min(_min), max(_max), hex(_hex), is_8bit(_is_8bit)
 {
@@ -38,7 +38,7 @@ void NumberSlider::pleaseDraw(void) {
 }
 
 // Event calls
-void NumberSlider::penDown(u8 px, u8 py)
+void NumberSlider::penDown(u16 px, u16 py)
 {
 	if (!enabled) return;
 
@@ -68,7 +68,7 @@ void NumberSlider::penDown(u8 px, u8 py)
 	draw();
 }
 
-void NumberSlider::penUp(u8 px, u8 py)
+void NumberSlider::penUp(u16 px, u16 py)
 {
 	if (!enabled) return;
 
@@ -81,7 +81,7 @@ void NumberSlider::penUp(u8 px, u8 py)
 	draw();
 }
 
-void NumberSlider::penMove(u8 px, u8 py)
+void NumberSlider::penMove(u16 px, u16 py)
 {
 	if (!enabled) return;
 

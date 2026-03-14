@@ -20,7 +20,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-RadioButton::RadioButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen,
+RadioButton::RadioButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
 	RadioButtonGroup *_rbg, bool _visible)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	rbg(_rbg), active(false)
@@ -34,7 +34,7 @@ void RadioButton::pleaseDraw(void) {
 }
 
 // Event calls
-void RadioButton::penDown(u8 px, u8 py) {
+void RadioButton::penDown(u16 px, u16 py) {
 	if (!enabled) return;
 	rbg->pushed(this);
 }

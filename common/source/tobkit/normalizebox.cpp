@@ -82,15 +82,15 @@ void NormalizeBox::pleaseDraw(void)
 }
 
 // Event calls
-void NormalizeBox::penDown(u8 px, u8 py) {
+void NormalizeBox::penDown(u16 px, u16 py) {
 	gui.penDown(px, py);
 }
 
-void NormalizeBox::penUp(u8 px, u8 py) {
+void NormalizeBox::penUp(u16 px, u16 py) {
 	gui.penUp(px, py);
 }
 
-void NormalizeBox::penMove(u8 px, u8 py) {
+void NormalizeBox::penMove(u16 px, u16 py) {
 	gui.penMove(px, py);
 }
 

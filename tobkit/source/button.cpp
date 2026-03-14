@@ -24,7 +24,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Button::Button(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible)
+Button::Button(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	 penIsDown(false), caption(0)
 {
@@ -46,14 +46,14 @@ void Button::pleaseDraw(void) {
 }
 		
 // Event calls
-void Button::penDown(u8 x, u8 y)
+void Button::penDown(u16 x, u16 y)
 {
 	if (!enabled) return;
 	penIsDown = true;
 	draw(1);
 }
 
-void Button::penUp(u8 x, u8 y)
+void Button::penUp(u16 x, u16 y)
 {
 	if (!enabled) return;
 	penIsDown = false;
@@ -63,7 +63,7 @@ void Button::penUp(u8 x, u8 y)
 	}
 }
 
-void Button::penMove(u8 x, u8 y) {
+void Button::penMove(u16 x, u16 y) {
 
 }
 

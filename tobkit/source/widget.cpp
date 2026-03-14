@@ -29,14 +29,14 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Widget::Widget(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible, bool _occluded)
+Widget::Widget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible, bool _occluded)
 	:x(_x), y(_y), width(_width), height(_height), enabled(true), do_overdraw(true), screen(_screen), visible(_visible), occluded(_occluded)
 {
 
 }
 
 // Get position
-void Widget::getPos(u8 *_x, u8 *_y, u8 *_width, u8 *_height)
+void Widget::getPos(u16 *_x, u16 *_y, u16 *_width, u16 *_height)
 {
 	if (_x != NULL) *_x = x;
 	if (_y != NULL) *_y = y;
@@ -44,7 +44,7 @@ void Widget::getPos(u8 *_x, u8 *_y, u8 *_width, u8 *_height)
 	if (_height != NULL) *_height = height;
 }
 
-void Widget::setPos(u8 _x, u8 _y)
+void Widget::setPos(u16 _x, u16 _y)
 {
 	x = _x;
 	y = _y;
@@ -144,10 +144,11 @@ void Widget::set_overdraw(bool value)
 // Draw utility functions
 
 ITCM_CODE
-void Widget::drawString(const char* str, u8 tx, u8 ty, u16 color, u8 maxwidth, u8 maxheight)
+void Widget::drawString(const char* str, u16 tx, u16 ty, u16 color, u16 maxwidth, u16 maxheight)
 {
 	// Draw text
-	u8 charidx, i, j;
+	u8 charidx;
+	u16 i, j;
 	u16 drawpos = 0; u8 col;
 
 	u8 fontheight = font_8x11.height;
@@ -179,9 +180,9 @@ void Widget::drawString(const char* str, u8 tx, u8 ty, u16 color, u8 maxwidth, u
 }
 
 ITCM_CODE
-void Widget::drawSmallChar(u8 c, u8 cx, u8 cy, u16 col)
+void Widget::drawSmallChar(u8 c, u16 cx, u16 cy, u16 col)
 {
-	u8 i,j;
+	u16 i,j;
 	for(j=0;j<5;++j) {
 		for(i=0;i<3;++i) {
 			u16 pixelidx = 3*GLYPH_3X5_COUNT*j+3*c+i;
@@ -194,9 +195,9 @@ void Widget::drawSmallChar(u8 c, u8 cx, u8 cy, u16 col)
 }
 
 ITCM_CODE
-void Widget::drawBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col)
+void Widget::drawBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 {
-	uint_fast8_t i,j;
+	u32 i,j;
 	for(i=0;i<tw;++i) {
 		drawPixel(i+tx, ty, col);
 		drawPixel(i+tx, ty+th-1, col);
@@ -208,7 +209,7 @@ void Widget::drawBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col)
 }
 
 ITCM_CODE
-void Widget::drawFullBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col)
+void Widget::drawFullBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 {
 	if (tw == 0) return;
 
@@ -221,21 +222,21 @@ void Widget::drawBorder(u16 col) {
 }
 
 ITCM_CODE
-void Widget::drawHLine(u8 tx, u8 ty, u8 length, u16 col) {
+void Widget::drawHLine(u16 tx, u16 ty, u16 length, u16 col) {
 	for(int i=0;i<length;++i) {
 		drawPixel(i+tx, ty, col);
 	}
 }
 
 ITCM_CODE
-void Widget::drawVLine(u8 tx, u8 ty, u8 length, u16 col) {
+void Widget::drawVLine(u16 tx, u16 ty, u16 length, u16 col) {
 	for(int i=0;i<length;++i) {
 		drawPixel(tx, i+ty, col);
 	}
 }
 
 ITCM_CODE
-void Widget::drawBresLine(u8 tx1, u8 ty1, u8 tx2, u8 ty2, u16 col)
+void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 {
 	u32 x1, y1, x2, y2;
 	x1 = tx1 + x;
@@ -333,13 +334,13 @@ void Widget::drawBresLine(u8 tx1, u8 ty1, u8 tx2, u8 ty2, u16 col)
 }
 
 ITCM_CODE
-void Widget::drawGradient(u16 col1, u16 col2, u8 tx, u8 ty, u8 tw, u8 th) {
+void Widget::drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th) {
 	if (col1 == col2) {
 		drawFullBox(tx, ty, tw, th, col1);
 		return;
 	}
 
-	u8 j;
+	u16 j;
 	u16 col;
 
 	if (tw == 0) return;
@@ -367,10 +368,10 @@ u32 Widget::getStringWidth(const char *str, u16 limit)
 }
 
 ITCM_CODE
-void Widget::drawMonochromeIcon(u8 tx, u8 ty, u8 tw, u8 th, const u8 *icon, u16 color) {
+void Widget::drawMonochromeIcon(u16 tx, u16 ty, u16 tw, u16 th, const u8 *icon, u16 color) {
 	u16 pixelidx = 0;
-	for(u8 j=0;j<th;++j) {
-		for(u8 i=0;i<tw;++i,++pixelidx) {
+	for(u16 j=0;j<th;++j) {
+		for(u16 i=0;i<tw;++i,++pixelidx) {
 			if(icon[pixelidx/8] & BIT(pixelidx%8) ) {
 				drawPixel(tx+i, ty+j, color);
 			}
@@ -379,10 +380,10 @@ void Widget::drawMonochromeIcon(u8 tx, u8 ty, u8 tw, u8 th, const u8 *icon, u16 
 }
 
 ITCM_CODE
-void Widget::drawMonochromeIconOffset(u8 tx, u8 ty, u8 tw, u8 th, u8 ix, u8 iy, u8 iw, u8 ih, const u8 *icon, u16 color) {
-	for(u8 j=0;j<th;++j) {
+void Widget::drawMonochromeIconOffset(u16 tx, u16 ty, u16 tw, u16 th, u16 ix, u16 iy, u16 iw, u16 ih, const u8 *icon, u16 color) {
+	for(u16 j=0;j<th;++j) {
 		u16 pixelidx = ((iy+j) * iw) + ix;
-		for(u8 i=0;i<tw;++i,++pixelidx) {
+		for(u16 i=0;i<tw;++i,++pixelidx) {
 			if(icon[pixelidx/8] & BIT(pixelidx%8) ) {
 				drawPixel(tx+i, ty+j, color);
 			}
@@ -391,7 +392,7 @@ void Widget::drawMonochromeIconOffset(u8 tx, u8 ty, u8 tw, u8 th, u8 ix, u8 iy, 
 }
 
 // Stylus utility functions
-bool Widget::isInRect(u8 x, u8 y, u8 x1, u8 y1, u8 x2, u8 y2)
+bool Widget::isInRect(u16 x, u16 y, u16 x1, u16 y1, u16 x2, u16 y2)
 {
 	return ( (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2) );
 }

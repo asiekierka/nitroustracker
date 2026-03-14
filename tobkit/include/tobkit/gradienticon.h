@@ -26,7 +26,7 @@ namespace tobkit {
  */
 class GradientIcon: public Widget {
 	public:
-		GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, Screen *_screen, bool _visible=true);
+		GradientIcon(u16 _x, u16 _y, u16 _width, u16 _height, const u32* _image, Screen *_screen, bool _visible=true);
 	
 		~GradientIcon();
 		
@@ -34,7 +34,7 @@ class GradientIcon: public Widget {
 		void registerPushCallback(void (*onPush_)(void));	
 		
 		// Event calls
-		void penDown(u8 x, u8 y);
+		void penDown(u16 x, u16 y);
 		
 		// Drawing request
 		void pleaseDraw(void);

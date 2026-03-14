@@ -29,7 +29,7 @@ static constexpr u32 TABBOX_ORIENTATION_LEFT = 1;
 
 class TabBox: public Widget {
 	public:
-		TabBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u8 orientation, u8 icon_size, bool _visible=true);
+		TabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u8 orientation, u8 icon_size, bool _visible=true);
 		
 		void addTab(const u8 *icon, u8 tabidx);
 		
@@ -38,9 +38,9 @@ class TabBox: public Widget {
 		void registerWidget(Widget *w, u16 listeningButtons, u8 tabidx, u8 screen=SUB_SCREEN);
 		
 		// Event calls
-		void penDown(u8 px, u8 py);
-		void penUp(u8 px, u8 py);
-		void penMove(u8 px, u8 py);
+		void penDown(u16 px, u16 py);
+		void penUp(u16 px, u16 py);
+		void penMove(u16 px, u16 py);
 		void buttonPress(u16 buttons);
 		
 		// Callback registration

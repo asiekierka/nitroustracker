@@ -36,6 +36,6 @@ void Screen::clear(tobkit_pixel_t col) {
 #else
     for (int iy = 0; iy < height; iy++)
         for (int ix = 0; ix < width; ix++)
-            pixels[iy*pitch+ix] = col;
+            drawPixel(ix, iy, col);
 #endif
 }

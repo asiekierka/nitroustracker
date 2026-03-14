@@ -33,8 +33,8 @@ class MessageBox: public Widget {
 		void pleaseDraw(void);
 	
 		// Event calls
-		void penDown(u8 x, u8 y);
-		void penUp(u8 x, u8 y);
+		void penDown(u16 x, u16 y);
+		void penUp(u16 x, u16 y);
 	
 		void show(void);
 		void reveal(void);

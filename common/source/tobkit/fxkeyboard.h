@@ -75,8 +75,8 @@ namespace tobkit {
 		void pleaseDraw(void);
 
 		// Event calls
-		void penDown(u8 x, u8 y);
-		void penUp(u8 x, u8 y);
+		void penDown(u16 x, u16 y);
+		void penUp(u16 x, u16 y);
 
 		void setTheme(Theme* theme_, u16 bgcolor_);
 		void hide(void);
@@ -93,7 +93,7 @@ namespace tobkit {
 		u8 getLastCmd(void);
 
 	private:
-		uint16* char_base, * map_base;
+		u16* char_base, * map_base;
 
 		u8 category;
 		u8 last_cmd;

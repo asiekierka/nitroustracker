@@ -33,7 +33,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-FileSelector::FileSelector(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool visible)
+FileSelector::FileSelector(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool visible)
 	:ListBox(_x, _y, _width, _height, _screen, 0, false, visible),
 	current_directory("/"), active_filterset(""), filelist_refresh(true),
 	ignore_draws(false), parent_requested_draw(false)
@@ -57,7 +57,7 @@ void FileSelector::invalidateFileList(void) {
 }
 
 // Calls fileselect callback or changes the directory
-void FileSelector::penDown(u8 px, u8 py)
+void FileSelector::penDown(u16 px, u16 py)
 {
 	bool touched_entry = true;
 

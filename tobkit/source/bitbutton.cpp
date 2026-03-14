@@ -24,7 +24,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-BitButton::BitButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, const u8 *_bitmap, u8 _bmpwidth,
+BitButton::BitButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, const u8 *_bitmap, u8 _bmpwidth,
 	u8 _bmpheight, u8 _bmpx, u8 _bmpy, bool _visible)
 	:Widget(_x, _y, _width, _height, _screen, _visible),
 	 penIsDown(false), bitmap(_bitmap), bmpwidth(_bmpwidth), bmpheight(_bmpheight), bmpx(_bmpx), bmpy(_bmpy)
@@ -42,7 +42,7 @@ void BitButton::pleaseDraw(void) {
 }
 
 // Event calls
-void BitButton::penDown(u8 x, u8 y)
+void BitButton::penDown(u16 x, u16 y)
 {
 	if(!enabled)
 		return;
@@ -50,7 +50,7 @@ void BitButton::penDown(u8 x, u8 y)
 	draw(1);
 }
 
-void BitButton::penUp(u8 x, u8 y)
+void BitButton::penUp(u16 x, u16 y)
 {
 	if (!enabled) return;
 	penIsDown = false;

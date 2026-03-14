@@ -33,8 +33,10 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
+#define PV_CURSORBAR_Y ((screen->getHeight() - 16) >> 1)
+
 // Constructor sets base variables
-PatternView::PatternView(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, State *_state)
+PatternView::PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, State *_state)
 	:Widget(_x, _y, _width, _height, _screen),
 	onMute(0), pattern(0), song(0), state(_state),
 	hscrollpos(0), lines_per_beat(8), selection_exists(false), pen_down(false),
@@ -56,7 +58,7 @@ void PatternView::pleaseDraw(void)
 }
 	
 // Event calls
-void PatternView::penDown(u8 px, u8 py)
+void PatternView::penDown(u16 px, u16 py)
 {
 	pen_down = true;
 	
@@ -73,9 +75,9 @@ void PatternView::penDown(u8 px, u8 py)
 	}
 		
 	// Mute / Solo buttons
-	u8 realx = px - (x+PV_BORDER_WIDTH);
+	u16 realx = px - (x+PV_BORDER_WIDTH);
 	s32 cellx = realx / getCellWidth() + hscrollpos;
-	u8 rel_cell_x = realx % getCellWidth();
+	u16 rel_cell_x = realx % getCellWidth();
 	
 	// Mute
 	if( ( soloChannel() == -1 ) && // No muting when a channel is solo
@@ -97,12 +99,12 @@ void PatternView::penDown(u8 px, u8 py)
 	}
 }
 
-void PatternView::penUp(u8 px, u8 py)
+void PatternView::penUp(u16 px, u16 py)
 {
 	pen_down = false;
 }
 
-void PatternView::penMove(u8 px, u8 py)
+void PatternView::penMove(u16 px, u16 py)
 {
 	this->px = px;
 	this->py = py;
@@ -422,13 +424,13 @@ void PatternView::updateFromState(void)
 	}
 }
 
-bool PatternView::pickCell(u8 px, u8 py, u16 *cx, u16 *cy)
+bool PatternView::pickCell(u16 px, u16 py, u16 *cx, u16 *cy)
 {
 	if( (px < x+PV_BORDER_WIDTH) || (px > x+getEffectiveWidth()) ) {
 		return false;
 	} else {
-		u8 realx = px - (x+PV_BORDER_WIDTH);
-		u8 realy = py - y - 1;
+		u16 realx = px - (x+PV_BORDER_WIDTH);
+		u16 realy = py - y - 1;
 		s32 cellx = realx / getCellWidth() + hscrollpos;
 		s32 celly = realy / PV_CELL_HEIGHT - getCursorBarPos() + state->getCursorRow();
 		if((celly < 0) || (celly >= song->getPatternLength(song->getPotEntry(state->potpos)))) {

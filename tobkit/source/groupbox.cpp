@@ -23,7 +23,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-GroupBox::GroupBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible)
+GroupBox::GroupBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible)
 	:Widget(_x, _y, _width, _height, _screen, _visible)
 {
 	text = NULL;
