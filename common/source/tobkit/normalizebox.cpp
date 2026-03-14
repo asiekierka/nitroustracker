@@ -24,13 +24,11 @@
 
 #include "normalizebox.h"
 
-#include <nds.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include "ntxm/instrument.h"
-#include "ntxm/fifocommand.h"
 
 using namespace tobkit;
 
@@ -38,7 +36,7 @@ using namespace tobkit;
 
 // Constructor sets base variables
 NormalizeBox::NormalizeBox(Screen *_screen, void (*_onOk)(void), void (*_onAuto)(void), void (*_onCancel)(void))
-	:Widget((SCREEN_WIDTH-NORMALIZEBOX_WIDTH)/2, (SCREEN_HEIGHT-NORMALIZEBOX_HEIGHT)/2,
+	:Widget((_screen->getWidth()-NORMALIZEBOX_WIDTH)/2, (_screen->getHeight()-NORMALIZEBOX_HEIGHT)/2,
 		NORMALIZEBOX_WIDTH, NORMALIZEBOX_HEIGHT, _screen),
 	onOk(_onOk), onAuto(_onAuto), onCancel(_onCancel)
 {

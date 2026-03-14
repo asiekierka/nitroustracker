@@ -40,7 +40,7 @@ ICON		:= icon48.png
 
 TARGET		:=	nitroustracker_3ds
 BUILD		:=	build_3ds
-SOURCES		:=	common/source n3ds/source tobkit/source
+SOURCES		:=	common/source common/source/tobkit n3ds/source tobkit/source
 DATA		:=	n3ds/data
 INCLUDES	:=	$(SOURCES) tobkit/include
 GRAPHICS	:=	n3ds/gfx
