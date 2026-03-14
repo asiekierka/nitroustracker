@@ -271,12 +271,14 @@ u8 Piano::isHalfTone(u8 note)
 // Reset piano colors to normal
 void Piano::resetPals(void)
 {
+#ifdef TOBKIT_PLATFORM_NDS
   u8 px,py;
   for(px=0; px<PIANO_WIDTH_TILES; ++px) {
     for(py=0; py<PIANO_HEIGHT_TILES; ++py) {
       map_base[32*(py+y/8)+(px+x/8)] &= ~(3 << 12); // Clear bits 12 and 13 (from the left)
     }
   }
+#endif
 }
 
 void Piano::drawKeyLabel(u8 key, bool visible)

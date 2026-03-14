@@ -28,7 +28,7 @@ bool PlatformInitFilesystem(void) {
     return fatInitDefault();
 }
 
-void PlatformInitVideo(void) {
+bool PlatformInit(void) {
 	// Hide everything
 #ifndef DEBUG
 	setBrightness(3, 16);
@@ -112,6 +112,12 @@ void PlatformInitVideo(void) {
 
 	// Clear tile mem
 	dmaFillWords(0, BG_BMP_RAM_SUB(0), 32*1024);
+
+	return true;
+}
+
+void PlatformExit(void) {
+
 }
 
 void PlatformFlipMainScreen(void) {

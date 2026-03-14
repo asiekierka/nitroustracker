@@ -22,7 +22,9 @@ bool PlatformInitFilesystem(void) {
     return true;
 }
 
-void PlatformInitVideo(void) {
+bool PlatformInit(void) {
+	csndInit();
+
     gfxInit(GSP_RGB5_A1_OES, GSP_RGB5_A1_OES, false);
     gfxSetDoubleBuffering(GFX_TOP, false);
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
@@ -32,6 +34,14 @@ void PlatformInitVideo(void) {
 
 	main_screen = new Screen(fb_main_l, 400, 240, 240);
 	sub_screen = new Screen(fb_sub, 320, 240, 240);
+
+	return true;
+}
+
+void PlatformExit(void) {
+	gfxExit();
+
+	csndExit();
 }
 
 void PlatformFlipMainScreen(void) {

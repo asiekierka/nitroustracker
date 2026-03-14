@@ -4218,7 +4218,7 @@ int main(int argc, char **argv) {
 	defaultExceptionHandler();
 #endif
 
-	PlatformInitVideo();
+	if (!PlatformInit()) exit(1);
 	bool fat_success = PlatformInitFilesystem();
 
 	settings = new Settings(launch_path, fat_success);
@@ -4293,6 +4293,8 @@ int main(int argc, char **argv) {
 	}
 
 	if (launch_path) ntxm_free(launch_path);
+
+	PlatformExit();
 
 	return 0;
 }
