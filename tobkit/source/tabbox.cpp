@@ -20,9 +20,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-TabBox::TabBox(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram,
+TabBox::TabBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen,
 	u8 _orientation, u8 _icon_size, bool _visible)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	orientation(_orientation), icon_size(_icon_size),
 	currentgui(0)
 {

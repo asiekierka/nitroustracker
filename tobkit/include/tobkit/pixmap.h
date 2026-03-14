@@ -23,7 +23,7 @@ namespace tobkit {
 
 class Pixmap: public Widget {
 	public:
-		Pixmap(u8 _x, u8 _y, u8 _width, u8 _height, const u16* _image, u16 **_vram, bool _visible=true);
+		Pixmap(u8 _x, u8 _y, u8 _width, u8 _height, const u16* _image, Screen *_screen, bool _visible=true);
 	
 		~Pixmap();
 		

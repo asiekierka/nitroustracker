@@ -14,38 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#ifndef _GRADIENTICON_H_
-#define _GRADIENTICON_H_
+#include <string.h>
+#include <stdio.h>
 
-#include "widget.h"
+#include "tobkit/widget.h"
 
-namespace tobkit {
+using namespace tobkit;
 
-/**
- * @brief 2bpp gradient icon pixmap.
- */
-class GradientIcon: public Widget {
-	public:
-		GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, Screen *_screen, bool _visible=true);
-	
-		~GradientIcon();
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));	
-		
-		// Event calls
-		void penDown(u8 x, u8 y);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-	private:
-		void draw(void);
-		
-		void (*onPush)(void);
-		const u32 *image;
-};
+#include "font_8x11.inc"
+#include "font_3x5_raw.h"
 
-};
+#define	abs(x)	(x<0?(-x):(x))
 
+/* ===================== PUBLIC ===================== */
+
+Screen::Screen(tobkit_pixel_t *_pixels, u32 _width, u32 _height, u32 _pitch)
+    :pixels(_pixels), width(_width), height(_height), pitch(_pitch)
+{
+
+}
+
+void Screen::clear(tobkit_pixel_t col) {
+#if defined(__NDS__)
+	u32 colcol = col * 0x10001;
+	dmaFillWords(colcol, pixels, 192*256*2);
+#else
+    for (int iy = 0; iy < height; iy++)
+        for (int ix = 0; ix < width; ix++)
+            pixels[iy*pitch+ix] = col;
 #endif
+}

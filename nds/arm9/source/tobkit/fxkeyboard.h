@@ -68,7 +68,7 @@ namespace tobkit {
 
 	class FXKeyboard : public Widget {
 	public:
-		FXKeyboard(u8 _x, u8 _y, u16* _char_base, u16* _map_base, u16** _vram,
+		FXKeyboard(u8 _x, u8 _y, u16* _char_base, u16* _map_base, Screen *_screen,
 			void (*onFxKeypress)(u8 pressedValue), bool _visible = true);
 
 		// Drawing request

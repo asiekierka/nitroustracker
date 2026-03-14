@@ -34,8 +34,8 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-PatternView::PatternView(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, State *_state)
-	:Widget(_x, _y, _width, _height, _vram),
+PatternView::PatternView(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, State *_state)
+	:Widget(_x, _y, _width, _height, _screen),
 	onMute(0), pattern(0), song(0), state(_state),
 	hscrollpos(0), lines_per_beat(8), selection_exists(false), pen_down(false),
 	effects_visible(true), cell_width(50)
@@ -244,10 +244,8 @@ void PatternView::recalcHscroll(void)
 // the whole screen.
 void PatternView::draw(void)
 {
-	u32 colcol = theme->col_pv_bg | theme->col_pv_bg << 16;
 	s32 sel_screen_x1 = -1, sel_screen_x2 = -1, sel_screen_y1 = -1, sel_screen_y2 = -1;
-
-	dmaFillWords(colcol, *vram, 192*256*2);
+	screen->clear(theme->col_pv_bg);
 	
 	// Selection
 	if(selection_exists == true) {

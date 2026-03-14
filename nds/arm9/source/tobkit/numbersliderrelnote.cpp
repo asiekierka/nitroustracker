@@ -33,8 +33,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberSliderRelNote::NumberSliderRelNote(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, s32 _value)
-	:Widget(_x, _y, _width, _height, _vram),
+NumberSliderRelNote::NumberSliderRelNote(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value)
+	:Widget(_x, _y, _width, _height, _screen),
 	value(_value), btnstate(0), min(-48), max(71)
 {
 	onChange = 0;
@@ -127,7 +127,7 @@ void NumberSliderRelNote::draw(void)
 	s8 i,j;
 	for(j=0;j<3;j++) {
 		for(i=-j;i<=j;++i) {
-			*(*vram+SCREEN_WIDTH*(y+j+3)+x+4+i) = theme->col_text_bt;
+			drawPixel(4+i, j+3, theme->col_text_bt);
 		}
 	}
 	
@@ -137,7 +137,7 @@ void NumberSliderRelNote::draw(void)
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(i=-j;i<=j;++i) {
-			*(*vram+SCREEN_WIDTH*(y-j+13)+x+4+i) = theme->col_text_bt;
+			drawPixel(4+i, 13-j, theme->col_text_bt);
 		}
 	}
 	

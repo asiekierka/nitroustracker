@@ -27,7 +27,7 @@ static constexpr int PIANO_HEIGHT_TILES = 5;
 
 class Piano: public Widget {
 	public:
-		Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_screen_base, u16 **_vram);
+		Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_screen_base, Screen *_screen);
 	
 		// Drawing request
 		void pleaseDraw(void);
@@ -52,7 +52,7 @@ class Piano: public Widget {
 	private:
 		void (*onNote)(u8);
 		void (*onRelease)(u8, bool);
-		uint16 *char_base, *map_base;
+		u16 *char_base, *map_base;
 		
 		unsigned short piano_Palette[16], piano_fullnotehighlight_Palette[16], piano_halfnotehighlight_Palette[16];
 		

@@ -26,8 +26,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Label::Label(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, bool _has_border, bool _albino, bool _no_bg, bool _right_aligned)
-	:Widget(_x, _y, _width, _height, _vram),
+Label::Label(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _has_border, bool _albino, bool _no_bg, bool _right_aligned)
+	:Widget(_x, _y, _width, _height, _screen),
 	onPush(0), caption(0), has_border(_has_border), is_albino(_albino), no_bg(_no_bg), right_aligned(_right_aligned)
 {
 

@@ -22,8 +22,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-GradientIcon::GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, u16 **_vram, bool _visible)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+GradientIcon::GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, Screen *_screen, bool _visible)
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	onPush(0), image(_image)
 {
 	
@@ -68,7 +68,7 @@ void GradientIcon::draw(void)
 				pixel >>= 2;
 			}
 			if(pixel & 3)
-				(*vram)[SCREEN_WIDTH*(y+j)+x+i] = (pixel & 2) ? theme->col_outline : colorFg;
+				drawPixel(i, j, (pixel & 2) ? theme->col_outline : colorFg);
 		}
 	}
 }

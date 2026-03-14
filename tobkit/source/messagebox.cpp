@@ -30,8 +30,8 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Takes a list of alternating button captions and callbacks
-MessageBox::MessageBox(u16 **_vram, const char *message, u8 n_buttons, ...)
-	:Widget((SCREEN_WIDTH-MB_MIN_WIDTH)/2, (SCREEN_HEIGHT-MB_HEIGHT)/2, MB_MIN_WIDTH, MB_HEIGHT, _vram),
+MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
+	:Widget((SCREEN_WIDTH-MB_MIN_WIDTH)/2, (SCREEN_HEIGHT-MB_HEIGHT)/2, MB_MIN_WIDTH, MB_HEIGHT, _screen),
 	n_buttons(n_buttons)
 {
 	msg = ntxm_cstrdup(message);
@@ -90,7 +90,7 @@ MessageBox::MessageBox(u16 **_vram, const char *message, u8 n_buttons, ...)
 			} else {
 				buttonwidth = fixedbuttonwidth;
 			}
-			buttons[i] = new Button(xpos, y+24, buttonwidth, 14, _vram, true);
+			buttons[i] = new Button(xpos, y+24, buttonwidth, 14, _screen, true);
 			gui.registerWidget(buttons[i], 0);
 			buttons[i]->setCaption(caption);
 			buttons[i]->registerPushCallback(onPush);

@@ -22,8 +22,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Pixmap::Pixmap(u8 _x, u8 _y, u8 _width, u8 _height, const u16* _image, u16 **_vram, bool _visible)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+Pixmap::Pixmap(u8 _x, u8 _y, u8 _width, u8 _height, const u16* _image, Screen *_screen, bool _visible)
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	onPush(0), image(_image)
 {
 	
@@ -57,7 +57,7 @@ void Pixmap::draw(void)
 	for(u16 j=0; j<height; ++j) {
 		for(u16 i=0; i<width; ++i) {
 			if(image[width*j+i] & BIT(15))
-				(*vram)[SCREEN_WIDTH*(y+j)+x+i] = image[width*j+i];
+				drawPixel(i, j, image[width*j+i]);
 		}
 	}
 }

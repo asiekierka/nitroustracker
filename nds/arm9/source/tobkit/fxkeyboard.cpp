@@ -28,8 +28,8 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 
-FXKeyboard::FXKeyboard(u8 _x, u8 _y, u16 *_char_base, u16 *_map_base, uint16** _vram, void (*_onFxKeypress)(u8 pressedValue), bool _visible)
-	: Widget(_x, _y, FXKEYBOARD_WIDTH+4, FXKEYBOARD_HEIGHT, _vram, _visible),
+FXKeyboard::FXKeyboard(u8 _x, u8 _y, u16 *_char_base, u16 *_map_base, Screen *_screen, void (*_onFxKeypress)(u8 pressedValue), bool _visible)
+	: Widget(_x, _y, FXKEYBOARD_WIDTH+4, FXKEYBOARD_HEIGHT, _screen, _visible),
 	char_base(_char_base), map_base(_map_base), last_cmd(0), caption(0), darken_title(false), onFxKeypress(_onFxKeypress)
 {
 	setCaption("");

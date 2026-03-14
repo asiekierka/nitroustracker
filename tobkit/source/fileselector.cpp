@@ -34,8 +34,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-FileSelector::FileSelector(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, bool visible)
-	:ListBox(_x, _y, _width, _height, _vram, 0, false, visible),
+FileSelector::FileSelector(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool visible)
+	:ListBox(_x, _y, _width, _height, _screen, 0, false, visible),
 	current_directory("/"), active_filterset(""), filelist_refresh(true),
 	ignore_draws(false), parent_requested_draw(false)
 {

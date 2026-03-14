@@ -39,7 +39,7 @@ namespace tobkit {
 class NormalizeBox: public Widget {
 	public:
 		// Constructor sets base variables
-		NormalizeBox(u16 **_vram, void (*_onOk)(void), void (*_onAuto)(void), void (*_onCancel)(void));
+		NormalizeBox(Screen *_screen, void (*_onOk)(void), void (*_onAuto)(void), void (*_onCancel)(void));
 		~NormalizeBox(void);
 		
 		// Drawing request

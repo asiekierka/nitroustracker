@@ -23,8 +23,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ToggleButton::ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible, bool _is_record)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+ToggleButton::ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible, bool _is_record)
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	penIsDown(false), on(false), has_bitmap(false), is_record(_is_record)
 {
 	onToggle = 0;

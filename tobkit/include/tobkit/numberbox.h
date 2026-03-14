@@ -24,7 +24,7 @@ namespace tobkit {
 
 class NumberBox: public Widget {
 	public:
-		NumberBox(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, u8 _value=0, u8 _min=0, u8 _max=255, u8 _digits=2);
+		NumberBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u8 _value=0, u8 _min=0, u8 _max=255, u8 _digits=2);
 	
 		// Drawing request
 		void pleaseDraw(void);

@@ -61,7 +61,7 @@ class EnvelopeEditor: public Widget
 {
 	public:
 		// Constructor sets base variables
-		EnvelopeEditor(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, u16 _max_x, u16 _max_y, u16 _max_points);
+		EnvelopeEditor(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u16 _max_x, u16 _max_y, u16 _max_points);
 		~EnvelopeEditor(void);
 
 		// Event calls

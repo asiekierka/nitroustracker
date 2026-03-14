@@ -129,6 +129,7 @@ u8 frame = 0;
 u8 active_buffer = FRONT_BUFFER;
 
 u16 *main_vram_front, *main_vram_back, *sub_vram;
+Screen *main_screen, *sub_screen;
 char *launch_path = NULL;
 
 bool typewriter_active = false;
@@ -901,7 +902,7 @@ void showSlowLoadOperation(std::function<const char*(void)> loadOp)
 	// irqSet(IRQ_VCOUNT, updateMemoryState);
 	// irqEnable(IRQ_VCOUNT);
 
-	mb = new MessageBox(&sub_vram, "one moment", 0);
+	mb = new MessageBox(sub_screen, "one moment", 0);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->show();
 	mb->pleaseDraw();
@@ -951,7 +952,7 @@ void handleDelfile(void)
 	if(file==0) return;
 	debugprintf("%s\n", file->name_with_path.c_str());
 
-	mb = new MessageBox(&sub_vram, "are you sure?", 2, "yes", handleDelfileConfirmed, "no", deleteMessageBox);
+	mb = new MessageBox(sub_screen, "are you sure?", 2, "yes", handleDelfileConfirmed, "no", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 	mb->pleaseDraw();
@@ -998,7 +999,7 @@ void handleLoad(void)
 		stopPlay();
 
 		if (state->unsaved_changes) {
-			mb = new MessageBox(&sub_vram, "you have unsaved changes", 2, "load", loadModule, "cancel", deleteMessageBox);
+			mb = new MessageBox(sub_screen, "you have unsaved changes", 2, "load", loadModule, "cancel", deleteMessageBox);
 			gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 			mb->reveal();
 			mb->pleaseDraw();
@@ -1033,7 +1034,7 @@ void saveFile(void)
 
 	debugprintf("saving %s ...\n", filename);
 
-	mb = new MessageBox(&sub_vram, "one moment", 0);
+	mb = new MessageBox(sub_screen, "one moment", 0);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->show();
 	mb->pleaseDraw();
@@ -1115,7 +1116,7 @@ void handleSave(void)
 	// Check if file already exists
 	if(ntxm_isFileExists(filename))
 	{
-		mb = new MessageBox(&sub_vram, "overwrite file", 2, "yes", mbOverwrite, "no", deleteMessageBox);
+		mb = new MessageBox(sub_screen, "overwrite file", 2, "yes", mbOverwrite, "no", deleteMessageBox);
 		gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 		mb->reveal();
 		mb->pleaseDraw();
@@ -1326,6 +1327,7 @@ void drawMainScreen(void)
 		main_vram_front = (uint16*)BG_BMP_RAM(8);
 		main_vram_back = (uint16*)BG_BMP_RAM(2);
 	}
+	main_screen->pixels = main_vram_back;
 }
 
 
@@ -1769,7 +1771,7 @@ void handleRestartPosChange(s32 restartpos)
 void confirmZap(void (*onConfirm)(void))
 {
 	deleteMessageBox();
-	mb = new MessageBox(&sub_vram, "are you sure", 2, "yes", onConfirm, "cancel", deleteMessageBox);
+	mb = new MessageBox(sub_screen, "are you sure", 2, "yes", onConfirm, "cancel", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 }
@@ -1892,7 +1894,7 @@ void confirmZapPatterns(void)
 void zapInstrumentsChoice(void)
 {
 	deleteMessageBox();
-	mb = new MessageBox(&sub_vram, "which instruments", 4, "selected", zapCurrentInstrument, "unused", zapUnusedInstruments,
+	mb = new MessageBox(sub_screen, "which instruments", 4, "selected", zapCurrentInstrument, "unused", zapUnusedInstruments,
 		"  all  ", confirmZapInsts, "cancel",
 		deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
@@ -1903,7 +1905,7 @@ void handleZap(void)
 {
 	stopPlay(); // Safety first
 
-	mb = new MessageBox(&sub_vram, "what to zap", 4, "patterns", confirmZapPatterns,
+	mb = new MessageBox(sub_screen, "what to zap", 4, "patterns", confirmZapPatterns,
 		"instruments", zapInstrumentsChoice, "song", confirmZapSong, "cancel",
 		deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
@@ -2235,7 +2237,7 @@ void handleThemeButton(void)
 {
 	pausePlay();
 	strncpy(last_themepath, settings->getThemePath(), SETTINGS_FILENAME_LEN);
-	fbtheme = new tobkit::ThemeSelectorBox(&sub_vram, handleThemeChosen, handleThemeApply, handleThemeReset, handleThemeCancel);
+	fbtheme = new tobkit::ThemeSelectorBox(sub_screen, handleThemeChosen, handleThemeApply, handleThemeReset, handleThemeCancel);
 	std::string themepath_(settings->getThemePath());
 	fbtheme->setDir(themepath_.substr(0, themepath_.find_last_of("/")));
 	gui->registerOverlayWidget(fbtheme, 0, SUB_SCREEN);
@@ -2385,7 +2387,7 @@ void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void
 #define SUB_BG1_Y0 (*(vuint16*)0x04001016)
 
 	tw = new Typewriter(prompt, (uint16*)CHAR_BASE_BLOCK_SUB(1),
-		(uint16*)SCREEN_BASE_BLOCK_SUB(12), 3, &sub_vram, &SUB_BG1_X0, &SUB_BG1_Y0);
+		(uint16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0);
 	tw->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	tw->setText(str);
 	gui->registerOverlayWidget(tw, mykey_LEFT|mykey_RIGHT, SUB_SCREEN);
@@ -2570,7 +2572,7 @@ void handleRecordSample(void)
 
 	// Show record box
 
-	recordbox = new RecordBox(&sub_vram, handleRecordSampleOK, handleRecordSampleCancel, smp, inst, state->sample);
+	recordbox = new RecordBox(sub_screen, handleRecordSampleOK, handleRecordSampleCancel, smp, inst, state->sample);
 
 	gui->registerOverlayWidget(recordbox, KEY_A | KEY_B, SUB_SCREEN);
 
@@ -2634,7 +2636,7 @@ void sample_show_normalize_window(void)
 	Sample *smp = inst->getSample(state->sample);
 	if(!smp) return;
 
-	normalizeBox = new NormalizeBox(&sub_vram, handleNormalizeOK, handleNormalizeAuto, handleNormalizeCancel);
+	normalizeBox = new NormalizeBox(sub_screen, handleNormalizeOK, handleNormalizeAuto, handleNormalizeCancel);
 	gui->registerOverlayWidget(normalizeBox, 0, SUB_SCREEN);
 	normalizeBox->reveal();
 }
@@ -2761,7 +2763,7 @@ void showExitBox(void)
 {
 	if (mb != 0) deleteMessageBox();
 
-	mb = new MessageBox(&sub_vram, "really exit", 2, "yes", requestExit, "no", deleteMessageBox);
+	mb = new MessageBox(sub_screen, "really exit", 2, "yes", requestExit, "no", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 	mb->pleaseDraw();
@@ -2769,7 +2771,7 @@ void showExitBox(void)
 
 void showMessage(const char *msg, bool error)
 {
-	mb = new MessageBox(&sub_vram, msg, 1, error ? "doh!" : "yay!", deleteMessageBox);
+	mb = new MessageBox(sub_screen, msg, 1, error ? "doh!" : "yay!", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 }
@@ -2778,7 +2780,7 @@ void showAboutBox(void)
 {
 	char msg[256];
 	snprintf(msg, 256, "NitrousTracker " VERSION " (" GIT_HASH ")");
-	mb = new MessageBox(&sub_vram, msg, 2, "track on!", deleteMessageBox, "exit", showExitBox);
+	mb = new MessageBox(sub_screen, msg, 2, "track on!", deleteMessageBox, "exit", showExitBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 }
@@ -3099,7 +3101,7 @@ void sampleTabBoxChage(u8 tab)
 
 void dsmiConnect(void)
 {
-	mb = new MessageBox(&sub_vram, "connecting ...", 0);
+	mb = new MessageBox(sub_screen, "connecting ...", 0);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->show();
 	mb->pleaseDraw();
@@ -3404,20 +3406,20 @@ void setupGUI(bool dldi_enabled)
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
-	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram);
+	kb = new Piano(0, 152, 224, 40, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen);
 	kb->set_overdraw(false);
 	kb->registerNoteCallback(handleNoteStroke);
 	kb->registerReleaseCallback(handleNoteRelease);
 
-	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), &sub_vram, onFxKeyPressed, false);
+	fxkb = new FXKeyboard(0, 152, (uint16*)CHAR_BASE_BLOCK_SUB(0), (uint16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen, onFxKeyPressed, false);
 	fxkb->set_overdraw(false);
 	
 
 	pixmaplogo = new GradientIcon(98, 1, 80, 17,
-		(const u32*) nitrotracker_logo_raw, &sub_vram);
+		(const u32*) nitrotracker_logo_raw, sub_screen);
 	pixmaplogo->registerPushCallback(showAboutBox);
 
-	tabbox = new TabBox(1, 1, 139, 151, &sub_vram, TABBOX_ORIENTATION_TOP, 16);
+	tabbox = new TabBox(1, 1, 139, 151, sub_screen, TABBOX_ORIENTATION_TOP, 16);
 	tabbox->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	// Note that setHasUnsavedChanges depends on this count and order of tabs.
 	tabbox->addTab(icon_song_raw, 0);
@@ -3428,7 +3430,7 @@ void setupGUI(bool dldi_enabled)
 	tabbox->addTab(icon_wrench_raw, 4);
 	
 	// <Disk OP GUI>
-		fileselector = new FileSelector(38, 21, 100, 111, &sub_vram);
+		fileselector = new FileSelector(38, 21, 100, 111, sub_screen);
 
 		std::vector<std::string> samplefilter;
 		samplefilter.push_back("wav");
@@ -3447,49 +3449,49 @@ void setupGUI(bool dldi_enabled)
 
 		rbgdiskop = new RadioButton::RadioButtonGroup();
 
-		rbsong   = new RadioButton(2, 21, 36, 14, &sub_vram, rbgdiskop);
+		rbsong   = new RadioButton(2, 21, 36, 14, sub_screen, rbgdiskop);
 
 		rbsong->setCaption("sng");
 
-		rbsample = new RadioButton(2, 36, 36, 14, &sub_vram, rbgdiskop);
+		rbsample = new RadioButton(2, 36, 36, 14, sub_screen, rbgdiskop);
 
 		rbsample->setCaption("smp");
 
-		//rbinst   = new RadioButton(2, 51, 36, 14, &sub_vram, "ins", rbgdiskop);
+		//rbinst   = new RadioButton(2, 51, 36, 14, sub_screen, "ins", rbgdiskop);
 		rbgdiskop->setActive(0);
 
 		rbgdiskop->registerChangeCallback(handleDiskOPChangeFileType);
 
-		memoryiindicator_disk = new MemoryIndicator(3, 51, 34, 8, &sub_vram, true);
+		memoryiindicator_disk = new MemoryIndicator(3, 51, 34, 8, sub_screen, true);
 
-		labelramusage_disk = new Label(8, 59, 34, 10, &sub_vram, false);
+		labelramusage_disk = new Label(8, 59, 34, 10, sub_screen, false);
 		labelramusage_disk->setCaption("ram");
 
-		cbsamplepreview = new CheckBox(4, 70, 34, 14, &sub_vram, false, true);
+		cbsamplepreview = new CheckBox(4, 70, 34, 14, sub_screen, false, true);
 		cbsamplepreview->setCaption("pre");
 		cbsamplepreview->registerToggleCallback(handleSamplePreviewToggled);
 
-		buttonload = new Button(3, 86, 34, 14, &sub_vram);
+		buttonload = new Button(3, 86, 34, 14, sub_screen);
 		buttonload->setCaption("load");
 		buttonload->registerPushCallback(handleLoad);
 
-		buttonsave = new Button(3, 102, 34, 14, &sub_vram);
+		buttonsave = new Button(3, 102, 34, 14, sub_screen);
 		buttonsave->setCaption("save");
 		buttonsave->registerPushCallback(handleSave);
 
-		buttondelfile = new Button(3, 118, 34, 14, &sub_vram);
+		buttondelfile = new Button(3, 118, 34, 14, sub_screen);
 		buttondelfile->setCaption("del");
 		buttondelfile->registerPushCallback(handleDelfile);
 
-		labelFilename = new Label(3, 134, 97, 14, &sub_vram);
+		labelFilename = new Label(3, 134, 97, 14, sub_screen);
 		labelFilename->setCaption("");
 		labelFilename->registerPushCallback(showTypewriterForFilename);
 
-		buttonchangefilename = new Button(101, 134, 22, 14, &sub_vram);
+		buttonchangefilename = new Button(101, 134, 22, 14, sub_screen);
 		buttonchangefilename->setCaption("...");
 		buttonchangefilename->registerPushCallback(showTypewriterForFilename);
 
-		buttonnewfolder = new BitButton(124, 134, 14, 14, &sub_vram, icon_new_folder_raw, 8, 8, 3, 3);
+		buttonnewfolder = new BitButton(124, 134, 14, 14, sub_screen, icon_new_folder_raw, 8, 8, 3, 3);
 		buttonnewfolder->registerPushCallback(showTypewriterForNewFolder);
 
 	if (dldi_enabled)
@@ -3511,78 +3513,78 @@ void setupGUI(bool dldi_enabled)
 	// </Disk OP GUI>
 
 	// <Song gui>
-		lbpot = new ListBox(4, 21, 50, 78, &sub_vram, 1, true);
+		lbpot = new ListBox(4, 21, 50, 78, sub_screen, 1, true);
 		lbpot->set(0," 0");
 		lbpot->registerChangeCallback(handlePotPosChangeFromUser);
-		buttonpotup = new Button(70, 47, 14, 12, &sub_vram);
+		buttonpotup = new Button(70, 47, 14, 12, sub_screen);
 		buttonpotup->setCaption(">");
 		buttonpotup->registerPushCallback(handlePotInc);
-		buttonpotdown = new Button(55, 47, 14, 12, &sub_vram);
+		buttonpotdown = new Button(55, 47, 14, 12, sub_screen);
 		buttonpotdown->setCaption("<");
 		buttonpotdown->registerPushCallback(handlePotDec);
-		buttonins = new Button(55, 21, 29, 12, &sub_vram);
+		buttonins = new Button(55, 21, 29, 12, sub_screen);
 		buttonins->setCaption("ins");
 		buttonins->registerPushCallback(handlePotIns);
-		buttondel = new Button(55, 60, 29, 12, &sub_vram);
+		buttondel = new Button(55, 60, 29, 12, sub_screen);
 		buttondel->setCaption("del");
 		buttondel->registerPushCallback(handlePotDel);
-		buttoncloneptn = new Button(55, 34, 29, 12, &sub_vram);
+		buttoncloneptn = new Button(55, 34, 29, 12, sub_screen);
 		buttoncloneptn->setCaption("cln");
 		buttoncloneptn->registerPushCallback(handlePtnClone);
-		tbqueuelock = new ToggleButton(55, 74, 29, 12, &sub_vram, true);
+		tbqueuelock = new ToggleButton(55, 74, 29, 12, sub_screen, true);
 		tbqueuelock->setCaption("lock");
 		tbqueuelock->registerToggleCallback(toggleQueueLock);
-		tbpotloop = new ToggleButton(55, 87, 29, 12, &sub_vram, true);
+		tbpotloop = new ToggleButton(55, 87, 29, 12, sub_screen, true);
 		tbpotloop->setCaption("loop");
 		tbpotloop->registerToggleCallback(handleLoopToggle);
 
-		labelptnlen = new Label(87, 48, 50, 12, &sub_vram, false);
+		labelptnlen = new Label(87, 48, 50, 12, sub_screen, false);
 		labelptnlen->setCaption("ptn len:");
-		nsptnlen = new NumberSlider(105, 60, 32, 17, &sub_vram, DEFAULT_PATTERN_LENGTH, 1, 256, true);
+		nsptnlen = new NumberSlider(105, 60, 32, 17, sub_screen, DEFAULT_PATTERN_LENGTH, 1, 256, true);
 		nsptnlen->registerChangeCallback(handlePtnLengthChange);
 
-		labelchannels = new Label(87, 22, 48, 12, &sub_vram, false);
+		labelchannels = new Label(87, 22, 48, 12, sub_screen, false);
 		labelchannels->setCaption("chn:  4");
-		buttonlesschannels = new Button(112, 34, 12, 12, &sub_vram);
+		buttonlesschannels = new Button(112, 34, 12, 12, sub_screen);
 		buttonlesschannels->setCaption("-");
 		buttonlesschannels->registerPushCallback(handleChannelDel);
-		buttonmorechannels = new Button(125, 34, 12, 12, &sub_vram);
+		buttonmorechannels = new Button(125, 34, 12, 12, sub_screen);
 		buttonmorechannels->setCaption("+");
 		buttonmorechannels->registerPushCallback(handleChannelAdd);
 
-		labeltempo = new Label(4, 103, 32, 12, &sub_vram, false);
+		labeltempo = new Label(4, 103, 32, 12, sub_screen, false);
 		labeltempo->setCaption("tmp");
-		labelbpm = new Label(38, 103, 32, 12, &sub_vram, false);
+		labelbpm = new Label(38, 103, 32, 12, sub_screen, false);
 		labelbpm->setCaption("bpm");
-		labelrestartpos = new Label(72, 103, 46, 12, &sub_vram, false);
+		labelrestartpos = new Label(72, 103, 46, 12, sub_screen, false);
 		labelrestartpos->setCaption("restart");
-		nbtempo = new NumberBox(4, 115, 32, 17, &sub_vram, 1, 1, 31);
+		nbtempo = new NumberBox(4, 115, 32, 17, sub_screen, 1, 1, 31);
 		nbtempo->registerChangeCallback(handleTempoChange);
 #ifdef DEBUG
-		nsbpm = new NumberSlider(38, 115, 32, 17, &sub_vram, 120, 1, 255);
+		nsbpm = new NumberSlider(38, 115, 32, 17, sub_screen, 120, 1, 255);
 #else
-		nsbpm = new NumberSlider(38, 115, 32, 17, &sub_vram, 120, 32, 255);
+		nsbpm = new NumberSlider(38, 115, 32, 17, sub_screen, 120, 32, 255);
 #endif
 		nsbpm->registerChangeCallback(handleBpmChange);
-		nsrestartpos = new NumberSlider(72, 115, 32, 17, &sub_vram, 0, 0, 255, true);
+		nsrestartpos = new NumberSlider(72, 115, 32, 17, sub_screen, 0, 0, 255, true);
 		nsrestartpos->registerChangeCallback(handleRestartPosChange);
 
-		labelsongname = new Label(4, 134, 113, 14, &sub_vram, true);
+		labelsongname = new Label(4, 134, 113, 14, sub_screen, true);
 		labelsongname->setCaption("unnamed");
 		labelsongname->registerPushCallback(showTypewriterForSongRename);
 
-		buttonrenamesong = new Button(118, 134, 20, 14, &sub_vram);
+		buttonrenamesong = new Button(118, 134, 20, 14, sub_screen);
 		buttonrenamesong->setCaption("...");
 		buttonrenamesong->registerPushCallback(showTypewriterForSongRename);
 
-		buttonzap = new Button(107, 116, 30, 14, &sub_vram);
+		buttonzap = new Button(107, 116, 30, 14, sub_screen);
 		buttonzap->setCaption("zap!");
 		buttonzap->registerPushCallback(handleZap);
 
-		labelramusage = new Label(87, 78, 52, 12, &sub_vram, false);
+		labelramusage = new Label(87, 78, 52, 12, sub_screen, false);
 		labelramusage->setCaption("ram use");
 
-		memoryiindicator = new MemoryIndicator(87, 90, 50, 8, &sub_vram);
+		memoryiindicator = new MemoryIndicator(87, 90, 50, 8, sub_screen);
 
 		tabbox->registerWidget(lbpot, 0, 0);
 		tabbox->registerWidget(buttonpotup, 0, 0);
@@ -3612,10 +3614,10 @@ void setupGUI(bool dldi_enabled)
 
 	// <Sample Gui>
 
-	sampledisplay = new SampleDisplay(4, 23, 131, 70, &sub_vram);
+	sampledisplay = new SampleDisplay(4, 23, 131, 70, sub_screen);
 	sampledisplay->setActive();
 
-	sampletabbox = new TabBox(3, 94, 132, 55, &sub_vram, TABBOX_ORIENTATION_LEFT, 11);
+	sampletabbox = new TabBox(3, 94, 132, 55, sub_screen, TABBOX_ORIENTATION_LEFT, 11);
 	sampletabbox->setTheme(settings->getTheme(), settings->getTheme()->col_smp_bg);
 	sampletabbox->addTab(sampleedit_wave_icon_raw, 0);
 	sampletabbox->addTab(sampleedit_draw_small_raw, 1);
@@ -3627,40 +3629,40 @@ void setupGUI(bool dldi_enabled)
 	sampletabbox->registerTabChangeCallback(sampleTabBoxChage);
 
 	// <Sample editing>
-		labelsampleedit_record = new Label(18, 99, 21, 30, &sub_vram, true);
+		labelsampleedit_record = new Label(18, 99, 21, 30, sub_screen, true);
 		labelsampleedit_record->setCaption("rec");
 
-		buttonrecord = new BitButton(20, 110, 17, 17, &sub_vram, sampleedit_record_raw);
+		buttonrecord = new BitButton(20, 110, 17, 17, sub_screen, sampleedit_record_raw);
 		buttonrecord->registerPushCallback(handleRecordSample);
 
-		labelsampleedit_select = new Label(38, 99, 39, 30, &sub_vram, true);
+		labelsampleedit_select = new Label(38, 99, 39, 30, sub_screen, true);
 		labelsampleedit_select->setCaption("select");
 
-		buttonsmpselall = new BitButton(40, 110, 17, 17, &sub_vram, sampleedit_all_raw);
+		buttonsmpselall = new BitButton(40, 110, 17, 17, sub_screen, sampleedit_all_raw);
 		buttonsmpselall->registerPushCallback(sample_select_all);
 
-		buttonsmpselnone = new BitButton(58, 110, 17, 17, &sub_vram, sampleedit_none_raw);
+		buttonsmpselnone = new BitButton(58, 110, 17, 17, sub_screen, sampleedit_none_raw);
 		buttonsmpselnone->registerPushCallback(sample_clear_selection);
 
-		labelsampleedit_edit = new Label(76, 99, 57, 48, &sub_vram, true);
+		labelsampleedit_edit = new Label(76, 99, 57, 48, sub_screen, true);
 		labelsampleedit_edit->setCaption("edit");
 
-		buttonsmpfadein = new BitButton(78, 110, 17, 17, &sub_vram, sampleedit_fadein_raw);
+		buttonsmpfadein = new BitButton(78, 110, 17, 17, sub_screen, sampleedit_fadein_raw);
 		buttonsmpfadein->registerPushCallback(sample_fade_in);
 
-		buttonsmpfadeout = new BitButton(96, 110, 17, 17, &sub_vram, sampleedit_fadeout_raw);
+		buttonsmpfadeout = new BitButton(96, 110, 17, 17, sub_screen, sampleedit_fadeout_raw);
 		buttonsmpfadeout->registerPushCallback(sample_fade_out);
 
-		buttonsmpreverse = new BitButton(78, 128, 17, 17, &sub_vram, sampleedit_reverse_raw);
+		buttonsmpreverse = new BitButton(78, 128, 17, 17, sub_screen, sampleedit_reverse_raw);
 		buttonsmpreverse->registerPushCallback(sample_reverse);
 
-		buttonsmpseldel = new BitButton(96, 128, 17, 17, &sub_vram, sampleedit_del_raw);
+		buttonsmpseldel = new BitButton(96, 128, 17, 17, sub_screen, sampleedit_del_raw);
 		buttonsmpseldel->registerPushCallback(sample_del_selection);
 
-		buttonsmptrim = new BitButton(114, 128, 17, 17, &sub_vram, sampleedit_trim_raw);
+		buttonsmptrim = new BitButton(114, 128, 17, 17, sub_screen, sampleedit_trim_raw);
 		buttonsmptrim->registerPushCallback(sample_crop_selection);
 
-		buttonsmpnormalize = new BitButton(114, 110, 17, 17, &sub_vram, sampleedit_normalize_raw);
+		buttonsmpnormalize = new BitButton(114, 110, 17, 17, sub_screen, sampleedit_normalize_raw);
 		buttonsmpnormalize->registerPushCallback(sample_show_normalize_window);
 
 		sampletabbox->registerWidget(buttonrecord, 0, 0);
@@ -3678,7 +3680,7 @@ void setupGUI(bool dldi_enabled)
 	// </Sample editing>
 
 	// <Drawing and Generating>
-		buttonsmpdraw = new ToggleButton(18, 96, 17, 17, &sub_vram);
+		buttonsmpdraw = new ToggleButton(18, 96, 17, 17, sub_screen);
 		buttonsmpdraw->setBitmap(sampleedit_draw_raw);
 		buttonsmpdraw->registerToggleCallback(sampleDrawToggle);
 
@@ -3686,28 +3688,28 @@ void setupGUI(bool dldi_enabled)
 	// </Drawing and Generating>
 
 	// <Sample settings>
-		labelsamplevolume = new Label(22, 108, 25, 10, &sub_vram, false);
+		labelsamplevolume = new Label(22, 108, 25, 10, sub_screen, false);
 		labelsamplevolume->setCaption("vol");
 
-		labelpanning = new Label(19, 127, 25, 10, &sub_vram, false);
+		labelpanning = new Label(19, 127, 25, 10, sub_screen, false);
 		labelpanning->setCaption("pan");
 
-		labelrelnote = new Label(79, 108, 25, 10, &sub_vram, false);
+		labelrelnote = new Label(79, 108, 25, 10, sub_screen, false);
 		labelrelnote->setCaption("rel");
 
-		labelfinetune = new Label(75, 127, 30, 10, &sub_vram, false);
+		labelfinetune = new Label(75, 127, 30, 10, sub_screen, false);
 		labelfinetune->setCaption("tun");
 
-		nssamplevolume = new NumberSlider(40, 103, 32, 17, &sub_vram, 64, 0, 64);
+		nssamplevolume = new NumberSlider(40, 103, 32, 17, sub_screen, 64, 0, 64);
 		nssamplevolume->registerChangeCallback(handleSampleVolumeChange);
 
-		nspanning = new NumberSlider(40, 122, 32, 17, &sub_vram, 64, 0, 127, false);
+		nspanning = new NumberSlider(40, 122, 32, 17, sub_screen, 64, 0, 127, false);
 		nspanning->registerChangeCallback(handleSamplePanningChange);
 
-		nsrelnote = new NumberSliderRelNote(94, 103, 38, 17, &sub_vram, 0);
+		nsrelnote = new NumberSliderRelNote(94, 103, 38, 17, sub_screen, 0);
 		nsrelnote->registerChangeCallback(handleSampleRelNoteChange);
 
-		nsfinetune = new NumberSlider(94, 122, 38, 17, &sub_vram, 0, -128, 127);
+		nsfinetune = new NumberSlider(94, 122, 38, 17, sub_screen, 0, -128, 127);
 		nsfinetune->registerChangeCallback(handleSampleFineTuneChange);
 
 		sampletabbox->registerWidget(nssamplevolume, 0, 2);
@@ -3721,14 +3723,14 @@ void setupGUI(bool dldi_enabled)
 	// </Sample settings>
 
 	// <Looping>
-		gbsampleloop = new GroupBox(19, 99, 110, 32, &sub_vram);
+		gbsampleloop = new GroupBox(19, 99, 110, 32, sub_screen);
 		gbsampleloop->setText("loop type");
 
 		rbg_sampleloop = new RadioButton::RadioButtonGroup();
 
-		rbloop_none     = new RadioButton(21, 110, 40, 10, &sub_vram, rbg_sampleloop);
-		rbloop_forward  = new RadioButton(68, 110, 40, 10, &sub_vram, rbg_sampleloop);
-		rbloop_pingpong = new RadioButton(21, 120, 40, 10, &sub_vram, rbg_sampleloop);
+		rbloop_none     = new RadioButton(21, 110, 40, 10, sub_screen, rbg_sampleloop);
+		rbloop_forward  = new RadioButton(68, 110, 40, 10, sub_screen, rbg_sampleloop);
+		rbloop_pingpong = new RadioButton(21, 120, 40, 10, sub_screen, rbg_sampleloop);
 
 		rbloop_none->setCaption("none");
 		rbloop_forward->setCaption("forward");
@@ -3738,7 +3740,7 @@ void setupGUI(bool dldi_enabled)
 
 		rbg_sampleloop->registerChangeCallback(handleSampleLoopChanged);
 
-		cbsnapto0xing = new CheckBox(50, 134, 77, 10, &sub_vram, true, true);
+		cbsnapto0xing = new CheckBox(50, 134, 77, 10, sub_screen, true, true);
 		cbsnapto0xing->setCaption("snap");
 		cbsnapto0xing->registerToggleCallback(handleSnapTo0XingToggled);
 
@@ -3754,43 +3756,43 @@ void setupGUI(bool dldi_enabled)
 	// </Sample Gui>
 
 	// <Instruments Gui>
-		volenvedit = new EnvelopeEditor(5, 24, 130, 72, &sub_vram, MAX_ENV_X, MAX_ENV_Y, MAX_ENV_POINTS);
+		volenvedit = new EnvelopeEditor(5, 24, 130, 72, sub_screen, MAX_ENV_X, MAX_ENV_Y, MAX_ENV_POINTS);
 		volenvedit->registerPointsChangeCallback(volEnvPointsChanged);
 		volenvedit->registerDrawFinishCallback(volEnvDrawFinish);
 
-		cbvolenvenabled = new CheckBox(6, 97, 60, 10, &sub_vram, true, false);
+		cbvolenvenabled = new CheckBox(6, 97, 60, 10, sub_screen, true, false);
 		cbvolenvenabled->setCaption("env on");
 		cbvolenvenabled->registerToggleCallback(toggleVolEnvEnabled);
 
-		btnaddenvpoint = new Button(72, 100, 30, 10, &sub_vram);
+		btnaddenvpoint = new Button(72, 100, 30, 10, sub_screen);
 		btnaddenvpoint->setCaption("add");
 		btnaddenvpoint->registerPushCallback(addEnvPoint);
 
-		btndelenvpoint = new Button(104, 100, 30, 10, &sub_vram);
+		btndelenvpoint = new Button(104, 100, 30, 10, sub_screen);
 		btndelenvpoint->setCaption("del");
 		btndelenvpoint->registerPushCallback(delEnvPoint);
 
-		btnenvzoomin = new Button(72, 112, 30, 10, &sub_vram);
+		btnenvzoomin = new Button(72, 112, 30, 10, sub_screen);
 		btnenvzoomin->setCaption("+");
 		btnenvzoomin->registerPushCallback(envZoomIn);
 
-		btnenvzoomout = new Button(104, 112, 30, 10, &sub_vram);
+		btnenvzoomout = new Button(104, 112, 30, 10, sub_screen);
 		btnenvzoomout->setCaption("-");
 		btnenvzoomout->registerPushCallback(envZoomOut);
 
-		btnenvdrawmode = new Button(6, 112, 60, 10, &sub_vram);
+		btnenvdrawmode = new Button(6, 112, 60, 10, sub_screen);
 		btnenvdrawmode->setCaption("draw env");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
     
-    btnenvsetsuspoint = new Button(6, 122, 60, 10, &sub_vram);
+    btnenvsetsuspoint = new Button(6, 122, 60, 10, sub_screen);
     btnenvsetsuspoint->setCaption("set sus");
     btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
     
-    cbsusenabled = new CheckBox(6, 132, 60, 10, &sub_vram, true, false);
+    cbsusenabled = new CheckBox(6, 132, 60, 10, sub_screen, true, false);
     cbsusenabled->setCaption("sus on");
     cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
     
-		tbmapsamples = new ToggleButton(72, 133, 134-72, 12, &sub_vram);
+		tbmapsamples = new ToggleButton(72, 133, 134-72, 12, sub_screen);
 		tbmapsamples->setCaption("map samp.");
 		tbmapsamples->registerToggleCallback(handleToggleMapSamples);
 		tbmapsamples->disable();
@@ -3808,13 +3810,13 @@ void setupGUI(bool dldi_enabled)
 	// </Instruments Gui>
 
 	// <Settings Gui>
-		gbhandedness = new GroupBox(5, 23, 80, 25, &sub_vram);
+		gbhandedness = new GroupBox(5, 23, 80, 25, sub_screen);
 		gbhandedness->setText("handedness");
 
 		rbghandedness = new RadioButton::RadioButtonGroup();
-		rblefthanded  = new RadioButton(7 , 35, 35, 14, &sub_vram, rbghandedness);
+		rblefthanded  = new RadioButton(7 , 35, 35, 14, sub_screen, rbghandedness);
 		rblefthanded->setCaption("left");
-		rbrighthanded = new RadioButton(42, 35, 35, 14, &sub_vram, rbghandedness);
+		rbrighthanded = new RadioButton(42, 35, 35, 14, sub_screen, rbghandedness);
 		rbrighthanded->setCaption("right");
 		rbghandedness->setActive(1);
 		rbghandedness->registerChangeCallback(handleHandednessChange);
@@ -3823,60 +3825,60 @@ void setupGUI(bool dldi_enabled)
 
 
 #if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
-		gbdsmw = new GroupBox(5, 55, 80, 54, &sub_vram);
+		gbdsmw = new GroupBox(5, 55, 80, 54, sub_screen);
 		gbdsmw->setText("dsmidi");
 
-		btndsmwtoggleconnect = new Button(10, 67, 71, 14, &sub_vram);
+		btndsmwtoggleconnect = new Button(10, 67, 71, 14, sub_screen);
 		btndsmwtoggleconnect->setCaption("connect");
 
-		cbdsmwsend = new CheckBox(7, 83, 40, 14, &sub_vram, true, true);
+		cbdsmwsend = new CheckBox(7, 83, 40, 14, sub_screen, true, true);
 		cbdsmwsend->setCaption("send");
 
-		cbdsmwrecv = new CheckBox(7, 97, 40, 14, &sub_vram, true, true);
+		cbdsmwrecv = new CheckBox(7, 97, 40, 14, sub_screen, true, true);
 		cbdsmwrecv->setCaption("receive");
-		gbtheme = new GroupBox(5, 114, 80, 25, &sub_vram);
-		bttheme = new Button(10, 125, 71, 14, &sub_vram);
+		gbtheme = new GroupBox(5, 114, 80, 25, sub_screen);
+		bttheme = new Button(10, 125, 71, 14, sub_screen);
 #else
-		gbtheme = new GroupBox(5, 54, 80, 25, &sub_vram);
-		bttheme = new Button(10, 64, 71, 14, &sub_vram);
+		gbtheme = new GroupBox(5, 54, 80, 25, sub_screen);
+		bttheme = new Button(10, 64, 71, 14, sub_screen);
 #endif
 		gbtheme->setText("theme");
 		bttheme->registerPushCallback(handleThemeButton);
 		bttheme->setCaption("select...");
 
-		gboutput = new GroupBox(89, 23, 40, 34, &sub_vram);
+		gboutput = new GroupBox(89, 23, 40, 34, sub_screen);
 		gboutput->setText("out");
 
 		rbgoutput = new RadioButton::RadioButtonGroup();
-		rboutputmono = new RadioButton(91, 33, 36, 14, &sub_vram, rbgoutput);
+		rboutputmono = new RadioButton(91, 33, 36, 14, sub_screen, rbgoutput);
 		rboutputmono->setCaption("1ch");
-		rboutputstereo = new RadioButton(91, 47, 36, 14, &sub_vram, rbgoutput);
+		rboutputstereo = new RadioButton(91, 47, 36, 14, sub_screen, rbgoutput);
 		rboutputstereo->setCaption("2ch");
 		rbgoutput->setActive(1);
 		rbgoutput->registerChangeCallback(handleOutputModeChange);
 
-		gblinesbeat = new GroupBox(89, 62, 40, 28, &sub_vram);
+		gblinesbeat = new GroupBox(89, 62, 40, 28, sub_screen);
 		gblinesbeat->setText("l/b");
-		nblinesbeat = new NumberBox(93, 72, 32, 17, &sub_vram, settings->getLinesPerBeat(), 1, 64);
+		nblinesbeat = new NumberBox(93, 72, 32, 17, sub_screen, settings->getLinesPerBeat(), 1, 64);
 		nblinesbeat->registerChangeCallback(handleLinesBeatChange);
 
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
 		{
-			gbfreq = new GroupBox(89, 95, 40, 34, &sub_vram);
+			gbfreq = new GroupBox(89, 95, 40, 34, sub_screen);
 			gbfreq->setText("freq");
 
 			rbgfreq = new RadioButton::RadioButtonGroup();
-			rbfreq32 = new RadioButton(91, 105, 36, 14, &sub_vram, rbgfreq);
+			rbfreq32 = new RadioButton(91, 105, 36, 14, sub_screen, rbgfreq);
 			rbfreq32->setCaption("32k");
-			rbfreq47 = new RadioButton(91, 119, 36, 14, &sub_vram, rbgfreq);
+			rbfreq47 = new RadioButton(91, 119, 36, 14, sub_screen, rbgfreq);
 			rbfreq47->setCaption("47k");
 			rbgfreq->setActive(1);
 			rbgfreq->registerChangeCallback(handleOutputFreqChange);
 		}
 
-		btnconfigsave = new Button(97, 135, 40, 14, &sub_vram);
+		btnconfigsave = new Button(97, 135, 40, 14, sub_screen);
 		btnconfigsave->setCaption("save");
 		btnconfigsave->registerPushCallback(saveConfig);
 
@@ -3913,58 +3915,58 @@ void setupGUI(bool dldi_enabled)
 		}
 	// </Settings Gui>
 
-	lbinstruments = new ListBox(141, 32, 114, 89, &sub_vram, MAX_INSTRUMENTS, true, true, false);
+	lbinstruments = new ListBox(141, 32, 114, 89, sub_screen, MAX_INSTRUMENTS, true, true, false);
 
-	lbsamples = new ListBox(141, 100, 114, 23, &sub_vram, MAX_INSTRUMENT_SAMPLES, true, false, true);
+	lbsamples = new ListBox(141, 100, 114, 23, sub_screen, MAX_INSTRUMENT_SAMPLES, true, false, true);
 
-	buttonswitchsub    = new BitButton(236, 1  , 19, 19, &sub_vram, icon_flp_raw, 15, 15);
-	buttonplay         = new BitButton(180, 3  , 23, 15, &sub_vram, icon_play_raw, 12, 12, 5, 0, true);
-	buttonpause        = new BitButton(180, 3  , 23, 15, &sub_vram, icon_pause_raw, 12, 12, 5, 0, false);
-	buttonstop         = new BitButton(204, 3  , 23, 15, &sub_vram, icon_stop_raw, 12, 12, 5, 0);
+	buttonswitchsub    = new BitButton(236, 1  , 19, 19, sub_screen, icon_flp_raw, 15, 15);
+	buttonplay         = new BitButton(180, 3  , 23, 15, sub_screen, icon_play_raw, 12, 12, 5, 0, true);
+	buttonpause        = new BitButton(180, 3  , 23, 15, sub_screen, icon_pause_raw, 12, 12, 5, 0, false);
+	buttonstop         = new BitButton(204, 3  , 23, 15, sub_screen, icon_stop_raw, 12, 12, 5, 0);
 
-	buttonundo         = new BitButton(RIGHT_SIDE_BUTTON_X, 127, 14, 12, &sub_vram, icon_undo_raw, 8, 8, 3, 2);
-	buttonredo         = new BitButton(RIGHT_SIDE_BUTTON_X + RIGHT_SIDE_BUTTON_WIDTH - 14, 127, 14, 12, &sub_vram, icon_redo_raw, 8, 8, 3, 2);
-	buttoninsnote2     = new Button(RIGHT_SIDE_BUTTON_X, 140, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
-	buttondelnote2     = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
-	buttonlerpfx       = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false);
-	buttonemptynote    = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
-	buttonemptyfx      = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false);
-	buttonstopnote     = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram);
-	buttoncpprm        = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false);
-	buttonrenamesample = new Button(141, 124, 23, 12, &sub_vram, false);
-	buttonrenameinst   = new Button(141, 19 , 23, 12, &sub_vram);
+	buttonundo         = new BitButton(RIGHT_SIDE_BUTTON_X, 127, 14, 12, sub_screen, icon_undo_raw, 8, 8, 3, 2);
+	buttonredo         = new BitButton(RIGHT_SIDE_BUTTON_X + RIGHT_SIDE_BUTTON_WIDTH - 14, 127, 14, 12, sub_screen, icon_redo_raw, 8, 8, 3, 2);
+	buttoninsnote2     = new Button(RIGHT_SIDE_BUTTON_X, 140, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttondelnote2     = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttonlerpfx       = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
+	buttonemptynote    = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttonemptyfx      = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
+	buttonstopnote     = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttoncpprm        = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
+	buttonrenamesample = new Button(141, 124, 23, 12, sub_screen, false);
+	buttonrenameinst   = new Button(141, 19 , 23, 12, sub_screen);
 
-	tbmultisample      = new ToggleButton(165, 20, 10, 10, &sub_vram);
+	tbmultisample      = new ToggleButton(165, 20, 10, 10, sub_screen);
 
 	buttonundo->registerPushCallback(undoOp);
 	buttonredo->registerPushCallback(redoOp);
 
-	cbscrolllock = new CheckBox(179, 18, 30, 12, &sub_vram, true, false, true);
+	cbscrolllock = new CheckBox(179, 18, 30, 12, sub_screen, true, false, true);
 	cbscrolllock->setCaption("scr lock");
 	cbscrolllock->registerToggleCallback(handleToggleScrollLock);
 
-	tbrecord = new ToggleButton(141, 136, 16, 16, &sub_vram, true, true);
+	tbrecord = new ToggleButton(141, 136, 16, 16, sub_screen, true, true);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
 	tbrecord->registerToggleCallback(setRecordMode);
 
-	labeladd = new Label(182, 126, 22, 12, &sub_vram, false, true);
+	labeladd = new Label(182, 126, 22, 12, sub_screen, false, true);
 	labeladd->setCaption("add");
-	labeloct = new Label(206, 126, 25, 12, &sub_vram, false, true);
+	labeloct = new Label(206, 126, 25, 12, sub_screen, false, true);
 	labeloct->setCaption("oct");
-	labelfxcat = new Label(206, 126, 25, 12, &sub_vram, false, true);
+	labelfxcat = new Label(206, 126, 25, 12, sub_screen, false, true);
 	labelfxcat->setCaption("cat");
-	labeleffectpar = new Label(185, 153, 38, 10, &sub_vram, false, true, true);
+	labeleffectpar = new Label(185, 153, 38, 10, sub_screen, false, true, true);
 	labeleffectpar->set_overdraw(false);
 	labeleffectpar->setCaption("param");
-	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X, 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false, true, true);
+	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X, 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false, true, true);
 	labelfxop->setCaption("fx op");
-	numberboxfxcat = new NumberBox(206, 135, 18, 17, &sub_vram, 0, 0, 3, 1);
-	numberboxadd    = new NumberBox(185, 135, 18, 17, &sub_vram, state->add, 0, 8, 1);
-	numberboxoctave = new NumberBox(206, 135, 18, 17, &sub_vram, state->basenote/12, 0, 6, 1);
-	dbeffectpar	 = new DigitBox(185, 164, 35, 17, &sub_vram, 0, 0, 255, 2);
+	numberboxfxcat = new NumberBox(206, 135, 18, 17, sub_screen, 0, 0, 3, 1);
+	numberboxadd    = new NumberBox(185, 135, 18, 17, sub_screen, state->add, 0, 8, 1);
+	numberboxoctave = new NumberBox(206, 135, 18, 17, sub_screen, state->basenote/12, 0, 6, 1);
+	dbeffectpar	 = new DigitBox(185, 164, 35, 17, sub_screen, 0, 0, 255, 2);
 	dbeffectpar->set_overdraw(false);
 	dbeffectpar->registerChangeCallback(handleEffectParamChanged);
-	buttonseteffectpar = new Button(185, 180, 35, 10, &sub_vram);
+	buttonseteffectpar = new Button(185, 180, 35, 10, sub_screen);
 	buttonseteffectpar->setCaption("set");
 	buttonseteffectpar->set_overdraw(false);
 	buttonseteffectpar->registerPushCallback(handleSetEffectParam);
@@ -4005,52 +4007,52 @@ void setupGUI(bool dldi_enabled)
 	tbmultisample->setCaption("+");
 
 	// <Main Screen>
-		buttonswitchmain = new BitButton(236, 1  , 19, 19, &main_vram_back, icon_flp_raw, 15, 15);
+		buttonswitchmain = new BitButton(236, 1  , 19, 19, main_screen, icon_flp_raw, 15, 15);
 		buttonswitchmain->registerPushCallback(switchScreens);
 
-		buttonunmuteall = new Button(RIGHT_SIDE_BUTTON_X, 22, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
+		buttonunmuteall = new Button(RIGHT_SIDE_BUTTON_X, 22, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 		buttonunmuteall->setCaption("-m/s");
 
-		labelnotevol = new Label(RIGHT_SIDE_BUTTON_X + 5, 34, RIGHT_SIDE_BUTTON_WIDTH - 7, 9, &main_vram_back, false, true, true);
+		labelnotevol = new Label(RIGHT_SIDE_BUTTON_X + 5, 34, RIGHT_SIDE_BUTTON_WIDTH - 7, 9, main_screen, false, true, true);
 		labelnotevol->setCaption("vol");
 
-		nsnotevolume	 = new NumberSlider(RIGHT_SIDE_BUTTON_X, 45, RIGHT_SIDE_BUTTON_WIDTH, 17, &main_vram_back, 127, 0, 127, true, true);
+		nsnotevolume	 = new NumberSlider(RIGHT_SIDE_BUTTON_X, 45, RIGHT_SIDE_BUTTON_WIDTH, 17, main_screen, 127, 0, 127, true, true);
 		nsnotevolume->registerPostChangeCallback(handleNoteVolumeChanged);
 
-		buttonsetnotevol = new Button(RIGHT_SIDE_BUTTON_X, 61, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
+		buttonsetnotevol = new Button(RIGHT_SIDE_BUTTON_X, 61, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 		buttonsetnotevol->setCaption("set");
 		buttonsetnotevol->registerPushCallback(handleSetNoteVol);
 
-		/* labeltranspose = new Label(200, 1, 48, 12, &main_vram_back, false, true);
+		/* labeltranspose = new Label(200, 1, 48, 12, main_screen, false, true);
 		labeltranspose->setCaption("trps"); */
-		buttontransposedown = new Button(RIGHT_SIDE_BUTTON_X, 74, 14, 12, &main_vram_back);
+		buttontransposedown = new Button(RIGHT_SIDE_BUTTON_X, 74, 14, 12, main_screen);
 		buttontransposedown->setCaption("-");
 		buttontransposedown->registerPushCallback(handleTransposeDown);
-		buttontransposeup = new Button(RIGHT_SIDE_BUTTON_X + RIGHT_SIDE_BUTTON_WIDTH - 14, 74, 14, 12, &main_vram_back);
+		buttontransposeup = new Button(RIGHT_SIDE_BUTTON_X + RIGHT_SIDE_BUTTON_WIDTH - 14, 74, 14, 12, main_screen);
 		buttontransposeup->setCaption("+");
 		buttontransposeup->registerPushCallback(handleTransposeUp);
 
-		tbeffects = new ToggleButton(158, 136, 16, 16, &sub_vram);
+		tbeffects = new ToggleButton(158, 136, 16, 16, sub_screen);
 		tbeffects->setBitmap(icon_fx_raw, 12, 12);
 		tbeffects->registerToggleCallback(handleToggleEffectsVisibility);
 
-		//buttoncut         = new BitButton(232,  52, 22, 21, &main_vram_back, icon_cut_raw, 16, 16, 3, 2);
-		//buttoncopy        = new BitButton(232,  74, 22, 21, &main_vram_back, icon_copy_raw, 16, 16, 3, 3);
-		//buttonpaste       = new BitButton(232,  96, 22, 21, &main_vram_back, icon_paste_raw, 16, 16, 3, 3);
+		//buttoncut         = new BitButton(232,  52, 22, 21, main_screen, icon_cut_raw, 16, 16, 3, 2);
+		//buttoncopy        = new BitButton(232,  74, 22, 21, main_screen, icon_copy_raw, 16, 16, 3, 3);
+		//buttonpaste       = new BitButton(232,  96, 22, 21, main_screen, icon_paste_raw, 16, 16, 3, 3);
 
-		buttoncut         = new Button(RIGHT_SIDE_BUTTON_X,  88, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
-		buttoncopy        = new Button(RIGHT_SIDE_BUTTON_X, 101, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
-		buttonpaste       = new Button(RIGHT_SIDE_BUTTON_X, 114, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
+		buttoncut         = new Button(RIGHT_SIDE_BUTTON_X,  88, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttoncopy        = new Button(RIGHT_SIDE_BUTTON_X, 101, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttonpaste       = new Button(RIGHT_SIDE_BUTTON_X, 114, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 
 		buttoncut->setCaption("cut");
 		buttoncopy->setCaption("cp");
 		buttonpaste->setCaption("pst");
 
-		buttoncolselect   = new Button(RIGHT_SIDE_BUTTON_X, 127, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
-		buttoninsnote     = new Button(RIGHT_SIDE_BUTTON_X, 140, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
-		buttondelnote     = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
-		buttonemptynote2  = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
-		buttonstopnote2   = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
+		buttoncolselect   = new Button(RIGHT_SIDE_BUTTON_X, 127, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttoninsnote     = new Button(RIGHT_SIDE_BUTTON_X, 140, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttondelnote     = new Button(RIGHT_SIDE_BUTTON_X, 153, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttonemptynote2  = new Button(RIGHT_SIDE_BUTTON_X, 166, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttonstopnote2   = new Button(RIGHT_SIDE_BUTTON_X, 179, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 
 		buttonunmuteall->registerPushCallback(handleUnmuteAll);
 		buttoncut->registerPushCallback(handleCut);
@@ -4068,7 +4070,7 @@ void setupGUI(bool dldi_enabled)
 		buttondelnote->setCaption("del");
 		buttonemptynote2->setCaption("clr");
 
-		pv = new PatternView(0, 0, RIGHT_SIDE_BUTTON_X, 192, &main_vram_back, state);
+		pv = new PatternView(0, 0, RIGHT_SIDE_BUTTON_X, 192, main_screen, state);
 		pv->setSong(song);
 		pv->registerMuteCallback(handleMuteChannelsChanged);
 
@@ -4529,17 +4531,16 @@ int main(int argc, char **argv) {
 
 	settings = new Settings(launch_path, fat_success);
 
-
-
 	// Set draw loactions for the ERBs
 	main_vram_front = (uint16*)BG_BMP_RAM(2);
 	main_vram_back = (uint16*)BG_BMP_RAM(8);
 	sub_vram  = (uint16*)BG_BMP_RAM_SUB(2);
 
+	main_screen = new Screen(main_vram_back, 256, 192, 256);
+	sub_screen = new Screen(sub_vram, 256, 192, 256);
+
 	// Clear tile mem
 	dmaFillWords(0, BG_BMP_RAM_SUB(0), 32*1024);
-
-
 
 	// parse argv[0], if present
 	if (argc >= 1 && argv != NULL && argv[0] != NULL) {

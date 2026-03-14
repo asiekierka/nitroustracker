@@ -26,7 +26,7 @@ namespace tobkit {
 
 class MessageBox: public Widget {
 	public:
-		MessageBox(u16 **_vram, const char *message, u8 n_buttons, ...);
+		MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...);
 		~MessageBox(void);
 		
 		// Drawing request

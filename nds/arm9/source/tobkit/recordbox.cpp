@@ -39,10 +39,10 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-RecordBox::RecordBox(u16 **_vram, void (*_onOk)(void), void (*_onCancel)(void), Sample *_sample, Instrument *_instrument,
+RecordBox::RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(void), Sample *_sample, Instrument *_instrument,
 			   u8 _smpidx)
 	:Widget((SCREEN_WIDTH-RECORDBOX_WIDTH)/2, (SCREEN_HEIGHT-RECORDBOX_HEIGHT)/2,
-		RECORDBOX_WIDTH, RECORDBOX_HEIGHT, _vram, true),
+		RECORDBOX_WIDTH, RECORDBOX_HEIGHT, _screen, true),
   	recording(false), btndown(false), onOk(_onOk), onCancel(_onCancel), sample(_sample),
 	instrument(_instrument), smpidx(_smpidx), sound_data(NULL)
 {
@@ -50,21 +50,21 @@ RecordBox::RecordBox(u16 **_vram, void (*_onOk)(void), void (*_onCancel)(void), 
 	
 	const char *msg = "hold down a";
 	u8 msgwidth = getStringWidth(msg);
-	labelmsg = new Label(x+(RECORDBOX_WIDTH-msgwidth)/2, y+18, msgwidth+5, 12, _vram, false);
+	labelmsg = new Label(x+(RECORDBOX_WIDTH-msgwidth)/2, y+18, msgwidth+5, 12, _screen, false);
 	labelmsg->setCaption(msg);
 	
 	msg = "or press b";
 	msgwidth = getStringWidth(msg);
-	labelmsg2 = new Label(x+(RECORDBOX_WIDTH-msgwidth)/2, y+30, msgwidth+5, 12, _vram, false);
+	labelmsg2 = new Label(x+(RECORDBOX_WIDTH-msgwidth)/2, y+30, msgwidth+5, 12, _screen, false);
 	labelmsg2->setCaption(msg);
 	
 	msg = "recording";
 	msgwidth = getStringWidth(msg);
-	labelrec = new Label(x+(RECORDBOX_WIDTH-msgwidth)/2, y+33, msgwidth+5, 12, _vram, false, false, true);
+	labelrec = new Label(x+(RECORDBOX_WIDTH-msgwidth)/2, y+33, msgwidth+5, 12, _screen, false, false, true);
 	labelrec->setCaption(msg);
 	labelrec->hide();
 	
-	buttoncancel = new Button(x+(RECORDBOX_WIDTH-50)/2, y+44, 50, 14, _vram);
+	buttoncancel = new Button(x+(RECORDBOX_WIDTH-50)/2, y+44, 50, 14, _screen);
 	buttoncancel->setCaption("cancel");
 	buttoncancel->registerPushCallback(_onCancel);
 }

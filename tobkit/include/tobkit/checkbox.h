@@ -24,7 +24,7 @@ namespace tobkit {
 class CheckBox: public Widget
 {
 	public:
-		CheckBox(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram,
+		CheckBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen,
 			 bool _visible=true, bool checked=false, bool albino=false);
 		~CheckBox();
 		

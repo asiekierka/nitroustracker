@@ -23,9 +23,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ListBox::ListBox(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, u16 n_items,
+ListBox::ListBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u16 n_items,
 	bool _show_numbers, bool _visible, bool _zero_offset)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	buttonstate(0), activeelement(0), highlightedelement(-1), scrollpos(0),
 	show_numbers(_show_numbers),
 	zero_offset(_zero_offset)

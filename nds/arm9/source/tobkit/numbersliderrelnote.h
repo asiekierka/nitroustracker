@@ -31,7 +31,7 @@ namespace tobkit {
 
 class NumberSliderRelNote: public Widget {
 	public:
-		NumberSliderRelNote(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, s32 _value=0);
+		NumberSliderRelNote(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value=0);
 	
 		// Drawing request
 		void pleaseDraw(void);

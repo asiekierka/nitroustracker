@@ -38,25 +38,25 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ThemeSelectorBox::ThemeSelectorBox(u16 **_vram, void (*_onSelect)(File), void(*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void))
+ThemeSelectorBox::ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File), void(*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void))
 	:Widget((SCREEN_WIDTH-THEMESELBOX_WIDTH)/2, (SCREEN_HEIGHT-THEMESELBOX_HEIGHT)/3,
-		THEMESELBOX_WIDTH, THEMESELBOX_HEIGHT, _vram), onSelect(_onSelect), onOk(_onOk), onReset(_onReset), onCancel(_onCancel)
+		THEMESELBOX_WIDTH, THEMESELBOX_HEIGHT, _screen), onSelect(_onSelect), onOk(_onOk), onReset(_onReset), onCancel(_onCancel)
 {
     title = "choose a theme";
 
-	buttonok = new Button(x+(THEMESELBOX_WIDTH-50)/2 - 55, y+THEMESELBOX_HEIGHT-20, 50, 14, _vram);
+	buttonok = new Button(x+(THEMESELBOX_WIDTH-50)/2 - 55, y+THEMESELBOX_HEIGHT-20, 50, 14, _screen);
 	buttonok->setCaption("apply");
 	buttonok->registerPushCallback(onOk);
 
-	buttonreset = new Button(x+(THEMESELBOX_WIDTH-50)/2, y+THEMESELBOX_HEIGHT-20, 50, 14, _vram);
+	buttonreset = new Button(x+(THEMESELBOX_WIDTH-50)/2, y+THEMESELBOX_HEIGHT-20, 50, 14, _screen);
 	buttonreset->setCaption("reset");
 	buttonreset->registerPushCallback(onReset);
 
-	buttoncancel = new Button(x+(THEMESELBOX_WIDTH-50)/2 + 55, y+THEMESELBOX_HEIGHT-20, 50, 14, _vram);
+	buttoncancel = new Button(x+(THEMESELBOX_WIDTH-50)/2 + 55, y+THEMESELBOX_HEIGHT-20, 50, 14, _screen);
 	buttoncancel->setCaption("cancel");
 	buttoncancel->registerPushCallback(onCancel);
 	
-	filesel = new FileSelector(x + 10, y + 25, THEMESELBOX_WIDTH-20, THEMESELBOX_HEIGHT - 50, _vram, true);
+	filesel = new FileSelector(x + 10, y + 25, THEMESELBOX_WIDTH-20, THEMESELBOX_HEIGHT - 50, _screen, true);
 	filesel->registerFileSelectCallback(onSelect);
 	std::vector<std::string> themefilter;
 	themefilter.push_back("nttheme");

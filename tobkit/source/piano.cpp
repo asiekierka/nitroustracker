@@ -32,8 +32,8 @@ static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
 
 
 /* ===================== PUBLIC ===================== */
-Piano::Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_map_base, u16 **_vram)
-:Widget(_x, _y, _width, _height, _vram),
+Piano::Piano(u8 _x, u8 _y, u8 _width, u8 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
+:Widget(_x, _y, _width, _height, _screen),
 char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_instrument(false)
 {
 	onNote = 0;

@@ -22,10 +22,11 @@ Has rectangular area
 #ifndef WIDGET_H
 #define WIDGET_H
 
-#include <nds.h>
 #include <limits.h>
 
 #include "theme.h"
+#include "platform.h"
+#include "screen.h"
 
 namespace tobkit {
 
@@ -43,7 +44,7 @@ struct Font {
 class Widget {
 	public:
 		// Constructor sets base variables
-		Widget(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible=true, bool _occluded=true);
+		Widget(u8 _x, u8 _y, u8 _width, u8 _height, Screen *screen, bool _visible=true, bool _occluded=true);
 		virtual ~Widget(void) {}
 
 		// Callback registration
@@ -95,7 +96,7 @@ class Widget {
 		u16 x, y, width, height;
 		bool enabled;
 		bool do_overdraw;
-		u16 **vram;
+		Screen *screen;
 		Theme *theme;
 		u16 bgcolor; // Color of the background (for hiding the widget)
 
@@ -122,7 +123,7 @@ class Widget {
 		void drawVLine(u8 tx, u8 ty, u8 length, u16 col);
 		void drawBresLine(u8 tx1, u8 ty1, u8 tx2, u8 ty2, u16 col);
 		inline void drawPixel(u8 tx, u8 ty, u16 col) {
-			*(*vram+SCREEN_WIDTH*(y+ty)+x+tx) = col;
+			screen->drawPixel(x+tx, y+ty, col);
 		}
 		void drawGradient(u16 col1, u16 col2, u8 tx, u8 ty, u8 tw, u8 th);
 
@@ -142,11 +143,11 @@ class Widget {
 			*/
 
 			// This is the above code in 1 Line (saves variable allocation time and mem)
-			return RGB15(
-				((((col1 & 0x001F) - (col2 & 0x001F)) * alpha) + ((col2 & 0x001F) << 12)) >> 12,
-				(((((col1>>5) & 0x001F) - ((col2>>5) & 0x001F)) * alpha) + (((col2>>5) & 0x001F) << 12)) >> 12,
-				(((((col1>>10) & 0x001F) - ((col2>>10) & 0x001F)) * alpha) + (((col2>>10) & 0x001F) << 12)) >> 12
-			)|BIT(15);
+			return RGB5A1(
+				(((RGB5A1_R(col1) - RGB5A1_R(col2)) * alpha) + (RGB5A1_R(col2) << 12)) >> 12,
+				(((RGB5A1_G(col1) - RGB5A1_G(col2)) * alpha) + (RGB5A1_G(col2) << 12)) >> 12,
+				(((RGB5A1_B(col1) - RGB5A1_B(col2)) * alpha) + (RGB5A1_B(col2) << 12)) >> 12,
+				1);
 		}
 
 		void drawMonochromeIcon(u8 tx, u8 ty, u8 tw, u8 th, const u8 *icon, u16 color);

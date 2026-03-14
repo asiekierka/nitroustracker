@@ -43,7 +43,7 @@ namespace tobkit {
 class RecordBox: public Widget {
 	public:
 		// Constructor sets base variables
-		RecordBox(u16 **_vram, void (*_onOk)(void), void (*_onCancel)(void), Sample *_sample, Instrument *_instrument,
+		RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(void), Sample *_sample, Instrument *_instrument,
 			    u8 _smpidx);
 		~RecordBox(void);
 		

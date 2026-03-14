@@ -37,9 +37,9 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 Typewriter::Typewriter(const char *_msg, u16 *_char_base, 
-	u16 *_map_base, u8 _palette_offset, uint16 **_vram, vuint16* _trans_reg_x,
+	u16 *_map_base, u8 _palette_offset, Screen *_screen, vuint16* _trans_reg_x,
 	vuint16* _trans_reg_y)
-	:Widget((SCREEN_WIDTH-TW_WIDTH)/2, (SCREEN_HEIGHT-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _vram),
+	:Widget((SCREEN_WIDTH-TW_WIDTH)/2, (SCREEN_HEIGHT-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _screen),
 	char_base(_char_base), map_base(_map_base), palette_offset(_palette_offset),
 	kx(x+TW_TILE_X), ky(y+TW_TILE_Y),
 	mode(TYPEWRITER_MODE_NORMAL),
@@ -54,22 +54,22 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 
 	u8 msglength = getStringWidth(_msg);
 	
-	msglabel = new Label(x+4, y+6, msglength+4, 12, _vram, false);
+	msglabel = new Label(x+4, y+6, msglength+4, 12, _screen, false);
 	msglabel->setCaption(_msg);
 	gui.registerWidget(msglabel, 0, SUB_SCREEN);
 	
-	label = new Label(x+msglength+8, y+4, TW_WIDTH-msglength-12, 15, _vram, true, false, false, true);
+	label = new Label(x+msglength+8, y+4, TW_WIDTH-msglength-12, 15, _screen, true, false, false, true);
 	gui.registerWidget(label, 0, SUB_SCREEN);
 	
-	buttonok = new Button(x+TW_WIDTH/2-50-2 - 29, y+TW_HEIGHT-12-4, 50, 12, _vram);
+	buttonok = new Button(x+TW_WIDTH/2-50-2 - 29, y+TW_HEIGHT-12-4, 50, 12, _screen);
 	buttonok->setCaption("ok");
 	gui.registerWidget(buttonok, 0, SUB_SCREEN);
 	
-	buttoncancel = new Button((x+TW_WIDTH/2+2) + 25, y+TW_HEIGHT-12-4, 50, 12, _vram);
+	buttoncancel = new Button((x+TW_WIDTH/2+2) + 25, y+TW_HEIGHT-12-4, 50, 12, _screen);
 	buttoncancel->setCaption("cancel");
 	gui.registerWidget(buttoncancel, 0, SUB_SCREEN);
 
-	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _vram);  
+	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _screen);  
 	buttonclear->setCaption("clear");
 	gui.registerWidget(buttonclear, 0, SUB_SCREEN);
 	

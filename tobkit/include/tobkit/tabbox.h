@@ -29,7 +29,7 @@ static constexpr u32 TABBOX_ORIENTATION_LEFT = 1;
 
 class TabBox: public Widget {
 	public:
-		TabBox(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, u8 orientation, u8 icon_size, bool _visible=true);
+		TabBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u8 orientation, u8 icon_size, bool _visible=true);
 		
 		void addTab(const u8 *icon, u8 tabidx);
 		

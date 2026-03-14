@@ -36,8 +36,8 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-EnvelopeEditor::EnvelopeEditor(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, u16 _max_x, u16 _max_y, u16 _max_points)
-	:Widget(_x, _y, _width, _height, _vram), onPointsChange(0), onDrawFinish(0),
+EnvelopeEditor::EnvelopeEditor(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u16 _max_x, u16 _max_y, u16 _max_points)
+	:Widget(_x, _y, _width, _height, _screen), onPointsChange(0), onDrawFinish(0),
 	pen_is_down(false), pen_on_point(false), points_max_x(_max_x), points_max_y(_max_y), n_points(0),
 	max_points(_max_points), active_point(0), sustain(false), sustain_point_index(0), zoom_level(0), buttonstate(0), scrollthingypos(0),
 	scrollthingyheight(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), scrollpos(0), draw_mode(false)
@@ -550,7 +550,7 @@ void EnvelopeEditor::draw(void)
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon_bt;
+			drawPixel(width-j-3, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
 		}
 	}
 
@@ -566,7 +566,7 @@ void EnvelopeEditor::draw(void)
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon_bt;
+			drawPixel(x+j+3, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
 		}
 	}
 

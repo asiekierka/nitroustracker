@@ -54,7 +54,7 @@ namespace tobkit {
 class SampleDisplay: public Widget {
 	public:
 		// Constructor sets base variables
-		SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, Sample *_smp=0);
+		SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, Sample *_smp=0);
 		~SampleDisplay(void);
 
 		// Event calls

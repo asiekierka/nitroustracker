@@ -20,9 +20,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-RadioButton::RadioButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram,
+RadioButton::RadioButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen,
 	RadioButtonGroup *_rbg, bool _visible)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	rbg(_rbg), active(false)
 {
 	rbg->add(this);

@@ -24,8 +24,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberSlider::NumberSlider(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, s32 _value, s32 _min, s32 _max, bool _hex, bool _is_8bit)
-	:Widget(_x, _y, _width, _height, _vram),
+NumberSlider::NumberSlider(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, s32 _value, s32 _min, s32 _max, bool _hex, bool _is_8bit)
+	:Widget(_x, _y, _width, _height, _screen),
 	value(_value), btnstate(0), min(_min), max(_max), hex(_hex), is_8bit(_is_8bit)
 {
 	onChange = 0;

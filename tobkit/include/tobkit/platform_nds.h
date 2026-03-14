@@ -17,6 +17,13 @@ limitations under the License.
 #ifndef _PLATFORM_NDS_H_
 #define _PLATFORM_NDS_H_
 
-// TODO
+#include <nds.h>
+
+typedef u16 tobkit_pixel_t;
+
+#define RGB5A1(r,g,b,a) (((b) << 10) | ((g) << 5) | (r) | ((a) << 15))
+#define RGB5A1_R(c) ((c) & 0x1F)
+#define RGB5A1_G(c) (((c) >> 5) & 0x1F)
+#define RGB5A1_B(c) (((c) >> 10) & 0x1F)
 
 #endif

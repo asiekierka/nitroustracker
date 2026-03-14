@@ -23,7 +23,7 @@ namespace tobkit {
 
 class Label: public Widget {
 	public:
-		Label(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, bool _has_border=true,
+		Label(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _has_border=true,
 		      bool _albino=false, bool _no_bg=false, bool _right_aligned=false);
 		~Label(void);
 		

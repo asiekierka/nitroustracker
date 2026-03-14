@@ -24,8 +24,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Button::Button(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, bool _visible)
-	:Widget(_x, _y, _width, _height, _vram, _visible),
+Button::Button(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible)
+	:Widget(_x, _y, _width, _height, _screen, _visible),
 	 penIsDown(false), caption(0)
 {
 	onPush = 0;

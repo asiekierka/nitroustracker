@@ -29,7 +29,7 @@ namespace tobkit {
 
 class Button: public Widget {
 	public:
-		Button(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible=true);
+		Button(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible=true);
 	
 		~Button();
 		

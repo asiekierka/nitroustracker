@@ -29,7 +29,7 @@ namespace tobkit {
 
 class BitButton: public Widget {
 	public:
-		BitButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, const u8 *_bitmap,
+		BitButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, const u8 *_bitmap,
 			  u8 _bmpwidth=13, u8 _bmpheight=13, u8 _bmpx=2, u8 _bmpy=2, bool _visible=true);
 		
 		// Callback registration

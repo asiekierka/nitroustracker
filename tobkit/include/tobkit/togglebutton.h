@@ -24,7 +24,7 @@ namespace tobkit {
 /* A button that can be toggled on and off, like a switch. It can have a caption and an icon. */
 class ToggleButton: public Widget {
 	public:
-		ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible=true, bool _is_record=false);
+		ToggleButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible=true, bool _is_record=false);
 		~ToggleButton();
 
 		// Callback registration

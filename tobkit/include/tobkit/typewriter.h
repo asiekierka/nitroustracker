@@ -31,7 +31,7 @@ static constexpr u32 TYPEWRITER_MODE_CAPS = 2;
 class Typewriter: public Widget {
 	public:
 		Typewriter(/*u8 _x, u8 _y,*/const char *_msg, u16 *_char_base,
-			u16 *_map_base, u8 _palette_offset, uint16 **_vram,
+			u16 *_map_base, u8 _palette_offset, Screen *_screen,
 			vuint16* _trans_reg_x, vuint16* _trans_reg_y);
 	
 		~Typewriter(void);
@@ -76,7 +76,7 @@ class Typewriter: public Widget {
 		Button *buttonok, *buttoncancel, *buttonclear;
 	
 		u8 mode;
-		vuint16 *trans_reg_x, *trans_reg_y;
+		vu16 *trans_reg_x, *trans_reg_y;
 
 		char *text;
 		u16 cursorpos, strlength;

@@ -32,7 +32,7 @@ namespace tobkit {
 
 class ThemeSelectorBox: public Widget {
 	public:
-		ThemeSelectorBox(u16 **_vram, void (*_onSelect)(File), void (*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void));
+		ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File), void (*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void));
 		~ThemeSelectorBox(void);
 
 		// Event calls

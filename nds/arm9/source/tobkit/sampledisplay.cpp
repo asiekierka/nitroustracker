@@ -36,8 +36,8 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, Sample *_smp)
-	:Widget(_x, _y, _width, _height, _vram),
+SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, Sample *_smp)
+	:Widget(_x, _y, _width, _height, _screen),
 	smp(_smp),
 	selstart(0), selend(0), selection_exists(false), pen_is_down(false), active(false), loop_points_visible(false),
 	pen_on_loop_start_point(false), pen_on_loop_end_point(false),
@@ -548,7 +548,7 @@ void SampleDisplay::draw(void)
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon_bt;
+			drawPixel(width-j-3, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
 		}
 	}
 
@@ -564,7 +564,7 @@ void SampleDisplay::draw(void)
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon_bt;
+			drawPixel(x+j+3, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
 		}
 	}
 
@@ -646,9 +646,9 @@ void SampleDisplay::draw(void)
 			}
 
 			s16 j;
-			for(j=0; j<miny;  ++j) (*vram)[SCREEN_WIDTH*(y+top-j)+x+i] = bg_current;
-			for(;    j<=maxy; ++j) (*vram)[SCREEN_WIDTH*(y+top-j)+x+i] = colortable_current; /* [top-j]; */
-			for(;    j<top;   ++j) (*vram)[SCREEN_WIDTH*(y+top-j)+x+i] = bg_current;
+			for(j=0; j<miny;  ++j) drawPixel(i, top-j, bg_current);
+			for(;    j<=maxy; ++j) drawPixel(i, top-j, colortable_current); /* [top-j]; */
+			for(;    j<top;   ++j) drawPixel(i, top-j, bg_current);
 
 			pos += step;
 		}
@@ -692,9 +692,9 @@ void SampleDisplay::draw(void)
 			}
 
 			s16 j;
-			for(j=0; j<miny;  ++j) (*vram)[SCREEN_WIDTH*(y+top-j)+x+i] = bg_current;
-			for(;    j<=maxy; ++j) (*vram)[SCREEN_WIDTH*(y+top-j)+x+i] = colortable_current; /* [top-j]; */
-			for(;    j<top;   ++j) (*vram)[SCREEN_WIDTH*(y+top-j)+x+i] = bg_current;
+			for(j=0; j<miny;  ++j) drawPixel(i, top-j, bg_current);
+			for(;    j<=maxy; ++j) drawPixel(i, top-j, colortable_current); /* [top-j]; */
+			for(;    j<top;   ++j) drawPixel(i, top-j, bg_current);
 
 			pos += step;
 		}

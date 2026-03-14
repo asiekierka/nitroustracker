@@ -23,8 +23,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberBox::NumberBox(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, u8 _value, u8 _min, u8 _max, u8 _digits)
-	:Widget(_x, _y, _width, _height, _vram),
+NumberBox::NumberBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u8 _value, u8 _min, u8 _max, u8 _digits)
+	:Widget(_x, _y, _width, _height, _screen),
 	value(_value), min(_min), max(_max), digits(_digits), btnstate(0)
 {
 	onChange = 0;

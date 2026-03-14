@@ -39,7 +39,7 @@ class RadioButton: public Widget {
 				void (*onChange)(u8);
 		};
 		
-		RadioButton(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram,
+		RadioButton(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen,
 				RadioButtonGroup *_rbg, bool _visible=true);
 		
 		// Drawing request

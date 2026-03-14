@@ -37,7 +37,7 @@ namespace tobkit {
 
 class ListBox: public Widget {
 	public:
-		ListBox(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, u16 n_items,
+		ListBox(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, u16 n_items,
 			bool _show_numbers, bool _visible=true, bool _zero_offset=true);
 
 		// Drawing request

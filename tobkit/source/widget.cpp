@@ -29,8 +29,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Widget::Widget(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, bool _visible, bool _occluded)
-	:x(_x), y(_y), width(_width), height(_height), enabled(true), do_overdraw(true), vram(_vram), visible(_visible), occluded(_occluded)
+Widget::Widget(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool _visible, bool _occluded)
+	:x(_x), y(_y), width(_width), height(_height), enabled(true), do_overdraw(true), screen(_screen), visible(_visible), occluded(_occluded)
 {
 
 }
@@ -187,7 +187,7 @@ void Widget::drawSmallChar(u8 c, u8 cx, u8 cy, u16 col)
 			u16 pixelidx = 3*GLYPH_3X5_COUNT*j+3*c+i;
 			if(font_3x5_raw[pixelidx/8]&BIT(pixelidx%8)) {
 				//*(*vram+SCREEN_WIDTH*(2+cy*8+j)+1+cx*4+i) = col;
-				*(*vram+SCREEN_WIDTH*(y+cy+j)+x+cx+i) = col;
+				drawPixel(cx+i, cy+j, col);
 			}
 		}
 	}
@@ -212,10 +212,8 @@ void Widget::drawFullBox(u8 tx, u8 ty, u8 tw, u8 th, u16 col)
 {
 	if (tw == 0) return;
 
-	int bw = (int) tw * 2;
-	for(int j=0;j<th;++j) {
-		dmaFillHalfWords(col, (*vram+SCREEN_WIDTH*(y+ty+j)+(x+tx)), bw);
-	}
+	for(int j=0;j<th;++j)
+		screen->fillRow(x+tx, y+ty+j, tw, col);
 }
 
 void Widget::drawBorder(u16 col) {
@@ -283,7 +281,7 @@ void Widget::drawBresLine(u8 tx1, u8 ty1, u8 tx2, u8 ty2, u16 col)
 				d -= 2 * dx;
 			}
 
-			*(*vram+SCREEN_WIDTH*yp+xp) = col;
+			screen->drawPixel(xp, yp, col);
 	
 			d += 2 * dy;
 		}
@@ -327,8 +325,8 @@ void Widget::drawBresLine(u8 tx1, u8 ty1, u8 tx2, u8 ty2, u16 col)
 				d -= 2 * dx;
 			}
 
-			*(*vram+SCREEN_WIDTH*xp+yp) = col;
-	
+			screen->drawPixel(xp, yp, col);
+
 			d += 2 * dy;
 		}
 	}
@@ -346,13 +344,12 @@ void Widget::drawGradient(u16 col1, u16 col2, u8 tx, u8 ty, u8 tw, u8 th) {
 
 	if (tw == 0) return;
 
-	int bw = tw * 2;
 	int step = div32((1<<12), th);
 	int pos = 0;
 
 	for(j=0;j<th;++j,pos+=step) {
 		col = interpolateColor(col1, col2, pos);
-		dmaFillHalfWords(col, (*vram+SCREEN_WIDTH*(y+ty+j)+(x+tx)), bw);
+		screen->fillRow(x+tx, y+ty+j, tw, col);
 	}
 }
 

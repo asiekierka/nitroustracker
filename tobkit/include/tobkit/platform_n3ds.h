@@ -1,5 +1,5 @@
 /*====================================================================
-Copyright 2006 Tobias Weyand
+Copyright 2025 Adrian "asie" Siekeirka
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,38 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#ifndef _GRADIENTICON_H_
-#define _GRADIENTICON_H_
+#ifndef _PLATFORM_N3DS_H_
+#define _PLATFORM_N3DS_H_
 
-#include "widget.h"
+#include <3ds.h>
 
-namespace tobkit {
+typedef u16 tobkit_pixel_t;
 
-/**
- * @brief 2bpp gradient icon pixmap.
- */
-class GradientIcon: public Widget {
-	public:
-		GradientIcon(u8 _x, u8 _y, u8 _width, u8 _height, const u32* _image, Screen *_screen, bool _visible=true);
-	
-		~GradientIcon();
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));	
-		
-		// Event calls
-		void penDown(u8 x, u8 y);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-	private:
-		void draw(void);
-		
-		void (*onPush)(void);
-		const u32 *image;
-};
-
-};
+#define RGB5A1(r,g,b,a) (((r) << 11) | ((g) << 6) | ((b) << 1) | (a))
+#define RGB5A1_R(c) (((c) >> 11) & 0x1F)
+#define RGB5A1_G(c) (((c) >> 6) & 0x1F)
+#define RGB5A1_B(c) (((c) >> 1) & 0x1F)
 
 #endif

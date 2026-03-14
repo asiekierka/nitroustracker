@@ -39,7 +39,7 @@ class File {
 
 class FileSelector: public ListBox {
 	public:
-		FileSelector(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, bool visible=true);
+		FileSelector(u8 _x, u8 _y, u8 _width, u8 _height, Screen *_screen, bool visible=true);
 		
 		// Calls fileselect callback or changes the directory
 		void penDown(u8 px, u8 py);
