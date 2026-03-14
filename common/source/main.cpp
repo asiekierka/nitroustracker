@@ -1275,11 +1275,12 @@ void drawMainScreen(void)
 
 void redrawSubScreen(void)
 {
-#ifdef TODO_NDS_ONLY
-	// Fill screen
 	u16 col = settings->getTheme()->col_bg;
+#ifdef TODO_NDS_ONLY
 	u32 colcol = col | col << 16;
 	dmaFillWords(colcol, sub_screen->pixels, 256 * 153 * 2);
+#else
+	PlatformClearSubScreen(col);
 #endif
 
 	// Redraw GUI

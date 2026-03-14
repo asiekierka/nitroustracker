@@ -46,6 +46,7 @@ void PlatformClearSubScreen(tobkit_pixel_t color) {
 }
 
 void PlatformWaitVBlank(void) {
+	gfxFlushBuffers();
     gspWaitForVBlank();
 }
 
