@@ -279,27 +279,19 @@ void stopPlay(void);
 void setHasUnsavedChanges(bool unsaved);
 void handleClearFx(void);
 
-
-
-#ifdef DEBUG
-void saveScreenshot(void);
-void dumpSample(void);
-#endif
+#include "debug_helpers.h"
 
 void clearMainScreen(void)
 {
-	u16 col = settings->getTheme()->col_bg;
-	u32 colcol = col | col << 16;
-	dmaFillWords(colcol, main_vram_front, 256 * 192 * 2);
-	dmaFillWords(colcol, main_vram_back, 256 * 192 * 2);
+	main_screen->pixels = main_vram_front;
+	main_screen->clear(settings->getTheme()->col_bg);
+	main_screen->pixels = main_vram_back;
+	main_screen->clear(settings->getTheme()->col_bg);
 }
 
 void clearSubScreen(void)
 {
-	u16 col = settings->getTheme()->col_bg;
-	u32 colcol = col | col << 16;
-	// Fill the bg with the bg color
-	dmaFillWords(colcol, sub_vram, 256 * 192 * 2);
+	sub_screen->clear(settings->getTheme()->col_bg);
 }
 
 void drawSampleNumbers(void)
@@ -453,7 +445,7 @@ void handleNoteStroke(u8 note)
 		/* uiSetNote(state->channel, state->getCursorRow(), note);
 
 		// Redraw
-		DC_FlushAll();
+		ntxm_flush_dcache();
 		redraw_main_requested = true; */
 	}
 	// If we are in sample mapping mode, map the pressed key to the selected sample for the current instrument
@@ -463,7 +455,7 @@ void handleNoteStroke(u8 note)
 		if(inst != NULL)
 		{
 			inst->setNoteSample(state->basenote + note, state->sample);
-			DC_FlushAll();
+			ntxm_flush_dcache();
 		}
 
 		char label;
@@ -494,7 +486,7 @@ void handleNoteRelease(u8 note, bool moved)
 		handleNoteAdvanceRow();
 
 		// Redraw
-		DC_FlushAll();
+		ntxm_flush_dcache();
 		redraw_main_requested = true;
 	}
 
@@ -515,7 +507,7 @@ void handlePianoPakStroke(u8 note)
 		handleNoteAdvanceRow();
 
 		// Redraw
-		DC_FlushAll();
+		ntxm_flush_dcache();
 		redraw_main_requested = true;
 	}
 
@@ -862,7 +854,7 @@ bool loadSample(const char *filename_with_path)
 
 	handleSampleChange(smpidx);
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	setHasUnsavedChanges(true);
 	return true;
@@ -885,7 +877,7 @@ void showSlowLoadOperation(std::function<const char*(void)> loadOp)
 
 	const char* res = loadOp();
 	updateMemoryState(true);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	deleteMessageBox();
 
@@ -1494,7 +1486,7 @@ void handlePotDec(void) {
 		// TODO: turn into undo operation
 		action_buffer->clear();
 		// If the current pos was changed, switch the pattern
-		DC_FlushAll();
+		ntxm_flush_dcache();
 
 		redraw_main_requested = true;
 
@@ -1522,7 +1514,7 @@ void handlePotInc(void)
 		song->setPotEntry(state->potpos, pattern);
 		// TODO: turn into undo operation
 		action_buffer->clear();
-		DC_FlushAll();
+		ntxm_flush_dcache();
 
 		redraw_main_requested = true;
 
@@ -1543,7 +1535,7 @@ void handlePotIns(void)
 		return;
 	// TODO: turn into undo operation
 	action_buffer->clear();
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	lbpot->ins(lbpot->getidx(), lbpot->get(lbpot->getidx()));
 	updateLabelSongLen();
 	setHasUnsavedChanges(true);
@@ -1560,7 +1552,7 @@ void handlePotDel(void)
 
 	// TODO: turn into undo operation
 	action_buffer->clear();
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	if(state->potpos>=song->getPotLength()) {
 		state->potpos = song->getPotLength() - 1;
@@ -1571,7 +1563,7 @@ void handlePotDel(void)
 	if(song->getRestartPosition() >= song->getPotLength()) {
 		song->setRestartPosition( song->getPotLength() - 1 );
 		nsrestartpos->setValue( song->getRestartPosition() );
-		DC_FlushAll();
+		ntxm_flush_dcache();
 	}
 	setHasUnsavedChanges(true);
 }
@@ -1599,7 +1591,7 @@ void handlePtnClone(void)
 
 	// TODO: turn into undo operation
 	action_buffer->clear();
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	char numberstr[3] = {0};
 	sprintf(numberstr, "%2x", newidx);
 	lbpot->ins(lbpot->getidx()+1, numberstr);
@@ -1652,7 +1644,7 @@ void handlePtnLengthChange(s32 newlength)
 	if(newlength != song->getPatternLength(song->getPotEntry(state->potpos)))
 	{
 		song->resizePattern(song->getPotEntry(state->potpos), newlength);
-		DC_FlushAll();
+		ntxm_flush_dcache();
 		// Scroll back if necessary
 		if(state->getPlaybackRow() >= newlength) {
 			state->setPlaybackRow(newlength-1);
@@ -1669,13 +1661,13 @@ void handlePtnLengthChange(s32 newlength)
 void handleTempoChange(u8 tempo) {
 	song->setTempo(tempo);
 	setHasUnsavedChanges(true);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 void handleBpmChange(s32 bpm) {
 	song->setBpm(bpm);
 	setHasUnsavedChanges(true);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 void handleLinesBeatChange(u8 lpb) {
@@ -1693,7 +1685,7 @@ void handleRestartPosChange(s32 restartpos)
 	}
 	song->setRestartPosition(restartpos);
 	setHasUnsavedChanges(true);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 void confirmZap(void (*onConfirm)(void))
@@ -1708,7 +1700,7 @@ void zapPatterns(void)
 {
 	song->zapPatterns();
 	action_buffer->clear();
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	deleteMessageBox();
 
 	// Update POT
@@ -1749,7 +1741,7 @@ void zapUnusedInstruments(void) {
 		}
 	}
 		
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	deleteMessageBox();
 	CommandSetSong(song);
 	updateMemoryState(true);
@@ -1761,7 +1753,7 @@ void zapCurrentInstrument(void) {
 	song->zapInstrument(inst);
 	sampledisplay->setSample(NULL);
 	handleSampleChange(0);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	deleteMessageBox();
 	
 	lbinstruments->set(inst, "");
@@ -1775,7 +1767,7 @@ void zapCurrentInstrument(void) {
 void zapInstruments(void)
 {
 	song->zapInstruments();
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	deleteMessageBox();
 
 	// Update instrument list
@@ -1909,7 +1901,7 @@ void handleFileChange(File file)
 
 			// Play it
 			state->preview_sample = smp;
-			DC_FlushAll();
+			ntxm_flush_dcache();
 			CommandPlaySample(smp, 4*12, 255, 0);
 
 			// When the sample has finished playing, the arm7 sends a signal,
@@ -2632,7 +2624,7 @@ void switchScreens(void)
 void setupSong(void) {
 	song = new Song(6, 125);
 	action_buffer = new ActionBuffer(isDSiMode() ? 1024 : 256);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 
@@ -2774,7 +2766,7 @@ void handleSampleVolumeChange(s32 newvol)
 	}
 
 	smp->setVolume(vol);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
 
@@ -2791,7 +2783,7 @@ void handleSamplePanningChange(s32 newpanning)
 	if (smp->getPanning() != pan) setHasUnsavedChanges(true);
 	smp->setPanning(pan);
 	smp->setBasePanning();
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 void handleSampleRelNoteChange(s32 newnote)
@@ -2802,7 +2794,7 @@ void handleSampleRelNoteChange(s32 newnote)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	if (smp->getRelNote() != newnote) setHasUnsavedChanges(true);
 	smp->setRelNote(newnote);
@@ -2817,7 +2809,7 @@ void handleSampleFineTuneChange(s32 newfinetune)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	if (smp->getFinetune() != newfinetune) setHasUnsavedChanges(true);
 	smp->setFinetune(newfinetune);
@@ -2861,7 +2853,7 @@ void sample_del_selection(void)
 
 	smp->delPart(startsample, endsample);
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	sampledisplay->setSample(smp);
 	setHasUnsavedChanges(true);
@@ -2905,7 +2897,7 @@ void sample_fade_in(void)
 
 	smp->fadeIn(startsample, endsample);
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	sampledisplay->setSample(smp);
 	setHasUnsavedChanges(true);
@@ -2927,7 +2919,7 @@ void sample_fade_out(void)
 
 	smp->fadeOut(startsample, endsample);
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	sampledisplay->setSample(smp);
 	setHasUnsavedChanges(true);
@@ -2952,7 +2944,7 @@ void sample_reverse(void)
 
 	smp->reverse(startsample, endsample);
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	sampledisplay->setSample(smp);
 	setHasUnsavedChanges(true);
@@ -3174,7 +3166,7 @@ void handleMuteChannelsChanged(bool *muted_channels)
 		song->setChannelMute(chn, muted_channels[chn]);
 	}
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 void handleSampleLoopChanged(u8 val)
@@ -3194,7 +3186,7 @@ void handleSampleLoopChanged(u8 val)
 	else
 		sampledisplay->showLoopPoints();
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 }
 
 void handleSnapTo0XingToggled(bool on)
@@ -3228,7 +3220,7 @@ void volEnvPointsChanged(void)
 	toggleVolEnvEnabled(n_points != 0 && inst->getVolEnvEnabled());
 	volenvedit->pleaseDraw();
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
 
@@ -3236,7 +3228,7 @@ void volEnvDrawFinish(void)
 {
 	cbvolenvenabled->setChecked(true);
 	toggleVolEnvEnabled(true);
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
 
@@ -3264,7 +3256,7 @@ void envSetSustainPoint(void)
 	volenvedit->setEditorSustainParams(s, susp);
 	volenvedit->pleaseDraw();
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
 
@@ -4234,11 +4226,6 @@ void VblankHandler(void)
 	frame = (frame + 1) % 2;
 }
 
-extern "C" void debug_print_stub(char *string)
-{
-	printf(string);
-}
-
 void fadeIn(void)
 {
 	for(int i=-16; i <= 0; ++i)
@@ -4247,70 +4234,6 @@ void fadeIn(void)
 		cothread_yield_irq(IRQ_VBLANK);
 	}
 }
-
-#ifdef DEBUG
-void saveScreenshot(void)
-{
-	debugprintf("Saving screenshot\n");
-	u8 *screenbuf = (u8*)ntxm_cmalloc(256*192*3*2);
-	u8 *screenptr = screenbuf;
-
-	u16 col;
-	for(u32 i=0;i<192*256;++i) {
-		col = main_vram_front[i];
-		*(screenptr++) = (col & 0x1F) << 3;
-		col >>= 5;
-		*(screenptr++) = (col & 0x1F) << 3;
-		col >>= 5;
-		*(screenptr++) = (col & 0x1F) << 3;
-	}
-	for(u32 i=0;i<192*256;++i) {
-		col = sub_vram[i];
-		*(screenptr++) = (col & 0x1F) << 3;
-		col >>= 5;
-		*(screenptr++) = (col & 0x1F) << 3;
-		col >>= 5;
-		*(screenptr++) = (col & 0x1F) << 3;
-	}
-
-	static u8 filenr = 0;
-	char filename[255] = {0};
-	sprintf(filename, "scr%02d.rgb", filenr);
-
-	FILE *fileh;
-	fileh = fopen(filename, "w");
-	fwrite(screenbuf, 256*192*3*2, 1, fileh);
-	fclose(fileh);
-
-	ntxm_free(screenbuf);
-	debugprintf("saved\n");
-
-	filenr++;
-}
-
-void dumpSample(void)
-{
-	static u8 smpfilenr = 0;
-	char filename[255] = {0};
-	sprintf(filename, "smp%02d.raw", smpfilenr);
-
-	Instrument *inst = song->getInstrument(state->instrument);
-	if(inst==0) return;
-	Sample *smp = inst->getSample(state->sample);
-	if(smp==0) return;
-	void *data = smp->getData();
-	u32 size = smp->getSize();
-
-	debugprintf("saving sample\n");
-
-	FILE *fileh;
-	fileh = fopen(filename, "w");
-	fwrite(data, size, 1, fileh);
-	fclose(fileh);
-
-	debugprintf("saved\n");
-}
-#endif
 
 void applySettings(void)
 {

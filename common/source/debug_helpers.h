@@ -1,13 +1,4 @@
 /*
- * NitroTracker - An FT2-style tracker for the Nintendo DS
- *
- *                                by Tobias Weyand (0xtob)
- *
- * http://nitrotracker.tobw.net
- * http://code.google.com/p/nitrotracker
- */
-
-/*
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -22,27 +13,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TOOLS_H_
-#define _TOOLS_H_
+#ifndef NT_DEBUG_HELPERS_H_
+#define NT_DEBUG_HELPERS_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <algorithm>
-#include "ntxm/ntxmtools.h"
+#include "ntxm/song.h"
+#include "tobkit/screen.h"
 
-// A collection of utilities for everyday coding
-#define debugprintf ntxm_dprintf
-#if !defined(__NDS__)
-#define sassert(...) {}
-#endif
-
-#define ceil_f32toint(n) (((n) + ((1 << 12) - 1)) >> 12)
-
-void lowercase(char *str);
-bool dirExists(const char *dir);
-void dirCreate(const char *dir);
-
-void PrintFreeMem(void);
-void printMallInfo(void);
+void saveScreenshot(tobkit::Screen *top_screen, tobkit::Screen *bottom_screen);
+void dumpSample(Song *song, int instrument, int sample);
 
 #endif

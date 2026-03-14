@@ -28,11 +28,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/dir.h>
-
-#ifdef ARM9
 
 // Helper for converting a string to lower case
 void lowercase(char *str)
@@ -42,13 +41,6 @@ void lowercase(char *str)
 			str[i]+=32;
 		}
 	}
-}
-
-void dbgWaitButton(void)
-{
-	printf("press the any key...\n");
-	scanKeys();
-	while(! (keysDown()&KEY_A) ) scanKeys();
 }
 
 bool dirExists(const char *path) {
@@ -92,5 +84,3 @@ void printMallInfo(void)
 	printf("mmap bytes:       %d\n", mi.hblkhd);
 	printf("malloc chunks:    %d\n", mi.uordblks);
 }
-
-#endif

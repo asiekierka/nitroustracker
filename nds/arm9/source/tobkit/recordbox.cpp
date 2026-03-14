@@ -198,7 +198,7 @@ void RecordBox::startRecording(void)
 			return;
 
 		// Start recording
-		DC_FlushAll();
+		ntxm_flush_dcache();
 		CommandStartRecording(sound_data, RECORDBOX_SOUNDDATA_SIZE);
 		recording = true;
 		
@@ -249,7 +249,7 @@ void RecordBox::stopRecording()
 	
 	recording = false;
 	
-	DC_FlushAll();
+	ntxm_flush_dcache();
 
 	onOk();
 }

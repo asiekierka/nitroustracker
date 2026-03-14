@@ -269,7 +269,7 @@ void SampleDisplay::penMove(u8 px, u8 py)
 			}
 
 			smp->drawLine(sx1, sy1, sx2, sy2);
-			DC_FlushAll();
+			ntxm_flush_dcache();
 
 			draw_last_x = draw_x;
 			draw_last_y = draw_y;
