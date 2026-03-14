@@ -31,7 +31,7 @@ using namespace tobkit;
 
 // Takes a list of alternating button captions and callbacks
 MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
-	:Widget((SCREEN_WIDTH-MB_MIN_WIDTH)/2, (SCREEN_HEIGHT-MB_HEIGHT)/2, MB_MIN_WIDTH, MB_HEIGHT, _screen),
+	:Widget((_screen->getWidth()-MB_MIN_WIDTH)/2, (_screen->getHeight()-MB_HEIGHT)/2, MB_MIN_WIDTH, MB_HEIGHT, _screen),
 	n_buttons(n_buttons)
 {
 	msg = ntxm_cstrdup(message);
@@ -70,7 +70,7 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 	}
 
 	// Set x
-	x = (SCREEN_WIDTH-width)/2;
+	x = (screen->getWidth()-width)/2;
 
 	if(n_buttons > 0)
 	{

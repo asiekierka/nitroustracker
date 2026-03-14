@@ -32,7 +32,7 @@ class Typewriter: public Widget {
 	public:
 		Typewriter(/*u8 _x, u8 _y,*/const char *_msg, u16 *_char_base,
 			u16 *_map_base, u8 _palette_offset, Screen *_screen,
-			vuint16* _trans_reg_x, vuint16* _trans_reg_y);
+			vu16* _trans_reg_x, vu16* _trans_reg_y);
 	
 		~Typewriter(void);
 	

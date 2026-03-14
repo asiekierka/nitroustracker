@@ -196,9 +196,9 @@ void FXKeyboard::drawButtonLabel(u8 key, u8 cat, bool visible)
 	u16 smallcol2 = theme->col_fxkeyboard_minilabel_y;
 	
 	if(visible == true) {
-		col |= BIT(15);
-		smallcol1 |= BIT(15);
-		smallcol2 |= BIT(15);
+		col |= RGB5A1_ALPHA_BIT;
+		smallcol1 |= RGB5A1_ALPHA_BIT;
+		smallcol2 |= RGB5A1_ALPHA_BIT;
 	}
 		
 	char label[] = {fxlabels[cat][key], 0};

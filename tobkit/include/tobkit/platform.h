@@ -1,5 +1,5 @@
 /*====================================================================
-Copyright 2025 Adrian "asie" Siekeirka
+Copyright 2025 Adrian "asie" Siekierka
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@ limitations under the License.
 #include "platform_n3ds.h"
 #else
 #error No platform defined!
+#endif
+
+#if !defined(TOBKIT_PLATFORM_NDS)
+#define ITCM_CODE
+#define div32(a,b) ((a)/(b))
 #endif
 
 #endif

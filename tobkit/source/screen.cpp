@@ -21,11 +21,6 @@ limitations under the License.
 
 using namespace tobkit;
 
-#include "font_8x11.inc"
-#include "font_3x5_raw.h"
-
-#define	abs(x)	(x<0?(-x):(x))
-
 /* ===================== PUBLIC ===================== */
 
 Screen::Screen(tobkit_pixel_t *_pixels, u32 _width, u32 _height, u32 _pitch)

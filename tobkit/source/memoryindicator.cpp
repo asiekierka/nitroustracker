@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <stdio.h>
 #include <malloc.h>
+#include <unistd.h>
 
 #include "tobkit/memoryindicator.h"
 

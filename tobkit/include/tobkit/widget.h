@@ -128,21 +128,6 @@ class Widget {
 		void drawGradient(u16 col1, u16 col2, u8 tx, u8 ty, u8 tw, u8 th);
 
 		inline const u16 interpolateColor(u16 col1, u16 col2, int alpha /* 0..4095 */) {
-			/*
-			u8 r1,g1,b1,r2,g2,b2,rn,gn,bn;
-			r1 = col1 & 0x001F;
-			g1 = (col1 >> 5) & 0x001F;
-			b1 = (col1 >> 10) & 0x001F;
-			r2 = col2 & 0x001F;
-			g2 = (col2 >> 5) & 0x001F;
-			b2 = (col2 >> 10) & 0x001F;
-			rn = r1*alpha/255 + r2-r2*alpha/255;
-			gn = g1*alpha/255 + g2-g2*alpha/255;
-			bn = b1*alpha/255 + b2-b2*alpha/255;
-			return RGB15(rn,gn,bn)|BIT(15);
-			*/
-
-			// This is the above code in 1 Line (saves variable allocation time and mem)
 			return RGB5A1(
 				(((RGB5A1_R(col1) - RGB5A1_R(col2)) * alpha) + (RGB5A1_R(col2) << 12)) >> 12,
 				(((RGB5A1_G(col1) - RGB5A1_G(col2)) * alpha) + (RGB5A1_G(col2) << 12)) >> 12,

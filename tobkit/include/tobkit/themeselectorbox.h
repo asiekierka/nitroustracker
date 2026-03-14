@@ -22,7 +22,6 @@ limitations under the License.
 #include "listbox.h"
 #include "fileselector.h"
 #include "button.h"
-#include <nds.h>
 
 #include <vector>
 #include <map>

@@ -27,7 +27,7 @@ ColorScheme::ColorScheme() {
 	col_medium_bg = RGB5A1(9, 11, 17, 1);
 	col_light_bg = RGB5A1(16, 18, 24, 1);
 	col_lighter_bg = RGB5A1(23, 25, 31, 1);
-	col_light_ctrl = RGB5A1(31, 31, 0, 1); // RGB5A1(26,26,26)|BIT(15)
+	col_light_ctrl = RGB5A1(31, 31, 0, 1); // RGB5A1(26,26,26,1)
 	col_dark_ctrl = RGB5A1(31, 18, 0, 1);
 	col_light_ctrl_disabled = col_light_bg;
 	col_dark_ctrl_disabled = col_medium_bg;
@@ -132,8 +132,8 @@ ColorScheme::ColorScheme() {
 	col_fxkeyboard_btn_label = col_piano_label;
 	col_fxkeyboard_cmd_desc = col_text_light;	
 	col_fxkeyboard_cmd_desc_disabled = col_dark_ctrl_disabled;	
-	col_fxkeyboard_minilabel_x = col_pv_notes &~ BIT(15);	
-	col_fxkeyboard_minilabel_y = col_pv_effect &~ BIT(15);
+	col_fxkeyboard_minilabel_x = col_pv_notes &~ RGB5A1_ALPHA_BIT;	
+	col_fxkeyboard_minilabel_y = col_pv_effect &~ RGB5A1_ALPHA_BIT;
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -153,11 +153,11 @@ bool Theme::loadTheme(const char* themefile) {
 
 		if (result) {
 			memcpy(data, scheme.data, sizeof(data));
-			col_piano_label &= ~BIT(15);
-			col_piano_label_inv &= ~BIT(15);
-			col_fxkeyboard_btn_label &= ~BIT(15);
-			col_fxkeyboard_minilabel_x &= ~BIT(15);
-			col_fxkeyboard_minilabel_y &= ~BIT(15);
+			col_piano_label &= ~RGB5A1_ALPHA_BIT;
+			col_piano_label_inv &= ~RGB5A1_ALPHA_BIT;
+			col_fxkeyboard_btn_label &= ~RGB5A1_ALPHA_BIT;
+			col_fxkeyboard_minilabel_x &= ~RGB5A1_ALPHA_BIT;
+			col_fxkeyboard_minilabel_y &= ~RGB5A1_ALPHA_BIT;
 
 			debugprintf("loaded theme '%s'\n", themefile);
 			return true;
@@ -174,8 +174,8 @@ void Theme::loadDefault(void) {
 	tobkit::ColorScheme scheme;
 
 	memcpy(data, scheme.data, sizeof(data));
-	col_piano_label &= ~BIT(15);
-	col_piano_label_inv &= ~BIT(15);
+	col_piano_label &= ~RGB5A1_ALPHA_BIT;
+	col_piano_label_inv &= ~RGB5A1_ALPHA_BIT;
 }
 
 /* ===================== PRIVATE ===================== */

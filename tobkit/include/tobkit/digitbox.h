@@ -18,7 +18,6 @@ limitations under the License.
 #define DIGITBOX_H
 
 #include "widget.h"
-#include <nds.h>
 
 namespace tobkit {
 

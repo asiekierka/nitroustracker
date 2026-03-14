@@ -1,5 +1,5 @@
 /*====================================================================
-Copyright 2025 Adrian "asie" Siekeirka
+Copyright 2025 Adrian "asie" Siekierka
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ limitations under the License.
 typedef u16 tobkit_pixel_t;
 
 #define RGB5A1(r,g,b,a) (((r) << 11) | ((g) << 6) | ((b) << 1) | (a))
+#define RGB5A1_ALPHA_BIT 0x1
 #define RGB5A1_R(c) (((c) >> 11) & 0x1F)
 #define RGB5A1_G(c) (((c) >> 6) & 0x1F)
 #define RGB5A1_B(c) (((c) >> 1) & 0x1F)

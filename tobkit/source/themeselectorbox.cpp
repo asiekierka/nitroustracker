@@ -17,7 +17,6 @@ limitations under the License.
 #include <sys/syslimits.h>
 #include <unistd.h>
 
-#include <fat.h>
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
@@ -39,7 +38,7 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 ThemeSelectorBox::ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File), void(*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void))
-	:Widget((SCREEN_WIDTH-THEMESELBOX_WIDTH)/2, (SCREEN_HEIGHT-THEMESELBOX_HEIGHT)/3,
+	:Widget((_screen->getWidth()-THEMESELBOX_WIDTH)/2, (_screen->getHeight()-THEMESELBOX_HEIGHT)/3,
 		THEMESELBOX_WIDTH, THEMESELBOX_HEIGHT, _screen), onSelect(_onSelect), onOk(_onOk), onReset(_onReset), onCancel(_onCancel)
 {
     title = "choose a theme";

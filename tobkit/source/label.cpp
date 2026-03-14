@@ -18,8 +18,6 @@ limitations under the License.
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <nds.h>
-
 #include "tobkit/label.h"
 
 using namespace tobkit;

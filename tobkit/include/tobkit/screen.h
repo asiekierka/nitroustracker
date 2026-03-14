@@ -31,6 +31,9 @@ class Screen {
 
         void clear(tobkit_pixel_t col);
 
+        const inline u32 getWidth(void) { return width; }
+        const inline u32 getHeight(void) { return height; }
+
 		inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col) {
 			*(pixels+pitch*ty+tx) = col;
 		}

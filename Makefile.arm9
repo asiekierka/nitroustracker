@@ -17,7 +17,7 @@ GFXDIRS		:= nds/arm9/graphics
 BINDIRS		:= nds/arm9/data
 AUDIODIRS	:=
 FONTSDIRS	:=
-BITMAPSDIRS	:= nds/arm9/bitmaps
+BITMAPSDIRS	:= common/bitmaps
 TOOLSDIR	:= tools
 
 # Defines passed to all files
@@ -139,11 +139,11 @@ ASFLAGS         += -x assembler-with-cpp $(DEFINES) $(INCLUDEFLAGS) \
                    $(ARCH) -ffunction-sections -fdata-sections \
                    -specs=$(SPECS)
 
-CFLAGS          += -std=gnu17 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+CFLAGS          += -std=gnu23 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
                    $(ARCH) -O2 -ffunction-sections -fdata-sections \
                    -specs=$(SPECS)
 
-CXXFLAGS        += -std=gnu++20 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
+CXXFLAGS        += -std=gnu++23 $(WARNFLAGS) $(DEFINES) $(INCLUDEFLAGS) \
                    $(ARCH) -O2 -ffunction-sections -fdata-sections \
                    -fno-exceptions -fno-rtti \
                    -specs=$(SPECS)

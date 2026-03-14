@@ -19,7 +19,9 @@ limitations under the License.
 
 #include "tobkit/piano.h"
 
+#ifdef TOBKIT_PLATFORM_NDS
 #include "piano.h"
+#endif
 #include "piano_hit.h"
 
 using namespace tobkit;
@@ -39,8 +41,10 @@ char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_i
 	onNote = 0;
 	onRelease = 0;
 
+#ifdef TOBKIT_PLATFORM_NDS
 	// Piano::draw is never invoked before Piano::setTheme
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
+#endif
 	
 	memset(key_labels, ' ', 24);
 }
@@ -52,14 +56,17 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
 	Widget::setTheme(theme_, bgcolor_);
 
+#ifdef TOBKIT_PLATFORM_NDS
 	// doesn't conflict with fx keyboard, so safe to write these
 	memcpy(BG_PALETTE_SUB+16, piano_fullnotehighlight_Palette, 32);
 	memcpy(BG_PALETTE_SUB+32, piano_halfnotehighlight_Palette, 32);
+#endif
 
 	if (!isExposed()) return;
 
+#ifdef TOBKIT_PLATFORM_NDS
 	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
-	
+#endif
 
 	setInMappingMode(mapping_instrument);
 	pleaseDraw();
@@ -67,8 +74,10 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 
 void Piano::show(void)
 {
+#ifdef TOBKIT_PLATFORM_NDS
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
 	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
+#endif
 
 	Widget::show();
 }
@@ -166,14 +175,14 @@ void Piano::hideKeyLabels(void)
 void Piano::setInMappingMode(bool instmap)
 {
 	mapping_instrument = instmap;
-	u16 col = theme->col_signal & ~BIT(15);
+	u16 col = theme->col_signal & ~RGB5A1_ALPHA_BIT;
 	if (!instmap)
 	{
 		drawHLine(0, height-1, width, theme->col_piano_half_col1);
 		drawVLine(0, 1, height-1, theme->col_piano_half_col2);
 		drawVLine(width-1, 1, height-1, theme->col_piano_half_col1);
 	}
-	drawBox(0, 1, width, height-1, mapping_instrument ? col | BIT(15) : col);
+	drawBox(0, 1, width, height-1, mapping_instrument ? col | RGB5A1_ALPHA_BIT : col);
 }
 
 void Piano::setKeyLabel(u8 key, char label)
@@ -206,6 +215,7 @@ void Piano::genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 
 
 void Piano::draw(void)
 {
+#ifdef TOBKIT_PLATFORM_NDS
 	// Fill screen with empty tiles
 	for (int i = 0; i < 768; i++) map_base[i] = 28;
 	
@@ -214,11 +224,13 @@ void Piano::draw(void)
 	{
 		memcpy(map_base + (32*(py+y/8)+(x/8)), pianoMap + (PIANO_WIDTH_TILES * py), PIANO_WIDTH_TILES * 2);
 	}	
+#endif
 }
 
 // Set the key corresp. to note to palette corresp. to pal_idx
 void Piano::setKeyPal(u8 note)
 {
+#ifdef TOBKIT_PLATFORM_NDS
   u8 px, py, hit_row, pal_idx;
 
   if(isHalfTone(note))
@@ -243,6 +255,7 @@ void Piano::setKeyPal(u8 note)
       }
     }
   }
+#endif
 }
 
 // 1 for halftones, 0 for fulltones
@@ -285,7 +298,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	}
 	
 	if(visible == true)
-		col |= BIT(15);
+		col |= RGB5A1_ALPHA_BIT;
 	
 	xpos = offset + x_offsets[key % 12];
 	

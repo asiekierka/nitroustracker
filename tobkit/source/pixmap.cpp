@@ -56,7 +56,7 @@ void Pixmap::draw(void)
 {
 	for(u16 j=0; j<height; ++j) {
 		for(u16 i=0; i<width; ++i) {
-			if(image[width*j+i] & BIT(15))
+			if(image[width*j+i] & RGB5A1_ALPHA_BIT)
 				drawPixel(i, j, image[width*j+i]);
 		}
 	}

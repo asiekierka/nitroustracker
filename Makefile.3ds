@@ -40,13 +40,17 @@ ICON		:= icon48.png
 
 TARGET		:=	nitroustracker_3ds
 BUILD		:=	build_3ds
-SOURCES		:=	common/source n3ds/source
+SOURCES		:=	common/source n3ds/source tobkit/source
 DATA		:=	n3ds/data
 INCLUDES	:=	$(SOURCES) tobkit/include
 GRAPHICS	:=	n3ds/gfx
 GFXBUILD	:=	$(BUILD)
 #ROMFS		:=	romfs
 #GFXBUILD	:=	$(ROMFS)/gfx
+
+TOBKIT_BITMAPS := tobkit/bitmaps common/bitmaps
+TOBKIT_FONTS_OBJECTS := font_8x11.raw.o font_3x5.raw.o
+TOOLSDIR := $(TOPDIR)/tools
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -59,12 +63,14 @@ CFLAGS	:=	-g -Wall -O2 -mword-relocations \
 
 CFLAGS	+=	$(INCLUDE) -D__3DS__ -DTOBKIT_PLATFORM_3DS
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++23
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= -lntxm -lctru -lm
+
+CFLAGS	+= -std=gnu23
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -85,7 +91,8 @@ export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(GRAPHICS),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(TOBKIT_BITMAPS),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -96,6 +103,7 @@ PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 SHLISTFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
 GFXFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.t3s)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+TOBKIT_BITMAPS_FILES :=	$(foreach dir,$(TOBKIT_BITMAPS),$(notdir $(wildcard $(dir)/*.png)))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -128,7 +136,8 @@ export OFILES_SOURCES 	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES)) \
 			$(PICAFILES:.v.pica=.shbin.o) $(SHLISTFILES:.shlist=.shbin.o) \
-			$(addsuffix .o,$(T3XFILES))
+			$(addsuffix .o,$(T3XFILES)) $(TOBKIT_BITMAPS_FILES:.png=.raw.o) \
+			$(TOBKIT_FONTS_OBJECTS)
 
 export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
 
@@ -228,6 +237,27 @@ $(OUTPUT).elf	:	$(OFILES)
 #---------------------------------------------------------------------------------
 	$(SILENTMSG) $(notdir $<)
 	$(bin2o)
+
+%.raw.o %_raw.h : %.png
+	$(SILENTMSG) $(notdir $<)
+	$(SILENTCMD)python3 $(TOOLSDIR)/icon_pack.py $< $(basename $(basename $@)).raw
+	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h  $< > $(basename $(basename $@))_raw.s
+	$(SILENTCMD)sed -i -e 's/_png/_raw/g' $(basename $(basename $@))_raw.h $(basename $(basename $@))_raw.s
+	$(SILENTCMD)$(CC) -x assembler-with-cpp $(CPPFLAGS) $(ASFLAGS) -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.s
+
+font_8x11.raw.o font_8x11_raw.h : $(TOPDIR)/tobkit/fonts/font_8x11.png $(TOPDIR)/tobkit/fonts/font_8x11.png.txt
+	$(SILENTMSG) $(notdir $<)
+	$(SILENTCMD)python3 $(TOOLSDIR)/font_pack.py $< $(basename $(basename $@)).raw
+	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h  $< > $(basename $(basename $@))_raw.s
+	$(SILENTCMD)sed -i -e 's/_png/_raw/g' $(basename $(basename $@))_raw.h $(basename $(basename $@))_raw.s
+	$(SILENTCMD)$(CC) -x assembler-with-cpp $(CPPFLAGS) $(ASFLAGS) -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.s
+
+font_3x5.raw.o font_3x5_raw.h : $(TOPDIR)/tobkit/fonts/font_3x5.png
+	$(SILENTMSG) $(notdir $<)
+	$(SILENTCMD)python3 $(TOOLSDIR)/font_3x5_pack.py $< $(basename $(basename $@)).raw
+	$(SILENTCMD)bin2s -a 4 -H $(basename $(basename $@))_raw.h  $< > $(basename $(basename $@))_raw.s
+	$(SILENTCMD)sed -i -e 's/_png/_raw/g' $(basename $(basename $@))_raw.h $(basename $(basename $@))_raw.s
+	$(SILENTCMD)$(CC) -x assembler-with-cpp $(CPPFLAGS) $(ASFLAGS) -c -o $(basename $(basename $@)).raw.o $(basename $(basename $@))_raw.s
 
 -include $(DEPSDIR)/*.d
 

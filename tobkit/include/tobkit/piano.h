@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef PIANO_H
 #define PIANO_H
 
-#include <nds.h>
 #include "widget.h"
 
 namespace tobkit {

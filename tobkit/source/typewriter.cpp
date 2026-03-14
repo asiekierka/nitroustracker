@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <nds.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "tobkit/typewriter.h"
+#ifdef TOBKIT_PLATFORM_NDS
 #include "typewriter.h"
+#endif
 #include "typewriter_hit.h"
 
 using namespace tobkit;
@@ -37,9 +38,9 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 Typewriter::Typewriter(const char *_msg, u16 *_char_base, 
-	u16 *_map_base, u8 _palette_offset, Screen *_screen, vuint16* _trans_reg_x,
-	vuint16* _trans_reg_y)
-	:Widget((SCREEN_WIDTH-TW_WIDTH)/2, (SCREEN_HEIGHT-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _screen),
+	u16 *_map_base, u8 _palette_offset, Screen *_screen, vu16* _trans_reg_x,
+	vu16* _trans_reg_y)
+	:Widget((_screen->getWidth()-TW_WIDTH)/2, (_screen->getHeight()-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _screen),
 	char_base(_char_base), map_base(_map_base), palette_offset(_palette_offset),
 	kx(x+TW_TILE_X), ky(y+TW_TILE_Y),
 	mode(TYPEWRITER_MODE_NORMAL),
@@ -48,9 +49,9 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	onOk = 0;
 	onCancel = 0;
 
-	
-
+#ifdef TOBKIT_PLATFORM_NDS
 	decompress(typewriterTiles, char_base, LZ77Vram);
+#endif
 
 	u8 msglength = getStringWidth(_msg);
 	
@@ -267,11 +268,14 @@ void Typewriter::setTheme(Theme *theme_, u16 bgcolor_)
 	buttonclear->setTheme(theme, theme->col_light_bg);
 
 	genPal();
+
+#ifdef TOBKIT_PLATFORM_NDS
 	memcpy(BG_PALETTE_SUB+palette_offset*16, typewriterPal, 32);
 	// generate highlight palette
 	for (int i = 0; i < 16; i++) {
 		BG_PALETTE_SUB[palette_offset * 16 + 16 + i] = (i == 1 || i == 2) ? theme->col_typewriter_pressed_key : theme->col_typewriter_bg;
 	}
+#endif
 }
 
 /* ===================== PRIVATE ===================== */
@@ -296,6 +300,7 @@ void Typewriter::redraw(void)
 	
 	drawCursor();
 	
+#ifdef TOBKIT_PLATFORM_NDS
 	u16 map_offset;
 	if((mode == TYPEWRITER_MODE_CAPS)||(mode == TYPEWRITER_MODE_SHIFT)) {
 		map_offset = TW_TILE_WIDTH*TW_TILE_HEIGHT;
@@ -309,6 +314,7 @@ void Typewriter::redraw(void)
 		  map_base[32*py+px] = typewriterMap[map_offset+26*py+px] | tile_attr;
         }
     }
+#endif
 }
 
 // Don't try this at home!
@@ -335,6 +341,7 @@ void Typewriter::setTile(int x, int y, int pal)
 
 	if(!c) return;
 
+#ifdef TOBKIT_PLATFORM_NDS
 	map_base[(y*32)+x] &= ~(7 << 12);
 	map_base[(y*32)+x] |= (pal << 12);
 
@@ -387,4 +394,5 @@ void Typewriter::setTile(int x, int y, int pal)
 		x2 = x;
 		y2--;
 	}
+#endif
 }

@@ -25,7 +25,6 @@ Calls touched widget
 #ifndef GUI_H
 #define GUI_H
 
-#include <nds.h>
 #include <vector>
 #include <map>
 #include "widget.h"

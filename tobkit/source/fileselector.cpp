@@ -17,7 +17,6 @@ limitations under the License.
 #include <sys/syslimits.h>
 #include <unistd.h>
 
-#include <fat.h>
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/stat.h>

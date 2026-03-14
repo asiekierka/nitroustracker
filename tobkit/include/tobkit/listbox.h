@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef LISTBOX_H
 #define LISTBOX_H
 
-#include <nds.h>
 #include <vector>
 #include <string>
 #include "widget.h"

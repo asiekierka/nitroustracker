@@ -18,7 +18,6 @@ limitations under the License.
 #define FILESELECTOR_H
 
 #include "listbox.h"
-#include <nds.h>
 
 #include <vector>
 #include <map>
