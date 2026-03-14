@@ -26,7 +26,7 @@ bool PlatformInit(void) {
 	csndInit();
 
     gfxInit(GSP_RGB5_A1_OES, GSP_RGB5_A1_OES, false);
-    gfxSetDoubleBuffering(GFX_TOP, false);
+    gfxSetDoubleBuffering(GFX_TOP, true);
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
 
     u16 *fb_main_l = (u16*) gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
@@ -45,9 +45,14 @@ void PlatformExit(void) {
 }
 
 void PlatformFlipMainScreen(void) {
+	gfxFlushBuffers();
+	gfxScreenSwapBuffers(GFX_TOP, false);
+	main_screen->pixels = (u16*) gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
 }
 
 void PlatformClearMainScreen(tobkit_pixel_t color) {
+	main_screen->clear(color);
+	PlatformFlipMainScreen();
 	main_screen->clear(color);
 }
 

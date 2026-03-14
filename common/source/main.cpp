@@ -4291,7 +4291,7 @@ int main(int argc, char **argv) {
         }
 #endif
 
-		exit_requested = !PlatformWaitVBlank();
+		exit_requested |= !PlatformWaitVBlank();
 	}
 
 	if (launch_path) ntxm_free(launch_path);

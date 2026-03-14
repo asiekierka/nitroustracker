@@ -36,8 +36,7 @@ class Screen {
 
 		inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col) {
 #if defined(TOBKIT_PLATFORM_3DS)
-            if (ty < pitch)
-                *(pixels+pitch*tx+pitch-1-ty) = col;
+            *(pixels+pitch*tx+pitch-1-ty) = col;
 #else
             *(pixels+pitch*ty+tx) = col;
 #endif
