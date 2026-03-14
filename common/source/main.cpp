@@ -1381,26 +1381,31 @@ void setRecordMode(bool is_on)
 	redraw_main_requested = false;
 	drawMainScreen(); // <- must redraw because of orange lines
 
-#ifdef TODO_NDS_ONLY
 	// Draw border
 	u16 col;
-	u32 colcol;
 
 	if(is_on)
 		col = settings->getTheme()->col_signal; // red
 	else
 		col = settings->getTheme()->col_bg; // bg color
-	colcol = (col) | (col << 16);
 
+#ifdef __NDS__
+	u32 colcol = (col) | (col << 16);
 	dmaFillWords(colcol, sub_screen->pixels, 256 * 2);
 	dmaFillWords(colcol, sub_screen->pixels + (256*191), 256 * 2);
-
-	for(u8 i=1; i<191; ++i)
+#else
+	for(int i=0; i<sub_screen->getWidth(); ++i)
 	{
-		sub_screen->pixels[256*i] = col;
-		sub_screen->pixels[256*i+255] = col;
+		sub_screen->drawPixel(i, 0, col);
+		sub_screen->drawPixel(i, sub_screen->getHeight() - 1, col);
 	}
 #endif
+
+	for(int i=1; i<sub_screen->getHeight()-1; ++i)
+	{
+		sub_screen->drawPixel(0, i, col);
+		sub_screen->drawPixel(sub_screen->getWidth() - 1, i, col);
+	}
 }
 
 

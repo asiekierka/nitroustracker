@@ -14,22 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#ifndef _PLATFORM_H_
-#define _PLATFORM_H_
+#ifndef _PLATFORM_SDL3_H_
+#define _PLATFORM_SDL3_H_
 
-#if defined(TOBKIT_PLATFORM_NDS)
-#include "platform_nds.h"
-#elif defined(TOBKIT_PLATFORM_3DS)
-#include "platform_n3ds.h"
-#elif defined(TOBKIT_PLATFORM_SDL3)
-#include "platform_sdl3.h"
-#else
-#error No platform defined!
-#endif
+#include <SDL3/SDL.h>
+#include "ntxm/common.h"
 
-#if !defined(TOBKIT_PLATFORM_NDS)
-#define ITCM_CODE
-#define div32(a,b) ((a)/(b))
-#endif
+typedef u16 tobkit_pixel_t;
+
+#define RGB5A1(r,g,b,a) (((r) << 11) | ((g) << 6) | ((b) << 1) | (a))
+#define RGB5A1_ALPHA_BIT 0x1
+#define RGB5A1_R(c) (((c) >> 11) & 0x1F)
+#define RGB5A1_G(c) (((c) >> 6) & 0x1F)
+#define RGB5A1_B(c) (((c) >> 1) & 0x1F)
 
 #endif
