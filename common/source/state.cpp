@@ -41,9 +41,6 @@ State::~State(void) {
 
 void State::reset(void)
 {
-	dsmi_connected = false;
-	dsmi_send = true;
-	dsmi_recv = true;
 	preview_sample = 0;
 	song_filename[0] = 0;
 	sample_filename[0] = 0;

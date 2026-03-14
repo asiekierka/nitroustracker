@@ -28,8 +28,6 @@
 #define ENABLE_EFFECT_MENU
 
 #include <nds.h>
-#include <nds/arm9/console.h>
-#include <nds/arm9/sound.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,6 +58,8 @@ using namespace tobkit;
 #include <ntxm/instrument.h>
 #include <ntxm/sample.h>
 #include <ntxm/ntxmtools.h>
+
+#include "dsmidi_handler.h"
 #include "state.h"
 #include "settings.h"
 #include "tools.h"
@@ -108,10 +108,6 @@ using namespace tobkit;
 #include "action.h"
 
 #include <fat.h>
-#ifdef MIDI
-#include <libdsmi.h>
-#include <dswifi9.h>
-#endif
 
 #define REPEAT_FREQ	10 /* Hz */
 #define REPEAT_START_DELAY 15 /* frames */
@@ -260,9 +256,7 @@ XMTransport xm_transport;
 CellArray *clipboard = NULL;
 ActionBuffer *action_buffer = NULL;
 
-u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
+DSMIDIHandler dsmidi_handler;
 char last_themepath[SETTINGS_FILENAME_LEN + 1];
 
 bool fastscroll = false;
@@ -483,11 +477,7 @@ void handleNoteStroke(u8 note)
 	// Play the note
 	CommandPlayNoteAuto(state->instrument, state->basenote + note, 255, note);
 
-#ifdef MIDI
-	u8 midichannel = state->instrument % 16;
-	if( (state->dsmi_connected) && (state->dsmi_send) )
-		dsmi_write(NOTE_ON | midichannel, state->basenote + note, 127);
-#endif
+	dsmidi_handler.noteStroke(true, state->instrument & 0xF, state->basenote + note);
 }
 
 void handleNoteRelease(u8 note, bool moved)
@@ -511,11 +501,7 @@ void handleNoteRelease(u8 note, bool moved)
 	onKeyrelease();
 	CommandStopNoteAuto(note);
 
-#ifdef MIDI
-	u8 midichannel = state->instrument % 16;
-	if( (state->dsmi_connected) && (state->dsmi_send) )
-		dsmi_write(NOTE_OFF | midichannel, state->basenote + note, 127);
-#endif
+	dsmidi_handler.noteStroke(false, state->instrument & 0xF, state->basenote + note);
 }
 
 void handlePianoPakStroke(u8 note)
@@ -538,11 +524,7 @@ void handlePianoPakStroke(u8 note)
 	// Play the note
 	CommandPlayNoteAuto(state->instrument, state->basenote + note, 255, note);
 
-#ifdef MIDI
-	u8 midichannel = state->instrument % 16;
-	if( (state->dsmi_connected) && (state->dsmi_send) )
-		dsmi_write(NOTE_ON | midichannel, state->basenote + note, 127);
-#endif
+	dsmidi_handler.noteStroke(true, state->instrument & 0xF, state->basenote + note);
 }
 
 void handlePianoPakRelease(u8 note)
@@ -550,14 +532,8 @@ void handlePianoPakRelease(u8 note)
 	onKeyrelease();
 	CommandStopNoteAuto(note);
 
-#ifdef MIDI
-	u8 midichannel = state->instrument % 16;
-	if( (state->dsmi_connected) && (state->dsmi_send) )
-		dsmi_write(NOTE_OFF | midichannel, state->basenote + note, 127);
-#endif
+	dsmidi_handler.noteStroke(false, state->instrument & 0xF, state->basenote + note);
 }
-
-
 
 void updateSampleList(Instrument *inst)
 {
@@ -1381,15 +1357,7 @@ void stop(void)
 	redraw_main_requested = false;
 	drawMainScreen();
 
-#ifdef MIDI
-	if( (state->dsmi_connected) && (state->dsmi_send) )
-	{
-		for(u8 chn=0; chn<16; ++chn) {
-			dsmi_write(MIDI_CC | chn, 120, 0);
-			dsmi_write(NOTE_OFF | chn, dsmw_lastnotes[chn], 0);
-		}
-	}
-#endif
+	dsmidi_handler.stop();
 }
 
 void stopPlay(void)
@@ -1501,46 +1469,6 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 	if (tw)
 		tw->pleaseDraw();
 }
-
-#ifdef MIDI
-
-void handleDSMWRecv(void)
-{
-	u8 message, data1, data2;
-
-	while(dsmi_read(&message, &data1, &data2))
-	{
-		if(state->dsmi_recv) {
-			// debugprintf("got sth. %x %x %x\n", message, data1, data2);
-
-			u8 type = message & 0xF0;
-			//debugprintf("Type is %x\n", type);
-			switch(type)
-			{
-				case NOTE_ON: {
-					u8 inst = message & 0x0F;
-					u8 note = data1;
-					u8 volume = data2;
-					u16 tag = (((u16)inst + 1) << 8) | note;
-					// debugprintf("on %d %d\n", inst, note);
-					CommandPlayNoteAuto(inst, note, volume, tag);
-					break;
-				}
-
-				case NOTE_OFF: {
-					u8 inst = message & 0x0F;
-					u8 note = data1;
-					u16 tag = (((u16)inst + 1) << 8) | note;
-					CommandStopNoteAuto(tag);
-					break;
-				}
-			}
-		}
-	}
-}
-
-#endif
-
 
 // Callback called from lbpot when the user changes the pot element
 void handlePotPosChangeFromUser(u16 newpotpos)
@@ -1921,43 +1849,7 @@ void handleRowChangeFromSong(u16 row)
 	
 	redraw_main_requested = true;
 
-#ifdef MIDI
-	if( (state->dsmi_connected) && (state->dsmi_send) )
-	{
-		Cell ** pattern = song->getPattern( song->getPotEntry( state->potpos ) );
-
-		Cell *curr_cell;
-
-		for(u8 chn=0; chn < song->getChannels(); ++chn)
-		{
-			if(song->channelMuted(chn))
-				continue;
-
-			curr_cell = &(pattern[chn][state->getCursorRow()]);
-
-			if(curr_cell->note == 254) // Note off
-			{
-				//debugprintf("off c %u n %u\n", chn, curr_cell->note);
-				dsmi_write(NOTE_OFF | dsmw_lastchannels[chn], dsmw_lastnotes[chn], 0);
-				dsmw_lastnotes[chn] = curr_cell->note;
-			}
-			else if(curr_cell->note < 254) // Note on
-			{
-				// Turn the last note off
-				if(dsmw_lastnotes[chn] < 254) {
-					//debugprintf("off c %u n %u\n", chn, curr_cell->note);
-					dsmi_write(NOTE_OFF | dsmw_lastchannels[chn], dsmw_lastnotes[chn], 0);
-				}
-				//debugprintf("on c %u n %u v %u\n", chn, curr_cell->note, curr_cell->volume / 2);
-				u8 midichannel = curr_cell->instrument % 16;
-				dsmi_write(NOTE_ON | midichannel, curr_cell->note, curr_cell->volume / 2);
-
-				dsmw_lastchannels[chn] = midichannel;
-				dsmw_lastnotes[chn] = curr_cell->note;
-			}
-		}
-	}
-#endif
+	dsmidi_handler.rowUpdate(song, state->getCursorRow(), state->potpos);
 }
 
 void handleStop(void)
@@ -3106,33 +2998,29 @@ void dsmiConnect(void)
 	mb->show();
 	mb->pleaseDraw();
 
-	int res = dsmi_connect();
+	int res = dsmidi_handler.connect();
 	deleteMessageBox();
 
 	if(res == 0) {
 		showMessage("Sorry, couldn't connect.", true);
-		state->dsmi_connected = false;
 	} else {
 		debugprintf("YAY, connected!\n");
 		btndsmwtoggleconnect->setCaption("disconnect");
         btndsmwtoggleconnect->pleaseDraw();
-        state->dsmi_connected = true;
 	}
 }
 
 void dsmiDisconnect(void)
 {
-	dsmi_disconnect();
+	dsmidi_handler.disconnect();
 
 	btndsmwtoggleconnect->setCaption("connect");
 	btndsmwtoggleconnect->pleaseDraw();
-
-	state->dsmi_connected = false;
 }
 
 void dsmiToggleConnect(void)
 {
-	if(!state->dsmi_connected)
+	if(!dsmidi_handler.dsmi_connected)
 		dsmiConnect();
 	else
 		dsmiDisconnect();
@@ -3140,13 +3028,14 @@ void dsmiToggleConnect(void)
 
 void handleDsmiSendToggled(bool is_active)
 {
-	state->dsmi_send = is_active;
+	dsmidi_handler.dsmi_send = is_active;
 }
 
 void handleDsmiRecvToggled(bool is_active)
 {
-	state->dsmi_recv = is_active;
+	dsmidi_handler.dsmi_recv = is_active;
 }
+
 #endif
 
 void saveConfig(void)
@@ -4601,12 +4490,7 @@ int main(int argc, char **argv) {
 	{
 		VblankHandler();
 
-#ifdef MIDI
-		if( state->dsmi_connected ) {
-			handleDSMWRecv();
-			dsmi_task();
-		}
-#endif
+		dsmidi_handler.tick();
 
 #ifdef DEBUG
         if(keysHeld() == (KEY_START | KEY_SELECT | KEY_L | KEY_R)) {

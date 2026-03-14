@@ -61,9 +61,6 @@ class State {
 		bool playing;
 		bool pause;
 		bool unsaved_changes;
-		bool dsmi_connected;
-		bool dsmi_send;
-		bool dsmi_recv;
 
 		bool map_samples;
 		bool scroll_lock;
