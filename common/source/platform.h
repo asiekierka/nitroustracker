@@ -35,7 +35,7 @@ void PlatformExit(void);
 void PlatformClearMainScreen(tobkit_pixel_t color);
 void PlatformClearSubScreen(tobkit_pixel_t color);
 void PlatformFlipMainScreen(void);
-void PlatformWaitVBlank(void);
+bool PlatformWaitVBlank(void);
 void PlatformVideoFadeIn(void);
 bool PlatformVideoAreScreensSwapped(void);
 bool PlatformVideoSwapScreens(void);

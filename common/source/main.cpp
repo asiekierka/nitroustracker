@@ -4287,9 +4287,11 @@ int main(int argc, char **argv) {
 #ifdef DEBUG
         if(PlatformKeysHeld == (KEY_START | KEY_SELECT | KEY_L | KEY_R)) {
             exit_requested = true;
+			break;
         }
 #endif
-		PlatformWaitVBlank();
+
+		exit_requested = !PlatformWaitVBlank();
 	}
 
 	if (launch_path) ntxm_free(launch_path);

@@ -147,8 +147,9 @@ void PlatformClearSubScreen(tobkit_pixel_t color) {
 	sub_screen->clear(color);
 }
 
-void PlatformWaitVBlank(void) {
+bool PlatformWaitVBlank(void) {
     cothread_yield_irq(IRQ_VBLANK);
+	return true;
 }
 
 void PlatformVideoFadeIn(void) {
