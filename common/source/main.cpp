@@ -2514,6 +2514,13 @@ void sample_show_normalize_window(void)
 	normalizeBox->reveal();
 }
 
+#define RIGHT_SIDE_BUTTON_WIDTH 30
+#ifdef __NDS__
+#define RIGHT_SIDE_BUTTON_X(screen) (255 - (RIGHT_SIDE_BUTTON_WIDTH))
+#else
+#define RIGHT_SIDE_BUTTON_X(screen) ((screen)->getWidth() - 1 - RIGHT_SIDE_BUTTON_WIDTH)
+#endif
+
 void swapPatternButtons(Handedness handedness)
 {
 	u16 x, y;
@@ -2523,9 +2530,9 @@ void swapPatternButtons(Handedness handedness)
 	if (current_handedness == handedness) return;
 
 	std::vector<Widget*> widgets = gui->getWidgets(MAIN_SCREEN);
-	int offset = (handedness == LEFT_HANDED) ? -225 : 225;
 
 	for (Widget* widget : widgets) {
+		int offset = (handedness == LEFT_HANDED) ? -RIGHT_SIDE_BUTTON_X(widget->getScreen()) : RIGHT_SIDE_BUTTON_X(widget->getScreen());
 		widget->getPos(&x, &y, NULL, NULL);
 		widget->setPos(x + offset, y);
 	}
@@ -3232,9 +3239,6 @@ void sampleDrawToggle(bool on)
 {
 	sampledisplay->setDrawMode(on);
 }
-
-#define RIGHT_SIDE_BUTTON_WIDTH 30
-#define RIGHT_SIDE_BUTTON_X(screen) ((screen)->getWidth() - 1 - RIGHT_SIDE_BUTTON_WIDTH)
 
 void setupGUI(bool dldi_enabled)
 {

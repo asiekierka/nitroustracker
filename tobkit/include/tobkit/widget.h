@@ -57,6 +57,8 @@ class Widget {
 		void getPos(u16 *_x, u16 *_y, u16 *_width, u16 *_height);
 		void setPos(u16 _x, u16 _y);
 
+		Screen *getScreen(void) { return screen; }
+
 		// Toggle visibility
 		// Objects can be hidden either explicitly (using show/hide) or implicitly
 		// (using reveal/occlude). Reveal/occlude are used eg if the object is on
