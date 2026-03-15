@@ -26,7 +26,9 @@
 
 #include <cstdio>
 #include <cstring>
+#define sqrtf32 unused_sqrtf32
 #include <cmath>
+#undef sqrtf32
 
 #ifndef __NDS__
 #include "libnds/math.h"

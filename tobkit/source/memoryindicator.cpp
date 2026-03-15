@@ -24,6 +24,7 @@ using namespace tobkit;
 
 #define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
+#if defined(__3DS__) || defined(__NDS__)
 /* https://devkitpro.org/viewtopic.php?f=6&t=3057 */
 
 extern u8 *fake_heap_end;
@@ -33,6 +34,9 @@ static int getFreeMem() {
 	struct mallinfo mi = mallinfo();
 	return mi.fordblks + (fake_heap_end - (u8*)sbrk(0));
 }
+#else
+static int getFreeMem() { return 1048576; }
+#endif
 
 /* ===================== PUBLIC ===================== */
 

@@ -42,7 +42,7 @@ bool PlatformVideoSwapScreens(void);
 
 extern PlatformKeyMask PlatformKey_LEFT, PlatformKey_UP, PlatformKey_RIGHT, PlatformKey_DOWN;
 extern PlatformKeyMask PlatformKey_A, PlatformKey_B, PlatformKey_X, PlatformKey_Y, PlatformKey_L, PlatformKey_R;
-extern PlatformKeyMask PlatformKey_TOUCH;
+extern PlatformKeyMask PlatformKey_START, PlatformKey_SELECT, PlatformKey_TOUCH;
 extern PlatformKeyMask PlatformKeysDown, PlatformKeysUp, PlatformKeysHeld;
 extern u16 PlatformTouchX, PlatformTouchY;
 

@@ -34,7 +34,7 @@ extern "C" {
 /// binary degree. It allows for more precise representation of angle and faster
 /// calculation as the DS has no floating point processor.
 
-#include <3ds.h>
+#include "tobkit/platform.h"
 
 /// Number of degrees in a circle.
 #define DEGREES_IN_CIRCLE (1 << 15)

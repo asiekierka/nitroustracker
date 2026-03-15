@@ -21,6 +21,7 @@ limitations under the License.
 
 using namespace tobkit;
 
+#include "font_8x11_raw.h"
 #include "font_8x11.inc"
 #include "font_3x5_raw.h"
 

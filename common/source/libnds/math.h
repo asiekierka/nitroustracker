@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-#include <3ds.h>
+#include "tobkit/platform.h"
 
 // Fixed point conversion macros
 

@@ -25,10 +25,15 @@
 #include "settings.h"
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "tools.h"
 #include "ntxm/ntxmtools.h"
 
+#if defined(__NDS__) || defined(__3DS__)
 #define SETTINGS_DEFAULT_DATA_DIR "/data/NitroTracker"
+#else
+#define SETTINGS_DEFAULT_DATA_DIR "."
+#endif
 #define SETTINGS_CONFIG_FILENAME "NitroTracker.conf"
 
 /* ===================== PUBLIC ===================== */
@@ -52,16 +57,17 @@ fat(use_fat), changed(false)
 	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
 	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
 	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Default.nttheme", launch_path != NULL ? launch_path : "");
-	
 
 	if(fat == true)
 	{
+#if defined(__NDS__) || defined(__3DS__)
 		if (launch_path == NULL)
 		{
 			dirCreate("/data");
 			dirCreate("/data/NitroTracker");
 			dirCreate("/data/NitroTracker/Themes");
 		}
+#endif
 
 		snprintf(configpath, SETTINGS_FILENAME_LEN, "%s/%s",
 			launch_path != NULL ? launch_path : SETTINGS_DEFAULT_DATA_DIR,

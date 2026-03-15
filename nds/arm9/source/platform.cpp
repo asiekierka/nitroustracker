@@ -171,7 +171,7 @@ bool PlatformVideoSwapScreens(void) {
 
 PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP, PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
 PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B, PlatformKey_X = KEY_X, PlatformKey_Y = KEY_Y, PlatformKey_L = KEY_L, PlatformKey_R = KEY_R;
-PlatformKeyMask PlatformKey_TOUCH = KEY_TOUCH;
+PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT, PlatformKey_TOUCH = KEY_TOUCH;
 PlatformKeyMask PlatformKeysHeld, PlatformKeysDown, PlatformKeysUp;
 u16 PlatformTouchX, PlatformTouchY;
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <sys/syslimits.h>
+#include <limits.h>
 #include <unistd.h>
 
 #include <sys/types.h>

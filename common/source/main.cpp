@@ -33,8 +33,6 @@
 #define ENABLE_PIANO_PAK
 #elif defined(__3DS__)
 #include <3ds.h>
-#else
-#error "Unsupported target!"
 #endif
 
 #include <stdio.h>
@@ -986,7 +984,7 @@ void saveFile(void)
 	strcat(filename_tmp, ".tmp");
 
 	chdir(fileselector->getDir().c_str());
-
+	
 	debugprintf("saving %s ...\n", filename);
 
 	mb = new MessageBox(sub_screen, "one moment", 0);
@@ -2104,6 +2102,7 @@ void handleThemeApply(void)
 	settings->writeIfChanged();
 	destroyThemeDialog();
 }
+
 void handleThemeButton(void)
 {
 	pausePlay();
@@ -2447,7 +2446,7 @@ void handleRecordSample(void)
 
 	recordbox = new RecordBox(sub_screen, handleRecordSampleOK, handleRecordSampleCancel, smp, inst, state->sample);
 
-	gui->registerOverlayWidget(recordbox, KEY_A | KEY_B, SUB_SCREEN);
+	gui->registerOverlayWidget(recordbox, PlatformKey_A | PlatformKey_B, SUB_SCREEN);
 
 	recordbox->reveal();
 
@@ -4096,7 +4095,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			redraw_main_requested = true;
 		}
 	}
-	else if(buttons & KEY_START)
+	else if(buttons & PlatformKey_START)
 	{
 #ifdef DEBUG
 		debugprintf("\x1b[2J");
@@ -4107,7 +4106,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			pausePlay();
 #endif
 	}
-	else if(buttons & KEY_SELECT)
+	else if(buttons & PlatformKey_SELECT)
 	{
 #ifdef DEBUG
 		PrintFreeMem();
@@ -4130,20 +4129,20 @@ void VblankHandler(void)
 {
 	PlatformInputUpdate();
 
-	if(PlatformKeysDown & KEY_TOUCH)
+	if(PlatformKeysDown & PlatformKey_TOUCH)
 	{
 		gui->penDown(PlatformTouchX, PlatformTouchY);
 		redraw_main_requested = true;
 	}
 
-	if(PlatformKeysUp & KEY_TOUCH)
+	if(PlatformKeysUp & PlatformKey_TOUCH)
 	{
 		gui->penUp(PlatformTouchX, PlatformTouchY);
 		lastx = -255;
 		lasty = -255;
 	}
 
-	if( (PlatformKeysHeld & KEY_TOUCH) && ( (abs(PlatformTouchX - lastx)>0) || (abs(PlatformTouchY - lasty)>0) ) ) // PenMove
+	if( (PlatformKeysHeld & PlatformKey_TOUCH) && ( (abs(PlatformTouchX - lastx)>0) || (abs(PlatformTouchY - lasty)>0) ) ) // PenMove
 	{
 		gui->penMove(PlatformTouchX, PlatformTouchY);
 		lastx = PlatformTouchX;
@@ -4160,7 +4159,7 @@ void VblankHandler(void)
 			move_to_top();
 	}
 
-	if(PlatformKeysDown & ~KEY_TOUCH)
+	if(PlatformKeysDown & ~PlatformKey_TOUCH)
 	{
 		if((PlatformKeysDown & PlatformKey_X)||(PlatformKeysDown & PlatformKey_L)) {
 			switchScreens();
@@ -4252,8 +4251,7 @@ int main(int argc, char **argv) {
 	if (!PlatformInit()) exit(1);
 	bool fat_success = PlatformInitFilesystem();
 
-	settings = new Settings(launch_path, fat_success);
-
+#if defined(__NDS__) || defined(__3DS__)
 	// parse argv[0], if present
 	if (argc >= 1 && argv != NULL && argv[0] != NULL) {
 		char *path_split = strrchr(argv[0], '/');
@@ -4269,6 +4267,14 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
+#else
+	launch_path = (char*) malloc(4097);
+	launch_path[0] = 0;
+	getcwd(launch_path, 4096);
+	launch_path[4096] = 0;
+#endif
+
+	settings = new Settings(launch_path, fat_success);
 
 	last_themepath[SETTINGS_FILENAME_LEN] = '\0';
 	state = new State();

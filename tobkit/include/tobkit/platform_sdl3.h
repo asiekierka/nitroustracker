@@ -22,10 +22,24 @@ limitations under the License.
 
 typedef u16 tobkit_pixel_t;
 
-#define RGB5A1(r,g,b,a) (((r) << 11) | ((g) << 6) | ((b) << 1) | (a))
-#define RGB5A1_ALPHA_BIT 0x1
-#define RGB5A1_R(c) (((c) >> 11) & 0x1F)
-#define RGB5A1_G(c) (((c) >> 6) & 0x1F)
-#define RGB5A1_B(c) (((c) >> 1) & 0x1F)
+#define RGB5A1(r,g,b,a) (((b) << 10) | ((g) << 5) | (r) | ((a) << 15))
+#define RGB5A1_ALPHA_BIT 0x8000
+#define RGB5A1_R(c) ((c) & 0x1F)
+#define RGB5A1_G(c) (((c) >> 5) & 0x1F)
+#define RGB5A1_B(c) (((c) >> 10) & 0x1F)
+
+#define KEY_UP (1 << 0)
+#define KEY_LEFT (1 << 1)
+#define KEY_RIGHT (1 << 2)
+#define KEY_DOWN (1 << 3)
+#define KEY_A (1 << 4)
+#define KEY_B (1 << 5)
+#define KEY_X (1 << 6)
+#define KEY_Y (1 << 7)
+#define KEY_L (1 << 8)
+#define KEY_R (1 << 9)
+#define KEY_START (1 << 10)
+#define KEY_SELECT (1 << 11)
+#define KEY_TOUCH (1 << 12)
 
 #endif

@@ -24,7 +24,9 @@
 
 #include "sampledisplay.h"
 
+#define sqrtf32 unused_sqrtf32
 #include <cmath>
+#undef sqrtf32
 #include <cstdio>
 
 #ifdef __NDS__
