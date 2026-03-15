@@ -2566,14 +2566,41 @@ void handleOutputFreqChange(u8 freq)
 }
 #endif
 
+void adjustMainScreenWidgets(int width_delta)
+{
+	u16 x, y;
+	std::vector<Widget*> widgets = gui->getWidgets(MAIN_SCREEN);
+
+	pv->getPos(NULL, NULL, &x, &y);
+	pv->setSize(x + width_delta, y);
+
+	for (Widget* widget : widgets) {
+		widget->getPos(&x, &y, NULL, NULL);
+		if (x > 0)
+			widget->setPos(x + width_delta, y);
+	}
+}
+
 void switchScreens(void)
 {
+#ifndef __NDS__
+	int old_main_screen_width = main_screen->getWidth();
+#endif
 	if (!PlatformVideoSwapScreens()) return;
+#ifndef __NDS__
+	int new_main_screen_width = main_screen->getWidth();
+	if (old_main_screen_width != new_main_screen_width) {
+		adjustMainScreenWidgets(new_main_screen_width - old_main_screen_width);
+	}
+#endif
 	gui->switchScreens();
 	if (!fxkb->is_visible())
 		pv->clearSelection();
 	redraw_main_requested = false;
 	drawMainScreen();
+#ifndef __NDS__
+	redrawSubScreen();
+#endif
 }
 
 

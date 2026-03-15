@@ -39,3 +39,9 @@ void Screen::clear(tobkit_pixel_t col) {
             drawPixel(ix, iy, col);
 #endif
 }
+
+void Screen::setSize(u32 _width, u32 _height, u32 _pitch) {
+    width = _width;
+    height = _height;
+    pitch = _pitch;
+}

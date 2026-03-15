@@ -17,6 +17,12 @@
 #include "platform.h"
 
 Screen *main_screen, *sub_screen;
+static bool screensSwapped;
+
+#define GFX_SCREEN_MAIN (screensSwapped ? GFX_BOTTOM : GFX_TOP)
+#define GFX_SCREEN_SUB (!screensSwapped ? GFX_BOTTOM : GFX_TOP)
+#define GFX_EYE_MAIN (screensSwapped ? GFX_RIGHT : GFX_LEFT)
+#define GFX_EYE_SUB (!screensSwapped ? GFX_RIGHT : GFX_LEFT)
 
 bool PlatformInitFilesystem(void) {
     return true;
@@ -29,11 +35,12 @@ bool PlatformInit(void) {
     gfxSetDoubleBuffering(GFX_TOP, true);
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
 
-    u16 *fb_main_l = (u16*) gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
-    u16 *fb_sub = (u16*) gfxGetFramebuffer(GFX_BOTTOM, GFX_RIGHT, NULL, NULL);
+    u16 *fb_main = (u16*) gfxGetFramebuffer(GFX_SCREEN_MAIN, GFX_EYE_MAIN, NULL, NULL);
+    u16 *fb_sub = (u16*) gfxGetFramebuffer(GFX_SCREEN_SUB, GFX_EYE_SUB, NULL, NULL);
 
-	main_screen = new Screen(fb_main_l, 400, 240, 240);
+	main_screen = new Screen(fb_main, 400, 240, 240);
 	sub_screen = new Screen(fb_sub, 320, 240, 240);
+	screensSwapped = false;
 
 	return true;
 }
@@ -46,8 +53,8 @@ void PlatformExit(void) {
 
 void PlatformFlipMainScreen(void) {
 	gfxFlushBuffers();
-	gfxScreenSwapBuffers(GFX_TOP, false);
-	main_screen->pixels = (u16*) gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
+	gfxScreenSwapBuffers(GFX_SCREEN_MAIN, false);
+	main_screen->pixels = (u16*) gfxGetFramebuffer(GFX_SCREEN_MAIN, GFX_EYE_MAIN, NULL, NULL);
 }
 
 void PlatformClearMainScreen(tobkit_pixel_t color) {
@@ -72,11 +79,35 @@ void PlatformVideoFadeIn(void) {
 }
 
 bool PlatformVideoAreScreensSwapped(void) {
-    return false; // TODO
+    return screensSwapped;
 }
 
 bool PlatformVideoSwapScreens(void) {
-    return false; // TODO
+	screensSwapped = !screensSwapped;
+
+    gfxSetDoubleBuffering(GFX_TOP, !screensSwapped);
+    gfxSetDoubleBuffering(GFX_BOTTOM, screensSwapped);
+
+    u16 *fb_main = (u16*) gfxGetFramebuffer(GFX_SCREEN_MAIN, GFX_EYE_MAIN, NULL, NULL);
+    u16 *fb_sub = (u16*) gfxGetFramebuffer(GFX_SCREEN_SUB, GFX_EYE_SUB, NULL, NULL);
+
+	main_screen->pixels = fb_main;
+	sub_screen->pixels = fb_sub;
+
+	if (screensSwapped) {
+		// Draw black bars
+		memset(sub_screen->pixels, 0, 40 * 240 * sizeof(u16));
+		memset(sub_screen->pixels + (360 * 240), 0, 40 * 240 * sizeof(u16));
+		
+		sub_screen->pixels += (40 * 240);
+		main_screen->setSize(320, 240, 240);
+		sub_screen->setSize(320, 240, 240);
+	} else {
+		main_screen->setSize(400, 240, 240);
+		sub_screen->setSize(320, 240, 240);
+	}
+
+	return true;
 }
 
 PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP, PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;

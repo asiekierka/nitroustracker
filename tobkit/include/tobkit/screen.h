@@ -30,6 +30,7 @@ class Screen {
 		~Screen(void) {}
 
         void clear(tobkit_pixel_t col);
+        void setSize(u32 _width, u32 _height, u32 _pitch);
 
         const inline u32 getWidth(void) { return width; }
         const inline u32 getHeight(void) { return height; }

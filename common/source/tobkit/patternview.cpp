@@ -56,7 +56,13 @@ void PatternView::pleaseDraw(void)
 
 	draw();
 }
-	
+
+void PatternView::setSize(u16 _width, u16 _height)
+{
+	width = _width;
+	height = _height;
+}
+
 // Event calls
 void PatternView::penDown(u16 px, u16 py)
 {

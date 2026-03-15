@@ -110,6 +110,8 @@ class PatternView: public Widget {
 		// Drawing request
 		void pleaseDraw(void);
 		
+		void setSize(u16 _width, u16 _height);
+
 		// Event calls
 		void penDown(u16 px, u16 py);
 		void penUp(u16 px, u16 py);
