@@ -25,7 +25,7 @@ static bool screensSwapped;
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
-static SDL_Texture *textureTop = NULL, *textureBottom = NULL;
+static SDL_Texture *textureMain = NULL, *textureSub = NULL;
 
 bool PlatformInitFilesystem(void) {
     return true;
@@ -36,20 +36,20 @@ bool PlatformInitFilesystem(void) {
 #endif
 
 static void lock_screens(void) {
-	SDL_Rect rectTop = {0, 0, 256, 192};
-	SDL_Rect rectBottom = {0, 0, 256, 192};
-	int pitchTop, pitchBottom;
+	SDL_Rect rectMain = {0, 0, main_screen->getWidth(), main_screen->getHeight()};
+	SDL_Rect rectSub = {0, 0, sub_screen->getWidth(), sub_screen->getHeight()};
+	int pitchMain, pitchSub;
 
-	SDL_LockTexture(textureTop, &rectTop, (void**) &main_screen->pixels, &pitchTop);
-	SDL_LockTexture(textureBottom, &rectBottom, (void**) &sub_screen->pixels, &pitchBottom);
+	SDL_LockTexture(textureMain, &rectMain, (void**) &main_screen->pixels, &pitchMain);
+	SDL_LockTexture(textureSub, &rectSub, (void**) &sub_screen->pixels, &pitchSub);
 
-	main_screen->setSize(textureTop->w, textureTop->h, pitchTop >> 1);
-	sub_screen->setSize(textureBottom->w, textureBottom->h, pitchBottom >> 1);
+	main_screen->setSize(textureMain->w, textureMain->h, pitchMain >> 1);
+	sub_screen->setSize(textureSub->w, textureSub->h, pitchSub >> 1);
 }
 
 static void unlock_screens(void) {
-	SDL_UnlockTexture(textureTop);
-	SDL_UnlockTexture(textureBottom);
+	SDL_UnlockTexture(textureMain);
+	SDL_UnlockTexture(textureSub);
 }
 
 bool PlatformInit(void) {
@@ -71,18 +71,18 @@ bool PlatformInit(void) {
 		return false;
 	}
 
-	textureTop = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, 256, 192);
-	if (textureTop == NULL) {
+	textureMain = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, 256, 192);
+	if (textureMain == NULL) {
 		return false;
 	}
 
-	textureBottom = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, 256, 192);
-	if (textureBottom == NULL) {
+	textureSub = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, 256, 192);
+	if (textureSub == NULL) {
 		return false;
 	}
 
-	SDL_SetTextureScaleMode(textureTop, SDL_SCALEMODE_PIXELART);
-	SDL_SetTextureScaleMode(textureBottom, SDL_SCALEMODE_PIXELART);
+	SDL_SetTextureScaleMode(textureMain, SDL_SCALEMODE_PIXELART);
+	SDL_SetTextureScaleMode(textureSub, SDL_SCALEMODE_PIXELART);
 
 	main_screen = new Screen(NULL, 256, 192, 256);
 	sub_screen = new Screen(NULL, 256, 192, 256);
@@ -93,8 +93,8 @@ bool PlatformInit(void) {
 }
 
 void PlatformExit(void) {
-	SDL_DestroyTexture(textureBottom);
-	SDL_DestroyTexture(textureTop);
+	SDL_DestroyTexture(textureSub);
+	SDL_DestroyTexture(textureMain);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -129,12 +129,12 @@ bool PlatformWaitVBlank(void) {
 	SDL_RenderClear(renderer);
 
 	src = {0, 0, 256, 192};
-	dest = {0, 0, 256, 192};
-	SDL_RenderTexture(renderer, textureTop, &src, &dest);
+	dest = {0, screensSwapped ? 192.0f : 0.0f, 256, 192};
+	SDL_RenderTexture(renderer, textureMain, &src, &dest);
 
 	src = {0, 0, 256, 192};
-	dest = {0, 192, 256, 192};
-	SDL_RenderTexture(renderer, textureBottom, &src, &dest);
+	dest = {0, !screensSwapped ? 192.0f : 0.0f, 256, 192};
+	SDL_RenderTexture(renderer, textureSub, &src, &dest);
 
 	SDL_RenderPresent(renderer);
 	lock_screens();
@@ -176,7 +176,8 @@ bool PlatformVideoAreScreensSwapped(void) {
 }
 
 bool PlatformVideoSwapScreens(void) {
-	return false;
+	screensSwapped = !screensSwapped;
+	return true;
 }
 
 PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP, PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
