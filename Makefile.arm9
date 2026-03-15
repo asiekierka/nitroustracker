@@ -11,7 +11,7 @@ ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 # Source code paths
 # -----------------
 
-SOURCEDIRS	:= nds/arm9/source common/source
+SOURCEDIRS	:= nds/arm9/source common/source common/source/tobkit
 INCLUDEDIRS	:= $(SOURCEDIRS)
 GFXDIRS		:= nds/arm9/graphics
 BINDIRS		:= nds/arm9/data
@@ -101,9 +101,9 @@ ifneq ($(AUDIODIRS),)
     endif
 endif
 
-SOURCES_S	:= $(shell find -L $(SOURCEDIRS) -name "*.s")
-SOURCES_C	:= $(shell find -L $(SOURCEDIRS) -name "*.c")
-SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
+SOURCES_S	:= $(shell find -L $(SOURCEDIRS) -maxdepth 1 -name "*.s")
+SOURCES_C	:= $(shell find -L $(SOURCEDIRS) -maxdepth 1 -name "*.c")
+SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -maxdepth 1 -name "*.cpp")
 
 # Compiler and linker flags
 # -------------------------
