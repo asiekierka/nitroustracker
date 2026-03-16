@@ -319,7 +319,7 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 
 		d = 2 * dy - dx;
 
-		for(xp=x1; xp<=x2; xp++) {
+		for(; xp<=x2; xp++) {
 
 			if(d > 0)
 			{
@@ -327,7 +327,7 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 				d -= 2 * dx;
 			}
 
-			screen->drawPixel(xp, yp, col);
+			screen->drawPixel(yp, xp, col);
 
 			d += 2 * dy;
 		}

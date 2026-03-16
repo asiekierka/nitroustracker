@@ -529,7 +529,7 @@ void EnvelopeEditor::draw(void)
 
 				// Draw sustain point
   				if (sustain && idx == (sustain_point_index + 1))
-					drawBresLine(last_point_x, last_point_y, last_point_x, MAX_Y, theme->col_env_sustain);
+					drawVLine(last_point_x, last_point_y, MAX_Y - last_point_y + 1, theme->col_env_sustain);
 			}
 
 		}
