@@ -515,18 +515,16 @@ void EnvelopeEditor::draw(void)
 
 
 			// Draw the line
-			if (sustain == true)
-			{
-			  if (idx == (sustain_point_index + 1))
-			  {
-			    drawBresLine(last_point_x, last_point_y, last_point_x, MAX_Y, theme->col_env_sustain);
-			  }
-			}
 			drawBresLine(line_x1, line_y1, line_x2, line_y2, theme->col_env_line);
 
-			// Display unclipped points
-			if( (last_point_x >= MIN_X) && (last_point_x <= MAX_X) )
+			if( (last_point_x >= MIN_X) && (last_point_x <= MAX_X) ) {
+				// Display unclipped points
 				drawPoint(last_point_x, last_point_y, idx - 1 == active_point);
+
+				// Draw sustain point
+  				if (sustain && idx == (sustain_point_index + 1))
+					drawBresLine(last_point_x, last_point_y, last_point_x, MAX_Y, theme->col_env_sustain);
+			}
 
 		}
 		last_point_x = point_x;
