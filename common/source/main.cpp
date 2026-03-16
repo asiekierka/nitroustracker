@@ -2865,7 +2865,7 @@ void sample_crop_selection(void)
 	if (endsample < smp->getNSamples()) smp->delPart(endsample, smp->getNSamples() - 1);
 	if (startsample > 0) smp->delPart(0, startsample - 1);
 
-	DC_FlushAll();
+	ntxm_flush_dcache();
 	sampledisplay->setSample(smp);
 }
 
