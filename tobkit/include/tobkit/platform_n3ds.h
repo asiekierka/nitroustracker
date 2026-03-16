@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <3ds.h>
 
+#define TOBKIT_CONSTANT_PITCH 240
+
 // For printf() and scanf() defines
 #include "ntxm/common.h"
 

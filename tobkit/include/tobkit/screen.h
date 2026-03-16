@@ -32,20 +32,27 @@ class Screen {
         void clear(tobkit_pixel_t col);
         void setSize(u32 _width, u32 _height, u32 _pitch);
 
-        const inline u32 getWidth(void) { return width; }
-        const inline u32 getHeight(void) { return height; }
+        inline u32 getWidth(void) const { return width; }
+        inline u32 getHeight(void) const { return height; }
+        inline u32 getPitch(void) const {
+#if defined(TOBKIT_CONSTANT_PITCH)
+            return TOBKIT_CONSTANT_PITCH;
+#else
+            return pitch;
+#endif
+        }
 
 		inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col) {
 #if defined(TOBKIT_PLATFORM_3DS)
-            *(pixels+pitch*tx+pitch-1-ty) = col;
+            *(pixels+getPitch()*tx+getPitch()-1-ty) = col;
 #else
-            *(pixels+pitch*ty+tx) = col;
+            *(pixels+getPitch()*ty+tx) = col;
 #endif
         }
 
         inline void fillRow(u32 tx, u32 ty, u32 bw, u32 col) {
 #if defined(TOBKIT_PLATFORM_NDS)
-    		dmaFillHalfWords(col, pixels+pitch*ty+tx, bw*2);
+    		dmaFillHalfWords(col, pixels+getPitch()*ty+tx, bw*2);
 #else
             for (u32 i = 0; i < bw; i++)
                 drawPixel(tx+i, ty, col);

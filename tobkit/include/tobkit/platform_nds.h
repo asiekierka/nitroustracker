@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <nds.h>
 
+#define TOBKIT_CONSTANT_PITCH 256
+
 typedef u16 tobkit_pixel_t;
 
 #define RGB5A1(r,g,b,a) (((b) << 10) | ((g) << 5) | (r) | ((a) << 15))
