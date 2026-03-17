@@ -189,6 +189,7 @@ void ListBox::del(void)
 		}
 		
 		if(activeelement >= scrollpos) {
+			calcScrollThingy();
 			draw();
 		}
 	}
@@ -198,7 +199,7 @@ void ListBox::del(void)
 void ListBox::ins(u16 idx, const char *name)
 {
 	elements.insert(elements.begin()+idx, name);
-	
+	calcScrollThingy();
 	draw();
 }
 
