@@ -15,8 +15,6 @@ limitations under the License.
 ======================================================================*/
 
 #include <stdio.h>
-#include <malloc.h>
-#include <unistd.h>
 
 #include "tobkit/memoryindicator.h"
 
@@ -24,26 +22,12 @@ using namespace tobkit;
 
 #define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
-#if defined(__3DS__) || defined(__NDS__)
-/* https://devkitpro.org/viewtopic.php?f=6&t=3057 */
-
-extern u8 *fake_heap_end;
-extern u8 *fake_heap_start;
-
-static int getFreeMem() {
-	struct mallinfo mi = mallinfo();
-	return mi.fordblks + (fake_heap_end - (u8*)sbrk(0));
-}
-#else
-static int getFreeMem() { return 1048576; }
-#endif
-
 /* ===================== PUBLIC ===================== */
 
 MemoryIndicator::MemoryIndicator(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible)
 	:Widget(_x, _y, _width, _height, _screen, _visible)
 {
-	total_ram = getFreeMem(); // only estimate!
+	total_ram = ntxm_getFreeMem(); // only estimate!
 }
 
 MemoryIndicator::~MemoryIndicator()
@@ -64,7 +48,7 @@ void MemoryIndicator::draw(void)
 	if (!isExposed())
 		return;
 
-	u32 free_ram = getFreeMem();
+	u32 free_ram = ntxm_getFreeMem();
 	u32 used_ram = total_ram - free_ram;
 	
 	int boxwidth = clamp((width - 2) * used_ram / total_ram, 0, (u32) (width - 2));
