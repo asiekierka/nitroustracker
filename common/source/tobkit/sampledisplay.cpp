@@ -29,13 +29,16 @@
 #undef sqrtf32
 #include <cstdio>
 
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 #include "loophandle.h"
 #else
 #include "libnds/math.h"
 #endif
 #include "ntxm/ntxmtools.h"
 #include "tools.h"
+
+#define ZOOM_BUTTON_SIZE 11
+#define ZOOM_BUTTON_CENTER (((ZOOM_BUTTON_SIZE) + 1) >> 1)
 
 using namespace tobkit;
 
@@ -52,7 +55,7 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_s
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
 	snap_to_zero_crossings(true), draw_mode(false)
 {
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	gfxLine = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 	gfxLoopHandle = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
 	gfxZoomButtons = oamAllocateGfx(&oamSub, SpriteSize_32x16, SpriteColorFormat_16Color);
@@ -107,7 +110,7 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_s
 
 SampleDisplay::~SampleDisplay(void)
 {
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	oamFreeGfx(&oamSub, gfxLine);
 	oamFreeGfx(&oamSub, gfxLoopHandle);
 	oamFreeGfx(&oamSub, gfxZoomButtons);
@@ -158,8 +161,8 @@ void SampleDisplay::penDown(u16 px, u16 py)
 		}
 
 		// Else: Stylus on a zoom button?
-		else if(isInRect(px-x, py-y, 1, 1, 22, 12))	{
-			if(px-x < 12) {
+		else if(isInRect(px-x, py-y, 1, 1, ZOOM_BUTTON_SIZE * 2, ZOOM_BUTTON_SIZE + 1))	{
+			if(px-x <= ZOOM_BUTTON_SIZE) {
 				pen_on_zoom_in = true;
 				zoomIn();
 			} else {
@@ -296,11 +299,11 @@ void SampleDisplay::setSample(Sample *_smp)
 	selstart = selend = 0;
 	if(_smp == 0) {
 		loop_points_visible = false;
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 		oamDisable(&oamSub);
 #endif
 	}
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	else if (isExposed())
 		oamEnable(&oamSub);
 #endif
@@ -362,7 +365,7 @@ void SampleDisplay::setDrawMode(bool _on)
 {
 	draw_mode = _on;
 
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	if (draw_mode)
 		oamDisable(&oamSub);
 	else
@@ -394,7 +397,7 @@ void SampleDisplay::setSnapToZeroCrossing(bool snap)
 
 void SampleDisplay::reveal(void)
 {
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	if(smp) oamEnable(&oamSub);
 #endif
 	Widget::reveal();
@@ -402,7 +405,7 @@ void SampleDisplay::reveal(void)
 
 void SampleDisplay::occlude(void)
 {
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	oamDisable(&oamSub);
 #endif
 	Widget::occlude();
@@ -410,7 +413,7 @@ void SampleDisplay::occlude(void)
 
 void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
 {
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	*(SPRITE_PALETTE_SUB+1) = theme_->col_loop;
 	*(SPRITE_PALETTE_SUB+1+16) = theme_->col_outline;
 	*(SPRITE_PALETTE_SUB+2+16) = theme_->col_loop;
@@ -490,7 +493,7 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 
 void SampleDisplay::drawLoopHandles(void)
 {
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	u16 loop_start_pos = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart());
 	u16 loop_end_pos   = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
@@ -513,6 +516,8 @@ void SampleDisplay::drawLoopHandles(void)
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_L, !draw_loop_end);
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_R, !draw_loop_end);
 	oamSub.oamMemory[SPR_LOOPLINE_2].x = draw_loop_end ? loop_end_pos-2-2 : width+1;
+#else
+	draw();
 #endif
 }
 
@@ -528,10 +533,9 @@ void SampleDisplay::draw(void)
 		drawBorder(theme->col_signal);
 	}
 
-	//
-	// Loop Points
-	//
+#ifdef TOBKIT_PLATFORM_NDS
 	drawLoopHandles(); // Hides loop points if no sample/loop
+#endif
 
 	// Now comes sample-dependant stuff, so return if we have no sample
 	if((smp==0)||(smp->getNSamples()==0)) {
@@ -725,7 +729,7 @@ void SampleDisplay::draw(void)
 
 	}
 
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 	//
 	// Zoom buttons
 	//
@@ -742,6 +746,124 @@ void SampleDisplay::draw(void)
 
 		else {
 			copy_sprite_frame(gfxZoomButtons, 0);
+		}
+	}
+#else
+	//
+	// Loop Points
+	//
+	if( (loop_points_visible) && (smp->getLoop() != NO_LOOP) && !draw_mode )
+	{
+		s32 loop_start_pos = sampleToPixel(smp->getLoopStart());
+		s32 loop_end_pos   = sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
+
+		// Loop Start
+
+		if( (loop_start_pos >= 0) && (loop_start_pos <= width-2) ) {
+			// Line
+			drawVLine(loop_start_pos, 1, DRAW_HEIGHT, theme->col_loop);
+
+			// Left Triangle
+			if(loop_start_pos > 1 + LOOP_TRIANGLE_SIZE)
+			{
+				drawHLine(loop_start_pos-2, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
+
+				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
+				{
+					drawHLine(loop_start_pos-i-2, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, i+2, theme->col_loop);
+					drawPixel(loop_start_pos-i-3, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
+				}
+
+				drawHLine(loop_start_pos-LOOP_TRIANGLE_SIZE+1, DRAW_HEIGHT, LOOP_TRIANGLE_SIZE-1,
+					theme->col_loop);
+				drawPixel(loop_start_pos-LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
+			}
+
+			// Right Triangle
+			if(loop_start_pos < width - 2 - LOOP_TRIANGLE_SIZE)
+			{
+				drawHLine(loop_start_pos+1, DRAW_HEIGHT+1-LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
+				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i) {
+					drawHLine(loop_start_pos+1, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, 2+i, theme->col_loop);
+					drawPixel(loop_start_pos+3+i, DRAW_HEIGHT+2-LOOP_TRIANGLE_SIZE+i, theme->col_outline);
+				}
+				drawHLine(loop_start_pos+1, DRAW_HEIGHT-LOOP_TRIANGLE_SIZE+LOOP_TRIANGLE_SIZE, LOOP_TRIANGLE_SIZE-1,
+					theme->col_loop);
+				drawPixel(loop_start_pos+LOOP_TRIANGLE_SIZE, DRAW_HEIGHT, theme->col_outline);
+			}
+		}
+
+		// Loop End
+
+		if( (loop_end_pos >= 0) && (loop_end_pos <= width-2) ) {
+			// Line
+			drawVLine(loop_end_pos, 1, DRAW_HEIGHT, theme->col_loop);
+
+			// Left Triangle
+			if(loop_end_pos > 1 + LOOP_TRIANGLE_SIZE)
+			{
+				drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+1, 1, LOOP_TRIANGLE_SIZE-1,
+					theme->col_loop);
+				drawPixel(loop_end_pos-LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
+
+				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
+				{
+					drawHLine(loop_end_pos-LOOP_TRIANGLE_SIZE+i+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
+					drawPixel(loop_end_pos-1-LOOP_TRIANGLE_SIZE+i+1, 2+i, theme->col_outline);
+				}
+
+				drawHLine(loop_end_pos-2, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
+			}
+
+			// Right Triangle
+			if(loop_end_pos < width-1-LOOP_TRIANGLE_SIZE)
+			{
+				drawHLine(loop_end_pos+1, 1, LOOP_TRIANGLE_SIZE-1, theme->col_loop);
+				drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE, 1, theme->col_outline);
+
+				for(u8 i=0; i<LOOP_TRIANGLE_SIZE-2; ++i)
+				{
+					drawHLine(loop_end_pos+1, 2+i, LOOP_TRIANGLE_SIZE-i-1, theme->col_loop);
+					drawPixel(loop_end_pos+LOOP_TRIANGLE_SIZE-i, 2+i, theme->col_outline);
+				}
+
+				drawHLine(loop_end_pos+1, LOOP_TRIANGLE_SIZE, 2, theme->col_outline);
+			}
+		}
+	}
+
+	//
+	// Zoom buttons
+	//
+
+	if(!draw_mode) {
+		// Outlines
+		drawHLine(2, 1, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+		drawHLine(ZOOM_BUTTON_SIZE + 1, 1, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+
+		drawHLine(2, ZOOM_BUTTON_SIZE, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+		drawHLine(ZOOM_BUTTON_SIZE + 1, ZOOM_BUTTON_SIZE, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+
+		drawVLine(1, 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+		drawVLine(ZOOM_BUTTON_SIZE, 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+		drawVLine(ZOOM_BUTTON_SIZE * 2 - 1, 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+
+		// +
+		if(pen_on_zoom_in) {
+			drawFullBox(2, 2, ZOOM_BUTTON_SIZE - 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+			drawHLine(3, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_bg);
+			drawVLine(ZOOM_BUTTON_CENTER, 3, ZOOM_BUTTON_SIZE - 4, theme->col_smp_bg);
+		} else {
+			drawHLine(3, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_zoom);
+			drawVLine(ZOOM_BUTTON_CENTER, 3, ZOOM_BUTTON_SIZE - 4, theme->col_smp_zoom);
+		}
+
+		// -
+		if(pen_on_zoom_out) {
+			drawFullBox(ZOOM_BUTTON_SIZE + 1, 2, ZOOM_BUTTON_SIZE - 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
+			drawHLine(ZOOM_BUTTON_SIZE + 2, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_bg);
+		} else {
+			drawHLine(ZOOM_BUTTON_SIZE + 2, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_zoom);
 		}
 	}
 #endif

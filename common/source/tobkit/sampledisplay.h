@@ -96,7 +96,7 @@ class SampleDisplay: public Widget {
 		void draw(void);
 		void drawLoopHandles(void);
 
-#ifdef __NDS__
+#ifdef TOBKIT_PLATFORM_NDS
 		// https://codeberg.org/blocksds/sdk/src/branch/master/examples/graphics_2d/sprites_animated/source/main.c
 		inline void copy_sprite_frame(void *dst, int frame)
 		{
@@ -106,8 +106,8 @@ class SampleDisplay: public Widget {
 
 			dmaCopy(base + offset, dst, frame_size);
 		}
-#endif
 		u16 *gfxZoomButtonStates[3];
+#endif
 		
 		void scroll(u32 newscrollpos);
 		void calcScrollThingy(void);
@@ -148,7 +148,9 @@ class SampleDisplay: public Widget {
 
 		u8 draw_last_x, draw_last_y;
 
+#ifdef TOBKIT_PLATFORM_NDS
 		u16 *gfxLoopHandle, *gfxLine, *gfxZoomButtons;
+#endif
 };
 
 };
