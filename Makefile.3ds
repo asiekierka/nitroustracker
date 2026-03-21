@@ -31,7 +31,7 @@ include $(DEVKITARM)/3ds_rules
 #     - icon.png
 #     - <libctru folder>/default_icon.png
 #---------------------------------------------------------------------------------
-export VERSION		?= 0.6.0
+export VERSION		?= 0.7.0
 export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 APP_TITLE	:= NitrousTracker
