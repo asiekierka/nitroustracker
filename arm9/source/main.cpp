@@ -2550,8 +2550,8 @@ void handleRecordSampleCancel(void)
 void handleRecordSample(void)
 {
 	// Check RAM first!
-	void *testbuf = ntxm_cmalloc(RECORDBOX_SOUNDDATA_SIZE * 2);
-	if(testbuf == 0)
+	void *testbuf = ntxm_umalloc(RECORDBOX_SOUNDDATA_SIZE * 2);
+	if(!testbuf)
 	{
 		showMessage("not enough ram free!", true);
 		return;
