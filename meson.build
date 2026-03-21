@@ -13,7 +13,7 @@ libntxm_sources = [
   'libntxm/libntxm/common/source/demokit.c',
   'libntxm/libntxm/common/source/instrument.cpp',
   'libntxm/libntxm/common/source/linear_freq_table.c',
-  'libntxm/libntxm/common/source/ntxmtools.cpp',
+  'libntxm/libntxm/common/source/ntxmtools.c',
   'libntxm/libntxm/common/source/sample.cpp',
   'libntxm/libntxm/common/source/song.cpp',
   'libntxm/libntxm/common/source/vibrato_sine_table.c',
