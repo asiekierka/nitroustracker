@@ -965,8 +965,8 @@ void loadModule(void)
 	File *file = getSelectedFile();
 	if(file==0) return;
 
-	delete song; // For christs sake do some checks before deleting the song!!
 	pv->unmuteAll();
+	delete song; // For christs sake do some checks before deleting the song!!
 
 	mod_loading = true;
 	showSlowLoadOperation([file](){
