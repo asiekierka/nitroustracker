@@ -1,3 +1,24 @@
+-- NitrousTracker v0.6.1 (2026-03-21)
+
+New features:
+
+- sample trim button (prayerie)
+
+Improvements:
+
+- removed confusing quirk in "clr" button behaviour added in v0.4.6 (prayerie)
+- the "ren" button is now disabled when not useful (prayerie)
+- touch keyboard can now be used while the song is playing (prayerie)
+- updated BlocksDS to 1.19.0
+
+Fixes:
+
+- fixed memory corruption by adding more than 256 patterns
+- fixed scroll bar not becoming visible after inserting patterns (prayerie)
+- fixed visual bug when scrolling the envelope editor with sustain set
+- fixed visual bug when switching instruments in effect mode (prayerie)
+- fixed wifi crash when trying to enable dsmidi
+
 -- NitrousTracker v0.6.0 (2026-03-02)
 
 New features:
