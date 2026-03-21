@@ -1609,7 +1609,8 @@ void handlePotInc(void)
 // Inserts a pattern into the pot (copies the current pattern)
 void handlePotIns(void)
 {
-	song->potIns(state->potpos, song->getPotEntry(state->potpos));
+	if (!song->potIns(state->potpos, song->getPotEntry(state->potpos)))
+		return;
 	// TODO: turn into undo operation
 	action_buffer->clear();
 	DC_FlushAll();
@@ -1647,8 +1648,10 @@ void handlePotDel(void)
 
 void handlePtnClone(void)
 {
+	if (song->getPotLength() >= MAX_POT_LENGTH)
+		return;
 	u16 newidx = song->getNumPatterns();
-	if(newidx == MAX_PATTERNS)
+	if(newidx >= MAX_PATTERNS)
 		return;
 
 	u16 ptnlength = song->getPatternLength(song->getPotEntry(state->potpos));
