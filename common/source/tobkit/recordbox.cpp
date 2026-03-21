@@ -66,10 +66,18 @@ RecordBox::RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(voi
 	buttoncancel = new Button(x+(RECORDBOX_WIDTH-50)/2, y+44, 50, 14, _screen);
 	buttoncancel->setCaption("cancel");
 	buttoncancel->registerPushCallback(_onCancel);
+
+#ifdef __3DS__
+	sound_data = (u16*) ntxm_cmemalign(0x1000, RECORDBOX_SOUNDDATA_SIZE);
+	micInit((u8*) sound_data, RECORDBOX_SOUNDDATA_SIZE);
+#endif
 }
 
 RecordBox::~RecordBox(void)
 {
+#ifdef __3DS__
+	micExit();
+#endif
 	if(sound_data)
 		ntxm_free(sound_data);
 
@@ -182,7 +190,7 @@ void RecordBox::draw(void)
 	labelrec->pleaseDraw();
 }
 
-void RecordBox::startRecording(void)
+bool RecordBox::startRecording(void)
 {
 	if(!recording)
 	{
@@ -190,24 +198,34 @@ void RecordBox::startRecording(void)
 		if(sample != NULL)
 			instrument->setSample(smpidx, NULL); // Deletes the sample
 
+#ifdef __3DS__
+		if (R_FAILED(MICU_StartSampling(MICU_ENCODING_PCM16_SIGNED, MICU_SAMPLE_RATE_16360, 0, micGetSampleDataSize(), false)))
+			return false;
+#else
 		if(sound_data)
 			ntxm_free(sound_data);
 		sound_data = (u16*)ntxm_cmalloc(RECORDBOX_SOUNDDATA_SIZE);
 		if(!sound_data)
-			return;
+			return false;
 
 		// Start recording
 		ntxm_flush_dcache();
+#endif
 		CommandStartRecording(sound_data, RECORDBOX_SOUNDDATA_SIZE);
 		recording = true;
 		
 		draw();
 	}
+	return true;
 }
 
 void RecordBox::stopRecording()
 {
 	int size = CommandStopRecording();
+#ifdef __3DS__
+	size = micGetLastSampleOffset();
+	MICU_StopSampling();
+#endif
 #ifdef __NDS__
 	DC_InvalidateRange(sound_data, size);
 #endif
@@ -217,9 +235,11 @@ void RecordBox::stopRecording()
 	// Security check
 	if(size < RECORDBOX_CROP_SAMPLES_END + RECORDBOX_CROP_SAMPLES_START)
 	{
+#ifndef __3DS__
 		if(sound_data)
 			ntxm_free(sound_data);
 		sound_data = NULL;
+#endif
 		sample = NULL;
 		onCancel();
 		debugprintf("recorded data too small\n");
@@ -228,21 +248,26 @@ void RecordBox::stopRecording()
 	
 	// Get pointer to sound data and shrink it beautiful
 	u32 newsize = size - RECORDBOX_CROP_SAMPLES_END*2; // Crop the end because it contains the clicking of the button
-	sound_data = (u16*)ntxm_crealloc(sound_data, newsize);
-	
+#ifdef __3DS__
+	u16 *sample_data = (u16*)ntxm_cmalloc(newsize);
+	memcpy(sample_data, sound_data, newsize);
+#else
+	u16 *sample_data = (u16*)ntxm_crealloc(sound_data, newsize);
+	sound_data = NULL;
+#endif
+
 	//Cut the first few samples
 	if(RECORDBOX_CROP_SAMPLES_START < newsize)
 	{
-		memmove(sound_data, sound_data+RECORDBOX_CROP_SAMPLES_START*2,
+		memmove(sample_data, sample_data+RECORDBOX_CROP_SAMPLES_START*2,
 			  newsize-RECORDBOX_CROP_SAMPLES_START*2);
 		newsize -= RECORDBOX_CROP_SAMPLES_START*2;
-		sound_data = (u16*)ntxm_crealloc(sound_data, newsize);
+		sample_data = (u16*)ntxm_crealloc(sample_data, newsize);
 	}
 	
 	// takes ownership of sound_data
-	sample = new Sample(sound_data, newsize/2, RECORDBOX_SAMPLING_FREQ);
+	sample = new Sample(sample_data, newsize/2, RECORDBOX_SAMPLING_FREQ);
 	debugprintf("cut sample size %lu @ %d Hz\n", newsize/2, RECORDBOX_SAMPLING_FREQ);
-	sound_data = NULL;
 
 	sample->setName("rec");
 	

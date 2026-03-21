@@ -35,8 +35,14 @@ namespace tobkit {
 
 #define RECORDBOX_WIDTH			150
 #define RECORDBOX_HEIGHT		64
-#define RECORDBOX_SOUNDDATA_SIZE	(256*1024) // 8 seconds at 16384 Hz, 16 Bit
+#define RECORDBOX_SOUNDDATA_SECONDS 8 
+#ifdef __3DS__
+#define RECORDBOX_SAMPLING_FREQ		16364
+#define RECORDBOX_SOUNDDATA_SIZE	0x40000
+#else
 #define RECORDBOX_SAMPLING_FREQ		16384
+#define RECORDBOX_SOUNDDATA_SIZE	((RECORDBOX_SOUNDDATA_SECONDS)*2*(RECORDBOX_SAMPLING_FREQ))
+#endif
 #define RECORDBOX_CROP_SAMPLES_END	500
 #define RECORDBOX_CROP_SAMPLES_START	100
 
@@ -61,7 +67,7 @@ class RecordBox: public Widget {
 		
 	private:
 		void draw(void);
-		void startRecording(void);
+		bool startRecording(void);
 		void stopRecording(void);
 		
 		bool recording, btndown;
