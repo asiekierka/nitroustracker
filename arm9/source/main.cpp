@@ -263,6 +263,7 @@ u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 char last_themepath[SETTINGS_FILENAME_LEN + 1];
+char preview_smp_path[256];
 
 bool fastscroll = false;
 bool multisamp_from_mapsamp = false;
@@ -1972,6 +1973,61 @@ void handleSamplePreviewToggled(bool on)
 	settings->setSamplePreview(on);
 }
 
+
+
+u32 calcFileSize(const char *path) {
+	struct stat filestats;
+	int stat_res = stat(path, &filestats);
+	
+	if(stat_res != -1) {
+		return filestats.st_size;
+	}
+
+	return 0;
+}
+
+void previewWav(void) {
+	if (mb != NULL)
+		deleteMessageBox();
+
+	debugprintf("previewing\n");
+
+	// Load sample
+	bool success;
+	Sample *smp = new Sample(preview_smp_path, false, &success);
+	if(!success)
+	{
+		delete smp;
+		return;
+	}
+		
+	updateMemoryState(false);
+
+	// Stop and delete previously playing preview sample
+	if(state->preview_sample)
+		CommandStopSample(0);
+
+	// Wait until previously playing preview sample is deleted
+	while(state->preview_sample)
+		cothread_yield_irq(IRQ_VBLANK);
+
+	// Play it
+	state->preview_sample = smp;
+	DC_FlushAll();
+	CommandPlaySample(smp, 4*12, 255, 0);
+
+	// When the sample has finished playing, the arm7 sends a signal,
+	// so the arm9 can delete the sample
+}
+
+void confirmWavPreview(void)
+{
+	deleteMessageBox();
+	mb = new MessageBox(&sub_vram, "preview large audio file?", 2, "preview", previewWav, "cancel", deleteMessageBox);
+	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
+	mb->reveal();
+}
+
 void handleFileChange(File file)
 {
 	if(!file.is_dir)
@@ -1995,35 +2051,14 @@ void handleFileChange(File file)
 			// Pause song playback if ongoing
 			if(state->playing)
 				pausePlay();
+				
+			preview_smp_path[255] = 0;
+			strncpy(preview_smp_path, file.name_with_path.c_str(), 255);
 
-			debugprintf("previewing\n");
-
-			// Load sample
-			bool success;
-			Sample *smp = new Sample(file.name_with_path.c_str(), false, &success);
-			if(!success)
-			{
-				delete smp;
-				return;
-			}
-		
-			updateMemoryState(false);
-
-			// Stop and delete previously playing preview sample
-			if(state->preview_sample)
-				CommandStopSample(0);
-
-			// Wait until previously playing preview sample is deleted
-			while(state->preview_sample)
-				cothread_yield_irq(IRQ_VBLANK);
-
-			// Play it
-			state->preview_sample = smp;
-			DC_FlushAll();
-			CommandPlaySample(smp, 4*12, 255, 0);
-
-			// When the sample has finished playing, the arm7 sends a signal,
-			// so the arm9 can delete the sample
+			if (calcFileSize(str) > 4 * 1024 * 1024 /* 4MiB */)
+				confirmWavPreview();
+			else
+				previewWav();
 		}
 	}
 }
