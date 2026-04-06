@@ -1368,6 +1368,11 @@ void stop(void)
 {
 	// Send stop command
 	CommandStopPlay();
+	
+	// Also stop a previewing sample, if there is one.
+	if (state->preview_sample)
+		CommandStopSample(0);
+		
 	state->playing = false;
 
 	// The arm7 will get the command with a slight delay and may continue playing for
@@ -1378,6 +1383,7 @@ void stop(void)
 	cothread_yield_irq(IRQ_VBLANK); cothread_yield_irq(IRQ_VBLANK);
 	redraw_main_requested = false;
 	drawMainScreen();
+
 
 #ifdef MIDI
 	if( (state->dsmi_connected) && (state->dsmi_send) )
