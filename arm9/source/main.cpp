@@ -3965,7 +3965,7 @@ void setupGUI(bool dldi_enabled)
 	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X, 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, &sub_vram, false, true, true);
 	labelfxop->setCaption("fx op");
 	numberboxfxcat = new NumberBox(206, 135, 18, 17, &sub_vram, 0, 0, 3, 1);
-	numberboxadd    = new NumberBox(185, 135, 18, 17, &sub_vram, state->add, 0, 8, 1);
+	numberboxadd    = new NumberBox(178, 135, 25, 17, &sub_vram, state->add, 0, 32, 2);
 	numberboxoctave = new NumberBox(206, 135, 18, 17, &sub_vram, state->basenote/12, 0, 6, 1);
 	dbeffectpar	 = new DigitBox(185, 164, 35, 17, &sub_vram, 0, 0, 255, 2);
 	dbeffectpar->set_overdraw(false);
