@@ -167,6 +167,7 @@ void ListBox::add(const char *name) {
 	elements.push_back(name);
 	
 	if(elements.size() <= (u16)((height-1)/ROW_HEIGHT)) {
+		calcScrollThingy();
 		draw();
 	}
 }
