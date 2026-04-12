@@ -206,7 +206,7 @@ GUI *gui;
 
 // <Instrument Gui>
 	EnvelopeEditor *volenvedit;
-	Button *btnaddenvpoint, *btndelenvpoint, *btnenvzoomin, *btnenvzoomout, *btnenvdrawmode, *btnenvsetsuspoint;
+	Button *btnaddenvpoint, *btndelenvpoint, *btnenvdrawmode, *btnenvsetsuspoint;
 	ToggleButton *tbmapsamples;
 	CheckBox *cbvolenvenabled, *cbsusenabled;
 // </Instrument Gui>
@@ -700,8 +700,6 @@ void volEnvSetInst(Instrument *inst)
 	btnenvdrawmode->set_enabled(inst != NULL);
 	btnaddenvpoint->set_enabled(inst != NULL);
 	btndelenvpoint->set_enabled(inst != NULL);
-	btnenvzoomin->set_enabled(inst != NULL);
-	btnenvzoomout->set_enabled(inst != NULL);
 	btnenvsetsuspoint->set_enabled(inst != NULL);
 	cbvolenvenabled->set_enabled(inst != NULL);
 	cbsusenabled->set_enabled(inst != NULL);
@@ -3317,18 +3315,6 @@ void handleSnapTo0XingToggled(bool on)
 	sampledisplay->setSnapToZeroCrossing(on);
 }
 
-void envZoomIn(void)
-{
-	volenvedit->zoomIn();
-}
-
-void envZoomOut(void)
-{
-	volenvedit->zoomOut();
-}
-
-
-
 void volEnvPointsChanged(void)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
@@ -3776,14 +3762,6 @@ void setupGUI(bool dldi_enabled)
 		btndelenvpoint->setCaption("del");
 		btndelenvpoint->registerPushCallback(delEnvPoint);
 
-		btnenvzoomin = new Button(72, 112, 30, 10, &sub_vram);
-		btnenvzoomin->setCaption("+");
-		btnenvzoomin->registerPushCallback(envZoomIn);
-
-		btnenvzoomout = new Button(104, 112, 30, 10, &sub_vram);
-		btnenvzoomout->setCaption("-");
-		btnenvzoomout->registerPushCallback(envZoomOut);
-
 		btnenvdrawmode = new Button(6, 112, 60, 10, &sub_vram);
 		btnenvdrawmode->setCaption("draw env");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
@@ -3803,8 +3781,6 @@ void setupGUI(bool dldi_enabled)
 
 		tabbox->registerWidget(btnaddenvpoint, 0, 3);
 		tabbox->registerWidget(btndelenvpoint, 0, 3);
-		tabbox->registerWidget(btnenvzoomin, 0, 3);
-		tabbox->registerWidget(btnenvzoomout, 0, 3);
 		tabbox->registerWidget(btnenvdrawmode, 0, 3);
 		tabbox->registerWidget(btnenvsetsuspoint, 0, 3);
 		tabbox->registerWidget(cbsusenabled, 0, 3);

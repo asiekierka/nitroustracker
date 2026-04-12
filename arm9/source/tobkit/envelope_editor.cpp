@@ -38,9 +38,9 @@ using namespace tobkit;
 // Constructor sets base variables
 EnvelopeEditor::EnvelopeEditor(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, u16 _max_x, u16 _max_y, u16 _max_points)
 	:Widget(_x, _y, _width, _height, _vram), onPointsChange(0), onDrawFinish(0),
-	pen_is_down(false), pen_on_point(false), points_max_x(_max_x), points_max_y(_max_y), n_points(0),
+	pen_is_down(false), pen_on_point(false), pen_on_zoom_in(false), pen_on_zoom_out(false), points_max_x(_max_x), points_max_y(_max_y), n_points(0),
 	max_points(_max_points), active_point(0), sustain(false), sustain_point_index(0), zoom_level(0), buttonstate(0), scrollthingypos(0),
-	scrollthingyheight(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), scrollpos(0), draw_mode(false)
+	scrollthingyheight(width-2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN+2), pen_x_on_scrollthingy(0), scrollpos(0), draw_mode(false)
 {
 	points_x = (u16*)ntxm_ccalloc(1, _max_points * sizeof(u16));
 	points_y = (u16*)ntxm_ccalloc(1, _max_points * sizeof(u16));
@@ -89,22 +89,30 @@ void EnvelopeEditor::penDown(u8 px, u8 py)
 			{
 				buttonstate = SCROLLLEFT;
 
-				scroll(-SCROLLPIXELS);
+				scroll(scrollpos-SCROLLPIXELS);
 			}
-			else if(penX >= width - SCROLLBUTTON_HEIGHT)
+			else if (penX >= width - 1 * SCROLLBUTTON_HEIGHT)
+			{
+				pen_on_zoom_out = true;
+				zoomOut();
+			}
+			else if (penX >= width - 2 * SCROLLBUTTON_HEIGHT)
+			{
+				pen_on_zoom_in = true;
+				zoomIn();
+			}
+			else if(penX >= width - 3 * SCROLLBUTTON_HEIGHT)
 			{
 				buttonstate = SCROLLRIGHT;
 
-				scroll(SCROLLPIXELS);
+				scroll(scrollpos+SCROLLPIXELS);
 			}
 			else if(penX < scrollthingypos + SCROLLBUTTON_HEIGHT)
 			{
-				scroll(-width+2);
+				scroll(scrollpos-width+2);
 			}
 			else if(penX > scrollthingypos + SCROLLBUTTON_HEIGHT + scrollthingyheight)
-			{
-				scroll(width-2);
-			}
+				scroll(scrollpos+width-2);
 			else
 			{
 				buttonstate = SCROLLTHINGY;
@@ -131,6 +139,8 @@ void EnvelopeEditor::penDown(u8 px, u8 py)
 
 void EnvelopeEditor::penUp(u8 px, u8 py)
 {
+	pen_on_zoom_in = pen_on_zoom_out = false;
+
 	if(draw_mode == true)
 	{
 		draw_mode = false;
@@ -199,11 +209,11 @@ void EnvelopeEditor::penMove(u8 px, u8 py)
 		}
 		else if(buttonstate == SCROLLTHINGY)
 		{
-			scrollthingypos = ntxm_clamp(penX - pen_x_on_scrollthingy - SCROLLBUTTON_HEIGHT, 0, width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingyheight);
+			scrollthingypos = ntxm_clamp(penX - pen_x_on_scrollthingy - SCROLLBUTTON_HEIGHT, 0, width - 2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN+2 - scrollthingyheight);
 
 			u32 window_width = width - 2;
 			u32 disp_width = window_width << zoom_level;
-			u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingyheight;
+			u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN+2 - scrollthingyheight;
 			scrollpos = scrollthingypos * (disp_width - window_width) / scroll_width;
 		}
 
@@ -395,39 +405,6 @@ void EnvelopeEditor::clear(void)
 	}
 }
 
-void EnvelopeEditor::zoomIn(void)
-{
-	if(zoom_level < ENVELOPE_MAX_ZOOM)
-	{
-		zoom_level++;
-		calcScrollThingy();
-		scrollthingypos += scrollthingyheight / 2;
-
-		scrollpos = scrollthingypos;
-		for(u8 i = 0; i < zoom_level; ++i)
-			scrollpos *= 2;
-
-		draw();
-	}
-}
-
-void EnvelopeEditor::zoomOut(void)
-{
-	if(zoom_level > 0)
-	{
-		zoom_level--;
-		scrollthingypos = ntxm_clamp(scrollthingypos - scrollthingyheight / 2, 0, width - 2*SCROLLBUTTON_HEIGHT);
-		calcScrollThingy();
-		scrollthingypos = ntxm_clamp(scrollthingypos, 0, width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingyheight);
-
-		scrollpos = scrollthingypos;
-		for(u8 i=0; i < zoom_level; ++i)
-			scrollpos *= 2;
-
-		draw();
-	}
-}
-
 void EnvelopeEditor::setZoomAndPos(int _zoom, int _pos)
 {
 	zoom_level = _zoom;
@@ -506,8 +483,8 @@ void EnvelopeEditor::draw(void)
 			{
 				// Clip the right point
 				line_y2 = (last_point_y*point_x + (width-1)*point_y - last_point_x*point_y -
-						width*last_point_y) / (point_x - last_point_x);
-				line_x2 = width-1;
+						width*last_point_y) / (point_x - last_point_x) + 1;
+				line_x2 = width-2;
 			} else {
 				line_y2 = point_y;
 				line_x2 = point_x;
@@ -541,20 +518,20 @@ void EnvelopeEditor::draw(void)
 
 	// Right Button
 	if(buttonstate == SCROLLRIGHT) {
-		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-9-ZOOM_BUTTONS_MARGIN, height-SCROLLBAR_WIDTH+1, 8, 8);
 	} else {
-		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-9-ZOOM_BUTTONS_MARGIN, height-SCROLLBAR_WIDTH+1, 8, 8);
 	}
 
 	// This draws the right-arrow
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-3) = theme->col_icon_bt;
+			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+width-j-ZOOM_BUTTONS_MARGIN-4) = theme->col_icon_bt;
 		}
 	}
 
-	drawBox(width-SCROLLBAR_WIDTH, height-SCROLLBUTTON_HEIGHT, 9, 9, theme->col_outline);
+	drawBox(width-SCROLLBAR_WIDTH-ZOOM_BUTTONS_MARGIN, height-SCROLLBUTTON_HEIGHT, 9, 9, theme->col_outline);
 
 	// Left Button
 	if(buttonstate==SCROLLLEFT) {
@@ -563,7 +540,7 @@ void EnvelopeEditor::draw(void)
 		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, 1, height-9, 8, 8);
 	}
 
-	// This draws the down-arrow
+	// This draws the left-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
 			*(*vram+SCREEN_WIDTH*(y+height-SCROLLBAR_WIDTH+4+p)+x+j+3) = theme->col_icon_bt;
@@ -575,8 +552,38 @@ void EnvelopeEditor::draw(void)
 
 	drawBox(0, height-SCROLLBAR_WIDTH, width, SCROLLBAR_WIDTH, theme->col_outline);
 
+	// 
+	// Zoom buttons on scrollbar
+	//
+
+	// Zoom in
+	if(pen_on_zoom_in) {
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width - 2 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	} else {
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width - 2 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	}
+
+	drawBox(width - 2 * SCROLLBUTTON_HEIGHT - 1, height-9, 10, 9, theme->col_outline);
+	
+	// + icon
+	drawHLine(width - 2 * SCROLLBUTTON_HEIGHT + 1, height-9 + 4, 6, theme->col_icon_bt);
+	drawVLine(width - 2 * SCROLLBUTTON_HEIGHT + 3, height-9 + 2, 5, theme->col_icon_bt);
+	drawVLine(width - 2 * SCROLLBUTTON_HEIGHT + 4, height-9 + 2, 5, theme->col_icon_bt);
+
+	//Zoom out
+	if(pen_on_zoom_out) {
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width - 1 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	} else {
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width - 1 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	}
+
+	drawBox(width - 1 * SCROLLBUTTON_HEIGHT - 1, height-9, 10, 9, theme->col_outline);
+
+	// - icon
+	drawHLine(width - 1 * SCROLLBUTTON_HEIGHT + 1, height-9 + 4, 6, theme->col_icon_bt);
+
 	// Clear Scrollbar
-	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
+	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN, SCROLLBAR_WIDTH-2);
 
 	// The scroll thingy
 	if(buttonstate==SCROLLTHINGY) {
@@ -588,12 +595,33 @@ void EnvelopeEditor::draw(void)
 	drawBox(SCROLLBUTTON_HEIGHT-1+scrollthingypos, height-SCROLLBAR_WIDTH, scrollthingyheight, SCROLLBAR_WIDTH, theme->col_outline);
 }
 
+void EnvelopeEditor::zoomIn(void)
+{
+	if(zoom_level == ENVELOPE_MAX_ZOOM) return;
+
+	zoom_level++;
+	calcScrollThingy();
+	scrollpos = scrollpos * 2 + (width - 2) / 2;
+	scroll(scrollpos);
+}
+
+void EnvelopeEditor::zoomOut(void)
+{
+	if(zoom_level == 0) return;
+
+	zoom_level--;
+	calcScrollThingy();
+	s32 scrollpostmp = ((s32)scrollpos * 2 - (width - 2)) / 4;
+	scrollpos = std::max(0, (int)scrollpostmp);
+	scroll(scrollpos);
+}
+
 // Calculate height and position of the scroll thingy
 void EnvelopeEditor::calcScrollThingy(void)
 {
-	u16 sch = width - 2 * SCROLLBUTTON_HEIGHT + 2;
-
+	u16 sch = width - 2 * SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN + 2;
 	scrollthingyheight = sch >> zoom_level;
+	if(scrollthingyheight < MIN_SCROLLTHINGY_WIDTH) scrollthingyheight = MIN_SCROLLTHINGY_WIDTH;
 }
 
 void EnvelopeEditor::drawPoint(u8 x, u8 y, bool active)
@@ -606,13 +634,13 @@ void EnvelopeEditor::drawPoint(u8 x, u8 y, bool active)
 		drawBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH, POINT_HEIGHT, theme->col_env_pt_border_active);
 }
 
-void EnvelopeEditor::scroll(s32 difference)
+void EnvelopeEditor::scroll(s32 newscrollpos)
 {
 	u32 window_width = width - 2;
-	u32 disp_width = window_width << zoom_level;
-	u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingyheight;
+	u64 disp_width = (u64)window_width << zoom_level;
+	u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN +2 - scrollthingyheight;
 
-	scrollpos = ntxm_clamp(scrollpos + difference, 0, disp_width - window_width);
+	scrollpos = ntxm_clamp(newscrollpos, 0, disp_width - window_width);
 	scrollthingypos = scrollpos * scroll_width / (disp_width - window_width);
 
 	calcScrollThingy();
