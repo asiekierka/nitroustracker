@@ -3203,8 +3203,7 @@ void handleLerp(void)
 	u16 maxeff = std::max(starteff, endeff);
 	u16 mineff = std::min(starteff, endeff);
 
-	u16 diff = std::max(sel_y1, sel_y2) - std::min(sel_y1, sel_y2);
-	u16 step = (maxeff - mineff) / diff;
+	u16 sel_height = std::max(sel_y1, sel_y2) - std::min(sel_y1, sel_y2);
 	int i = 0;
 	if (fill != NULL && fill->valid())
 	{
@@ -3215,14 +3214,14 @@ void handleLerp(void)
 			{
 				if (starteff < endeff)
 				{
-					cell.effect_param = mineff + (step * i++);
+					cell.effect_param = mineff + ((maxeff - mineff) * i++) / sel_height;
 				}
 				else
 				{
-					cell.effect_param = maxeff - (step * i++);
+					cell.effect_param = maxeff - ((maxeff - mineff) * i++) / sel_height;
 				}
 			}
-			*fill->ptr(sel_x1 - sel_x1, row - sel_y1) = cell;
+			*fill->ptr(0, row - sel_y1) = cell;
 		}
 		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
 		pv->clearSelection();
