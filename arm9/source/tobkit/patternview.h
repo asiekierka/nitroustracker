@@ -261,7 +261,7 @@ class PatternView: public Widget {
 				if (cell->effect != 0xff)
 					drawSmallChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
 						
-				if (cell->effect_param != 0x00)
+				if (cell->effect_param != 0x00 || cell->effect != 0xff)
 					drawHexByte(cell->effect_param, realx+8*PV_CHAR_WIDTH+3, realy, effectparamcol);
 			}
 		}
