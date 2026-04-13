@@ -263,7 +263,7 @@ u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 char last_themepath[SETTINGS_FILENAME_LEN + 1];
-char preview_smp_path[256];
+char *preview_smp_path = NULL;
 
 bool fastscroll = false;
 bool multisamp_from_mapsamp = false;
@@ -2022,7 +2022,7 @@ void previewWav(void) {
 
 void confirmWavPreview(void)
 {
-	deleteMessageBox();
+	if (mb != 0) deleteMessageBox();
 	mb = new MessageBox(&sub_vram, "preview large audio file?", 2, "preview", previewWav, "cancel", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
@@ -2051,11 +2051,21 @@ void handleFileChange(File file)
 			// Pause song playback if ongoing
 			if(state->playing)
 				pausePlay();
-				
-			preview_smp_path[255] = 0;
-			strncpy(preview_smp_path, file.name_with_path.c_str(), 255);
 
-			if (calcFileSize(str) > 4 * 1024 * 1024 /* 4MiB */)
+			if (preview_smp_path != NULL)
+			{
+				ntxm_free(preview_smp_path);
+				preview_smp_path = NULL;
+			}
+
+			preview_smp_path = ntxm_ustrdup(file.name_with_path.c_str());
+			if (!preview_smp_path)
+			{
+				showMessage("not enough ram free!", true);
+				return;
+			}
+
+			if (calcFileSize(str) > 3 * 1024 * 1024 /* 3MiB */)
 				confirmWavPreview();
 			else
 				previewWav();
