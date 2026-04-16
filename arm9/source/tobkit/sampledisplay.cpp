@@ -450,14 +450,11 @@ void SampleDisplay::drawLoopHandles(void)
 	u16 loop_start_pos = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart());
 	u16 loop_end_pos   = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
-	if(!draw_mode)
-	{
-		oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos-2;
-		oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos-2+8-1;
-			
-		oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos-3;
-		oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos-3+8-1;
-	}
+	oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos-2;
+	oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos-2+8-1;
+		
+	oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos-3;
+	oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos-3+8-1;
 
 	bool draw_loop_end 	 = loop_points_visible && (loop_end_pos <= width+8);
 	bool draw_loop_start = loop_points_visible && (loop_start_pos <= width+8);
