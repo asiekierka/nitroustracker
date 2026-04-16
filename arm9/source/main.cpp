@@ -1503,6 +1503,9 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 
 	if (tw)
 		tw->pleaseDraw();
+
+	if (mb)
+		mb->pleaseDraw();
 }
 
 #ifdef MIDI
