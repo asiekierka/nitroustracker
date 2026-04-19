@@ -609,28 +609,30 @@ void handleSampleChange(const u16 newsample)
 	state->sample = newsample;
 	Instrument *inst = song->getInstrument(lbinstruments->getidx());
 	Sample *smp = inst ? inst->getSample(newsample) : NULL;
-	rbloop_none->set_enabled(smp != NULL);
-	rbloop_forward->set_enabled(smp != NULL);
-	rbloop_pingpong->set_enabled(smp != NULL);
-	nssamplevolume->set_enabled(smp != NULL);
-	nspanning->set_enabled(smp != NULL);
-	nsrelnote->set_enabled(smp != NULL);
-	nsfinetune->set_enabled(smp != NULL);
-	buttonsmpfadein->set_enabled(smp != NULL);
-	buttonsmpfadeout->set_enabled(smp != NULL);
-	buttonsmpselall->set_enabled(smp != NULL);
-	buttonsmpselnone->set_enabled(smp != NULL);
-	buttonsmpseldel->set_enabled(smp != NULL);
-	buttonsmptrim->set_enabled(smp != NULL);
-	buttonsmpreverse->set_enabled(smp != NULL);
-	buttonsmpnormalize->set_enabled(smp != NULL);
-	cbsnapto0xing->set_enabled(smp != NULL);
-	buttonsmpdraw->set_enabled(smp != NULL);
+	bool is_null_sample = smp == NULL || smp->getData() == NULL;
+
+	rbloop_none->set_enabled(!is_null_sample);
+	rbloop_forward->set_enabled(!is_null_sample);
+	rbloop_pingpong->set_enabled(!is_null_sample);
+	nssamplevolume->set_enabled(!is_null_sample);
+	nspanning->set_enabled(!is_null_sample);
+	nsrelnote->set_enabled(!is_null_sample);
+	nsfinetune->set_enabled(!is_null_sample);
+	buttonsmpfadein->set_enabled(!is_null_sample);
+	buttonsmpfadeout->set_enabled(!is_null_sample);
+	buttonsmpselall->set_enabled(!is_null_sample);
+	buttonsmpselnone->set_enabled(!is_null_sample);
+	buttonsmpseldel->set_enabled(!is_null_sample);
+	buttonsmptrim->set_enabled(!is_null_sample);
+	buttonsmpreverse->set_enabled(!is_null_sample);
+	buttonsmpnormalize->set_enabled(!is_null_sample);
+	cbsnapto0xing->set_enabled(!is_null_sample);
+	buttonsmpdraw->set_enabled(!is_null_sample);
 	buttonrenameinst->set_enabled(inst != NULL);
 	buttonrenamesample->set_enabled(smp != NULL);
 	lbsamples->select(newsample);
 
-	if(smp == NULL)
+	if(is_null_sample)
 	{
 		sampledisplay->setSample(NULL);
 		nssamplevolume->setValue(0);
@@ -3022,6 +3024,8 @@ void sample_del_selection(void)
 	DC_FlushAll();
 
 	sampledisplay->setSample(smp);
+	handleSampleChange(state->sample);
+	
 	setHasUnsavedChanges(true);
 }
 
