@@ -1181,14 +1181,14 @@ void handleTypewriterFilenameOk(void)
 	debugprintf("%s\n", text);
 	if(strcmp(text,"") != 0)
 	{
-		if( (rbsong->getActive() == true) && (strcasecmp(text+textlen-3, ".xm") != 0) )
+		if( (rbsong->getActive() == true) && (textlen <= 3 || strcasecmp(text+textlen-3, ".xm") != 0) )
 		{
 			// Append extension
 			name = (char*)ntxm_cmalloc(textlen+3+1);
 			strcpy(name,text);
 			strcpy(name+textlen,".xm");
 		}
-		else if( (rbsample->getActive() == true) && (strcasecmp(text+textlen-4, ".wav") != 0) )
+		else if( (rbsample->getActive() == true) && (textlen <= 4 || strcasecmp(text+textlen-4, ".wav") != 0) )
 		{
 			// Append extension
 			name = (char*)ntxm_cmalloc(textlen+4+1);
