@@ -716,7 +716,11 @@ void SampleDisplay::scroll(u32 newscrollpos)
 	u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN +2 - scrollthingywidth;
 
 	scrollpos = ntxm_clamp(newscrollpos, 0, disp_width - window_width);
-	scrollthingypos = scrollpos * scroll_width / (disp_width - window_width);
+	
+	if (disp_width - window_width == 0)
+		scrollthingypos = 0;
+	else
+		scrollthingypos = scrollpos * scroll_width / (disp_width - window_width);
 
 	calcScrollThingy();
 	draw();
@@ -772,5 +776,7 @@ u32 SampleDisplay::pixelToSample(s32 pixel)
 
 s32 SampleDisplay::sampleToPixel(u32 sample)
 {
+	if (smp->getNSamples() - scrollpos == 0) return 0;
+
 	return s32( sample * (s64(width-2) << zoom_level) / smp->getNSamples() - scrollpos );
 }
