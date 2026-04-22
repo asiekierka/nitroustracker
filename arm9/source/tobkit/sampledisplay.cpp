@@ -381,6 +381,8 @@ void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
 
 long SampleDisplay::find_zero_crossing_near(long pos)
 {
+	pos = ntxm_clamp(pos, 0, smp->getNSamples() - 1);
+
 	if( smp->is16bit() )
 	{
 		s16 *data = (s16*)smp->getData();
