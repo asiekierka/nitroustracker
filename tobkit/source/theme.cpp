@@ -133,6 +133,7 @@ ColorScheme::ColorScheme() {
 	col_fxkeyboard_cmd_desc_disabled = col_dark_ctrl_disabled;	
 	col_fxkeyboard_minilabel_x = col_pv_notes &~ BIT(15);	
 	col_fxkeyboard_minilabel_y = col_pv_effect &~ BIT(15);
+	col_typewriter_disabled_key = RGB15(25, 25, 25) | BIT(15);
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -248,6 +249,8 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (!theme_has_key[109]) theme_cols[109] = theme_cols[8];	// Fxkb disabled command desc label
 	if (!theme_has_key[110]) theme_cols[110] = theme_cols[61];	// Fxkb button param label 'X'
 	if (!theme_has_key[111]) theme_cols[111] = theme_cols[67];	// Fxkb button param label 'Y'
+	if (!theme_has_key[112]) theme_cols[112] = theme_cols[93];	// Typewriter disabled key
+
 
 	return true;
 }
