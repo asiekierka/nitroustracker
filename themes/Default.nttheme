@@ -110,3 +110,4 @@
 109=ff9400 ; FX input keyboard command description label (disabled)
 110=4a7bff ; FX input keyboard button "X" label
 111=ff62ee ; FX input keyboard button "Y" label
+112=cfcfcf ; Text entry disabled key

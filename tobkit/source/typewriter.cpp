@@ -128,8 +128,7 @@ void Typewriter::penDown(u8 px, u8 py)
 			else
 				c = typewriter_Hit[tilex+(tiley*TW_TILE_WIDTH)];
 			
-			if (is_file_name && 
-				(c=='<' || c=='>' || c==':' || c=='/' || c=='?' || c=='*'))
+			if (is_file_name && strchr("*:<>|\"\?\x7F", c))	
 			{
 				c = NOK;
 			} else {
