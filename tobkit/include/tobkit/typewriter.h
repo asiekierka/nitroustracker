@@ -32,7 +32,7 @@ class Typewriter: public Widget {
 	public:
 		Typewriter(/*u8 _x, u8 _y,*/const char *_msg, u16 *_char_base,
 			u16 *_map_base, u8 _palette_offset, uint16 **_vram,
-			vuint16* _trans_reg_x, vuint16* _trans_reg_y);
+			vuint16* _trans_reg_x, vuint16* _trans_reg_y, bool _is_file_name);
 	
 		~Typewriter(void);
 	
@@ -57,7 +57,7 @@ class Typewriter: public Widget {
 		void setTheme(Theme *theme_, u16 bgcolor_);
 		
 	private:
-		unsigned short typewriterPal[16] __attribute__((aligned(4)));
+		unsigned short typewriterPal[16];
 
 
 		void (*onOk)(void);
@@ -78,9 +78,10 @@ class Typewriter: public Widget {
 		u8 mode;
 		vuint16 *trans_reg_x, *trans_reg_y;
 
+		bool is_file_name;
 		char *text;
 		u16 cursorpos, strlength;
-	
+		
 		u8 tilex, tiley;
 		
 		void genPal(void);
