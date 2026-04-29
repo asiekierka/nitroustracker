@@ -426,7 +426,7 @@ void PatternView::updateFromState(void)
 
 bool PatternView::pickCell(u8 px, u8 py, u16 *cx, u16 *cy)
 {
-	if( (px < x+PV_BORDER_WIDTH) || (px > x+getEffectiveWidth()) ) {
+	if( (px < x+PV_BORDER_WIDTH) || (px > x+getEffectiveWidth()-1) ) {
 		return false;
 	} else {
 		u8 realx = px - (x+PV_BORDER_WIDTH);
