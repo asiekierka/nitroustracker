@@ -2767,7 +2767,7 @@ void handleOutputModeChange(u8 outputMode)
 {
 	settings->setStereoOutput(outputMode != 0);
 	CommandSetStereoOutput(outputMode != 0);
-	stopPlay();
+	pausePlay();
 }
 
 void handleOutputFreqChange(u8 freq)
@@ -3013,7 +3013,7 @@ void sample_del_selection(void)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	stopPlay();
+	pausePlay();
 
 	u32 startsample, endsample;
 	bool sel_exists = sampledisplay->getSelection(&startsample, &endsample);
@@ -3037,7 +3037,7 @@ void sample_crop_selection(void)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	stopPlay();
+	pausePlay();
 
 	u32 startsample, endsample;
 	bool sel_exists = sampledisplay->getSelection(&startsample, &endsample);
@@ -3059,7 +3059,7 @@ void sample_fade_in(void)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	stopPlay();
+	pausePlay();
 
 	u32 startsample, endsample;
 	bool sel_exists = sampledisplay->getSelection(&startsample, &endsample);
@@ -3081,7 +3081,7 @@ void sample_fade_out(void)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	stopPlay();
+	pausePlay();
 
 	u32 startsample, endsample;
 	bool sel_exists = sampledisplay->getSelection(&startsample, &endsample);
@@ -3103,7 +3103,7 @@ void sample_reverse(void)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	stopPlay();
+	pausePlay();
 
 	u32 startsample, endsample;
 	bool sel_exists = sampledisplay->getSelection(&startsample, &endsample);
