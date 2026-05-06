@@ -1,3 +1,20 @@
+-- NitrousTracker v0.6.3 (2026-05-06)
+
+New features:
+
+- two new interface themes (Gobiodon.nttheme, 14.4mL/BubblegumWhite.nttheme)
+
+Improvements:
+
+- in fx mode, truncate pattern selection when channels are deleted or pattern length is reduced
+- prevent typing illegal characters in file names
+- expanded interface theming
+ 
+Fixes:
+
+- fix crash caused by finishing a pattern selection on the last pixel column of the last channel
+- fix dummy instruments in imported songs crashing
+
 -- NitrousTracker v0.6.2 (2026-04-16)
 
 New features:
