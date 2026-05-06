@@ -45,9 +45,9 @@ ColorScheme::ColorScheme() {
 	col_outline = RGB15(0, 0, 0) | BIT(15);
 	col_tab_outline = col_outline;
 	col_sepline = RGB15(31, 31, 0) | BIT(15);
-	col_icon = RGB15(0, 0, 0) | BIT(15);
-	col_icon_bt = col_icon;
-	col_checkmark = col_icon;
+	col_tab_icon = RGB15(0, 0, 0) | BIT(15);
+	col_icon_bt = col_tab_icon;
+	col_checkmark = col_tab_icon;
 	col_text = RGB15(0, 0, 0) | BIT(15);
 	col_text_light = col_light_bg;
 	col_text_bt = col_text;
@@ -102,7 +102,7 @@ ColorScheme::ColorScheme() {
 	col_pv_mutesolo_col2_highlight = col_pv_cb_col2_highlight;
 	col_pv_left_numbers_highlight = col_pv_left_numbers;
 	col_list_sep_vertical = col_sepline;
-	col_tb_bg = col_dark_ctrl;
+	col_tb_bg_off_col1 = col_dark_ctrl;
 	col_tb_fg_off = col_text_bt;
 	col_tb_fg_on = col_light_ctrl;
 	col_piano_full_col1 = RGB15(31, 31, 31) | BIT(15);
@@ -134,6 +134,14 @@ ColorScheme::ColorScheme() {
 	col_fxkeyboard_minilabel_x = col_pv_notes &~ BIT(15);	
 	col_fxkeyboard_minilabel_y = col_pv_effect &~ BIT(15);
 	col_typewriter_disabled_key = RGB15(25, 25, 25) | BIT(15);
+	col_light_ctrl_pressed = col_dark_ctrl;
+	col_dark_ctrl_pressed = col_light_ctrl;
+	col_text_bt_pressed = col_text_bt;
+	col_tb_bg_on_col1 = col_tb_bg_off_col1;
+	col_tb_bg_on_col2 = col_tb_bg_off_col1;
+	col_tb_bg_off_col2 = col_tb_bg_off_col1;
+	col_pv_mutesolo_text_highlight = col_text;
+	col_tab_icon_highlight = col_tab_icon;
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -250,6 +258,17 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (!theme_has_key[110]) theme_cols[110] = theme_cols[61];	// Fxkb button param label 'X'
 	if (!theme_has_key[111]) theme_cols[111] = theme_cols[67];	// Fxkb button param label 'Y'
 	if (!theme_has_key[112]) theme_cols[112] = theme_cols[93];	// Typewriter disabled key
+
+	if (!theme_has_key[113]) theme_cols[113] = theme_cols[6];   // Light button gradient (pressed)
+	if (!theme_has_key[114]) theme_cols[114] = theme_cols[5];   // Dark button gradient (pressed)
+	if (!theme_has_key[115]) theme_cols[115] = theme_cols[29];  // Button text (pressed)
+	if (!theme_has_key[116]) theme_cols[116] = theme_cols[25];  // Button icon (pressed)
+	if (!theme_has_key[117]) theme_cols[117] = theme_cols[81];  // Togglebutton background (on) 1
+	if (!theme_has_key[118]) theme_cols[118] = theme_cols[81];  // Togglebutton background (on) 2
+	if (!theme_has_key[119]) theme_cols[119] = theme_cols[81];  // Togglebutton background (off) 2
+	if (!theme_has_key[120]) theme_cols[120] = theme_cols[74];  // Mute/solo pressed button text
+	if (!theme_has_key[121]) theme_cols[121] = theme_cols[24];  // Selected tab icon
+
 
 
 	return true;
