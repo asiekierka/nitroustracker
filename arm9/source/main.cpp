@@ -1483,7 +1483,7 @@ void updateGuiToNewPattern(u8 newpattern)
 void handlePotPosChangeFromSong(u16 newpotpos)
 {	
 	if (newpotpos != state->potpos)
-			pv->clearSelection();
+		pv->clearSelection();
 			
 	if (state->queued_potpos >= 0) {
 		state->potpos = state->queued_potpos;
@@ -1558,6 +1558,9 @@ void handlePotPosChangeFromUser(u16 newpotpos)
 		newpotpos = song->getPotLength() - 1;
 	}
 	if (!potGoto(newpotpos)) return;
+
+	if (newpotpos != state->potpos)
+		pv->clearSelection();
 
 	// Update other GUI Elements
 	updateGuiToNewPattern(song->getPotEntry(newpotpos));
@@ -1722,6 +1725,12 @@ void handleChannelDel(void)
 
 	redraw_main_requested = true;
 	updateLabelChannels();
+
+	u16 x1, y1, x2, y2;
+	if(pv->getSelection(&x1, &y1, &x2, &y2) == true) {
+		if (x2 >= song->getChannels()-1) pv->setSelection(x1, y1, song->getChannels()-1, y2);
+	}
+
 	setHasUnsavedChanges(true);
 }
 
@@ -1740,6 +1749,12 @@ void handlePtnLengthChange(s32 newlength)
 		if(state->getCursorRow() >= newlength) {
 			state->setCursorRow(newlength-1);
 		}
+
+		u16 x1, y1, x2, y2;
+		if(pv->getSelection(&x1, &y1, &x2, &y2) == true) {
+			if (y2 >= newlength) pv->setSelection(x1, y1, x2, newlength-1);
+		}
+		
 		redraw_main_requested = true;
 		setHasUnsavedChanges(true);
 	}
