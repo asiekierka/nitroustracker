@@ -1553,14 +1553,14 @@ void handleDSMWRecv(void)
 // Callback called from lbpot when the user changes the pot element
 void handlePotPosChangeFromUser(u16 newpotpos)
 {
+	if (newpotpos != state->potpos)
+		pv->clearSelection();
+
 	// Update potpos in song
 	if(newpotpos>=song->getPotLength()) {
 		newpotpos = song->getPotLength() - 1;
 	}
 	if (!potGoto(newpotpos)) return;
-
-	if (newpotpos != state->potpos)
-		pv->clearSelection();
 
 	// Update other GUI Elements
 	updateGuiToNewPattern(song->getPotEntry(newpotpos));
@@ -1754,7 +1754,7 @@ void handlePtnLengthChange(s32 newlength)
 		if(pv->getSelection(&x1, &y1, &x2, &y2) == true) {
 			if (y2 >= newlength) pv->setSelection(x1, y1, x2, newlength-1);
 		}
-		
+
 		redraw_main_requested = true;
 		setHasUnsavedChanges(true);
 	}
