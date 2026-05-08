@@ -1794,7 +1794,7 @@ void handleRestartPosChange(s32 restartpos)
 void confirmZap(void (*onConfirm)(void))
 {
 	deleteMessageBox();
-	mb = new MessageBox(&sub_vram, "are you sure", 2, "yes", onConfirm, "cancel", deleteMessageBox);
+	mb = new MessageBox(&sub_vram, "are you sure", 2, "zap", onConfirm, "cancel", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 }
