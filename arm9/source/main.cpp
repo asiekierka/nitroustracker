@@ -1485,6 +1485,10 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 	if (newpotpos != state->potpos)
 		pv->clearSelection();
 			
+	if(newpotpos>=song->getPotLength()) {
+		newpotpos = song->getPotLength() - 1;
+	}
+
 	if (state->queued_potpos >= 0) {
 		state->potpos = state->queued_potpos;
 		state->setPlaybackRow(0);
