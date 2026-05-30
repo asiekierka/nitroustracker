@@ -142,6 +142,7 @@ void FXKeyboard::setCategory(u8 newcat) {
 			fxkb_vals[14] = 0xE;
 			fxkb_state[0] = FXBUTTON_DISABLED;
 			memset(&fxkb_state[3], FXBUTTON_DISABLED, 9);
+			fxkb_state[6] = FXBUTTON_NORMAL;
 			break;
 
 		default:
