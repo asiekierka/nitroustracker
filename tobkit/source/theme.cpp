@@ -137,6 +137,7 @@ ColorScheme::ColorScheme() {
 	col_light_ctrl_pressed = col_dark_ctrl;
 	col_dark_ctrl_pressed = col_light_ctrl;
 	col_text_bt_pressed = col_text_bt;
+	col_icon_bt_pressed = col_icon_bt;
 	col_tb_bg_on_col1 = col_tb_bg_off_col1;
 	col_tb_bg_on_col2 = col_tb_bg_off_col1;
 	col_tb_bg_off_col2 = col_tb_bg_off_col1;
