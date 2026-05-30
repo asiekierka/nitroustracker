@@ -724,8 +724,9 @@ void handleInstChange(const u16 newinst, const bool reset=true)
 		handleSampleChange(0); // handles the state sample
 	else if(inst == NULL)
 		handleSampleChange(state->sample); // preserve current sample so user can load new smp into slot >0 on null inst
-	else
-		cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
+
+	cbvolenvenabled->setChecked(inst != NULL && inst->getVolEnvEnabled());
+		
 }
 
 void handleInstChangeReset(u16 newinst)
@@ -3396,7 +3397,7 @@ void volEnvPointsChanged(void)
 
 	inst->setVolumeEnvelopePoints(xs, ys, n_points);
 
-	toggleVolEnvEnabled(n_points != 0 && inst->getVolEnvEnabled());
+	toggleVolEnvEnabled(inst->getVolEnvEnabled());
 	volenvedit->pleaseDraw();
 
 	DC_FlushAll();
