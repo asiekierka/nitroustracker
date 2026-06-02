@@ -260,15 +260,22 @@ void SampleDisplay::penMove(u8 px, u8 py)
 
 void SampleDisplay::setSample(Sample *_smp)
 {
+	if (_smp != NULL && smp != _smp) {
+		zoom_level = 0;
+		scroll(0);
+	}
+
 	smp = _smp;
 	selection_exists = false;
 	selstart = selend = 0;
-	if(_smp == 0) {
+	
+	if(_smp == NULL) {
 		loop_points_visible = false;
 		oamDisable(&oamSub);
 	}
 	else if (isExposed())
 		oamEnable(&oamSub);
+
 	draw();
 }
 
