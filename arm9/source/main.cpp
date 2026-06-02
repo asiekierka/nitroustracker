@@ -2872,6 +2872,8 @@ void ptnCopy(bool cut)
 		clipboard = NULL;
 	}
 
+	buttonpaste->set_enabled(clipboard != NULL);
+
 	if(cut == true) {
 		action_buffer->add(song, newCellClearAction(state, song, sel_x1, sel_y1, sel_x2, sel_y2));
 	}
@@ -4098,6 +4100,7 @@ void setupGUI(bool dldi_enabled)
 		buttoncut->setCaption("cut");
 		buttoncopy->setCaption("cp");
 		buttonpaste->setCaption("pst");
+		buttonpaste->disable();
 
 		buttoncolselect   = new Button(RIGHT_SIDE_BUTTON_X, 127, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
 		buttoninsnote     = new Button(RIGHT_SIDE_BUTTON_X, 140, RIGHT_SIDE_BUTTON_WIDTH, 12, &main_vram_back);
