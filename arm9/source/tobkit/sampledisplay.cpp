@@ -261,8 +261,7 @@ void SampleDisplay::penMove(u8 px, u8 py)
 void SampleDisplay::setSample(Sample *_smp)
 {
 	if (_smp != NULL && smp != _smp) {
-		zoom_level = 0;
-		scroll(0);
+		zoom_level =  scrollpos = scrollthingypos = 0;
 	}
 
 	smp = _smp;
