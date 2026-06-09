@@ -52,13 +52,12 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_s
 	pen_on_loop_start_point(false), pen_on_loop_end_point(false),
 	pen_on_zoom_in(false), pen_on_zoom_out(false),
 	pen_on_scroll_left(false), pen_on_scroll_right(false), pen_on_scrollthingy(false), pen_on_scrollbar(false),
-	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
+	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
 	snap_to_zero_crossings(true), draw_mode(false)
 {
 #ifdef TOBKIT_PLATFORM_NDS
 	gfxLine = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 	gfxLoopHandle = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
-	gfxZoomButtons = oamAllocateGfx(&oamSub, SpriteSize_32x16, SpriteColorFormat_16Color);
 
 	// draw a single pixel then use max y-scale to make a line
 	*(gfxLine+64)=1;
@@ -91,20 +90,6 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_s
 			SpriteSize_16x32, SpriteColorFormat_16Color,
 			gfxLine, 0, true, false, false, false, false);
 	}
-
-	memcpy(gfxZoomButtons, sampleed_zoomTiles, sampleed_zoomTilesLen);
-	copy_sprite_frame(gfxZoomButtons, 0);
-
-	for (int i=0;i<3;++i)
-	{
-		gfxZoomButtonStates[i] = oamAllocateGfx(&oamSub, SpriteSize_32x16,
-								SpriteColorFormat_16Color);
-		copy_sprite_frame(gfxZoomButtonStates[i], i);
-	}
-
-	oamSet(&oamSub, SPR_ZOOM_BUTTONS, x+1, y+1, 0, 2,
-		SpriteSize_32x16, SpriteColorFormat_16Color, gfxZoomButtons,
-		-1, false, false, false, false, false);
 #endif
 }
 
@@ -113,7 +98,6 @@ SampleDisplay::~SampleDisplay(void)
 #ifdef TOBKIT_PLATFORM_NDS
 	oamFreeGfx(&oamSub, gfxLine);
 	oamFreeGfx(&oamSub, gfxLoopHandle);
-	oamFreeGfx(&oamSub, gfxZoomButtons);
 #endif
 }
 
@@ -128,6 +112,12 @@ void SampleDisplay::penDown(u16 px, u16 py)
 			pen_on_scroll_left = true;
 			scroll(scrollpos-SCROLLPIXELS);
 		} else if(px - x >= width - SCROLLBUTTON_HEIGHT) {
+			pen_on_zoom_out = true;
+			zoomOut();
+		} else if(px - x >= width - 2 * SCROLLBUTTON_HEIGHT) {
+			pen_on_zoom_in = true;
+			zoomIn();
+		} else if(px - x >= width - 3 * SCROLLBUTTON_HEIGHT) {
 			pen_on_scroll_right = true;
 			scroll(scrollpos+SCROLLPIXELS);
 		} else if(px - x < scrollthingypos + SCROLLBUTTON_HEIGHT)	{
@@ -158,17 +148,6 @@ void SampleDisplay::penDown(u16 px, u16 py)
 		{
 			pen_on_loop_end_point = true;
 			loop_touch_offset = px-x-1 - loop_end_pos;
-		}
-
-		// Else: Stylus on a zoom button?
-		else if(isInRect(px-x, py-y, 1, 1, ZOOM_BUTTON_SIZE * 2, ZOOM_BUTTON_SIZE + 1))	{
-			if(px-x <= ZOOM_BUTTON_SIZE) {
-				pen_on_zoom_in = true;
-				zoomIn();
-			} else {
-				pen_on_zoom_out = true;
-				zoomOut();
-			}
 		}
 
 		// Else: Stylus on the sample.
@@ -246,11 +225,11 @@ void SampleDisplay::penMove(u16 px, u16 py)
 	}
 	else if(pen_on_scrollthingy)
 	{
-		scrollthingypos = ntxm_clamp(px - x - pen_x_on_scrollthingy - SCROLLBUTTON_HEIGHT, 0, width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingywidth);
+		scrollthingypos = ntxm_clamp(px - x - pen_x_on_scrollthingy - SCROLLBUTTON_HEIGHT, 0, width - 2*SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN +2 - scrollthingywidth);
 
 		u32 window_width = width - 2;
 		u32 disp_width = window_width << zoom_level;
-		u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingywidth;
+		u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN +2 - scrollthingywidth;
 		scrollpos = scrollthingypos * (disp_width - window_width) / scroll_width;
 	}
 	else if( !pen_on_zoom_in && !pen_on_zoom_out && !pen_on_scroll_left && !pen_on_scroll_right && !pen_on_scrollbar)
@@ -294,10 +273,15 @@ void SampleDisplay::penMove(u16 px, u16 py)
 
 void SampleDisplay::setSample(Sample *_smp)
 {
+	if (_smp != NULL && smp != _smp) {
+		zoom_level =  scrollpos = scrollthingypos = 0;
+	}
+
 	smp = _smp;
 	selection_exists = false;
 	selstart = selend = 0;
-	if(_smp == 0) {
+	
+	if(_smp == NULL) {
 		loop_points_visible = false;
 #ifdef TOBKIT_PLATFORM_NDS
 		oamDisable(&oamSub);
@@ -307,6 +291,7 @@ void SampleDisplay::setSample(Sample *_smp)
 	else if (isExposed())
 		oamEnable(&oamSub);
 #endif
+
 	draw();
 }
 
@@ -427,6 +412,8 @@ void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
 
 long SampleDisplay::find_zero_crossing_near(long pos)
 {
+	pos = ntxm_clamp(pos, 0, smp->getNSamples() - 1);
+
 	if( smp->is16bit() )
 	{
 		s16 *data = (s16*)smp->getData();
@@ -497,14 +484,11 @@ void SampleDisplay::drawLoopHandles(void)
 	u16 loop_start_pos = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart());
 	u16 loop_end_pos   = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
-	if(!draw_mode)
-	{
-		oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos-2;
-		oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos-2+8-1;
-			
-		oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos-3;
-		oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos-3+8-1;
-	}
+	oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos-2;
+	oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos-2+8-1;
+		
+	oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos-3;
+	oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos-3+8-1;
 
 	bool draw_loop_end 	 = loop_points_visible && (loop_end_pos <= width+8);
 	bool draw_loop_start = loop_points_visible && (loop_start_pos <= width+8);
@@ -567,20 +551,20 @@ void SampleDisplay::draw(void)
 
 	// Right Button
 	if(pen_on_scroll_right) {
-		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-8-ZOOM_BUTTONS_MARGIN, height-SCROLLBAR_WIDTH+1, 8, 8);
 	} else {
-		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-9, height-SCROLLBAR_WIDTH+1, 8, 8);
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-8-ZOOM_BUTTONS_MARGIN, height-SCROLLBAR_WIDTH+1, 8, 8);
 	}
 
 	// This draws the right-arrow
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			drawPixel(width-j-3, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
+			drawPixel(width-ZOOM_BUTTONS_MARGIN-j-4, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
 		}
 	}
 
-	drawBox(width-SCROLLBAR_WIDTH, height-SCROLLBUTTON_HEIGHT, 9, 9, theme->col_outline);
+	drawBox(width-SCROLLBAR_WIDTH-ZOOM_BUTTONS_MARGIN, height-SCROLLBUTTON_HEIGHT, 9, 9, theme->col_outline);
 
 	// Left Button
 	if(pen_on_scroll_left) {
@@ -589,7 +573,7 @@ void SampleDisplay::draw(void)
 		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, 1, height-9, 8, 8);
 	}
 
-	// This draws the down-arrow
+	// This draws the left-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
 			drawPixel(x+j+3, height-SCROLLBAR_WIDTH+4+p, theme->col_icon_bt);
@@ -598,11 +582,40 @@ void SampleDisplay::draw(void)
 
 	drawBox(0, height-9, 9, 9, theme->col_outline);
 
+	// 
+	// Zoom buttons on scrollbar
+	//
+
+	// Zoom in
+	if(pen_on_zoom_in) {
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width - 2 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	} else {
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width - 2 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	}
+
+	drawBox(width - 2 * SCROLLBUTTON_HEIGHT - 1, height-9, 10, 9, theme->col_outline);
+	
+	// + icon
+	drawHLine(width - 2 * SCROLLBUTTON_HEIGHT + 1, height-9 + 4, 6, theme->col_icon_bt);
+	drawVLine(width - 2 * SCROLLBUTTON_HEIGHT + 3, height-9 + 2, 5, theme->col_icon_bt);
+	drawVLine(width - 2 * SCROLLBUTTON_HEIGHT + 4, height-9 + 2, 5, theme->col_icon_bt);
+
+	//Zoom out
+	if(pen_on_zoom_out) {
+		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width - 1 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	} else {
+		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width - 1 * SCROLLBUTTON_HEIGHT, height-9, 9, 8);
+	}
+
+	drawBox(width - 1 * SCROLLBUTTON_HEIGHT - 1, height-9, 10, 9, theme->col_outline);
+
+	// - icon
+	drawHLine(width - 1 * SCROLLBUTTON_HEIGHT + 1, height-9 + 4, 6, theme->col_icon_bt);
 
 	drawBox(0, height-SCROLLBAR_WIDTH, width, SCROLLBAR_WIDTH, theme->col_outline);
 
 	// Clear Scrollbar
-	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2);
+	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, SCROLLBUTTON_HEIGHT, height-SCROLLBAR_WIDTH+1, width-2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN, SCROLLBAR_WIDTH-2);
 
 	// The scroll thingy
 	if(pen_on_scrollthingy) {
@@ -729,26 +742,7 @@ void SampleDisplay::draw(void)
 
 	}
 
-#ifdef TOBKIT_PLATFORM_NDS
-	//
-	// Zoom buttons
-	//
-	if(!draw_mode) {
-		// +
-		if(pen_on_zoom_in) {
-			copy_sprite_frame(gfxZoomButtons, 1);
-		}
-
-		// -
-		else if(pen_on_zoom_out) {
-			copy_sprite_frame(gfxZoomButtons, 2);
-		}
-
-		else {
-			copy_sprite_frame(gfxZoomButtons, 0);
-		}
-	}
-#else
+#ifndef TOBKIT_PLATFORM_NDS
 	//
 	// Loop Points
 	//
@@ -831,41 +825,6 @@ void SampleDisplay::draw(void)
 			}
 		}
 	}
-
-	//
-	// Zoom buttons
-	//
-
-	if(!draw_mode) {
-		// Outlines
-		drawHLine(2, 1, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-		drawHLine(ZOOM_BUTTON_SIZE + 1, 1, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-
-		drawHLine(2, ZOOM_BUTTON_SIZE, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-		drawHLine(ZOOM_BUTTON_SIZE + 1, ZOOM_BUTTON_SIZE, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-
-		drawVLine(1, 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-		drawVLine(ZOOM_BUTTON_SIZE, 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-		drawVLine(ZOOM_BUTTON_SIZE * 2 - 1, 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-
-		// +
-		if(pen_on_zoom_in) {
-			drawFullBox(2, 2, ZOOM_BUTTON_SIZE - 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-			drawHLine(3, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_bg);
-			drawVLine(ZOOM_BUTTON_CENTER, 3, ZOOM_BUTTON_SIZE - 4, theme->col_smp_bg);
-		} else {
-			drawHLine(3, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_zoom);
-			drawVLine(ZOOM_BUTTON_CENTER, 3, ZOOM_BUTTON_SIZE - 4, theme->col_smp_zoom);
-		}
-
-		// -
-		if(pen_on_zoom_out) {
-			drawFullBox(ZOOM_BUTTON_SIZE + 1, 2, ZOOM_BUTTON_SIZE - 2, ZOOM_BUTTON_SIZE - 2, theme->col_smp_zoom);
-			drawHLine(ZOOM_BUTTON_SIZE + 2, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_bg);
-		} else {
-			drawHLine(ZOOM_BUTTON_SIZE + 2, ZOOM_BUTTON_CENTER, ZOOM_BUTTON_SIZE - 4, theme->col_smp_zoom);
-		}
-	}
 #endif
 }
 
@@ -873,10 +832,14 @@ void SampleDisplay::scroll(u32 newscrollpos)
 {
 	u32 window_width = width - 2;
 	u64 disp_width = (u64)window_width << zoom_level;
-	u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT+2 - scrollthingywidth;
+	u32 scroll_width = width - 2*SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN +2 - scrollthingywidth;
 
 	scrollpos = ntxm_clamp(newscrollpos, 0, disp_width - window_width);
-	scrollthingypos = scrollpos * scroll_width / (disp_width - window_width);
+	
+	if (disp_width - window_width == 0)
+		scrollthingypos = 0;
+	else
+		scrollthingypos = scrollpos * scroll_width / (disp_width - window_width);
 
 	calcScrollThingy();
 	draw();
@@ -885,7 +848,7 @@ void SampleDisplay::scroll(u32 newscrollpos)
 // Calculate height and position of the scroll thingy
 void SampleDisplay::calcScrollThingy(void)
 {
-	u16 sch = width - 2 * SCROLLBUTTON_HEIGHT + 2;
+	u16 sch = width - 2 * SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN + 2;
 	scrollthingywidth = sch >> zoom_level;
 	if(scrollthingywidth < MIN_SCROLLTHINGY_WIDTH) scrollthingywidth = MIN_SCROLLTHINGY_WIDTH;
 }
@@ -932,5 +895,7 @@ u32 SampleDisplay::pixelToSample(s32 pixel)
 
 s32 SampleDisplay::sampleToPixel(u32 sample)
 {
+	if (smp->getNSamples() - scrollpos == 0) return 0;
+
 	return s32( sample * (s64(width-2) << zoom_level) / smp->getNSamples() - scrollpos );
 }

@@ -27,9 +27,6 @@
 
 #include "tobkit/widget.h"
 #include "ntxm/sample.h"
-#ifdef __NDS__
-#include "sampleed_zoom.h"
-#endif
 
 namespace tobkit {
 
@@ -40,6 +37,7 @@ namespace tobkit {
 #define SCROLLBUTTON_HEIGHT			9
 
 #define SAMPLE_MAX_ZOOM					16
+#define ZOOM_BUTTONS_MARGIN (2*SCROLLBUTTON_HEIGHT)
 
 #define SCROLLPIXELS				25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH		15
@@ -51,7 +49,6 @@ namespace tobkit {
 #define SPR_LOOPHANDLE_2_R				19
 #define SPR_LOOPLINE_1					20
 #define SPR_LOOPLINE_2					21
-#define SPR_ZOOM_BUTTONS				22
 
 class SampleDisplay: public Widget {
 	public:
@@ -96,19 +93,6 @@ class SampleDisplay: public Widget {
 		void draw(void);
 		void drawLoopHandles(void);
 
-#ifdef TOBKIT_PLATFORM_NDS
-		// https://codeberg.org/blocksds/sdk/src/branch/master/examples/graphics_2d/sprites_animated/source/main.c
-		inline void copy_sprite_frame(void *dst, int frame)
-		{
-			uint32_t frame_size = 32 * 16 / 2;
-			uint32_t offset = frame_size * frame;
-			uint8_t *base = (uint8_t *)sampleed_zoomTiles;
-
-			dmaCopy(base + offset, dst, frame_size);
-		}
-		u16 *gfxZoomButtonStates[3];
-#endif
-		
 		void scroll(u32 newscrollpos);
 		void calcScrollThingy(void);
 		void zoomIn(void);
@@ -149,7 +133,7 @@ class SampleDisplay: public Widget {
 		u8 draw_last_x, draw_last_y;
 
 #ifdef TOBKIT_PLATFORM_NDS
-		u16 *gfxLoopHandle, *gfxLine, *gfxZoomButtons;
+		u16 *gfxLoopHandle, *gfxLine;
 #endif
 };
 

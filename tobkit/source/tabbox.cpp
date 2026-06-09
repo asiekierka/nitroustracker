@@ -191,7 +191,7 @@ void TabBox::drawIcon(u8 guiidx)
 		drawHLine(3+size_full*guiidx, 0+offset, size_border - 1, col);
 		drawVLine(2+size_full*(guiidx+1), 1+offset, size_border-offset, col);
 		if (!selected) drawPixel(3+size_full*guiidx+size_border-1, 0+offset, theme->col_bg);
-		drawMonochromeIcon(4+size_full*guiidx, 2+offset, icon_size, icon_size - offset, icons.at(guiidx), theme->col_icon);
+		drawMonochromeIcon(4+size_full*guiidx, 2+offset, icon_size, icon_size - offset, icons.at(guiidx), selected ? theme->col_tab_icon_highlight : theme->col_tab_icon);
 	}
 	else
 	{
@@ -203,7 +203,7 @@ void TabBox::drawIcon(u8 guiidx)
 		drawVLine(0+offset, 3+size_full*guiidx, size_border - 1, col);
 		drawHLine(1+offset, 2+size_full*(guiidx+1), size_border-offset-1, col);
 		if (!selected) drawPixel(offset, 2+size_full*guiidx + size_border, theme->col_light_bg);
-		drawMonochromeIconOffset(2+offset, 4+size_full*guiidx, icon_size - offset, icon_size, 0, 0, icon_size, icon_size, icons.at(guiidx), theme->col_icon);
+		drawMonochromeIconOffset(2+offset, 4+size_full*guiidx, icon_size - offset, icon_size, 0, 0, icon_size, icon_size, icons.at(guiidx), selected ? theme->col_tab_icon_highlight : theme->col_tab_icon);
 	}
 		
 }

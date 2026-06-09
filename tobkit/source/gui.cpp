@@ -152,8 +152,9 @@ void GUI::penUp(u16 x, u16 y)
 {
 	if(activeWidget!=0) {
 		if(activeWidget->is_visible()==true) {
-			activeWidget->penUp(x, y);
+			Widget *w = activeWidget;
 			activeWidget = 0;
+			w->penUp(x, y);
 		}
 	}
 }

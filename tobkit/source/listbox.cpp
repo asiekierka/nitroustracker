@@ -167,6 +167,7 @@ void ListBox::add(const char *name) {
 	elements.push_back(name);
 	
 	if(elements.size() <= (u16)((height-1)/ROW_HEIGHT)) {
+		calcScrollThingy();
 		draw();
 	}
 }
@@ -315,7 +316,7 @@ void ListBox::draw(void)
 	s8 j, p;
 	for(j=0;j<3;j++) {
 		for(p=-j;p<=j;++p) {
-			drawPixel(width-SCROLLBAR_WIDTH+4+p, j+3, theme->col_outline);
+			drawPixel(width-SCROLLBAR_WIDTH+4+p, j+3, theme->col_icon_bt);
 		}
 	}
 	
@@ -331,7 +332,7 @@ void ListBox::draw(void)
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
-			drawPixel(width-SCROLLBAR_WIDTH+4+p, -j+height-4, theme->col_outline);
+			drawPixel(width-SCROLLBAR_WIDTH+4+p, -j+height-4, theme->col_icon_bt);
 		}
 	}
 	

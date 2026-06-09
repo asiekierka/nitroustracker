@@ -87,7 +87,7 @@ void Button::draw(u8 down) {
 	if(enabled)
 	{
 		if(down) {
-			drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 1, 1, width - 2, height - 2);
+			drawGradient(theme->col_dark_ctrl_pressed, theme->col_light_ctrl_pressed, 1, 1, width - 2, height - 2);
 		} else {
 			drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1, width - 2, height - 2);
 		}
@@ -96,5 +96,5 @@ void Button::draw(u8 down) {
 	}
 	drawBorder(theme->col_outline);
 	
-	drawString(caption, (width-getStringWidth(caption))/2, height/2-5, theme->col_text_bt);
+	drawString(caption, (width-getStringWidth(caption))/2, height/2-5, down ? theme->col_text_bt_pressed : theme->col_text_bt);
 }

@@ -39,12 +39,13 @@ using namespace tobkit;
 
 Typewriter::Typewriter(const char *_msg, u16 *_char_base, 
 	u16 *_map_base, u8 _palette_offset, Screen *_screen, vu16* _trans_reg_x,
-	vu16* _trans_reg_y)
+	vu16* _trans_reg_y, bool _is_file_name)
 	:Widget((_screen->getWidth()-TW_WIDTH)/2, (_screen->getHeight()-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _screen),
 	char_base(_char_base), map_base(_map_base), palette_offset(_palette_offset),
 	kx(x+TW_TILE_X), ky(y+TW_TILE_Y),
 	mode(TYPEWRITER_MODE_NORMAL),
-	trans_reg_x(_trans_reg_x), trans_reg_y(_trans_reg_y), cursorpos(0), strlength(0)
+	trans_reg_x(_trans_reg_x), trans_reg_y(_trans_reg_y), 
+	is_file_name(_is_file_name), cursorpos(0), strlength(0)
 {
 	onOk = 0;
 	onCancel = 0;
@@ -97,13 +98,14 @@ Typewriter::~Typewriter(void)
 
 void Typewriter::genPal(void)
 {
-	const u16 tw_themecols[6] = {
+	const u16 tw_themecols[] = {
 		theme->col_typewriter_mod_key, theme->col_typewriter_key,
 		theme->col_typewriter_key_label, theme->col_typewriter_bg, 
-		theme->col_outline, theme->col_typewriter_mod_key_label
+		theme->col_outline, theme->col_typewriter_mod_key_label,
+		(is_file_name ? theme->col_typewriter_disabled_key : theme->col_typewriter_key)
 	};
 
-	memcpy(&typewriterPal[1], tw_themecols, 6 * sizeof(u16));
+	memcpy(&typewriterPal[1], tw_themecols, 7 * sizeof(u16));
 }
 // Drawing request
 void Typewriter::pleaseDraw(void) {
@@ -119,8 +121,6 @@ void Typewriter::penDown(u16 px, u16 py)
 		tilex = (px-kx)/8;
 		tiley = (py-ky)/8;
 		
-		setTile(tilex, tiley, 4);
-		
 		if(tilex>=1 && tilex<(TW_TILE_WIDTH-1) && tiley<TW_TILE_HEIGHT)
 		{
 			char c;
@@ -129,6 +129,13 @@ void Typewriter::penDown(u16 px, u16 py)
 			else
 				c = typewriter_Hit[tilex+(tiley*TW_TILE_WIDTH)];
 			
+			if (is_file_name && strchr("*/:<>|\"\?\x7F", c))	
+			{
+				c = NOK;
+			} else {
+				setTile(tilex, tiley, 4);
+			}
+
 			if(c==CAP)
 			{
 				if((mode==TYPEWRITER_MODE_CAPS)||(mode==TYPEWRITER_MODE_SHIFT)) {
@@ -273,7 +280,7 @@ void Typewriter::setTheme(Theme *theme_, u16 bgcolor_)
 	memcpy(BG_PALETTE_SUB+palette_offset*16, typewriterPal, 32);
 	// generate highlight palette
 	for (int i = 0; i < 16; i++) {
-		BG_PALETTE_SUB[palette_offset * 16 + 16 + i] = (i == 1 || i == 2) ? theme->col_typewriter_pressed_key : theme->col_typewriter_bg;
+		BG_PALETTE_SUB[palette_offset * 16 + 16 + i] = (i == 1 || i == 2 || i == 7) ? theme->col_typewriter_pressed_key : theme->col_typewriter_bg;
 	}
 #endif
 }

@@ -193,7 +193,7 @@ GUI *gui;
 
 // <Instrument Gui>
 	EnvelopeEditor *volenvedit;
-	Button *btnaddenvpoint, *btndelenvpoint, *btnenvzoomin, *btnenvzoomout, *btnenvdrawmode, *btnenvsetsuspoint;
+	Button *btnaddenvpoint, *btndelenvpoint, *btnenvdrawmode, *btnenvsetsuspoint;
 	ToggleButton *tbmapsamples;
 	CheckBox *cbvolenvenabled, *cbsusenabled;
 // </Instrument Gui>
@@ -250,6 +250,7 @@ ActionBuffer *action_buffer = NULL;
 
 DSMIDIHandler dsmidi_handler;
 char last_themepath[SETTINGS_FILENAME_LEN + 1];
+char *preview_smp_path = NULL;
 
 bool fastscroll = false;
 bool multisamp_from_mapsamp = false;
@@ -565,28 +566,30 @@ void handleSampleChange(const u16 newsample)
 	state->sample = newsample;
 	Instrument *inst = song->getInstrument(lbinstruments->getidx());
 	Sample *smp = inst ? inst->getSample(newsample) : NULL;
-	rbloop_none->set_enabled(smp != NULL);
-	rbloop_forward->set_enabled(smp != NULL);
-	rbloop_pingpong->set_enabled(smp != NULL);
-	nssamplevolume->set_enabled(smp != NULL);
-	nspanning->set_enabled(smp != NULL);
-	nsrelnote->set_enabled(smp != NULL);
-	nsfinetune->set_enabled(smp != NULL);
-	buttonsmpfadein->set_enabled(smp != NULL);
-	buttonsmpfadeout->set_enabled(smp != NULL);
-	buttonsmpselall->set_enabled(smp != NULL);
-	buttonsmpselnone->set_enabled(smp != NULL);
-	buttonsmpseldel->set_enabled(smp != NULL);
-	buttonsmptrim->set_enabled(smp != NULL);
-	buttonsmpreverse->set_enabled(smp != NULL);
-	buttonsmpnormalize->set_enabled(smp != NULL);
-	cbsnapto0xing->set_enabled(smp != NULL);
-	buttonsmpdraw->set_enabled(smp != NULL);
+	bool is_null_sample = smp == NULL || smp->getData() == NULL;
+
+	rbloop_none->set_enabled(!is_null_sample);
+	rbloop_forward->set_enabled(!is_null_sample);
+	rbloop_pingpong->set_enabled(!is_null_sample);
+	nssamplevolume->set_enabled(!is_null_sample);
+	nspanning->set_enabled(!is_null_sample);
+	nsrelnote->set_enabled(!is_null_sample);
+	nsfinetune->set_enabled(!is_null_sample);
+	buttonsmpfadein->set_enabled(!is_null_sample);
+	buttonsmpfadeout->set_enabled(!is_null_sample);
+	buttonsmpselall->set_enabled(!is_null_sample);
+	buttonsmpselnone->set_enabled(!is_null_sample);
+	buttonsmpseldel->set_enabled(!is_null_sample);
+	buttonsmptrim->set_enabled(!is_null_sample);
+	buttonsmpreverse->set_enabled(!is_null_sample);
+	buttonsmpnormalize->set_enabled(!is_null_sample);
+	cbsnapto0xing->set_enabled(!is_null_sample);
+	buttonsmpdraw->set_enabled(!is_null_sample);
 	buttonrenameinst->set_enabled(inst != NULL);
 	buttonrenamesample->set_enabled(smp != NULL);
 	lbsamples->select(newsample);
 
-	if(smp == NULL)
+	if(is_null_sample)
 	{
 		sampledisplay->setSample(NULL);
 		nssamplevolume->setValue(0);
@@ -659,8 +662,6 @@ void volEnvSetInst(Instrument *inst)
 	btnenvdrawmode->set_enabled(inst != NULL);
 	btnaddenvpoint->set_enabled(inst != NULL);
 	btndelenvpoint->set_enabled(inst != NULL);
-	btnenvzoomin->set_enabled(inst != NULL);
-	btnenvzoomout->set_enabled(inst != NULL);
 	btnenvsetsuspoint->set_enabled(inst != NULL);
 	cbvolenvenabled->set_enabled(inst != NULL);
 	cbsusenabled->set_enabled(inst != NULL);
@@ -682,8 +683,9 @@ void handleInstChange(const u16 newinst, const bool reset=true)
 		handleSampleChange(0); // handles the state sample
 	else if(inst == NULL)
 		handleSampleChange(state->sample); // preserve current sample so user can load new smp into slot >0 on null inst
-	else
-		cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
+
+	cbvolenvenabled->setChecked(inst != NULL && inst->getVolEnvEnabled());
+		
 }
 
 void handleInstChangeReset(u16 newinst)
@@ -1134,14 +1136,14 @@ void handleTypewriterFilenameOk(void)
 	debugprintf("%s\n", text);
 	if(strcmp(text,"") != 0)
 	{
-		if( (rbsong->getActive() == true) && (strcasecmp(text+textlen-3, ".xm") != 0) )
+		if( (rbsong->getActive() == true) && (textlen <= 3 || strcasecmp(text+textlen-3, ".xm") != 0) )
 		{
 			// Append extension
 			name = (char*)ntxm_cmalloc(textlen+3+1);
 			strcpy(name,text);
 			strcpy(name+textlen,".xm");
 		}
-		else if( (rbsample->getActive() == true) && (strcasecmp(text+textlen-4, ".wav") != 0) )
+		else if( (rbsample->getActive() == true) && (textlen <= 4 || strcasecmp(text+textlen-4, ".wav") != 0) )
 		{
 			// Append extension
 			name = (char*)ntxm_cmalloc(textlen+4+1);
@@ -1313,6 +1315,11 @@ void stop(void)
 {
 	// Send stop command
 	CommandStopPlay();
+	
+	// Also stop a previewing sample, if there is one.
+	if (state->preview_sample)
+		CommandStopSample(0);
+		
 	state->playing = false;
 
 	// The arm7 will get the command with a slight delay and may continue playing for
@@ -1323,8 +1330,6 @@ void stop(void)
 	PlatformWaitVBlank(); PlatformWaitVBlank();
 	redraw_main_requested = false;
 	drawMainScreen();
-
-	dsmidi_handler.stop();
 }
 
 void stopPlay(void)
@@ -1420,8 +1425,12 @@ void updateGuiToNewPattern(u8 newpattern)
 void handlePotPosChangeFromSong(u16 newpotpos)
 {	
 	if (newpotpos != state->potpos)
-			pv->clearSelection();
+		pv->clearSelection();
 			
+	if(newpotpos>=song->getPotLength()) {
+		newpotpos = song->getPotLength() - 1;
+	}
+
 	if (state->queued_potpos >= 0) {
 		state->potpos = state->queued_potpos;
 		state->setPlaybackRow(0);
@@ -1442,11 +1451,17 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 
 	if (tw)
 		tw->pleaseDraw();
+
+	if (mb)
+		mb->pleaseDraw();
 }
 
 // Callback called from lbpot when the user changes the pot element
 void handlePotPosChangeFromUser(u16 newpotpos)
 {
+	if (newpotpos != state->potpos)
+		pv->clearSelection();
+
 	// Update potpos in song
 	if(newpotpos>=song->getPotLength()) {
 		newpotpos = song->getPotLength() - 1;
@@ -1616,6 +1631,12 @@ void handleChannelDel(void)
 
 	redraw_main_requested = true;
 	updateLabelChannels();
+
+	u16 x1, y1, x2, y2;
+	if(pv->getSelection(&x1, &y1, &x2, &y2) == true) {
+		if (x2 >= song->getChannels()-1) pv->setSelection(x1, y1, song->getChannels()-1, y2);
+	}
+
 	setHasUnsavedChanges(true);
 }
 
@@ -1634,6 +1655,12 @@ void handlePtnLengthChange(s32 newlength)
 		if(state->getCursorRow() >= newlength) {
 			state->setCursorRow(newlength-1);
 		}
+
+		u16 x1, y1, x2, y2;
+		if(pv->getSelection(&x1, &y1, &x2, &y2) == true) {
+			if (y2 >= newlength) pv->setSelection(x1, y1, x2, newlength-1);
+		}
+
 		redraw_main_requested = true;
 		setHasUnsavedChanges(true);
 	}
@@ -1673,7 +1700,7 @@ void handleRestartPosChange(s32 restartpos)
 void confirmZap(void (*onConfirm)(void))
 {
 	deleteMessageBox();
-	mb = new MessageBox(sub_screen, "are you sure", 2, "yes", onConfirm, "cancel", deleteMessageBox);
+	mb = new MessageBox(sub_screen, "are you sure", 2, "zap", onConfirm, "cancel", deleteMessageBox);
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 }
@@ -1836,6 +1863,61 @@ void handleSamplePreviewToggled(bool on)
 	settings->setSamplePreview(on);
 }
 
+
+
+u32 calcFileSize(const char *path) {
+	struct stat filestats;
+	int stat_res = stat(path, &filestats);
+	
+	if(stat_res != -1) {
+		return filestats.st_size;
+	}
+
+	return 0;
+}
+
+void previewWav(void) {
+	if (mb != NULL)
+		deleteMessageBox();
+
+	debugprintf("previewing\n");
+
+	// Load sample
+	bool success;
+	Sample *smp = new Sample(preview_smp_path, false, &success);
+	if(!success)
+	{
+		delete smp;
+		return;
+	}
+		
+	updateMemoryState(false);
+
+	// Stop and delete previously playing preview sample
+	if(state->preview_sample)
+		CommandStopSample(0);
+
+	// Wait until previously playing preview sample is deleted
+	while(state->preview_sample)
+		cothread_yield_irq(IRQ_VBLANK);
+
+	// Play it
+	state->preview_sample = smp;
+	ntxm_flush_dcache();
+	CommandPlaySample(smp, 4*12, 255, 0);
+
+	// When the sample has finished playing, the arm7 sends a signal,
+	// so the arm9 can delete the sample
+}
+
+void confirmWavPreview(void)
+{
+	if (mb != 0) deleteMessageBox();
+	mb = new MessageBox(sub_screen, "preview large audio file?", 2, "preview", previewWav, "cancel", deleteMessageBox);
+	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
+	mb->reveal();
+}
+
 void handleFileChange(File file)
 {
 	if(!file.is_dir)
@@ -1860,34 +1942,23 @@ void handleFileChange(File file)
 			if(state->playing)
 				pausePlay();
 
-			debugprintf("previewing\n");
-
-			// Load sample
-			bool success;
-			Sample *smp = new Sample(file.name_with_path.c_str(), false, &success);
-			if(!success)
+			if (preview_smp_path != NULL)
 			{
-				delete smp;
+				ntxm_free(preview_smp_path);
+				preview_smp_path = NULL;
+			}
+
+			preview_smp_path = ntxm_ustrdup(file.name_with_path.c_str());
+			if (!preview_smp_path)
+			{
+				showMessage("not enough ram free!", true);
 				return;
 			}
-		
-			updateMemoryState(false);
 
-			// Stop and delete previously playing preview sample
-			if(state->preview_sample)
-				CommandStopSample(0);
-
-			// Wait until previously playing preview sample is deleted
-			while(state->preview_sample)
-				PlatformWaitVBlank();
-
-			// Play it
-			state->preview_sample = smp;
-			ntxm_flush_dcache();
-			CommandPlaySample(smp, 4*12, 255, 0);
-
-			// When the sample has finished playing, the arm7 sends a signal,
-			// so the arm9 can delete the sample
+			if (calcFileSize(str) > 3 * 1024 * 1024 /* 3MiB */)
+				confirmWavPreview();
+			else
+				previewWav();
 		}
 	}
 }
@@ -2248,7 +2319,7 @@ void handleClearFx(void)
 	setEffectCommand(0xff);
 	pv->clearSelection();
 }
-void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void), void (*clearCallback)(void), void (*cancelCallback)(void))
+void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void), void (*clearCallback)(void), void (*cancelCallback)(void), bool is_file_name)
 {
     // TODO: Migrate to new TobKit to eliminate such ugliness
 #ifdef TODO_NDS_ONLY
@@ -2256,9 +2327,9 @@ void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void
 #define SUB_BG1_Y0 (*(vu16*)0x04001016)
 
 	tw = new Typewriter(prompt, (u16*)CHAR_BASE_BLOCK_SUB(1),
-		(u16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0);
+		(u16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0, is_file_name);
 #else
-	tw = new Typewriter(prompt, NULL, NULL, 3, sub_screen, NULL, NULL);
+	tw = new Typewriter(prompt, NULL, NULL, 3, sub_screen, NULL, NULL, is_file_name);
 #endif
 	tw->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	tw->setText(str);
@@ -2278,7 +2349,7 @@ void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void
 
 
 void showTypewriterForFilename(void) {
-	showTypewriter("filename", labelFilename->getCaption(), handleTypewriterFilenameOk, clearTypewriterText, deleteTypewriter);
+	showTypewriter("filename", labelFilename->getCaption(), handleTypewriterFilenameOk, clearTypewriterText, deleteTypewriter, true);
 }
 
 void handleTypewriterNewFolderOk(void)
@@ -2294,7 +2365,7 @@ void handleTypewriterNewFolderOk(void)
 }
 
 void showTypewriterForNewFolder(void) {
-	showTypewriter("dir name", "", handleTypewriterNewFolderOk, clearTypewriterText, deleteTypewriter);
+	showTypewriter("dir name", "", handleTypewriterNewFolderOk, clearTypewriterText, deleteTypewriter, true);
 }
 
 void handleTypewriterInstnameOk(void)
@@ -2313,7 +2384,7 @@ void showTypewriterForInstRename(void)
 		return;
 	}
 
-	showTypewriter("inst name", lbinstruments->get(lbinstruments->getidx()), handleTypewriterInstnameOk, clearTypewriterText, deleteTypewriter);
+	showTypewriter("inst name", lbinstruments->get(lbinstruments->getidx()), handleTypewriterInstnameOk, clearTypewriterText, deleteTypewriter, false);
 }
 
 void handleTypewriterSongnameOk(void)
@@ -2325,7 +2396,7 @@ void handleTypewriterSongnameOk(void)
 
 void showTypewriterForSongRename(void)
 {
-	showTypewriter("song name", song->getName(), handleTypewriterSongnameOk, clearTypewriterText, deleteTypewriter);
+	showTypewriter("song name", song->getName(), handleTypewriterSongnameOk, clearTypewriterText, deleteTypewriter, false);
 }
 
 void handleTypewriterSampleOk(void)
@@ -2369,7 +2440,7 @@ void showTypewriterForSampleRename(void)
 	if(sample == 0)
 		return;
 
-	showTypewriter("sample name", lbsamples->get(lbsamples->getidx()), handleTypewriterSampleOk, clearTypewriterText, deleteTypewriter);
+	showTypewriter("sample name", lbsamples->get(lbsamples->getidx()), handleTypewriterSampleOk, clearTypewriterText, deleteTypewriter, false);
 }
 
 void handleRecordSampleOK(void)
@@ -2672,6 +2743,8 @@ void ptnCopy(bool cut)
 		clipboard = NULL;
 	}
 
+	buttonpaste->set_enabled(clipboard != NULL);
+
 	if(cut == true) {
 		action_buffer->add(song, newCellClearAction(state, song, sel_x1, sel_y1, sel_x2, sel_y2));
 	}
@@ -2844,6 +2917,8 @@ void sample_del_selection(void)
 	ntxm_flush_dcache();
 
 	sampledisplay->setSample(smp);
+	handleSampleChange(state->sample);
+	
 	setHasUnsavedChanges(true);
 }
 
@@ -3070,8 +3145,7 @@ void handleLerp(void)
 	u16 maxeff = std::max(starteff, endeff);
 	u16 mineff = std::min(starteff, endeff);
 
-	u16 diff = std::max(sel_y1, sel_y2) - std::min(sel_y1, sel_y2);
-	u16 step = (maxeff - mineff) / diff;
+	u16 sel_height = std::max(sel_y1, sel_y2) - std::min(sel_y1, sel_y2);
 	int i = 0;
 	if (fill != NULL && fill->valid())
 	{
@@ -3082,14 +3156,14 @@ void handleLerp(void)
 			{
 				if (starteff < endeff)
 				{
-					cell.effect_param = mineff + (step * i++);
+					cell.effect_param = mineff + ((maxeff - mineff) * i++) / sel_height;
 				}
 				else
 				{
-					cell.effect_param = maxeff - (step * i++);
+					cell.effect_param = maxeff - ((maxeff - mineff) * i++) / sel_height;
 				}
 			}
-			*fill->ptr(sel_x1 - sel_x1, row - sel_y1) = cell;
+			*fill->ptr(0, row - sel_y1) = cell;
 		}
 		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
 		pv->clearSelection();
@@ -3182,18 +3256,6 @@ void handleSnapTo0XingToggled(bool on)
 	sampledisplay->setSnapToZeroCrossing(on);
 }
 
-void envZoomIn(void)
-{
-	volenvedit->zoomIn();
-}
-
-void envZoomOut(void)
-{
-	volenvedit->zoomOut();
-}
-
-
-
 void volEnvPointsChanged(void)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
@@ -3205,7 +3267,7 @@ void volEnvPointsChanged(void)
 
 	inst->setVolumeEnvelopePoints(xs, ys, n_points);
 
-	toggleVolEnvEnabled(n_points != 0 && inst->getVolEnvEnabled());
+	toggleVolEnvEnabled(inst->getVolEnvEnabled());
 	volenvedit->pleaseDraw();
 
 	ntxm_flush_dcache();
@@ -3646,14 +3708,6 @@ void setupGUI(bool dldi_enabled)
 		btndelenvpoint->setCaption("del");
 		btndelenvpoint->registerPushCallback(delEnvPoint);
 
-		btnenvzoomin = new Button(72, 112, 30, 10, sub_screen);
-		btnenvzoomin->setCaption("+");
-		btnenvzoomin->registerPushCallback(envZoomIn);
-
-		btnenvzoomout = new Button(104, 112, 30, 10, sub_screen);
-		btnenvzoomout->setCaption("-");
-		btnenvzoomout->registerPushCallback(envZoomOut);
-
 		btnenvdrawmode = new Button(6, 112, 60, 10, sub_screen);
 		btnenvdrawmode->setCaption("draw env");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
@@ -3673,8 +3727,6 @@ void setupGUI(bool dldi_enabled)
 
 		tabbox->registerWidget(btnaddenvpoint, 0, 3);
 		tabbox->registerWidget(btndelenvpoint, 0, 3);
-		tabbox->registerWidget(btnenvzoomin, 0, 3);
-		tabbox->registerWidget(btnenvzoomout, 0, 3);
 		tabbox->registerWidget(btnenvdrawmode, 0, 3);
 		tabbox->registerWidget(btnenvsetsuspoint, 0, 3);
 		tabbox->registerWidget(cbsusenabled, 0, 3);
@@ -3839,7 +3891,7 @@ void setupGUI(bool dldi_enabled)
 	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X(sub_screen), 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false, true, true);
 	labelfxop->setCaption("fx op");
 	numberboxfxcat = new NumberBox(206, 135, 18, 17, sub_screen, 0, 0, 3, 1);
-	numberboxadd    = new NumberBox(185, 135, 18, 17, sub_screen, state->add, 0, 8, 1);
+	numberboxadd    = new NumberBox(178, 135, 25, 17, sub_screen, state->add, 0, 32, 2);
 	numberboxoctave = new NumberBox(206, 135, 18, 17, sub_screen, state->basenote/12, 0, 6, 1);
 	dbeffectpar	 = new DigitBox(185, 164, 35, 17, sub_screen, 0, 0, 255, 2);
 	dbeffectpar->set_overdraw(false);
@@ -3925,6 +3977,7 @@ void setupGUI(bool dldi_enabled)
 		buttoncut->setCaption("cut");
 		buttoncopy->setCaption("cp");
 		buttonpaste->setCaption("pst");
+		buttonpaste->disable();
 
 		buttoncolselect   = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 127, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 		buttoninsnote     = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 140, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);

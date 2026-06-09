@@ -371,7 +371,7 @@ void PatternView::draw(void)
 	}
 	
 	// Mute / Solo buttons
-	u16 mute_col1, mute_col2, solo_col1, solo_col2;
+	u16 mute_col1, mute_col2, solo_col1, solo_col2, text_col;
 	
 	for(u8 i=0;i<getNumVisibleChannels();++i)
 	{
@@ -383,29 +383,33 @@ void PatternView::draw(void)
 			{
 				mute_col1 = theme->col_pv_mutesolo_col1_highlight;
 				mute_col2 = theme->col_pv_mutesolo_col2_highlight;
+				text_col = theme->col_pv_mutesolo_text_highlight;
 			}
 			else
 			{
 				mute_col1 = theme->col_pv_mutesolo_col1;
 				mute_col2 = theme->col_pv_mutesolo_col2;
+				text_col = theme->col_pv_mutesolo_text;
 			}
 			drawGradient(mute_col1, mute_col2, MUTE_X(i), MUTE_Y, MUTE_WIDTH, MUTE_HEIGHT);
-			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+1, 0, theme->col_pv_mutesolo_text, 255);
+			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+1, 0, text_col, 255);
 		}
 		
 		if(solo_channels[chn] == true)
 		{
 			solo_col1 = theme->col_pv_mutesolo_col1_highlight;
 			solo_col2 = theme->col_pv_mutesolo_col2_highlight;
+			text_col = theme->col_pv_mutesolo_text_highlight;
 		}
 		else
 		{
 			solo_col1 = theme->col_pv_mutesolo_col1;
 			solo_col2 = theme->col_pv_mutesolo_col2;
+			text_col = theme->col_pv_mutesolo_text;
 		}
 		
 		drawGradient(solo_col1, solo_col2, SOLO_X(i), SOLO_Y, SOLO_WIDTH, SOLO_HEIGHT);
-		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+2, 0, theme->col_pv_mutesolo_text, 255);
+		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+2, 0, text_col, 255);
 	}
 }
 
@@ -432,7 +436,7 @@ void PatternView::updateFromState(void)
 
 bool PatternView::pickCell(u16 px, u16 py, u16 *cx, u16 *cy)
 {
-	if( (px < x+PV_BORDER_WIDTH) || (px > x+getEffectiveWidth()) ) {
+	if( (px < x+PV_BORDER_WIDTH) || (px > x+getEffectiveWidth()-1) ) {
 		return false;
 	} else {
 		u16 realx = px - (x+PV_BORDER_WIDTH);

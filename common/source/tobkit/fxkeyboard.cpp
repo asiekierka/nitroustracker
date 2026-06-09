@@ -32,7 +32,7 @@ using namespace tobkit;
 
 FXKeyboard::FXKeyboard(u8 _x, u8 _y, u16 *_char_base, u16 *_map_base, Screen *_screen, void (*_onFxKeypress)(u8 pressedValue), bool _visible)
 	: Widget(_x, _y, FXKEYBOARD_WIDTH+4, FXKEYBOARD_HEIGHT, _screen, _visible),
-	char_base(_char_base), map_base(_map_base), last_cmd(0), caption(0), darken_title(false), onFxKeypress(_onFxKeypress)
+	char_base(_char_base), map_base(_map_base), category(0), last_cmd(0), caption(0), darken_title(false), onFxKeypress(_onFxKeypress)
 {
 	setCaption("");
 }
@@ -148,6 +148,7 @@ void FXKeyboard::setCategory(u8 newcat) {
 			fxkb_vals[14] = 0xE;
 			fxkb_state[0] = FXBUTTON_DISABLED;
 			memset(&fxkb_state[3], FXBUTTON_DISABLED, 9);
+			fxkb_state[6] = FXBUTTON_NORMAL;
 			break;
 
 		default:

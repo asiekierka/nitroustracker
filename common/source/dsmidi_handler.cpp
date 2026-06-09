@@ -72,7 +72,7 @@ void DSMIDIHandler::tick() {
 }
 
 void DSMIDIHandler::stop() {
-	if(!(dsmi_connected && dsmi_send)) return;
+    if(!(dsmi_connected && dsmi_send)) return;
 
     for(u8 chn=0; chn<16; ++chn) {
         dsmi_write(MIDI_CC | chn, 120, 0);

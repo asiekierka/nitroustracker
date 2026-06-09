@@ -50,8 +50,10 @@ namespace tobkit {
 #define MAX_Y				(height + POINT_Y_OFFSET - 1 - SCROLLBAR_WIDTH)
 
 #define ENVELOPE_MAX_ZOOM			3
+#define ZOOM_BUTTONS_MARGIN (2*SCROLLBUTTON_HEIGHT)
 
 #define SCROLLPIXELS			25 // Scroll that many pixels when a scroll button is pressed
+#define MIN_SCROLLTHINGY_WIDTH  15
 
 #define DRAW_MIN_POINT_DIST		10//15
 #define DRAW_NEW_POINT_ANGLE		20
@@ -85,8 +87,6 @@ class EnvelopeEditor: public Widget
 		void setEditorSustainParams(bool sus, u8 suspoint);
 		void clear(void);
 
-		void zoomIn(void);
-		void zoomOut(void);
 		void setZoomAndPos(int _zoom, int _pos);
 
 		void startDrawMode(void);
@@ -94,10 +94,13 @@ class EnvelopeEditor: public Widget
 	private:
 		void draw(void);
 
+		void zoomIn(void);
+		void zoomOut(void);
+
 		void calcScrollThingy(void);
 		void drawPoint(u16 x, u16 y, bool active);
 
-		void scroll(s32 difference);
+		void scroll(s32 newscrollpos);
 
 		void calcPoint(u8 idx, s16 *x, s16 *y); // Calculate point position from coords
 		void dispToReal(s16 dispX, s16 dispY, s16 *realX, s16 *realY); // Calculate actual point from screen corrds
@@ -108,6 +111,9 @@ class EnvelopeEditor: public Widget
 
 		bool pen_is_down;
 		bool pen_on_point;
+
+		bool pen_on_zoom_in;
+		bool pen_on_zoom_out;
 
 		u16 *points_x;
 		u16 *points_y;

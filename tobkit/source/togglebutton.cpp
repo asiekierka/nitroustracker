@@ -114,15 +114,20 @@ bool ToggleButton::getState(void)
 void ToggleButton::draw(void)
 {
 	if(!isExposed()) return;
-	u16 bg = enabled ? theme->col_tb_bg : theme->col_dark_ctrl_disabled;
-	drawFullBox(1, 1, width - 2, height - 2, bg);
+	u16 bg1 = on ? theme->col_tb_bg_on_col1 : theme->col_tb_bg_off_col1;
+	u16 bg2 = on ? theme->col_tb_bg_on_col2 : theme->col_tb_bg_off_col2;
+
+	bg1 = enabled ? bg1 : theme->col_dark_ctrl_disabled;
+	bg2 = enabled ? bg2 : theme->col_dark_ctrl_disabled;  
+
+	drawGradient(bg1, bg2, 1, 1, width - 2, height - 2);
 	drawBorder(theme->col_outline);
 	
 	u16 col;
 
 	if(penIsDown) {
 		if(on) {
-			col = bg;
+			col = bg1;
 		} else {
 			col = theme->col_tb_fg_on;
 		}

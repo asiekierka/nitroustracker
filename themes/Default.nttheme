@@ -79,7 +79,7 @@
 78=e6e600  ; Pattern - mute/solo gradient 2 (highlight)
 79=e67b00  ; Pattern - row numbers (highlight)
 80=ffff00  ; List item separator line (vertical)
-81=ff9400  ; Togglebutton background
+81=ff9400  ; Togglebutton background gradient 1 (disabled)
 82=000000  ; Togglebutton text (off)
 83=ffff00  ; Togglebutton text (on)
 84=ffffff  ; Piano - full key color 1
@@ -110,3 +110,13 @@
 109=ff9400 ; FX input keyboard command description label (disabled)
 110=4a7bff ; FX input keyboard button "X" label
 111=ff62ee ; FX input keyboard button "Y" label
+112=cfcfcf ; Text entry disabled key
+113=ff9400 ; Light control / button gradient 1 (pressed)
+114=ffff00 ; Dark control / button gradient 2 (pressed)
+115=000000 ; Text (pressed buttons)
+116=000000 ; Icon (pressed buttons)
+117=ff9400 ; Togglebutton background gradient 1 (enabled)
+118=ff9400 ; Togglebutton background gradient 2 (enabled)
+119=ff9400 ; Togglebutton background gradient 2 (disabled)
+120=000000 ; Pattern - mute/solo text color (highlight)
+121=000000 ; Selected tab icon
