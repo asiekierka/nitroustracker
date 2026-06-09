@@ -3950,9 +3950,11 @@ void setupGUI(bool dldi_enabled)
 #endif
 		tabbox->registerWidget(btnconfigsave, 0, 4);
 		tabbox->registerWidget(gbhandedness, 0, 4);
-		tabbox->registerWidget(bttheme, 0, 4);
+		if (dldi_enabled)
+			tabbox->registerWidget(bttheme, 0, 4);
 
-		tabbox->registerWidget(gbtheme, 0, 4);
+		if (dldi_enabled)
+			tabbox->registerWidget(gbtheme, 0, 4);
 		tabbox->registerWidget(rboutputmono, 0, 4);
 		tabbox->registerWidget(rboutputstereo, 0, 4);
 		tabbox->registerWidget(gboutput, 0, 4);
