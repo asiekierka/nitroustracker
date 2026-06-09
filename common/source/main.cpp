@@ -1899,7 +1899,7 @@ void previewWav(void) {
 
 	// Wait until previously playing preview sample is deleted
 	while(state->preview_sample)
-		cothread_yield_irq(IRQ_VBLANK);
+		PlatformWaitVBlank();
 
 	// Play it
 	state->preview_sample = smp;
