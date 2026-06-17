@@ -111,6 +111,7 @@ using namespace tobkit;
 #ifdef MIDI
 #include <libdsmi.h>
 #include <dswifi9.h>
+#include "midisync.h"
 #endif
 
 #define REPEAT_FREQ	10 /* Hz */
@@ -4500,6 +4501,115 @@ void applySettings(void)
 	fileselector->pleaseDraw();
 }
 
+#ifdef MIDI
+// --- Glue between the mDS Slot-2 MIDI cart and NitrousTracker's transport ---
+
+static void midisync_onStart(u16 /*song_pos_16ths*/)
+{
+	// External transport START: begin playback from the current position.
+	// (SPP -> tracker row mapping is song-dependent; see midisync_onSongPos.)
+#ifdef DEBUG
+	debugprintf("midisync: transport START\n");
+#endif
+	if(!state->playing)
+		startPlay();
+}
+
+static void midisync_onStop(void)
+{
+#ifdef DEBUG
+	debugprintf("midisync: transport STOP\n");
+#endif
+	if(state->playing)
+		stopPlay();
+	// Guaranteed hard-kill of every hardware voice. stopPlay()/CommandStopInst
+	// only schedule a *fade* (and only if BIT(31) is caught), so a looping or
+	// stuck voice can survive and pop at its loop-seam rate forever. This cuts
+	// them unconditionally. A tiny click on stop is fine; endless popping isn't.
+	CommandKillSound();
+}
+
+static void midisync_onBpm(u16 bpm)
+{
+	// Live tempo follow - same path as the GUI tempo slider (handleBpmChange):
+	// the song struct is shared with the ARM7 engine, so flush after writing.
+	// We deliberately do NOT mark the song dirty for an external tempo change.
+#ifdef DEBUG
+	debugprintf("midisync: BPM -> %d\n", bpm);
+#endif
+	song->setBpm(bpm);   // setBpm() already flushes the song to the ARM7 engine
+	if(nsbpm) nsbpm->setValue(bpm);
+}
+
+static void midisync_onSongPos(u16 /*pos_16ths*/)
+{
+	// MIDI Song Position is in 16th notes; converting that to a pattern/row
+	// depends on the song's lines-per-beat, so this is left as a hook for now.
+}
+
+static void midisync_onMidiEvent(u8 status, u8 data1, u8 data2)
+{
+	// Incoming MIDI notes from the mDS cart. Like the other MIDI input options
+	// they play the CURRENTLY SELECTED instrument live; and like the on-screen
+	// keyboard, a note-on in record mode also PLACES the note into the pattern
+	// (and advances the row). The MIDI note number is the absolute tracker note
+	// (the same mapping the WiFi/USB recv uses); MIDI velocity (0..127) is the
+	// engine's channel-volume range as-is, so it is passed straight through (the
+	// WiFi/USB recv does the same). The voice tag is keyed by channel+note so a
+	// note-off matches its note-on even if the selected instrument changes.
+	u8  chn  = status & 0x0F;
+	u8  note = data1;
+	u16 tag  = (((u16)chn + 1) << 8) | note;
+	switch(status & 0xF0)
+	{
+		case 0x90: // Note On
+			if(data2 == 0) {                 // velocity 0 == Note Off
+				CommandStopNoteAuto(tag);
+				break;
+			}
+			// Place the note into the pattern when recording (like the keyboard).
+			if(state->recording && note <= MAX_NOTE) {
+				Cell **ptn = song->getPattern(song->getPotEntry(state->potpos));
+				Cell newCell = ptn[state->channel][state->getCursorRow()];
+				newCell.note       = note;
+				newCell.instrument = state->instrument;
+				action_buffer->add(song, new SingleCellSetAction(
+					state, state->channel, state->getCursorRow(), newCell));
+				handleNoteAdvanceRow();
+				DC_FlushAll();
+				redraw_main_requested = true;
+			}
+			// Play it live (selected instrument), like the other MIDI options.
+			// Velocity is passed through unscaled: scaling it (<<1) overflowed the
+			// engine's 0..127 channel-volume range and gave erratic/loud notes for
+			// velocity >= 64. data2 == 127 is full volume.
+			CommandPlayNoteAuto(state->instrument, note, data2, tag);
+			break;
+		case 0x80: // Note Off
+			CommandStopNoteAuto(tag);
+			break;
+		default:
+			break;
+	}
+}
+
+// The midisync driver reads the cart only while the tracker is stopped (reading
+// the clocked cart clicks the audio), so it needs to know our playback state.
+static bool midisync_isPlaying(void)
+{
+	return state->playing;
+}
+
+static const MidiSyncCallbacks midisync_cb = {
+	midisync_onStart,
+	midisync_onStop,
+	midisync_onBpm,
+	midisync_onSongPos,
+	midisync_onMidiEvent,
+	midisync_isPlaying,
+};
+#endif // MIDI
+
 //---------------------------------------------------------------------------------
 int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
@@ -4641,6 +4751,13 @@ int main(int argc, char **argv) {
 	applySettings();
 	setSong(song);
 
+#ifdef MIDI
+	// Set up the Slot-2 (GBA) bus for the mDS MIDI cart. The actual cart probe
+	// is deferred to the first midisync_poll() (reading slot-2 before the bus
+	// is configured / before the first frame can wedge some flashcarts).
+	midisync_init();
+#endif
+
 #ifndef DEBUG
 	fadeIn();
 #endif
@@ -4663,6 +4780,37 @@ int main(int argc, char **argv) {
 			handleDSMWRecv();
 			dsmi_task();
 		}
+		// Follow the external MIDI clock/transport and play incoming notes
+		// from the mDS Slot-2 cart (independent of the WiFi MIDI path above).
+#ifndef MIDISYNC_NO_POLL
+		midisync_poll(&midisync_cb);
+#endif
+#ifdef DEBUG
+		{
+			// One-shot report of the deferred cart probe result.
+			static int midisync_reported = 0;
+			if(!midisync_reported) {
+				midisync_reported = 1;
+				u8 mg[4], ver; u16 exmem;
+				midisync_debug_probe(mg, &ver, &exmem);
+				debugprintf("midisync: %s\n", midisync_present()
+					? "mDS cart DETECTED" : "no mDS cart found");
+				debugprintf("  magic=%02x %02x %02x %02x ver=%d exmem=%04x\n",
+					mg[0], mg[1], mg[2], mg[3], ver, exmem);
+			}
+			// Once-per-second status line so the console is readable.
+			static int midisync_ctr = 0;
+			if(midisync_present() && (++midisync_ctr >= 60)) {
+				midisync_ctr = 0;
+				u8 tp, ls, d1, d2, wh, rh; u16 bpm; u32 ev, reassert;
+				u8 mg[4], ver; u16 exmem;
+				midisync_debug_status(&tp, &bpm, &wh, &rh, &ev, &reassert, &ls, &d1, &d2);
+				midisync_debug_probe(mg, &ver, &exmem);  // exmem = live EXMEMCNT as found
+				debugprintf("ms tp=%d bpm=%d exmem=%04x reasserts/s=%lu ev=%lu last=%02x%02x%02x\n",
+					tp, bpm, exmem, reassert, ev, ls, d1, d2);
+			}
+		}
+#endif
 #endif
 
 #ifdef DEBUG
