@@ -262,6 +262,7 @@ void SampleDisplay::setSample(Sample *_smp)
 {
 	if (_smp != NULL && smp != _smp) {
 		zoom_level =  scrollpos = scrollthingypos = 0;
+		calcScrollThingy();
 	}
 
 	smp = _smp;
