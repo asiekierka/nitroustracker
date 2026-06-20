@@ -284,6 +284,7 @@ void deleteMessageBox(void);
 void stopPlay(void);
 void setHasUnsavedChanges(bool unsaved);
 void handleClearFx(void);
+void updateSampleOffsetGuide(void);
 
 
 
@@ -655,7 +656,8 @@ void handleSampleChange(const u16 newsample)
 		rbg_sampleloop->setActive(smp->getLoop());
 	else
 		rbg_sampleloop->setActive(0);
-		
+
+	updateSampleOffsetGuide();
 	updateKeyLabels();
 	if (!had_changes) setHasUnsavedChanges(false);
 	/*
@@ -716,6 +718,7 @@ void handleInstChange(const u16 newinst, const bool reset=true)
 	state->instrument = newinst;
 
 	Instrument *inst = song->getInstrument(newinst);
+	updateSampleOffsetGuide();
 	updateSampleList(inst);
 	volEnvSetInst(inst);
 	updateKeyLabels();
@@ -1403,6 +1406,8 @@ void stopPlay(void)
 	state->pause = false;
 	state->setPlaybackRow(0);
 
+	updateSampleOffsetGuide();
+
 	stop();
 
 	buttonpause->hide();
@@ -1415,6 +1420,8 @@ void pausePlay(void)
 
 	// Send stop command
 	CommandStopPlay();
+
+	updateSampleOffsetGuide();
 
 	buttonpause->hide();
 	buttonplay->show();
@@ -2155,6 +2162,7 @@ void setEffectCommand(u16 eff)
 			}
         action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
 		redraw_main_requested = true;
+    	updateSampleOffsetGuide();
 	}
 }
 
@@ -2208,6 +2216,8 @@ void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false, bool ov
 			}
         action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
 		redraw_main_requested = true;
+
+    	updateSampleOffsetGuide();
 	}
 }
 
@@ -2234,6 +2244,7 @@ void handleTranspose(s32 transpose_amount)
 			}
 		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
 		redraw_main_requested = true;
+		updateSampleOffsetGuide();
 	}
 }
 
@@ -2411,6 +2422,7 @@ void handleToggleEffectsVisibility(bool on)
 	buttonundo->pleaseDraw(); // gets occluded by oct/cat label bg otherwise
 
 	pv->recalcHscroll();
+	updateSampleOffsetGuide();
 	setRecordMode(state->recording); // ensure red border gets drawn!
 }
 
@@ -4211,6 +4223,31 @@ void move_to_top(void)
 	redraw_main_requested = true;
 }
 
+void updateSampleOffsetGuide(void)
+{
+	sampledisplay->setOffsetGuide(0);
+
+	if (fxkb->is_visible()) {
+		Cell targetcell = song->getPattern(song->getPotEntry(state->potpos))[state->channel][state->getCursorRow()];
+
+		u8 fx = targetcell.effect;
+		u8 prm = targetcell.effect_param;
+
+		if (targetcell.instrument == state->instrument)
+		{
+			Instrument *inst = song->getInstrument(state->instrument);
+
+			if (inst != NULL && fx == EFFECT_SAMPLE_OFFSET
+				&& inst->getNoteSample(targetcell.note) == state->sample) {
+				sampledisplay->setOffsetGuide(FT_OFFSET_SCALAR * prm);
+			}
+		}
+	}
+
+	sampledisplay->pleaseDraw();
+}
+
+
 // Update the state for certain keypresses
 void handleButtons(u16 buttons, u16 buttonsheld)
 {
@@ -4234,6 +4271,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			state->setCursorRow(newrow);
 
 			pv->updateSelection();
+			updateSampleOffsetGuide();
 			redraw_main_requested = true;
 
 		}
@@ -4252,6 +4290,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 			state->setCursorRow(newrow);
 
 			pv->updateSelection();
+			updateSampleOffsetGuide();
 			redraw_main_requested = true;
 		}
 	}
@@ -4261,6 +4300,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 		if(state->channel>0) {
 			state->channel--;
 			pv->updateSelection();
+			updateSampleOffsetGuide();
 			redraw_main_requested = true;
 		}
 	}
@@ -4270,6 +4310,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 		{
 			state->channel++;
 			pv->updateSelection();
+			updateSampleOffsetGuide();
 			redraw_main_requested = true;
 		}
 	}

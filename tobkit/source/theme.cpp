@@ -143,6 +143,7 @@ ColorScheme::ColorScheme() {
 	col_tb_bg_off_col2 = col_tb_bg_off_col1;
 	col_pv_mutesolo_text_highlight = col_text;
 	col_tab_icon_highlight = col_tab_icon;
+	col_smp_offset_guide = col_list_sep_vertical;
 }
 
 Theme::Theme(char* themepath, bool use_fat)
