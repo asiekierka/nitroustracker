@@ -44,7 +44,7 @@ SampleDisplay::SampleDisplay(u8 _x, u8 _y, u8 _width, u8 _height, u16 **_vram, S
 	pen_on_zoom_in(false), pen_on_zoom_out(false),
 	pen_on_scroll_left(false), pen_on_scroll_right(false), pen_on_scrollthingy(false), pen_on_scrollbar(false),
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
-	snap_to_zero_crossings(true), draw_mode(false)
+	offset_guide_pos(0), snap_to_zero_crossings(true), draw_mode(false)
 {
 	gfxLine = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 	gfxLoopHandle = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
@@ -357,6 +357,10 @@ void SampleDisplay::hideLoopPoints(void)
 	}
 }
 
+void SampleDisplay::setOffsetGuide(u32 newpos) {
+	offset_guide_pos = newpos;
+}
+
 void SampleDisplay::setSnapToZeroCrossing(bool snap)
 {
 	snap_to_zero_crossings = snap;
@@ -621,6 +625,9 @@ void SampleDisplay::draw(void)
 	u16 top = (DRAW_HEIGHT+2);
 
 	s32 lastmax=0, lastmin=0;
+
+	u32 offsetpos = sampleToPixel(offset_guide_pos);
+
 	if(smp->is16bit() == true) {
 
 		s16 *data;
@@ -629,8 +636,14 @@ void SampleDisplay::draw(void)
 		for(s32 i=1; i<s32(width-1); ++i)
 		{
 			bool draw_selection_here = (draw_selection && i >= selleft && i < selright);
-			u16 colortable_current = draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform;
-			u16 bg_current = draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg;
+			bool draw_offset_line_here = offsetpos == i;
+
+			u16 wave_col = draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform;
+			u16 bg_col = draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg;
+
+			u16 colortable_current = draw_offset_line_here ? theme->col_smp_offset_guide : wave_col;
+			u16 bg_current = draw_offset_line_here ? theme->col_smp_offset_guide : bg_col;
+
 			data = &(base[f32toint(pos)]);
 
 			s32 maxsmp = -32767, minsmp = 32767;
@@ -675,8 +688,13 @@ void SampleDisplay::draw(void)
 		for(s32 i=1; i<s32(width-1); ++i)
 		{
 			bool draw_selection_here = (draw_selection && i >= selleft && i < selright);
-			u16 colortable_current = draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform;
-			u16 bg_current = draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg;
+			bool draw_offset_line_here = offsetpos == i;
+
+			u16 wave_col = draw_selection_here ? theme->col_smp_waveform_sel : theme->col_smp_waveform;
+			u16 bg_col = draw_selection_here ? theme->col_smp_bg_sel : theme->col_smp_bg;
+
+			u16 colortable_current = draw_offset_line_here ? theme->col_smp_offset_guide : wave_col;
+			u16 bg_current = draw_offset_line_here ? theme->col_smp_offset_guide : bg_col;
 			data = &(base[f32toint(pos)]);
 
 			s8 maxsmp = -127, minsmp = 127;
