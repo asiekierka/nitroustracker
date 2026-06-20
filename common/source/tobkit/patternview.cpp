@@ -253,6 +253,8 @@ void PatternView::recalcHscroll(void)
 void PatternView::draw(void)
 {
 	s32 sel_screen_x1 = -1, sel_screen_x2 = -1, sel_screen_y1 = -1, sel_screen_y2 = -1;
+	bool selection_visible = false;
+
 	screen->clear(theme->col_pv_bg);
 	
 	// Selection
@@ -272,13 +274,15 @@ void PatternView::draw(void)
 		
 			// Clamp to screen
 			if (sel_screen_x1 < 0) sel_screen_x1 = 0;
-			if (sel_screen_x2 > getEffectiveWidth()) sel_screen_x2 = getEffectiveWidth();
+			else if (sel_screen_x2 > getEffectiveWidth()) sel_screen_x2 = getEffectiveWidth();
 			if (sel_screen_y1 < 0) sel_screen_y1 = 0;
-			if (sel_screen_y2 > height) sel_screen_y2 = height;
+			else if (sel_screen_y2 > height) sel_screen_y2 = height;
 			
 			// Draw
 			drawFullBox(sel_screen_x1, sel_screen_y1, sel_screen_x2 - sel_screen_x1,
-				    sel_screen_y2 - sel_screen_y1 + 1, theme->col_pv_cb_sel_highlight);
+				    sel_screen_y2 - sel_screen_y1, theme->col_pv_cb_sel_highlight);
+
+			selection_visible = true;
 		}
 	}
 	
@@ -312,14 +316,11 @@ void PatternView::draw(void)
 	
 	// Cursor bar (highlight)
 	drawGradient(theme->col_pv_cb_col1, theme->col_pv_cb_col2, 0, PV_CURSORBAR_Y, getEffectiveWidth(), PV_CELL_HEIGHT);
-	if(selection_exists == true) {
+	if(selection_visible) {
 		// Cursor bar (highlighted component)
 		if (	(sel_screen_y1 <= PV_CURSORBAR_Y + 1)
-			&&	(sel_screen_y2 >= PV_CURSORBAR_Y + 1 + PV_CELL_HEIGHT-1)
-			&&	(sel_screen_x1 <= getEffectiveWidth())
-			&&	(sel_screen_x2 >= PV_BORDER_WIDTH)) {
-				s32 cursor_highlight_x1 = std::max((int) sel_screen_x1, PV_BORDER_WIDTH + 1);
-				drawFullBox(cursor_highlight_x1, PV_CURSORBAR_Y+1, sel_screen_x2 - cursor_highlight_x1 - 1, PV_CELL_HEIGHT-1, theme->col_pv_cb_sel_highlight);
+			&&	(sel_screen_y2 >= PV_CURSORBAR_Y + 1 + PV_CELL_HEIGHT-1)) {
+				drawFullBox(sel_screen_x1, PV_CURSORBAR_Y+1, sel_screen_x2 - sel_screen_x1, PV_CELL_HEIGHT-1, theme->col_pv_cb_sel_highlight);
 		}
 	}
 
