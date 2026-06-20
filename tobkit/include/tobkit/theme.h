@@ -22,7 +22,7 @@ limitations under the License.
 #include "../../arm9/source/tools.h" 
 #include <nds.h>
 
-#define NUM_COLORS 122
+#define NUM_COLORS 123
 
 namespace tobkit {
 
