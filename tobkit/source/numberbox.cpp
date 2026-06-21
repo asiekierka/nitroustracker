@@ -23,9 +23,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberBox::NumberBox(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, u8 _value, u8 _min, u8 _max, u8 _digits)
+NumberBox::NumberBox(u8 _x, u8 _y, u8 _width, u8 _height, uint16 **_vram, u8 _value, u8 _min, u8 _max, u8 _digits, bool _wraparound)
 	:Widget(_x, _y, _width, _height, _vram),
-	value(_value), min(_min), max(_max), digits(_digits), btnstate(0)
+	value(_value), min(_min), max(_max), digits(_digits), btnstate(0), wraparound(_wraparound)
 {
 	onChange = 0;
 }	
@@ -42,10 +42,10 @@ void NumberBox::penDown(u8 px, u8 py) {
 	
 	if((px>x)&&(px<x+width)&&(py>y)&&(py<y+9)) {
 		btnstate = 1;
-		if(value<max) value++;
+		if(value<max) value++; else if (wraparound) value = min;
 	} else if((px>x)&&(px<x+width)&&(py>y+9)&&(py<y+18)) {
 		btnstate = 2;
-		if(value>min) value--;
+		if(value>min) value--; else if (wraparound) value = max;
 	}
 	
 	if(value!=oldvalue) {
