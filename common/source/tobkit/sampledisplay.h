@@ -81,6 +81,8 @@ class SampleDisplay: public Widget {
 		void showLoopPoints(void);
 		void hideLoopPoints(void);
 
+		void setOffsetGuide(u32 newpos);
+
 		void setSnapToZeroCrossing(bool snap);
 
 		void reveal(void);
@@ -125,6 +127,8 @@ class SampleDisplay: public Widget {
 		u8 scrollthingypos, scrollthingywidth, pen_x_on_scrollthingy;
 		u8 zoom_level;
 		u64 scrollpos;
+
+		u32 offset_guide_pos;
 
 		bool snap_to_zero_crossings;
 

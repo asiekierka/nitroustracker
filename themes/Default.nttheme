@@ -120,3 +120,4 @@
 119=ff9400 ; Togglebutton background gradient 2 (disabled)
 120=000000 ; Pattern - mute/solo text color (highlight)
 121=000000 ; Selected tab icon
+122=ffff00 ; Sample display offset preview

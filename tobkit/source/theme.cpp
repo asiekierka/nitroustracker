@@ -144,6 +144,7 @@ ColorScheme::ColorScheme() {
 	col_tb_bg_off_col2 = col_tb_bg_off_col1;
 	col_pv_mutesolo_text_highlight = col_text;
 	col_tab_icon_highlight = col_tab_icon;
+	col_smp_offset_guide = col_list_sep_vertical;
 }
 
 Theme::Theme(char* themepath, bool use_fat)
@@ -270,6 +271,7 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 	if (!theme_has_key[119]) theme_cols[119] = theme_cols[81];  // Togglebutton background (off) 2
 	if (!theme_has_key[120]) theme_cols[120] = theme_cols[74];  // Mute/solo pressed button text
 	if (!theme_has_key[121]) theme_cols[121] = theme_cols[24];  // Selected tab icon
+	if (!theme_has_key[122]) theme_cols[122] = theme_cols[80];  // Sample display offset preview
 
 
 

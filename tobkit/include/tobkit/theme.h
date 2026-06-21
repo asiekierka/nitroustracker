@@ -21,7 +21,7 @@ limitations under the License.
 
 #include "../../common/source/tools.h" 
 
-#define NUM_COLORS 122
+#define NUM_COLORS 123
 
 namespace tobkit {
 
@@ -151,6 +151,7 @@ struct ColorScheme {
 			u16 col_tb_bg_off_col2;
 			u16 col_pv_mutesolo_text_highlight;
 			u16 col_tab_icon_highlight;
+			u16 col_smp_offset_guide;
 		};
 	};
 
