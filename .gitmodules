@@ -1,6 +1,6 @@
 [submodule "dsmi"]
 	path = dsmi
-	url = https://github.com/asiekierka/dsmi
+	url = https://github.com/NitrousTracker/dsmi
 [submodule "libntxm"]
 	path = libntxm
-	url = https://github.com/asiekierka/libntxm
+	url = https://github.com/NitrousTracker/libntxm

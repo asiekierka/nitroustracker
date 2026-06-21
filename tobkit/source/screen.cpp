@@ -23,7 +23,7 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Screen::Screen(tobkit_pixel_t *_pixels, u32 _width, u32 _height, u32 _pitch)
+Screen::Screen(tobkit_pixel_t *_pixels, int _width, int _height, int _pitch)
     :pixels(_pixels), width(_width), height(_height), pitch(_pitch)
 {
 
@@ -40,7 +40,7 @@ void Screen::clear(tobkit_pixel_t col) {
 #endif
 }
 
-void Screen::setSize(u32 _width, u32 _height, u32 _pitch) {
+void Screen::setSize(int _width, int _height, int _pitch) {
     width = _width;
     height = _height;
     pitch = _pitch;

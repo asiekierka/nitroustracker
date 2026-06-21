@@ -27,7 +27,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -66,6 +65,8 @@ void PrintFreeMem(void)
 	printf("FreeMem=%dbyte    \n", ntxm_getFreeMem());
 }
 
+#if defined(__3DS__) || defined(__NDS__) || defined(__linux__)
+#include <malloc.h>
 void printMallInfo(void)
 {
 	struct mallinfo mi = mallinfo();
@@ -74,3 +75,8 @@ void printMallInfo(void)
 	printf("mmap bytes:       %d\n", mi.hblkhd);
 	printf("malloc chunks:    %d\n", mi.uordblks);
 }
+#else
+void printMallInfo(void)
+{
+}
+#endif

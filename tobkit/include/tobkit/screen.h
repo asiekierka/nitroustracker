@@ -26,15 +26,15 @@ namespace tobkit {
 
 class Screen {
 	public:
-		Screen(tobkit_pixel_t *_pixels, u32 _width, u32 _height, u32 _pitch);
+		Screen(tobkit_pixel_t *_pixels, int _width, int _height, int _pitch);
 		~Screen(void) {}
 
         void clear(tobkit_pixel_t col);
-        void setSize(u32 _width, u32 _height, u32 _pitch);
+        void setSize(int _width, int _height, int _pitch);
 
-        inline u32 getWidth(void) const { return width; }
-        inline u32 getHeight(void) const { return height; }
-        inline u32 getPitch(void) const {
+        inline int getWidth(void) const { return width; }
+        inline int getHeight(void) const { return height; }
+        inline int getPitch(void) const {
 #if defined(TOBKIT_CONSTANT_PITCH)
             return TOBKIT_CONSTANT_PITCH;
 #else
@@ -62,7 +62,7 @@ class Screen {
         tobkit_pixel_t *pixels;
 
     private:
-        u32 width, height, pitch;
+        int width, height, pitch;
 };
 
 };
