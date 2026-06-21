@@ -10,19 +10,18 @@ conf_data = configuration_data()
 conf_data.set('version', meson.project_version())
 
 libntxm_sources = [
-  'libntxm/libntxm/common/source/demokit.c',
-  'libntxm/libntxm/common/source/instrument.cpp',
-  'libntxm/libntxm/common/source/linear_freq_table.c',
-  'libntxm/libntxm/common/source/ntxmtools.c',
-  'libntxm/libntxm/common/source/sample.cpp',
-  'libntxm/libntxm/common/source/song.cpp',
-  'libntxm/libntxm/common/source/vibrato_sine_table.c',
-  'libntxm/libntxm/player/source/ntxmsound.c',
-  'libntxm/libntxm/player/source/player.cpp',
-  'libntxm/libntxm/single/source/fifocommand.cpp',
-  'libntxm/libntxm/transport/source/mod_transport.cpp',
-  'libntxm/libntxm/transport/source/wav.cpp',
-  'libntxm/libntxm/transport/source/xm_transport.cpp'
+  'libntxm/libntxm/source/common/demokit.c',
+  'libntxm/libntxm/source/common/instrument.cpp',
+  'libntxm/libntxm/source/common/linear_freq_table.c',
+  'libntxm/libntxm/source/common/ntxmtools.c',
+  'libntxm/libntxm/source/common/sample.cpp',
+  'libntxm/libntxm/source/common/song.cpp',
+  'libntxm/libntxm/source/common/vibrato_sine_table.c',
+  'libntxm/libntxm/source/player/player.cpp',
+  'libntxm/libntxm/source/single/fifocommand.cpp',
+  'libntxm/libntxm/source/transport/mod_transport.cpp',
+  'libntxm/libntxm/source/transport/wav.cpp',
+  'libntxm/libntxm/source/transport/xm_transport.cpp'
 ]
 
 nitroustracker_sources = [
