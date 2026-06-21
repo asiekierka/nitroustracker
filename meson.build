@@ -19,6 +19,7 @@ libntxm_sources = [
   'libntxm/libntxm/source/common/vibrato_sine_table.c',
   'libntxm/libntxm/source/player/player.cpp',
   'libntxm/libntxm/source/single/fifocommand.cpp',
+  'libntxm/libntxm/source/single/platform_sdl3.cpp',
   'libntxm/libntxm/source/transport/mod_transport.cpp',
   'libntxm/libntxm/source/transport/wav.cpp',
   'libntxm/libntxm/source/transport/xm_transport.cpp'
@@ -122,6 +123,7 @@ add_project_arguments('-DSDL3', language: 'cpp')
 add_project_arguments('-DTOBKIT_PLATFORM_SDL3', language: 'cpp')
 add_project_arguments('-DVERSION="WIP"', language: 'cpp')
 add_project_arguments('-DGIT_HASH="WIP"', language: 'cpp')
+add_project_arguments('-DDEBUG', language: 'cpp')
 
 libntxm = static_library('ntxm', libntxm_sources,
   dependencies: [sdl3_dep],

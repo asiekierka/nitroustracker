@@ -413,7 +413,7 @@ void onKeypress(u8 note)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
 	if (inst==0) return;
-	
+
 	u16 newsamp = inst->getNoteSample(note + state->basenote);
 
 	handleSampleChange(newsamp);
@@ -453,7 +453,7 @@ void handleNoteStroke(u8 note)
 		label = (sample_id >= 0xA) ? (sample_id - 0xA + 'a') : (sample_id + '0');
 		kb->setKeyLabel(note, label);
 	}
-	
+
 	onKeypress(note);
 
 	// Play the note
@@ -688,7 +688,7 @@ void handleInstChange(const u16 newinst, const bool reset=true)
 		handleSampleChange(state->sample); // preserve current sample so user can load new smp into slot >0 on null inst
 
 	cbvolenvenabled->setChecked(inst != NULL && inst->getVolEnvEnabled());
-		
+
 }
 
 void handleInstChangeReset(u16 newinst)
@@ -755,7 +755,7 @@ void setSong(Song *newsong)
 			lbinstruments->set(i, "");
 		}
 	}
-	
+
 	// inst is now equal to song->getInstrument(0)
 	lbinstruments->select(0);
 	updateSampleList(inst);
@@ -961,9 +961,9 @@ void handleLoad(void)
 			gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 			mb->reveal();
 			mb->pleaseDraw();
-		} else 
+		} else
 			loadModule();
-		
+
 	}
 	else if(strcasecmp(fn + strlen(fn) - 4, ".wav")==0)
 	{
@@ -989,7 +989,7 @@ void saveFile(void)
 	strcat(filename_tmp, ".tmp");
 
 	chdir(fileselector->getDir().c_str());
-	
+
 	debugprintf("saving %s ...\n", filename);
 
 	mb = new MessageBox(sub_screen, "one moment", 0);
@@ -1318,11 +1318,11 @@ void stop(void)
 {
 	// Send stop command
 	CommandStopPlay();
-	
+
 	// Also stop a previewing sample, if there is one.
 	if (state->preview_sample)
 		CommandStopSample(0);
-		
+
 	state->playing = false;
 
 	// The arm7 will get the command with a slight delay and may continue playing for
@@ -1430,10 +1430,10 @@ void updateGuiToNewPattern(u8 newpattern)
 
 // Callback called from song when the pot element changes during playback
 void handlePotPosChangeFromSong(u16 newpotpos)
-{	
+{
 	if (newpotpos != state->potpos)
 		pv->clearSelection();
-			
+
 	if(newpotpos>=song->getPotLength()) {
 		newpotpos = song->getPotLength() - 1;
 	}
@@ -1756,7 +1756,7 @@ void zapUnusedInstruments(void) {
 			}
 		}
 	}
-		
+
 	ntxm_flush_dcache();
 	deleteMessageBox();
 	CommandSetSong(song);
@@ -1771,7 +1771,7 @@ void zapCurrentInstrument(void) {
 	handleSampleChange(0);
 	ntxm_flush_dcache();
 	deleteMessageBox();
-	
+
 	lbinstruments->set(inst, "");
 	for(u8 i=0;i<MAX_INSTRUMENT_SAMPLES;++i) {
 		lbsamples->set(i, "");
@@ -1854,7 +1854,7 @@ void handleRowChangeFromSong(u16 row)
 
 	if(!state->playing)
 		return;
-	
+
 	redraw_main_requested = true;
 
 	dsmidi_handler.rowUpdate(song, state->getCursorRow(), state->potpos);
@@ -1875,7 +1875,7 @@ void handleSamplePreviewToggled(bool on)
 u32 calcFileSize(const char *path) {
 	struct stat filestats;
 	int stat_res = stat(path, &filestats);
-	
+
 	if(stat_res != -1) {
 		return filestats.st_size;
 	}
@@ -1897,7 +1897,7 @@ void previewWav(void) {
 		delete smp;
 		return;
 	}
-		
+
 	updateMemoryState(false);
 
 	// Stop and delete previously playing preview sample
@@ -2044,7 +2044,7 @@ void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false, bool ov
 				Cell cell = song->getPattern(song->getPotEntry(state->potpos))[chn][row];
 
 				bool cell_has_param = cell.effect_param != 0xff && cell.effect_param != 0x0;
-				
+
 
 				if (force_clear)
 					eff_par = 0x00;
@@ -2152,7 +2152,7 @@ void handleThemeChosen(File file)
 		{
 			settings->getTheme()->loadTheme(file.name_with_path.c_str());
 			settings->setThemePath(file.name_with_path.c_str());
-			
+
 			reloadSkin();
 		}
 	}
@@ -2162,7 +2162,7 @@ void handleThemeChosen(File file)
 void handleThemeCancel(void)
 {
 	settings->getTheme()->loadTheme(last_themepath);
-	
+
 	settings->setThemePath(last_themepath);
 	reloadSkin();
 
@@ -2172,7 +2172,7 @@ void handleThemeCancel(void)
 void handleThemeReset(void)
 {
 	destroyThemeDialog();
-	
+
 	settings->getTheme()->loadDefault();
 	settings->setThemePath("/");
 	settings->writeIfChanged();
@@ -2233,7 +2233,7 @@ void handleToggleEffectsVisibility(bool on)
 
 		kb->hide();
 		kb->disable();
-		
+
 		labeloct->hide();
 		labelfxcat->show();
 		numberboxoctave->hide();
@@ -2245,7 +2245,7 @@ void handleToggleEffectsVisibility(bool on)
 		dbeffectpar->show();
 		labeleffectpar->show();
 		buttonseteffectpar->show();
-		
+
 		buttoninsnote2->hide();
 		buttondelnote2->hide();
 		buttonemptynote->hide();
@@ -2294,7 +2294,7 @@ void handleToggleEffectsVisibility(bool on)
 }
 
 void onFxKeyPressed(u8 val)
-{	
+{
 	if (val == NO_EFFECT || !state->recording) return;
 	// for E effects, the button's val is the E sub-command, rather than just 'E'
 
@@ -2305,7 +2305,7 @@ void onFxKeyPressed(u8 val)
 		setEffectCommand(val);
 		setEffectParam(dbeffectpar->getValue(), false, false, false);
 	}
-	
+
 	pv->clearSelection();
 	handleNoteAdvanceRow();
 }
@@ -2438,7 +2438,7 @@ void handleToggleMultiSample(bool on)
 		handleToggleMapSamples(false);
 		tbmapsamples->setState(false);
 	}
-		
+
 	setMultisamplesEnabled(on);
 }
 
@@ -2871,7 +2871,7 @@ void handleSampleRelNoteChange(s32 newnote)
 
 	if (smp->getRelNote() != newnote) setHasUnsavedChanges(true);
 	smp->setRelNote(newnote);
-	
+
 }
 
 void handleSampleFineTuneChange(s32 newfinetune)
@@ -2930,7 +2930,7 @@ void sample_del_selection(void)
 
 	sampledisplay->setSample(smp);
 	handleSampleChange(state->sample);
-	
+
 	setHasUnsavedChanges(true);
 }
 
@@ -3123,7 +3123,7 @@ void setMultisamplesEnabled(bool show)
 		lbinstruments->resize(114, 67);
 		lbsamples->show();
 	}
-		
+
 	else {
 		lbsamples->hide();
 		lbinstruments->resize(114, 89);
@@ -3312,7 +3312,7 @@ void envSetSustainPoint(void)
 	u16 active_point = volenvedit->getActivePoint();
 
 	inst->setVolumeEnvelopeSustainPoint((u8)active_point);
-	
+
 	bool s = inst->getVolumeEnvelopeSustainFlag();
 	u8 susp = inst->getVolumeEnvelopeSustainPoint();
 	volenvedit->setEditorSustainParams(s, susp);
@@ -3324,7 +3324,7 @@ void envSetSustainPoint(void)
 
 void envToggleSustainEnabled(bool is_enabled)
 {
-  
+
   Instrument *inst = song->getInstrument(state->instrument);
 	if(inst != NULL)
 	{
@@ -3361,7 +3361,7 @@ void setupGUI(bool dldi_enabled)
 	fxkb = new FXKeyboard(0, 152, NULL, NULL, sub_screen, onFxKeyPressed, false);
 #endif
 	fxkb->set_overdraw(false);
-	
+
 
 	pixmaplogo = new GradientIcon(98, 1, 80, 17,
 		(const u32*) nitrotracker_logo_raw, sub_screen);
@@ -3376,7 +3376,7 @@ void setupGUI(bool dldi_enabled)
 	tabbox->addTab(icon_sample_raw, 2);
 	tabbox->addTab(icon_trumpet_raw, 3);
 	tabbox->addTab(icon_wrench_raw, 4);
-	
+
 	// <Disk OP GUI>
 		fileselector = new FileSelector(38, 21, 100, 111, sub_screen);
 
@@ -3723,15 +3723,15 @@ void setupGUI(bool dldi_enabled)
 		btnenvdrawmode = new Button(6, 112, 60, 10, sub_screen);
 		btnenvdrawmode->setCaption("draw env");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
-    
+
     btnenvsetsuspoint = new Button(6, 122, 60, 10, sub_screen);
     btnenvsetsuspoint->setCaption("set sus");
     btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
-    
+
     cbsusenabled = new CheckBox(6, 132, 60, 10, sub_screen, true, false);
     cbsusenabled->setCaption("sus on");
     cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
-    
+
 		tbmapsamples = new ToggleButton(72, 133, 134-72, 12, sub_screen);
 		tbmapsamples->setCaption("map samp.");
 		tbmapsamples->registerToggleCallback(handleToggleMapSamples);
@@ -4289,7 +4289,7 @@ void VblankHandler(void)
 		for (u16 i = 0; i < 15; i++) {
 			if (i > 10 && i < 13)
 				continue;
-			
+
 			u16 note_val = (i >= 13) ? (i - 2) : i;
 
 			if (piano_down & (1 << i)) {
@@ -4374,7 +4374,7 @@ int main(int argc, char **argv) {
 
 	last_themepath[SETTINGS_FILENAME_LEN] = '\0';
 	state = new State();
-	
+
 	clearMainScreen();
 	clearSubScreen();
 
@@ -4382,7 +4382,11 @@ int main(int argc, char **argv) {
 	PlatformInputSetRepeat(REPEAT_START_DELAY, 60 / REPEAT_FREQ);
 
 	// Init interprocessor communication
-	CommandInit();
+	if (!CommandInit()) {
+	    // TODO: Error message
+	    PlatformExit();
+		return 1;
+	}
 	RegisterRowCallback(handleRowChangeFromSong);
 	RegisterStopCallback(handleStop);
 	RegisterPlaySampleFinishedCallback(handlePreviewSampleFinished);
