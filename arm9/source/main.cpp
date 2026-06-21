@@ -657,6 +657,16 @@ void handleSampleChange(const u16 newsample)
 	else
 		rbg_sampleloop->setActive(0);
 
+	if (smp != NULL) {
+		const char *str = smp->getName();
+		strncpy(state->sample_filename, str, STATE_FILENAME_LEN);
+
+		if(rbsample->getActive() == true)
+		{
+			labelFilename->setCaption(str);
+		}
+	}
+
 	updateSampleOffsetGuide();
 	updateKeyLabels();
 	if (!had_changes) setHasUnsavedChanges(false);
