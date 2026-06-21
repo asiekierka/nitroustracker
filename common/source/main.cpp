@@ -4433,6 +4433,7 @@ int main(int argc, char **argv) {
 
 	if (launch_path) ntxm_free(launch_path);
 
+	CommandExit();
 	PlatformExit();
 
 	return 0;
