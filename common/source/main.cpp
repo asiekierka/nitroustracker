@@ -614,6 +614,16 @@ void handleSampleChange(const u16 newsample)
 	else
 		rbg_sampleloop->setActive(0);
 
+	if (smp != NULL) {
+		const char *str = smp->getName();
+		strncpy(state->sample_filename, str, STATE_FILENAME_LEN);
+
+		if(rbsample->getActive() == true)
+		{
+			labelFilename->setCaption(str);
+		}
+	}
+
 	updateSampleOffsetGuide();
 	updateKeyLabels();
 	if (!had_changes) setHasUnsavedChanges(false);
@@ -3905,7 +3915,7 @@ void setupGUI(bool dldi_enabled)
 	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X(sub_screen), 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false, true, true);
 	labelfxop->setCaption("fx op");
 	numberboxfxcat = new NumberBox(206, 135, 18, 17, sub_screen, 0, 0, 3, 1);
-	numberboxadd    = new NumberBox(178, 135, 25, 17, sub_screen, state->add, 0, 32, 2);
+	numberboxadd    = new NumberBox(178, 135, 25, 17, sub_screen, state->add, 0, 32, 2, true);
 	numberboxoctave = new NumberBox(206, 135, 18, 17, sub_screen, state->basenote/12, 0, 6, 1);
 	dbeffectpar	 = new DigitBox(185, 164, 35, 17, sub_screen, 0, 0, 255, 2);
 	dbeffectpar->set_overdraw(false);

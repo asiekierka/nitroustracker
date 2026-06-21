@@ -23,7 +23,7 @@ namespace tobkit {
 
 class NumberBox: public Widget {
 	public:
-		NumberBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u8 _value=0, u8 _min=0, u8 _max=255, u8 _digits=2);
+		NumberBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u8 _value=0, u8 _min=0, u8 _max=255, u8 _digits=2, bool _wraparound=false);
 	
 		// Drawing request
 		void pleaseDraw(void);
@@ -44,6 +44,7 @@ class NumberBox: public Widget {
 		u8 value;
 		u8 min, max, digits;
 		u8 btnstate;
+		bool wraparound;
 };
 
 };

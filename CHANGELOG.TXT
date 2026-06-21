@@ -1,3 +1,25 @@
+-- NitrousTracker v0.6.4 (2026-06-21)
+
+New features:
+
+- in fx mode, display a preview cursor for `09XX` offset commands
+
+Improvements:
+
+- hide the theme button in settings if DLDI driver fails (asie)
+- disable paste button if the clipboard is empty
+- reset sample display zoom level when switching samples
+- wrap around 'add' value
+- updated BlocksDS to 1.21.1
+
+Fixes:
+
+- fix awkward selection drawing logic in pattern editor (asie)
+- fix samples with a sample rate below 1191 causing hanging
+- fix scroll lock edge case allowing deleted patterns to be played (#249)
+- fix sliding on the FX keyboard parameter input
+- other minor fixes
+
 -- NitrousTracker v0.6.3 (2026-05-06)
 
 New features:
