@@ -48,7 +48,7 @@ void DigitBox::penMove(u8 px, u8 py)
 	}
 
 	s16 dy = lasty-py;
-	if(abs(dy)>0 && px > x + 8 &&  px < x + width - 8) {
+	if(abs(dy)>0 && ((px > x + 8 &&  px < x + width - 8) || py < y || py > y + height)) {
 		int inc = (dy*dy) >> 3;
 		if (dy == 0)
 			inc = 1;
