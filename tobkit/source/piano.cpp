@@ -36,7 +36,7 @@ static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
 :Widget(_x, _y, _width, _height, _screen),
-char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_instrument(false)
+char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_instrument(false), curr_note(255)
 {
 	onNote = 0;
 	onRelease = 0;
@@ -99,7 +99,9 @@ void Piano::penDown(u16 px, u16 py)
 	u8 note = piano_hit[kby][kbx];
 	
 	setKeyPal(note);
-	
+#ifndef TOBKIT_PLATFORM_NDS
+	pleaseDraw();
+#endif
 	if(onNote) {
 		onNote(note);
 	}
@@ -133,6 +135,10 @@ void Piano::penMove(u16 px, u16 py)
 
 		// draw();
 	}
+
+	#ifndef TOBKIT_PLATFORM_NDS
+		pleaseDraw();
+	#endif
 }
 
 
@@ -144,6 +150,10 @@ void Piano::penUp(u16 px, u16 py)
 	{
 		onRelease(curr_note, false);
 	}
+#ifndef TOBKIT_PLATFORM_NDS
+	curr_note = 255;
+	pleaseDraw();
+#endif
 }
 
 // Callback registration
@@ -225,6 +235,42 @@ void Piano::draw(void)
 		memcpy(map_base + (32*(py+y/8)+(x/8)), pianoMap + (PIANO_WIDTH_TILES * py), PIANO_WIDTH_TILES * 2);
 	}	
 #endif
+	if (!isExposed()) {
+		drawFullBox(0, 0, width, height, theme->col_bg);
+	} else {
+		drawFullBox(0, 1, width, height-1, theme->col_piano_outline);
+
+		u8 fullkeys[14] = {0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23};
+		u8 halfkeys[10] = {1, 3, 6, 8, 10, 13, 15, 18, 20, 22};
+
+		const u8 FULLKEY_WIDTH = 15;
+		const u8 FULLKEY_HEIGHT = 38;
+
+		const u8 HALFKEY_WIDTH = 10;
+		const u8 HALFKEY_HEIGHT = 23;
+
+		for (u8 i = 0,key_draw_x = 0;i<14; ++i,key_draw_x+=16)
+		{
+			u16 col1 = curr_note != fullkeys[i] ? theme->col_piano_full_col1 : theme->col_piano_full_highlight_col1;
+			u16 col2 = curr_note != fullkeys[i] ? theme->col_piano_full_col2 : theme->col_piano_full_highlight_col2;
+
+			drawFullBox(1+key_draw_x, 1, FULLKEY_WIDTH, FULLKEY_HEIGHT, col2);
+			drawHorizontalGradient(col2, col1, 2 + key_draw_x, 2, FULLKEY_WIDTH-2, FULLKEY_HEIGHT-2);
+		}
+
+		for (u8 j = 0, key_draw_x = 0;j<10; ++j,key_draw_x+=16)
+		{
+			if (j==0||j==2||j==5||j==7)
+				key_draw_x += 16;
+
+			u16 col1 = curr_note != halfkeys[j] ? theme->col_piano_half_col1 : theme->col_piano_half_highlight_col2;
+			u16 col2 = curr_note != halfkeys[j] ? theme->col_piano_half_col2 : theme->col_piano_half_highlight_col1;
+
+			drawFullBox(1+key_draw_x - 5, 1, HALFKEY_WIDTH, HALFKEY_HEIGHT, col2);
+			drawGradient(col2, col1, 2 + key_draw_x - 5, 2, HALFKEY_WIDTH-2, HALFKEY_HEIGHT-2);
+		}
+	}
+	
 }
 
 // Set the key corresp. to note to palette corresp. to pal_idx

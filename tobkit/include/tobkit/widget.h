@@ -128,6 +128,7 @@ class Widget {
 			screen->drawPixel(x+tx, y+ty, col);
 		}
 		void drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th);
+		void drawHorizontalGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th);
 
 		inline const u16 interpolateColor(u16 col1, u16 col2, int alpha /* 0..4095 */) {
 			return RGB5A1(

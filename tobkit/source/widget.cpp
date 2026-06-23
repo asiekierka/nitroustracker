@@ -355,6 +355,30 @@ void Widget::drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th) {
 	}
 }
 
+ITCM_CODE
+void Widget::drawHorizontalGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th) {
+	if (col1 == col2) {
+		drawFullBox(tx, ty, tw, th, col1);
+		return;
+	}
+
+	u16 i, j;
+	u16 col;
+
+	if (tw == 0) return;
+
+	int step = div32((1<<12), tw);
+	int pos = 0;
+
+	for(j=0;j<tw;++j,pos+=step) {
+		col = interpolateColor(col1, col2, pos);
+
+		for (i=0;i<th;++i) {
+			drawPixel(tx+j, ty+i, col);
+		}
+	}
+}
+
 // How wide is the string when rendered?
 ITCM_CODE
 u32 Widget::getStringWidth(const char *str, u16 limit)

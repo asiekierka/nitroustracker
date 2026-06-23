@@ -241,6 +241,7 @@ void FXKeyboard::eraseButtonLabels(void)
 void FXKeyboard::draw(void) {
 	if (!isExposed()) return;
 
+#ifdef TOBKIT_PLATFORM_NDS
 	u16 lstate, rstate;
 
 	/* 
@@ -307,6 +308,31 @@ void FXKeyboard::draw(void) {
 	for(int py=0; py<FXKEYBOARD_HEIGHT_TILES; ++py)
 		memcpy(map_base + (32*(py+y/8)+(x/8)), fxkb_map + (FXKEYBOARD_WIDTH_TILES * py), FXKEYBOARD_WIDTH_TILES * 2);
 	
+#else
+	drawFullBox(0, 0, width, height, theme->col_bg); // hide the piano
+
+	const u8 FX_KEY_WIDTH = 11;
+	const u8 FX_KEY_HEIGHT = 26;
+
+	drawFullBox(0, 11 - 1, 1+NUM_FXKEYS*(FX_KEY_WIDTH+1), FX_KEY_HEIGHT+2, theme->col_outline);
+
+	for (u8 fxkey=0;fxkey<NUM_FXKEYS;++fxkey) {
+		// drawFullBox(fxkey * (FX_KEY_WIDTH+1), 11, FX_KEY_WIDTH, FX_KEY_HEIGHT, theme->col_outline);
+		drawFullBox(1 + fxkey * (FX_KEY_WIDTH+1), 11, FX_KEY_WIDTH, FX_KEY_HEIGHT, fxkb_state[fxkey] != FXBUTTON_DISABLED ? theme->col_fxkeyboard_col2 : theme->col_fxkeyboard_col2_disabled);
+
+		u16 col1, col2;
+
+		if (fxkb_state[fxkey] == FXBUTTON_DISABLED) {
+			col1 = theme->col_fxkeyboard_col1_disabled;
+			col2 = theme->col_fxkeyboard_col2_disabled;
+		} else {
+			col1 = fxkb_state[fxkey] == FXBUTTON_DOWN ? theme->col_fxkeyboard_col2 : theme->col_fxkeyboard_col1;
+			col2 = fxkb_state[fxkey] == FXBUTTON_DOWN ? theme->col_fxkeyboard_col1 : theme->col_fxkeyboard_col2;
+		}
+
+		drawHorizontalGradient(col2, col1, 1+ fxkey * (FX_KEY_WIDTH+1) + 1, 11 + 1, FX_KEY_WIDTH-2, FX_KEY_HEIGHT-2);
+	}
+#endif
 	drawButtonLabels();
 	drawCaption();
 }

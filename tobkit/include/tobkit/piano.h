@@ -67,6 +67,7 @@ class Piano: public Widget {
 		bool key_labels_visible;
 		bool mapping_instrument;
 		u16 curr_note;
+
 };
 
 };

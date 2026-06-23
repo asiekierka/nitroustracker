@@ -74,10 +74,11 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _screen);  
 	buttonclear->setCaption("clear");
 	gui.registerWidget(buttonclear, 0, SUB_SCREEN);
-	
+#ifdef TOBKIT_PLATFORM_NDS
 	// Set the tile bg translation registers to move the typewriter to (x,y)
 	*_trans_reg_x = -kx;
 	*_trans_reg_y = -ky;
+#endif
 	
 	text = (char*)ntxm_ccalloc(1, MAX_TEXT_LEN+1);
 }
@@ -91,9 +92,11 @@ Typewriter::~Typewriter(void)
 	delete buttonclear;
 	ntxm_free(text);
 	
+#ifdef TOBKIT_PLATFORM_NDS
 	for(int py=0; py<TW_TILE_HEIGHT; ++py) {
 		memset(map_base + 32*py, 0, TW_TILE_WIDTH*2);
 	}
+#endif
 }
 
 void Typewriter::genPal(void)
