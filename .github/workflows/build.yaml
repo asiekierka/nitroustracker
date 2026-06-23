@@ -2,18 +2,19 @@ name: Build
 
 on:
   push:
-    branches: [ new ]
+    branches:
+      - '*'
   pull_request:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build
+  build-nds:
+    name: Build (NDS)
     runs-on: ubuntu-latest
     container: skylyrac/blocksds:slim-latest
     steps:
       - name: Clone project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -26,11 +27,43 @@ jobs:
         run: make VERSION=git
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: NitrousTracker
+          name: NitrousTracker (NDS)
           path: |
             nitroustracker*.nds
+            CHANGELOG.TXT
+            licenses/
+            themes/
+            README.TXT
+
+  build-3ds:
+    name: Build (3DS)
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
+    steps:
+      - name: Clone project
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install prerequisites
+        run: |
+          apt-get update -y
+          apt-get install -y --no-install-recommends python3 python3-pil
+
+      - name: Build libntxm
+        run: cd libntxm/libntxm && make -f Makefile.3ds
+
+      - name: Build
+        run: make -f Makefile.3ds VERSION=git
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: NitrousTracker (3DS)
+          path: |
+            nitroustracker*.3dsx
             CHANGELOG.TXT
             licenses/
             themes/

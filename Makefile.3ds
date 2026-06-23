@@ -38,7 +38,7 @@ APP_TITLE	:= NitrousTracker
 APP_DESCRIPTION	:= v$(VERSION)
 ICON		:= icon48.png
 
-TARGET		:=	nitroustracker_3ds
+TARGET		:=	nitroustracker
 BUILD		:=	build_3ds
 SOURCES		:=	common/source/libnds n3ds/source/libnds common/source common/source/tobkit n3ds/source tobkit/source
 DATA		:=	n3ds/data
@@ -197,7 +197,7 @@ endif
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf $(GFXBUILD)
+	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(GFXBUILD)
 
 #---------------------------------------------------------------------------------
 $(GFXBUILD)/%.t3x	$(BUILD)/%.h	:	%.t3s
@@ -211,11 +211,11 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
+$(OUTPUT).3dsx	:	$(DEPSDIR)/$(TARGET).elf $(_3DSXDEPS)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-$(OUTPUT).elf	:	$(OFILES)
+$(DEPSDIR)/$(TARGET).elf	:	$(OFILES)
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
