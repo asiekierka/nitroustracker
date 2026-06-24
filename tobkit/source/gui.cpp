@@ -23,7 +23,7 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 GUI::GUI()
-	:activeWidget(0), activeScreen(SUB_SCREEN), onOverlayChanged(0), 
+	:activeWidget(0), activeScreen(SUB_SCREEN), onOverlayChanged(0),
 	overlayWidgetMain(0), overlayWidgetSub(0), overlayShortcuts(0)
 {
 	u8 i;
@@ -136,7 +136,7 @@ void GUI::unregisterOverlayWidget(u8 screen)
 void GUI::setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool))
 {
 	onOverlayChanged = _onOverlayChanged;
-} 
+}
 
 // Event calls
 void GUI::penDown(u16 x, u16 y)

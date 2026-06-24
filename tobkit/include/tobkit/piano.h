@@ -27,19 +27,20 @@ static constexpr int PIANO_HEIGHT_TILES = 5;
 class Piano: public Widget {
 	public:
 		Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_screen_base, Screen *_screen);
-	
+		virtual ~Piano();
+
 		// Drawing request
 		void pleaseDraw(void);
-		
+
 		// Event calls
 		void penDown(u16 px, u16 py);
 		void penUp(u16 px, u16 py);
 		void penMove(u16 px, u16 py);
-		
+
 		// Callback registration
 		void registerNoteCallback(void (*onNote_)(u8));
 		void registerReleaseCallback(void (*onRelease_)(u8, bool));
-		
+
 		// Key label handling
 		void showKeyLabels(void);
 		void hideKeyLabels(void);
@@ -47,14 +48,15 @@ class Piano: public Widget {
 		void setInMappingMode(bool instmap);
 		void setTheme(Theme *theme_, u16 bgcolor_);
 		void show(void);
-		
+		inline int getWidthTiles(void) { return (width + 7) >> 3; }
+
 	private:
 		void (*onNote)(u8);
 		void (*onRelease)(u8, bool);
 		u16 *char_base, *map_base;
-		
+
 		unsigned short piano_Palette[16], piano_fullnotehighlight_Palette[16], piano_halfnotehighlight_Palette[16];
-		
+
 		void draw(void);
 		void setKeyPal(u8 note);
 		u8 isHalfTone(u8 note);
@@ -62,8 +64,8 @@ class Piano: public Widget {
 		void genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 *pal_half_highlight);
 		void drawKeyLabel(u8 key, bool visible=true);
 		void eraseKeyLabel(u8 key);
-		
-		char key_labels[24];
+
+		char *key_labels;
 		bool key_labels_visible;
 		bool mapping_instrument;
 		u16 curr_note;

@@ -16,4 +16,4 @@ limitations under the License.
 
 #include <stdint.h>
 
-extern const uint8_t piano_hit[][28];
+extern const uint8_t piano_hit[][14];

@@ -28,7 +28,7 @@ using namespace tobkit;
 
 #define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
-static u8 halftones[] = {1, 3, 6, 8, 10, 13, 15, 18, 20, 22};
+static u8 halfkeys[] = {1, 3, 6, 8, 10};
 static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
 
 
@@ -45,13 +45,18 @@ char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_i
 	// Piano::draw is never invoked before Piano::setTheme
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
 #endif
-	
-	memset(key_labels, ' ', 24);
+
+    key_labels = (char*) ntxm_cmalloc((_width + 7) >> 3);
+	memset(key_labels, ' ', getWidthTiles());
+}
+
+Piano::~Piano() {
+    ntxm_free(key_labels);
 }
 
 void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
-	u16 piano_cols[9] = { theme_->col_piano_full_col1, theme_->col_piano_full_col2, theme_->col_piano_half_col1, theme_->col_piano_half_col2, 
-						theme_->col_piano_full_highlight_col1, theme_->col_piano_full_highlight_col2, theme_->col_piano_half_highlight_col1, 
+	u16 piano_cols[9] = { theme_->col_piano_full_col1, theme_->col_piano_full_col2, theme_->col_piano_half_col1, theme_->col_piano_half_col2,
+						theme_->col_piano_full_highlight_col1, theme_->col_piano_full_highlight_col2, theme_->col_piano_half_highlight_col1,
 						theme_->col_piano_half_highlight_col2, theme_->col_piano_outline};
 	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
 	Widget::setTheme(theme_, bgcolor_);
@@ -93,11 +98,11 @@ void Piano::penDown(u16 px, u16 py)
 {
 	// Look up the note in the hit-array
 	s16 kbx, kby;
-	kbx = clamp((px - x)/8, 0, PIANO_WIDTH_TILES - 1);
-	kby = clamp((py - y)/8, 0, PIANO_HEIGHT_TILES - 1);
-	
-	u8 note = piano_hit[kby][kbx];
-	
+	kbx = clamp((px - x), 0, width - 1) / 8;
+	kby = clamp((py - y), 0, height - 1) / 8;
+
+	u8 note = piano_hit[kby][kbx % 14] + ((kbx / 14) * 12);
+
 	setKeyPal(note);
 #ifndef TOBKIT_PLATFORM_NDS
 	pleaseDraw();
@@ -105,7 +110,7 @@ void Piano::penDown(u16 px, u16 py)
 	if(onNote) {
 		onNote(note);
 	}
-	
+
 	curr_note = note;
 }
 
@@ -113,11 +118,11 @@ void Piano::penMove(u16 px, u16 py)
 {
 	// Look up the note in the hit-array
 	s16 kbx, kby;
-	kbx = clamp((px - x)/8, 0, PIANO_WIDTH_TILES - 1);
-	kby = clamp((py - y)/8, 0, PIANO_HEIGHT_TILES - 1);
+	kbx = clamp((px - x), 0, width - 1) / 8;
+	kby = clamp((py - y), 0, height - 1) / 8;
 
-	u8 note = piano_hit[kby][kbx];
-	
+	u8 note = piano_hit[kby][kbx % 14] + ((kbx / 14) * 12);
+
 	// Only when it moves to another note
 	if (note != curr_note) {
 		resetPals();
@@ -126,11 +131,11 @@ void Piano::penMove(u16 px, u16 py)
 		}
 
 		setKeyPal(note);
-	
+
 		if(onNote) {
 			onNote(note);
 		}
-		
+
 		curr_note = note;
 
 		// draw();
@@ -145,7 +150,7 @@ void Piano::penMove(u16 px, u16 py)
 void Piano::penUp(u16 px, u16 py)
 {
 	resetPals();
-	
+
 	if(onRelease)
 	{
 		onRelease(curr_note, false);
@@ -169,16 +174,16 @@ void Piano::registerReleaseCallback(void (*onRelease_)(u8, bool)) {
 void Piano::showKeyLabels(void)
 {
 	key_labels_visible = true;
-	
-	for(u8 key=0; key<24; ++key)
+
+	for(u8 key=0; key<getWidthTiles(); ++key)
 		drawKeyLabel(key);
 }
 
 void Piano::hideKeyLabels(void)
 {
 	key_labels_visible = false;
-	
-	for(u8 key=0; key<24; ++key)
+
+	for(u8 key=0; key<getWidthTiles(); ++key)
 		eraseKeyLabel(key);
 }
 
@@ -198,9 +203,9 @@ void Piano::setInMappingMode(bool instmap)
 void Piano::setKeyLabel(u8 key, char label)
 {
 	eraseKeyLabel(key);
-	
+
 	key_labels[key] = label;
-	
+
 	drawKeyLabel(key);
 }
 
@@ -228,20 +233,20 @@ void Piano::draw(void)
 #ifdef TOBKIT_PLATFORM_NDS
 	// Fill screen with empty tiles
 	for (int i = 0; i < 768; i++) map_base[i] = 28;
-	
+
 	// Copy the piano to the screen
 	for(int py=0; py<PIANO_HEIGHT_TILES; ++py)
 	{
 		memcpy(map_base + (32*(py+y/8)+(x/8)), pianoMap + (PIANO_WIDTH_TILES * py), PIANO_WIDTH_TILES * 2);
-	}	
+	}
 #else
 	if (!isExposed()) {
 		drawFullBox(0, 0, width, height, theme->col_bg);
 	} else {
 		drawFullBox(0, 1, width, height-1, theme->col_piano_outline);
 
-		u8 fullkeys[14] = {0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23};
-		u8 halfkeys[10] = {1, 3, 6, 8, 10, 13, 15, 18, 20, 22};
+		u8 fullkeys[7] = {0, 2, 4, 5, 7, 9, 11};
+		u8 halfkeys[5] = {1, 3, 6, 8, 10};
 
 		const u8 FULLKEY_WIDTH = 15;
 		const u8 FULLKEY_HEIGHT = 38;
@@ -249,22 +254,24 @@ void Piano::draw(void)
 		const u8 HALFKEY_WIDTH = 10;
 		const u8 HALFKEY_HEIGHT = 23;
 
-		for (u8 i = 0,key_draw_x = 0;i<14; ++i,key_draw_x+=16)
+		for (int i = 0,key_draw_x = 0;i<(width / 16); ++i,key_draw_x+=16)
 		{
-			u16 col1 = curr_note != fullkeys[i] ? theme->col_piano_full_col1 : theme->col_piano_full_highlight_col1;
-			u16 col2 = curr_note != fullkeys[i] ? theme->col_piano_full_col2 : theme->col_piano_full_highlight_col2;
+			u16 col1 = curr_note != (fullkeys[i % 7] + ((i / 7) * 12)) ? theme->col_piano_full_col1 : theme->col_piano_full_highlight_col1;
+			u16 col2 = curr_note != (fullkeys[i % 7] + ((i / 7) * 12)) ? theme->col_piano_full_col2 : theme->col_piano_full_highlight_col2;
 
 			drawFullBox(1+key_draw_x, 1, FULLKEY_WIDTH, FULLKEY_HEIGHT, col2);
 			drawHorizontalGradient(col2, col1, 2 + key_draw_x, 2, FULLKEY_WIDTH-2, FULLKEY_HEIGHT-2);
 		}
 
-		for (u8 j = 0, key_draw_x = 0;j<10; ++j,key_draw_x+=16)
+		for (int j = 0, key_draw_x = 0; ; ++j,key_draw_x+=16)
 		{
-			if (j==0||j==2||j==5||j==7)
+			if ((j % 5)==0||(j % 5)==2)
 				key_draw_x += 16;
+			if (key_draw_x > (width - 16))
+			    break;
 
-			u16 col1 = curr_note != halfkeys[j] ? theme->col_piano_half_col1 : theme->col_piano_half_highlight_col2;
-			u16 col2 = curr_note != halfkeys[j] ? theme->col_piano_half_col2 : theme->col_piano_half_highlight_col1;
+			u16 col1 = curr_note != (halfkeys[j % 5] + ((j / 5) * 12)) ? theme->col_piano_half_col1 : theme->col_piano_half_highlight_col2;
+			u16 col2 = curr_note != (halfkeys[j % 5] + ((j / 5) * 12)) ? theme->col_piano_half_col2 : theme->col_piano_half_highlight_col1;
 
 			drawFullBox(1+key_draw_x - 5, 1, HALFKEY_WIDTH, HALFKEY_HEIGHT, col2);
 			drawGradient(col2, col1, 2 + key_draw_x - 5, 2, HALFKEY_WIDTH-2, HALFKEY_HEIGHT-2);
@@ -292,7 +299,7 @@ void Piano::setKeyPal(u8 note)
 
   for(px=0; px<PIANO_WIDTH_TILES; ++px)
   {
-    if(piano_hit[hit_row][px] == note)
+    if((piano_hit[hit_row][px % 14] + ((px / 14) * 12)) == note)
 	{
       for(py=0; py<PIANO_HEIGHT_TILES; ++py)
 	  {
@@ -307,9 +314,8 @@ void Piano::setKeyPal(u8 note)
 // 1 for halftones, 0 for fulltones
 u8 Piano::isHalfTone(u8 note)
 {
-	u8 i;
-	for(i=0;i<10;++i) {
-		if(note==halftones[i]) return 1;
+	for(int i=0;i<5;++i) {
+		if((note%12)==halfkeys[i]) return 1;
 	}
 	return 0;
 }
@@ -331,7 +337,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 {
 	u8 xpos, ypos, offset;
 	u16 col;
-	
+
 	if(isHalfTone(key) == true)
 	{
 		ypos = 12;
@@ -344,17 +350,14 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 		col = theme->col_piano_label;
 		offset = 5;
 	}
-	
+
 	if(visible == true)
 		col |= RGB5A1_ALPHA_BIT;
-	
-	xpos = offset + x_offsets[key % 12];
-	
-	if(key > 11)
-		xpos += 111;
-	
+
+	xpos = offset + x_offsets[key % 12] + ((key / 12) * 111);
+
 	char label[] = {key_labels[key], 0};
-	
+
 	drawString(label, xpos, ypos, col);
 }
 

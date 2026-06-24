@@ -29,7 +29,6 @@
 #include <fat.h>
 #define GURU // Show guru meditations
 #define ENABLE_EFFECT_MENU
-#define TODO_NDS_ONLY
 #define ENABLE_PIANO_PAK
 #elif defined(__3DS__)
 #include <3ds.h>
@@ -1297,7 +1296,8 @@ void drawMainScreen(void)
 void redrawSubScreen(void)
 {
 	u16 col = settings->getTheme()->col_bg;
-#ifdef TODO_NDS_ONLY
+#ifdef __NDS__
+    // clean only ~3/4ths of the screen, as the rest is covered by the piano
 	u32 colcol = col | col << 16;
 	dmaFillWords(colcol, sub_screen->pixels, 256 * 153 * 2);
 #else
@@ -2145,10 +2145,10 @@ void reloadSkin(void)
 {
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 
-#ifdef TODO_NDS_ONLY
+#ifdef __NDS__
+	// fill the quirky little square next to the piano
 	for (int y = 153; y < 192;++y)
 	{
-		// fill the quirky little square next to the piano
 		u16 col = settings->getTheme()->col_bg;
 		u32 colcol = col | col << 16;
 		dmaFillWords(colcol, sub_screen->pixels + (256 * y) + 224, (256 - 224) * 2);
@@ -2821,6 +2821,7 @@ void showMessage(const char *msg, bool error)
 	mb->reveal();
 }
 
+
 void showAboutBox(void)
 {
 	char msg[256];
@@ -3210,13 +3211,13 @@ void setMultisamplesEnabled(bool show)
 
 		drawSampleNumbers();
 		kb->showKeyLabels();
-		lbinstruments->resize(114, 67);
+		lbinstruments->resize(lbinstruments->getWidth(), 67);
 		lbsamples->show();
 	}
 
 	else {
 		lbsamples->hide();
-		lbinstruments->resize(114, 89);
+		lbinstruments->resize(lbinstruments->getWidth(), 89);
 		kb->hideKeyLabels();
 	}
 
@@ -3432,23 +3433,27 @@ void sampleDrawToggle(bool on)
 
 void setupGUI(bool dldi_enabled)
 {
+    int piano_width = sub_screen->getWidth() - 32;
+    int piano_height = 40;
+    int piano_y = sub_screen->getHeight() - piano_height;
+
 	gui = new GUI();
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
-#ifdef TODO_NDS_ONLY
-	kb = new Piano(0, 152, 224, 40, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen);
+#ifdef __NDS__
+	kb = new Piano(0, piano_y, piano_width, piano_height, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen);
 #else
-	kb = new Piano(0, 152, 224, 40, NULL, NULL, sub_screen);
+	kb = new Piano(0, piano_y, piano_width, piano_height, NULL, NULL, sub_screen);
 #endif
 	kb->set_overdraw(false);
 	kb->registerNoteCallback(handleNoteStroke);
 	kb->registerReleaseCallback(handleNoteRelease);
 
-#ifdef TODO_NDS_ONLY
-	fxkb = new FXKeyboard(0, 152, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen, onFxKeyPressed, false);
+#ifdef __NDS__
+	fxkb = new FXKeyboard(0, piano_y, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen, onFxKeyPressed, false);
 #else
-	fxkb = new FXKeyboard(0, 152, NULL, NULL, sub_screen, onFxKeyPressed, false);
+	fxkb = new FXKeyboard(0, piano_y, NULL, NULL, sub_screen, onFxKeyPressed, false);
 #endif
 	fxkb->set_overdraw(false);
 
@@ -3457,7 +3462,10 @@ void setupGUI(bool dldi_enabled)
 		(const u32*) nitrotracker_logo_raw, sub_screen);
 	pixmaplogo->registerPushCallback(showAboutBox);
 
-	tabbox = new TabBox(1, 1, 139, 151, sub_screen, TABBOX_ORIENTATION_TOP, 16);
+	int tabbox_endx = 140;
+	int tabbox_width = tabbox_endx - 1;
+	int tabbox_height = piano_y - 1;
+	tabbox = new TabBox(1, 1, tabbox_width, tabbox_height, sub_screen, TABBOX_ORIENTATION_TOP, 16);
 	tabbox->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	// Note that setHasUnsavedChanges depends on this count and order of tabs.
 	tabbox->addTab(icon_song_raw, 0);
@@ -3468,7 +3476,11 @@ void setupGUI(bool dldi_enabled)
 	tabbox->addTab(icon_wrench_raw, 4);
 
 	// <Disk OP GUI>
-		fileselector = new FileSelector(38, 21, 100, 111, sub_screen);
+	{
+	    int fileselector_y = 21;
+		int fileselector_height = tabbox_height - 40;
+	    int below_fileselector_y1 = fileselector_y + fileselector_height + 2;
+		fileselector = new FileSelector(38, fileselector_y, 100, fileselector_height, sub_screen);
 
 		std::vector<std::string> samplefilter;
 		samplefilter.push_back("wav");
@@ -3521,16 +3533,17 @@ void setupGUI(bool dldi_enabled)
 		buttondelfile->setCaption("del");
 		buttondelfile->registerPushCallback(handleDelfile);
 
-		labelFilename = new Label(3, 134, 97, 14, sub_screen);
+		labelFilename = new Label(3, below_fileselector_y1, 97, 14, sub_screen);
 		labelFilename->setCaption("");
 		labelFilename->registerPushCallback(showTypewriterForFilename);
 
-		buttonchangefilename = new Button(101, 134, 22, 14, sub_screen);
+		buttonchangefilename = new Button(101, below_fileselector_y1, 22, 14, sub_screen);
 		buttonchangefilename->setCaption("...");
 		buttonchangefilename->registerPushCallback(showTypewriterForFilename);
 
-		buttonnewfolder = new BitButton(124, 134, 14, 14, sub_screen, icon_new_folder_raw, 8, 8, 3, 3);
+		buttonnewfolder = new BitButton(124, below_fileselector_y1, 14, 14, sub_screen, icon_new_folder_raw, 8, 8, 3, 3);
 		buttonnewfolder->registerPushCallback(showTypewriterForNewFolder);
+	}
 
 	if (dldi_enabled)
 	{
@@ -3551,7 +3564,10 @@ void setupGUI(bool dldi_enabled)
 	// </Disk OP GUI>
 
 	// <Song gui>
-		lbpot = new ListBox(4, 21, 50, 78, sub_screen, 1, true);
+	{
+	    int pot_y = 21;
+		int pot_height = tabbox_height - 73;
+		lbpot = new ListBox(4, pot_y, 50, pot_height, sub_screen, 1, true);
 		lbpot->set(0," 0");
 		lbpot->registerChangeCallback(handlePotPosChangeFromUser);
 		buttonpotup = new Button(70, 47, 14, 12, sub_screen);
@@ -3590,32 +3606,36 @@ void setupGUI(bool dldi_enabled)
 		buttonmorechannels->setCaption("+");
 		buttonmorechannels->registerPushCallback(handleChannelAdd);
 
-		labeltempo = new Label(4, 103, 32, 12, sub_screen, false);
+		int below_pot_y1 = pot_y + pot_height + 4;
+		int below_pot_y2 = below_pot_y1 + 12;
+		int below_pot_y3 = below_pot_y2 + 19;
+
+		labeltempo = new Label(4, below_pot_y1, 32, 12, sub_screen, false);
 		labeltempo->setCaption("tmp");
-		labelbpm = new Label(38, 103, 32, 12, sub_screen, false);
+		labelbpm = new Label(38, below_pot_y1, 32, 12, sub_screen, false);
 		labelbpm->setCaption("bpm");
-		labelrestartpos = new Label(72, 103, 46, 12, sub_screen, false);
+		labelrestartpos = new Label(72, below_pot_y1, 46, 12, sub_screen, false);
 		labelrestartpos->setCaption("restart");
-		nbtempo = new NumberBox(4, 115, 32, 17, sub_screen, 1, 1, 31);
+		nbtempo = new NumberBox(4, below_pot_y2, 32, 17, sub_screen, 1, 1, 31);
 		nbtempo->registerChangeCallback(handleTempoChange);
 #ifdef DEBUG
-		nsbpm = new NumberSlider(38, 115, 32, 17, sub_screen, 120, 1, 255);
+		nsbpm = new NumberSlider(38, below_pot_y2, 32, 17, sub_screen, 120, 1, 255);
 #else
-		nsbpm = new NumberSlider(38, 115, 32, 17, sub_screen, 120, 32, 255);
+		nsbpm = new NumberSlider(38, below_pot_y2, 32, 17, sub_screen, 120, 32, 255);
 #endif
 		nsbpm->registerChangeCallback(handleBpmChange);
-		nsrestartpos = new NumberSlider(72, 115, 32, 17, sub_screen, 0, 0, 255, true);
+		nsrestartpos = new NumberSlider(72, below_pot_y2, 32, 17, sub_screen, 0, 0, 255, true);
 		nsrestartpos->registerChangeCallback(handleRestartPosChange);
 
-		labelsongname = new Label(4, 134, 113, 14, sub_screen, true);
+		labelsongname = new Label(4, below_pot_y3, 113, 14, sub_screen, true);
 		labelsongname->setCaption("unnamed");
 		labelsongname->registerPushCallback(showTypewriterForSongRename);
 
-		buttonrenamesong = new Button(118, 134, 20, 14, sub_screen);
+		buttonrenamesong = new Button(118, below_pot_y3, 20, 14, sub_screen);
 		buttonrenamesong->setCaption("...");
 		buttonrenamesong->registerPushCallback(showTypewriterForSongRename);
 
-		buttonzap = new Button(107, 116, 30, 14, sub_screen);
+		buttonzap = new Button(107, below_pot_y2 + 1, 30, 14, sub_screen);
 		buttonzap->setCaption("zap!");
 		buttonzap->registerPushCallback(handleZap);
 
@@ -3648,6 +3668,7 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(buttonzap, 0, 0);
 		tabbox->registerWidget(memoryiindicator, 0, 0);
 		tabbox->registerWidget(labelramusage, 0, 0);
+	}
 	// </Song gui>
 
 	// <Sample Gui>
@@ -3667,6 +3688,7 @@ void setupGUI(bool dldi_enabled)
 	sampletabbox->registerTabChangeCallback(sampleTabBoxChage);
 
 	// <Sample editing>
+	{
 		labelsampleedit_record = new Label(18, 99, 21, 30, sub_screen, true);
 		labelsampleedit_record->setCaption("rec");
 
@@ -3715,17 +3737,21 @@ void setupGUI(bool dldi_enabled)
 		sampletabbox->registerWidget(labelsampleedit_edit, 0, 0);
 		sampletabbox->registerWidget(labelsampleedit_select, 0, 0);
 		sampletabbox->registerWidget(labelsampleedit_record, 0, 0);
+	}
 	// </Sample editing>
 
 	// <Drawing and Generating>
+	{
 		buttonsmpdraw = new ToggleButton(18, 96, 17, 17, sub_screen);
 		buttonsmpdraw->setBitmap(sampleedit_draw_raw);
 		buttonsmpdraw->registerToggleCallback(sampleDrawToggle);
 
 		sampletabbox->registerWidget(buttonsmpdraw, 0, 1);
+	}
 	// </Drawing and Generating>
 
 	// <Sample settings>
+	{
 		labelsamplevolume = new Label(22, 108, 25, 10, sub_screen, false);
 		labelsamplevolume->setCaption("vol");
 
@@ -3758,9 +3784,11 @@ void setupGUI(bool dldi_enabled)
 		sampletabbox->registerWidget(labelrelnote, 0, 2);
 		sampletabbox->registerWidget(labelsamplevolume, 0, 2);
 		sampletabbox->registerWidget(labelpanning, 0, 2);
+	}
 	// </Sample settings>
 
 	// <Looping>
+	{
 		gbsampleloop = new GroupBox(19, 99, 110, 32, sub_screen);
 		gbsampleloop->setText("loop type");
 
@@ -3787,6 +3815,7 @@ void setupGUI(bool dldi_enabled)
 		sampletabbox->registerWidget(rbloop_pingpong, 0, 3);
 		sampletabbox->registerWidget(gbsampleloop, 0, 3);
 		sampletabbox->registerWidget(cbsnapto0xing, 0, 3);
+	}
 	// </Looping>
 
 	tabbox->registerWidget(sampledisplay, 0, 2);
@@ -3794,6 +3823,7 @@ void setupGUI(bool dldi_enabled)
 	// </Sample Gui>
 
 	// <Instruments Gui>
+	{
 		volenvedit = new EnvelopeEditor(5, 24, 130, 72, sub_screen, MAX_ENV_X, MAX_ENV_Y, MAX_ENV_POINTS);
 		volenvedit->registerPointsChangeCallback(volEnvPointsChanged);
 		volenvedit->registerDrawFinishCallback(volEnvDrawFinish);
@@ -3814,13 +3844,13 @@ void setupGUI(bool dldi_enabled)
 		btnenvdrawmode->setCaption("draw env");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
 
-    btnenvsetsuspoint = new Button(6, 122, 60, 10, sub_screen);
-    btnenvsetsuspoint->setCaption("set sus");
-    btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
+        btnenvsetsuspoint = new Button(6, 122, 60, 10, sub_screen);
+        btnenvsetsuspoint->setCaption("set sus");
+        btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
 
-    cbsusenabled = new CheckBox(6, 132, 60, 10, sub_screen, true, false);
-    cbsusenabled->setCaption("sus on");
-    cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
+        cbsusenabled = new CheckBox(6, 132, 60, 10, sub_screen, true, false);
+        cbsusenabled->setCaption("sus on");
+        cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
 
 		tbmapsamples = new ToggleButton(72, 133, 134-72, 12, sub_screen);
 		tbmapsamples->setCaption("map samp.");
@@ -3835,9 +3865,11 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(cbvolenvenabled, 0, 3);
 		tabbox->registerWidget(volenvedit, 0, 3);
 		tabbox->registerWidget(tbmapsamples, 0, 3);
+	}
 	// </Instruments Gui>
 
 	// <Settings Gui>
+	{
 		gbhandedness = new GroupBox(5, 23, 80, 25, sub_screen);
 		gbhandedness->setText("handedness");
 
@@ -3848,9 +3880,6 @@ void setupGUI(bool dldi_enabled)
 		rbrighthanded->setCaption("right");
 		rbghandedness->setActive(1);
 		rbghandedness->registerChangeCallback(handleHandednessChange);
-
-
-
 
 #if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
 		gbdsmw = new GroupBox(5, 55, 80, 54, sub_screen);
@@ -3947,11 +3976,13 @@ void setupGUI(bool dldi_enabled)
 			tabbox->registerWidget(gbfreq, 0, 4);
 		}
 #endif
+    }
 	// </Settings Gui>
 
-	lbinstruments = new ListBox(141, 32, 114, 89, sub_screen, MAX_INSTRUMENTS, true, true, false);
+	lbinstruments = new ListBox(tabbox_endx + 1, 32, sub_screen->getWidth() - tabbox_endx - 2, 89,
+	    sub_screen, MAX_INSTRUMENTS, true, true, false);
 
-	lbsamples = new ListBox(141, 100, 114, 23, sub_screen, MAX_INSTRUMENT_SAMPLES, true, false, true);
+	lbsamples = new ListBox(tabbox_endx + 1, 100, sub_screen->getWidth() - tabbox_endx - 2, 23, sub_screen, MAX_INSTRUMENT_SAMPLES, true, false, true);
 
 	buttonswitchsub    = new BitButton(sub_screen->getWidth() - 20, 1  , 19, 19, sub_screen, icon_flp_raw, 15, 15);
 	buttonplay         = new BitButton(180, 3  , 23, 15, sub_screen, icon_play_raw, 12, 12, 5, 0, true);
@@ -3979,28 +4010,32 @@ void setupGUI(bool dldi_enabled)
 	cbscrolllock->setCaption("scr lock");
 	cbscrolllock->registerToggleCallback(handleToggleScrollLock);
 
-	tbrecord = new ToggleButton(141, 136, 16, 16, sub_screen, true, true);
+	int add_oct_label_y = piano_y - 27;
+	int add_oct_number_y = piano_y - 18;
+	int tb_effect_y = piano_y - 17;
+
+	tbrecord = new ToggleButton(141, add_oct_number_y + 1, 16, 16, sub_screen, true, true);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
 	tbrecord->registerToggleCallback(setRecordMode);
 
-	labeladd = new Label(182, 126, 22, 12, sub_screen, false, true);
+	labeladd = new Label(182, add_oct_label_y, 22, 12, sub_screen, false, true);
 	labeladd->setCaption("add");
-	labeloct = new Label(206, 126, 25, 12, sub_screen, false, true);
+	labeloct = new Label(206, add_oct_label_y, 25, 12, sub_screen, false, true);
 	labeloct->setCaption("oct");
-	labelfxcat = new Label(206, 126, 25, 12, sub_screen, false, true);
+	labelfxcat = new Label(206, add_oct_label_y, 25, 12, sub_screen, false, true);
 	labelfxcat->setCaption("cat");
-	labeleffectpar = new Label(185, 153, 38, 10, sub_screen, false, true, true);
-	labeleffectpar->set_overdraw(false);
-	labeleffectpar->setCaption("param");
 	labelfxop 		   = new Label(RIGHT_SIDE_BUTTON_X(sub_screen), 140 + 1, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false, true, true);
 	labelfxop->setCaption("fx op");
-	numberboxfxcat = new NumberBox(206, 135, 18, 17, sub_screen, 0, 0, 3, 1);
-	numberboxadd    = new NumberBox(178, 135, 25, 17, sub_screen, state->add, 0, 32, 2, true);
-	numberboxoctave = new NumberBox(206, 135, 18, 17, sub_screen, state->basenote/12, 0, 6, 1);
-	dbeffectpar	 = new DigitBox(185, 164, 35, 17, sub_screen, 0, 0, 255, 2);
+	numberboxfxcat = new NumberBox(206, add_oct_number_y, 18, 17, sub_screen, 0, 0, 3, 1);
+	numberboxadd    = new NumberBox(178, add_oct_number_y, 25, 17, sub_screen, state->add, 0, 32, 2, true);
+	numberboxoctave = new NumberBox(206, add_oct_number_y, 18, 17, sub_screen, state->basenote/12, 0, 6, 1);
+	labeleffectpar = new Label(185, piano_y, 38, 10, sub_screen, false, true, true);
+	labeleffectpar->set_overdraw(false);
+	labeleffectpar->setCaption("param");
+	dbeffectpar	 = new DigitBox(185, piano_y + 11, 35, 17, sub_screen, 0, 0, 255, 2);
 	dbeffectpar->set_overdraw(false);
 	dbeffectpar->registerChangeCallback(handleEffectParamChanged);
-	buttonseteffectpar = new Button(185, 180, 35, 10, sub_screen);
+	buttonseteffectpar = new Button(185, piano_y + 27, 35, 10, sub_screen);
 	buttonseteffectpar->setCaption("set");
 	buttonseteffectpar->set_overdraw(false);
 	buttonseteffectpar->registerPushCallback(handleSetEffectParam);
@@ -4066,7 +4101,7 @@ void setupGUI(bool dldi_enabled)
 		buttontransposeup->setCaption("+");
 		buttontransposeup->registerPushCallback(handleTransposeUp);
 
-		tbeffects = new ToggleButton(158, 136, 16, 16, sub_screen);
+		tbeffects = new ToggleButton(158, add_oct_number_y + 1, 16, 16, sub_screen);
 		tbeffects->setBitmap(icon_fx_raw, 12, 12);
 		tbeffects->registerToggleCallback(handleToggleEffectsVisibility);
 
