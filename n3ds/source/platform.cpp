@@ -96,9 +96,12 @@ bool PlatformVideoSwapScreens(void) {
 
 	if (screensSwapped) {
 		// Draw black bars
-		memset(sub_screen->pixels, 0, 40 * 240 * sizeof(u16));
-		memset(sub_screen->pixels + (360 * 240), 0, 40 * 240 * sizeof(u16));
-		
+		for (int i = 0; i < 40*240; i++) {
+		    sub_screen->pixels[i] = RGB5A1_ALPHA_BIT;
+		}
+		for (int i = 0; i < 40*240; i++) {
+		    sub_screen->pixels[i + (360 * 240)] = RGB5A1_ALPHA_BIT;
+		}
 		sub_screen->pixels += (40 * 240);
 		main_screen->setSize(320, 240, 240);
 		sub_screen->setSize(320, 240, 240);
