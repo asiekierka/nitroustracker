@@ -234,7 +234,7 @@ void Piano::draw(void)
 	{
 		memcpy(map_base + (32*(py+y/8)+(x/8)), pianoMap + (PIANO_WIDTH_TILES * py), PIANO_WIDTH_TILES * 2);
 	}	
-#endif
+#else
 	if (!isExposed()) {
 		drawFullBox(0, 0, width, height, theme->col_bg);
 	} else {
@@ -270,7 +270,7 @@ void Piano::draw(void)
 			drawGradient(col2, col1, 2 + key_draw_x - 5, 2, HALFKEY_WIDTH-2, HALFKEY_HEIGHT-2);
 		}
 	}
-	
+#endif
 }
 
 // Set the key corresp. to note to palette corresp. to pal_idx
