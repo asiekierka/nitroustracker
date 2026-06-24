@@ -37,14 +37,14 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Typewriter::Typewriter(const char *_msg, u16 *_char_base, 
+Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	u16 *_map_base, u8 _palette_offset, Screen *_screen, vu16* _trans_reg_x,
 	vu16* _trans_reg_y, bool _is_file_name)
 	:Widget((_screen->getWidth()-TW_WIDTH)/2, (_screen->getHeight()-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _screen),
 	char_base(_char_base), map_base(_map_base), palette_offset(_palette_offset),
 	kx(x+TW_TILE_X), ky(y+TW_TILE_Y),
 	mode(TYPEWRITER_MODE_NORMAL),
-	trans_reg_x(_trans_reg_x), trans_reg_y(_trans_reg_y), 
+	trans_reg_x(_trans_reg_x), trans_reg_y(_trans_reg_y),
 	is_file_name(_is_file_name), cursorpos(0), strlength(0)
 {
 	onOk = 0;
@@ -55,23 +55,23 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 #endif
 
 	u8 msglength = getStringWidth(_msg);
-	
+
 	msglabel = new Label(x+4, y+6, msglength+4, 12, _screen, false);
 	msglabel->setCaption(_msg);
 	gui.registerWidget(msglabel, 0, SUB_SCREEN);
-	
+
 	label = new Label(x+msglength+8, y+4, TW_WIDTH-msglength-12, 15, _screen, true, false, false, true);
 	gui.registerWidget(label, 0, SUB_SCREEN);
-	
+
 	buttonok = new Button(x+TW_WIDTH/2-50-2 - 29, y+TW_HEIGHT-12-4, 50, 12, _screen);
 	buttonok->setCaption("ok");
 	gui.registerWidget(buttonok, 0, SUB_SCREEN);
-	
+
 	buttoncancel = new Button((x+TW_WIDTH/2+2) + 25, y+TW_HEIGHT-12-4, 50, 12, _screen);
 	buttoncancel->setCaption("cancel");
 	gui.registerWidget(buttoncancel, 0, SUB_SCREEN);
 
-	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _screen);  
+	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _screen);
 	buttonclear->setCaption("clear");
 	gui.registerWidget(buttonclear, 0, SUB_SCREEN);
 #ifdef TOBKIT_PLATFORM_NDS
@@ -79,7 +79,7 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	*_trans_reg_x = -kx;
 	*_trans_reg_y = -ky;
 #endif
-	
+
 	text = (char*)ntxm_ccalloc(1, MAX_TEXT_LEN+1);
 }
 
@@ -91,7 +91,7 @@ Typewriter::~Typewriter(void)
 	delete buttoncancel;
 	delete buttonclear;
 	ntxm_free(text);
-	
+
 #ifdef TOBKIT_PLATFORM_NDS
 	for(int py=0; py<TW_TILE_HEIGHT; ++py) {
 		memset(map_base + 32*py, 0, TW_TILE_WIDTH*2);
@@ -103,7 +103,7 @@ void Typewriter::genPal(void)
 {
 	const u16 tw_themecols[] = {
 		theme->col_typewriter_mod_key, theme->col_typewriter_key,
-		theme->col_typewriter_key_label, theme->col_typewriter_bg, 
+		theme->col_typewriter_key_label, theme->col_typewriter_bg,
 		theme->col_outline, theme->col_typewriter_mod_key_label,
 		(is_file_name ? theme->col_typewriter_disabled_key : theme->col_typewriter_key)
 	};
@@ -123,7 +123,7 @@ void Typewriter::penDown(u16 px, u16 py)
 	{
 		tilex = (px-kx)/8;
 		tiley = (py-ky)/8;
-		
+
 		if(tilex>=1 && tilex<(TW_TILE_WIDTH-1) && tiley<TW_TILE_HEIGHT)
 		{
 			char c;
@@ -131,8 +131,8 @@ void Typewriter::penDown(u16 px, u16 py)
 				c = typewriter_Hit_Shift[tilex+(tiley*TW_TILE_WIDTH)];
 			else
 				c = typewriter_Hit[tilex+(tiley*TW_TILE_WIDTH)];
-			
-			if (is_file_name && strchr("*/:<>|\"\?\x7F", c))	
+
+			if (is_file_name && strchr("*/:<>|\"\?\x7F", c))
 			{
 				c = NOK;
 			} else {
@@ -195,7 +195,7 @@ void Typewriter::penDown(u16 px, u16 py)
 				}
 			}
 		}
-		
+
 	// Inside the button area?
 	} else if ((px>x)&&(px<x+TW_WIDTH)&&(py<y+TW_HEIGHT)&&(py>ky+TW_TILE_HEIGHT*8)) {
 		gui.penDown(px, py);
@@ -270,7 +270,7 @@ void Typewriter::setTheme(Theme *theme_, u16 bgcolor_)
 {
 	theme = theme_;
 	bgcolor = bgcolor_;
-	
+
 	label->setTheme(theme, theme->col_light_bg);
 	msglabel->setTheme(theme, theme->col_light_bg);
 	buttonok->setTheme(theme, theme->col_light_bg);
@@ -295,7 +295,7 @@ void Typewriter::draw(void)
 	drawFullBox(1, 1, TW_WIDTH - 2, TW_HEIGHT - 2, theme->col_light_bg);
 	drawBorder(theme->col_outline);
 	gui.draw();
-	
+
 	redraw();
 }
 
@@ -304,12 +304,12 @@ void Typewriter::redraw(void)
 {
 	if(!isExposed())
 		return;
-	
+
 	label->pleaseDraw();
 	msglabel->pleaseDraw();
-	
+
 	drawCursor();
-	
+
 #ifdef TOBKIT_PLATFORM_NDS
 	u16 map_offset;
 	if((mode == TYPEWRITER_MODE_CAPS)||(mode == TYPEWRITER_MODE_SHIFT)) {
@@ -317,7 +317,7 @@ void Typewriter::redraw(void)
 	} else {
 		map_offset = 0;
 	}
-	
+
 	u16 tile_attr = palette_offset << 12;
     for(u8 py=0; py<TW_TILE_HEIGHT; ++py) {
 		for(u8 px=0; px<TW_TILE_WIDTH; ++px) {

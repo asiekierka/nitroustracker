@@ -233,7 +233,10 @@ GUI *gui;
 // </Main Screen>
 
 // <Things that suddenly pop up>
-	Typewriter *tw = NULL;
+#if defined(__NDS__)
+    Typewriter *tw = NULL;
+#endif
+	void (*twOkCallback)(const char*);
 	MessageBox *mb = NULL;
 // </Things that suddenly pop up>
 
@@ -1127,22 +1130,28 @@ void handleDiskOPChangeFileType(u8 newidx)
 
 void deleteTypewriter(void)
 {
-	gui->unregisterOverlayWidget();
-	typewriter_active = false;
-	delete tw;
-	tw = NULL;
+    gui->unregisterOverlayWidget();
+    typewriter_active = false;
+#if defined(__NDS__)
+    if(tw)
+    {
+        delete tw;
+        tw = NULL;
+    }
+#endif
+    twOkCallback = NULL;
 	redrawSubScreen();
 }
 
 void clearTypewriterText(void)
 {
+#if defined(__NDS__)
 	tw->setText("");
+#endif
 }
 
-
-void handleTypewriterFilenameOk(void)
+void handleTypewriterFilenameOk(const char *text)
 {
-	char *text = tw->getText();
 	char *name = NULL;
 	int textlen = strlen(text);
 	debugprintf("%s\n", text);
@@ -1465,8 +1474,10 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 	// Update other GUI Elements
 	updateGuiToNewPattern(song->getPotEntry(state->potpos));
 
+#if defined(__NDS__)
 	if (tw)
 		tw->pleaseDraw();
+#endif
 
 	if (mb)
 		mb->pleaseDraw();
@@ -2340,42 +2351,112 @@ void handleClearFx(void)
 	setEffectCommand(0xff);
 	pv->clearSelection();
 }
-void showTypewriter(const char *prompt, const char *str, void (*okCallback)(void), void (*clearCallback)(void), void (*cancelCallback)(void), bool is_file_name)
+
+struct TypewriterState {
+    const char *prompt;
+    const char *str;
+    void (*okCallback)(const char*);
+    void (*clearCallback)(void);
+    void (*cancelCallback)(void);
+    bool isFileName;
+};
+
+#if defined(__NDS__)
+void handleTypewriterOk()
+{
+    twOkCallback(tw->getText());
+}
+#endif
+
+void switchScreens();
+
+void showTypewriter(TypewriterState state)
 {
     // TODO: Migrate to new TobKit to eliminate such ugliness
-#ifdef TODO_NDS_ONLY
+#if defined(__NDS__)
 #define SUB_BG1_X0 (*(vu16*)0x04001014)
 #define SUB_BG1_Y0 (*(vu16*)0x04001016)
 
-	tw = new Typewriter(prompt, (u16*)CHAR_BASE_BLOCK_SUB(1),
-		(u16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0, is_file_name);
-#else
-	tw = new Typewriter(prompt, NULL, NULL, 3, sub_screen, NULL, NULL, is_file_name);
-#endif
+	tw = new Typewriter(state.prompt, (u16*)CHAR_BASE_BLOCK_SUB(1),
+		(u16*)SCREEN_BASE_BLOCK_SUB(12), 3, sub_screen, &SUB_BG1_X0, &SUB_BG1_Y0, state.isFileName);
 	tw->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
-	tw->setText(str);
+	tw->setText(state.str);
 	gui->registerOverlayWidget(tw, PlatformKey_LEFT|PlatformKey_RIGHT, SUB_SCREEN);
-	if(okCallback!=0) {
-		tw->registerOkCallback(okCallback);
+	if(state.okCallback) {
+	    twOkCallback = state.okCallback;
+		tw->registerOkCallback(handleTypewriterOk);
 	}
-	if(cancelCallback != 0) {
-		tw->registerCancelCallback(cancelCallback);
+	if(state.cancelCallback) {
+		tw->registerCancelCallback(state.cancelCallback);
 	}
-	if(clearCallback != 0) {
-		tw->registerClearCallback(clearCallback);
+	if(state.clearCallback) {
+		tw->registerClearCallback(state.clearCallback);
 	}
 	typewriter_active = true;
 	tw->reveal();
+#else
+#if defined(__3DS__)
+    static char text[512];
+
+    // Ensure the bottom screen is on top
+    bool unswitch = false;
+    if (!PlatformVideoAreScreensSwapped()) {
+        switchScreens();
+        PlatformWaitVBlank();
+        unswitch = true;
+    }
+
+    static SwkbdState swkbd;
+
+    swkbdInit(&swkbd, SWKBD_TYPE_QWERTY, 2, -1);
+    swkbdSetInitialText(&swkbd, state.str);
+    swkbdSetHintText(&swkbd, state.prompt);
+    swkbdSetButton(&swkbd, SWKBD_BUTTON_LEFT, "cancel", false);
+    swkbdSetButton(&swkbd, SWKBD_BUTTON_RIGHT, "ok", true);
+    swkbdSetValidation(&swkbd,
+        (state.isFileName ? SWKBD_NOTEMPTY_NOTBLANK : SWKBD_ANYTHING),
+        (state.isFileName ? SWKBD_FILTER_BACKSLASH : 0), 0);
+    swkbdSetFeatures(&swkbd, SWKBD_DARKEN_TOP_SCREEN | SWKBD_ALLOW_HOME | SWKBD_ALLOW_RESET | SWKBD_ALLOW_POWER
+        | (state.isFileName ? 0 : SWKBD_PREDICTIVE_INPUT));
+
+    while (aptMainLoop()) {
+        swkbdInputText(&swkbd, text, sizeof(text));
+        SwkbdResult result = swkbdGetResult(&swkbd);
+        if (result < SWKBD_HOMEPRESSED) {
+            if (state.okCallback && result == SWKBD_D1_CLICK1) {
+                state.okCallback(text);
+            } else if (state.cancelCallback) {
+                state.cancelCallback();
+            }
+            break;
+        } else {
+            if (!aptMainLoop()) {
+                if(state.cancelCallback) {
+                    state.cancelCallback();
+                }
+                return;
+            }
+        }
+    }
+
+    if (unswitch) {
+        switchScreens();
+    }
+#else
+    if(state.cancelCallback) {
+        state.cancelCallback();
+    }
+#endif
+#endif
 }
 
 
 void showTypewriterForFilename(void) {
-	showTypewriter("filename", labelFilename->getCaption(), handleTypewriterFilenameOk, clearTypewriterText, deleteTypewriter, true);
+	showTypewriter({"filename", labelFilename->getCaption(), handleTypewriterFilenameOk, clearTypewriterText, deleteTypewriter, true});
 }
 
-void handleTypewriterNewFolderOk(void)
+void handleTypewriterNewFolderOk(const char *text)
 {
-	char *text = tw->getText();
 	if(text[0] != '\0' && strchr(text, '/') == NULL && strchr(text, ':') == NULL)
 	{
 		mkdir(text, 0777);
@@ -2386,13 +2467,13 @@ void handleTypewriterNewFolderOk(void)
 }
 
 void showTypewriterForNewFolder(void) {
-	showTypewriter("dir name", "", handleTypewriterNewFolderOk, clearTypewriterText, deleteTypewriter, true);
+	showTypewriter({"dir name", "", handleTypewriterNewFolderOk, clearTypewriterText, deleteTypewriter, true});
 }
 
-void handleTypewriterInstnameOk(void)
+void handleTypewriterInstnameOk(const char *text)
 {
-	song->getInstrument(lbinstruments->getidx())->setName(tw->getText());
-	lbinstruments->set( lbinstruments->getidx(), tw->getText() );
+	song->getInstrument(lbinstruments->getidx())->setName(text);
+	lbinstruments->set( lbinstruments->getidx(), text );
 
 	deleteTypewriter();
 }
@@ -2405,25 +2486,25 @@ void showTypewriterForInstRename(void)
 		return;
 	}
 
-	showTypewriter("inst name", lbinstruments->get(lbinstruments->getidx()), handleTypewriterInstnameOk, clearTypewriterText, deleteTypewriter, false);
+	showTypewriter({"inst name", lbinstruments->get(lbinstruments->getidx()), handleTypewriterInstnameOk, clearTypewriterText, deleteTypewriter, false});
 }
 
-void handleTypewriterSongnameOk(void)
+void handleTypewriterSongnameOk(const char *text)
 {
-	song->setName(tw->getText());
+	song->setName(text);
 	labelsongname->setCaption(song->getName());
 	deleteTypewriter();
 }
 
 void showTypewriterForSongRename(void)
 {
-	showTypewriter("song name", song->getName(), handleTypewriterSongnameOk, clearTypewriterText, deleteTypewriter, false);
+	showTypewriter({"song name", song->getName(), handleTypewriterSongnameOk, clearTypewriterText, deleteTypewriter, false});
 }
 
-void handleTypewriterSampleOk(void)
+void handleTypewriterSampleOk(const char *text)
 {
-	song->getInstrument(lbinstruments->getidx())->getSample(lbsamples->getidx())->setName(tw->getText());
-	lbsamples->set( lbsamples->getidx(), tw->getText() );
+	song->getInstrument(lbinstruments->getidx())->getSample(lbsamples->getidx())->setName(text);
+	lbsamples->set( lbsamples->getidx(), text );
 
 	deleteTypewriter();
 }
@@ -2461,7 +2542,7 @@ void showTypewriterForSampleRename(void)
 	if(sample == 0)
 		return;
 
-	showTypewriter("sample name", lbsamples->get(lbsamples->getidx()), handleTypewriterSampleOk, clearTypewriterText, deleteTypewriter, false);
+	showTypewriter({"sample name", lbsamples->get(lbsamples->getidx()), handleTypewriterSampleOk, clearTypewriterText, deleteTypewriter, false});
 }
 
 void handleRecordSampleOK(void)
