@@ -3989,15 +3989,18 @@ void setupGUI(bool dldi_enabled)
 	buttonpause        = new BitButton(180, 3  , 23, 15, sub_screen, icon_pause_raw, 12, 12, 5, 0, false);
 	buttonstop         = new BitButton(204, 3  , 23, 15, sub_screen, icon_stop_raw, 12, 12, 5, 0);
 
-	buttonundo         = new BitButton(RIGHT_SIDE_BUTTON_X(sub_screen), 127, 14, 12, sub_screen, icon_undo_raw, 8, 8, 3, 2);
-	buttonredo         = new BitButton(RIGHT_SIDE_BUTTON_X(sub_screen) + RIGHT_SIDE_BUTTON_WIDTH - 14, 127, 14, 12, sub_screen, icon_redo_raw, 8, 8, 3, 2);
-	buttoninsnote2     = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 140, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
-	buttondelnote2     = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 153, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
-	buttonlerpfx       = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 153, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
-	buttonemptynote    = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 166, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
-	buttonemptyfx      = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 166, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
-	buttonstopnote     = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 179, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
-	buttoncpprm        = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), 179, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
+	int button2_main_y = main_screen->getHeight() - (13 * 8);
+	int button2_sub_y = sub_screen->getHeight() - (13 * 5);
+
+	buttonundo         = new BitButton(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y, 14, 12, sub_screen, icon_undo_raw, 8, 8, 3, 2);
+	buttonredo         = new BitButton(RIGHT_SIDE_BUTTON_X(sub_screen) + RIGHT_SIDE_BUTTON_WIDTH - 14, button2_sub_y, 14, 12, sub_screen, icon_redo_raw, 8, 8, 3, 2);
+	buttoninsnote2     = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 13, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttondelnote2     = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 26, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttonlerpfx       = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 26, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
+	buttonemptynote    = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 39, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttonemptyfx      = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 39, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
+	buttonstopnote     = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 52, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen);
+	buttoncpprm        = new Button(RIGHT_SIDE_BUTTON_X(sub_screen), button2_sub_y + 52, RIGHT_SIDE_BUTTON_WIDTH, 12, sub_screen, false);
 	buttonrenamesample = new Button(141, 124, 23, 12, sub_screen, false);
 	buttonrenameinst   = new Button(141, 19 , 23, 12, sub_screen);
 
@@ -4109,20 +4112,20 @@ void setupGUI(bool dldi_enabled)
 		//buttoncopy        = new BitButton(232,  74, 22, 21, main_screen, icon_copy_raw, 16, 16, 3, 3);
 		//buttonpaste       = new BitButton(232,  96, 22, 21, main_screen, icon_paste_raw, 16, 16, 3, 3);
 
-		buttoncut         = new Button(RIGHT_SIDE_BUTTON_X(main_screen),  88, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
-		buttoncopy        = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 101, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
-		buttonpaste       = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 114, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttoncut         = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttoncopy        = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 13, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttonpaste       = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 26, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 
 		buttoncut->setCaption("cut");
 		buttoncopy->setCaption("cp");
 		buttonpaste->setCaption("pst");
 		buttonpaste->disable();
 
-		buttoncolselect   = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 127, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
-		buttoninsnote     = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 140, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
-		buttondelnote     = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 153, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
-		buttonemptynote2  = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 166, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
-		buttonstopnote2   = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 179, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttoncolselect   = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 39, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttoninsnote     = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 52, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttondelnote     = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 65, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttonemptynote2  = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 78, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
+		buttonstopnote2   = new Button(RIGHT_SIDE_BUTTON_X(main_screen), button2_main_y + 91, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
 
 		buttonunmuteall->registerPushCallback(handleUnmuteAll);
 		buttoncut->registerPushCallback(handleCut);
