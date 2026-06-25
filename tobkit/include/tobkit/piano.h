@@ -48,7 +48,7 @@ class Piano: public Widget {
 		void setInMappingMode(bool instmap);
 		void setTheme(Theme *theme_, u16 bgcolor_);
 		void show(void);
-		inline int getWidthTiles(void) { return (width + 7) >> 3; }
+		int getKeyCount(void) const;
 
 	private:
 		void (*onNote)(u8);
@@ -59,7 +59,8 @@ class Piano: public Widget {
 
 		void draw(void);
 		void setKeyPal(u8 note);
-		u8 isHalfTone(u8 note);
+		int getKeyXOffset(int key) const;
+		bool isSharpNote(u8 note) const;
 		void resetPals(void);
 		void genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 *pal_half_highlight);
 		void drawKeyLabel(u8 key, bool visible=true);

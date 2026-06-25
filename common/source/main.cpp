@@ -290,7 +290,7 @@ void drawSampleNumbers(void)
 	Instrument *inst = song->getInstrument(state->instrument);
 	if(inst == NULL)
 	{
-		for(u8 key=0; key<24; ++key)
+		for(u8 key=0; key<kb->getKeyCount(); ++key)
 		{
 			kb->setKeyLabel(key, '0');
 		}
@@ -299,7 +299,7 @@ void drawSampleNumbers(void)
 
 	char label;
 	u8 note, sample_id;
-	for(u8 key=0; key<24; ++key)
+	for(u8 key=0; key<kb->getKeyCount(); ++key)
 	{
 		note = state->basenote + key;
 		sample_id = inst->getNoteSample(note) & 0x0F;
@@ -3433,7 +3433,7 @@ void sampleDrawToggle(bool on)
 
 void setupGUI(bool dldi_enabled)
 {
-    int piano_width = sub_screen->getWidth() - 32;
+    int piano_width = (sub_screen->getWidth() - 32) & ~0xF;
     int piano_height = 40;
     int piano_y = sub_screen->getHeight() - piano_height;
 

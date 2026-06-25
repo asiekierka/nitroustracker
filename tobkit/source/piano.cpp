@@ -28,9 +28,10 @@ using namespace tobkit;
 
 #define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
-static u8 halfkeys[5] = {1, 3, 6, 8, 10};
-static u8 fullkeys[7] = {0, 2, 4, 5, 7, 9, 11};
-static u8 fullkeyoffset[12] = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
+static const u8 halfkeys[5] = {1, 3, 6, 8, 10};
+static const u8 fullkeys[7] = {0, 2, 4, 5, 7, 9, 11};
+static const u8 fullkeysDrawn[7] = {0, 1, 3, 5, 6, 8, 10};
+static const u8 fullkeyoffset[12] = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
 
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
@@ -45,8 +46,8 @@ char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_i
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
 #endif
 
-    key_labels = (char*) ntxm_cmalloc((_width + 7) >> 3);
-	memset(key_labels, ' ', getWidthTiles());
+    key_labels = (char*) ntxm_cmalloc(getKeyCount());
+	memset(key_labels, ' ', getKeyCount());
 }
 
 Piano::~Piano() {
@@ -91,6 +92,15 @@ void Piano::pleaseDraw(void) {
 	draw();
 }
 
+int Piano::getKeyXOffset(int key) const {
+    return (fullkeyoffset[key % 12] * 16) + ((key / 12) * 112) + (isSharpNote(key) ? 11 : 0);
+}
+
+int Piano::getKeyCount(void) const {
+    int rows = width / 112;
+    int keys = fullkeysDrawn[(width % 112) >> 4];
+    return rows * 12 + keys;
+}
 
 // Event calls
 void Piano::penDown(u16 px, u16 py)
@@ -174,7 +184,7 @@ void Piano::showKeyLabels(void)
 {
 	key_labels_visible = true;
 
-	for(u8 key=0; key<getWidthTiles(); ++key)
+	for(u8 key=0; key<getKeyCount(); ++key)
 		drawKeyLabel(key);
 }
 
@@ -182,8 +192,12 @@ void Piano::hideKeyLabels(void)
 {
 	key_labels_visible = false;
 
-	for(u8 key=0; key<getWidthTiles(); ++key)
-		eraseKeyLabel(key);
+#ifdef TOBKIT_PLATFORM_NDS
+    for(u8 key=0; key<getKeyCount(); ++key)
+        eraseKeyLabel(key);
+#else
+    draw();
+#endif
 }
 
 void Piano::setInMappingMode(bool instmap)
@@ -272,6 +286,12 @@ void Piano::draw(void)
 			drawFullBox(1+key_draw_x - 5, 1, HALFKEY_WIDTH, HALFKEY_HEIGHT, col2);
 			drawGradient(col2, col1, 2 + key_draw_x - 5, 2, HALFKEY_WIDTH-2, HALFKEY_HEIGHT-2);
 		}
+
+		if(key_labels_visible)
+		{
+    		for(u8 key=0; key<getKeyCount(); ++key)
+    			drawKeyLabel(key);
+		}
 	}
 #endif
 }
@@ -282,7 +302,7 @@ void Piano::setKeyPal(u8 note)
 #ifdef TOBKIT_PLATFORM_NDS
   u8 px, py, hit_row, pal_idx;
 
-  if(isHalfTone(note))
+  if(isSharpNote(note))
   {
     hit_row = 0;
     pal_idx = 2;
@@ -308,12 +328,12 @@ void Piano::setKeyPal(u8 note)
 }
 
 // 1 for halftones, 0 for fulltones
-u8 Piano::isHalfTone(u8 note)
+bool Piano::isSharpNote(u8 note) const
 {
 	for(int i=0;i<5;++i) {
-		if((note%12)==halfkeys[i]) return 1;
+		if((note%12)==halfkeys[i]) return true;
 	}
-	return 0;
+	return false;
 }
 
 // Reset piano colors to normal
@@ -331,14 +351,19 @@ void Piano::resetPals(void)
 
 void Piano::drawKeyLabel(u8 key, bool visible)
 {
-	u8 xpos, ypos, offset;
+	int xpos, ypos, offset;
 	u16 col;
 
-	if(isHalfTone(key) == true)
+#ifndef TOBKIT_PLATFORM_NDS
+    if(!visible)
+        return;
+#endif
+
+	if(isSharpNote(key))
 	{
 		ypos = 12;
 		col = theme->col_piano_label_inv;
-		offset = 14;
+		offset = 3;
 	}
 	else
 	{
@@ -347,10 +372,10 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 		offset = 5;
 	}
 
-	if(visible == true)
+	if(visible)
 		col |= RGB5A1_ALPHA_BIT;
 
-	xpos = offset + (fullkeyoffset[key % 12] * 16) + ((key / 12) * 112);
+	xpos = offset + getKeyXOffset(key);
 
 	char label[] = {key_labels[key], 0};
 
