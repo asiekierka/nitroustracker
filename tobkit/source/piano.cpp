@@ -28,10 +28,9 @@ using namespace tobkit;
 
 #define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
-static u8 halfkeys[] = {1, 3, 6, 8, 10};
-static u8 x_offsets[] = {0, 11, 16, 27, 32, 48, 59, 64, 75, 80, 91, 96};
-
-
+static u8 halfkeys[5] = {1, 3, 6, 8, 10};
+static u8 fullkeys[7] = {0, 2, 4, 5, 7, 9, 11};
+static u8 fullkeyoffset[12] = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
 
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
@@ -245,9 +244,6 @@ void Piano::draw(void)
 	} else {
 		drawFullBox(0, 1, width, height-1, theme->col_piano_outline);
 
-		u8 fullkeys[7] = {0, 2, 4, 5, 7, 9, 11};
-		u8 halfkeys[5] = {1, 3, 6, 8, 10};
-
 		const u8 FULLKEY_WIDTH = 15;
 		const u8 FULLKEY_HEIGHT = 38;
 
@@ -342,7 +338,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	{
 		ypos = 12;
 		col = theme->col_piano_label_inv;
-		offset = 3;
+		offset = 14;
 	}
 	else
 	{
@@ -354,7 +350,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	if(visible == true)
 		col |= RGB5A1_ALPHA_BIT;
 
-	xpos = offset + x_offsets[key % 12] + ((key / 12) * 111);
+	xpos = offset + (fullkeyoffset[key % 12] * 16) + ((key / 12) * 112);
 
 	char label[] = {key_labels[key], 0};
 
