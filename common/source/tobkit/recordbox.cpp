@@ -67,7 +67,7 @@ RecordBox::RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(voi
 	buttoncancel->setCaption("cancel");
 	buttoncancel->registerPushCallback(_onCancel);
 
-#ifdef __3DS__
+#ifdef NT_PLATFORM_3DS
 	sound_data = (u16*) ntxm_cmemalign(0x1000, RECORDBOX_SOUNDDATA_SIZE);
 	micInit((u8*) sound_data, RECORDBOX_SOUNDDATA_SIZE);
 #endif
@@ -75,7 +75,7 @@ RecordBox::RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(voi
 
 RecordBox::~RecordBox(void)
 {
-#ifdef __3DS__
+#ifdef NT_PLATFORM_3DS
 	micExit();
 #endif
 	if(sound_data)
@@ -198,7 +198,7 @@ bool RecordBox::startRecording(void)
 		if(sample != NULL)
 			instrument->setSample(smpidx, NULL); // Deletes the sample
 
-#ifdef __3DS__
+#ifdef NT_PLATFORM_3DS
 		if (R_FAILED(MICU_StartSampling(MICU_ENCODING_PCM16_SIGNED, MICU_SAMPLE_RATE_16360, 0, micGetSampleDataSize(), false)))
 			return false;
 #else
@@ -222,11 +222,11 @@ bool RecordBox::startRecording(void)
 void RecordBox::stopRecording()
 {
 	int size = CommandStopRecording();
-#ifdef __3DS__
+#ifdef NT_PLATFORM_3DS
 	size = micGetLastSampleOffset();
 	MICU_StopSampling();
 #endif
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	DC_InvalidateRange(sound_data, size);
 #endif
 
@@ -235,7 +235,7 @@ void RecordBox::stopRecording()
 	// Security check
 	if(size < RECORDBOX_CROP_SAMPLES_END + RECORDBOX_CROP_SAMPLES_START)
 	{
-#ifndef __3DS__
+#ifndef NT_PLATFORM_3DS
 		if(sound_data)
 			ntxm_free(sound_data);
 		sound_data = NULL;
@@ -248,7 +248,7 @@ void RecordBox::stopRecording()
 	
 	// Get pointer to sound data and shrink it beautiful
 	u32 newsize = size - RECORDBOX_CROP_SAMPLES_END*2; // Crop the end because it contains the clicking of the button
-#ifdef __3DS__
+#ifdef NT_PLATFORM_3DS
 	u16 *sample_data = (u16*)ntxm_cmalloc(newsize);
 	memcpy(sample_data, sound_data, newsize);
 #else

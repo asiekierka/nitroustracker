@@ -19,7 +19,7 @@ limitations under the License.
 #include <string.h>
 
 #include "tobkit/typewriter.h"
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 #include "typewriter.h"
 #endif
 #include "typewriter_hit.h"
@@ -50,7 +50,7 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	onOk = 0;
 	onCancel = 0;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	decompress(typewriterTiles, char_base, LZ77Vram);
 #endif
 
@@ -74,7 +74,7 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _screen);
 	buttonclear->setCaption("clear");
 	gui.registerWidget(buttonclear, 0, SUB_SCREEN);
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	// Set the tile bg translation registers to move the typewriter to (x,y)
 	*_trans_reg_x = -kx;
 	*_trans_reg_y = -ky;
@@ -92,7 +92,7 @@ Typewriter::~Typewriter(void)
 	delete buttonclear;
 	ntxm_free(text);
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	for(int py=0; py<TW_TILE_HEIGHT; ++py) {
 		memset(map_base + 32*py, 0, TW_TILE_WIDTH*2);
 	}
@@ -279,7 +279,7 @@ void Typewriter::setTheme(Theme *theme_, u16 bgcolor_)
 
 	genPal();
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	memcpy(BG_PALETTE_SUB+palette_offset*16, typewriterPal, 32);
 	// generate highlight palette
 	for (int i = 0; i < 16; i++) {
@@ -310,7 +310,7 @@ void Typewriter::redraw(void)
 
 	drawCursor();
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	u16 map_offset;
 	if((mode == TYPEWRITER_MODE_CAPS)||(mode == TYPEWRITER_MODE_SHIFT)) {
 		map_offset = TW_TILE_WIDTH*TW_TILE_HEIGHT;
@@ -351,7 +351,7 @@ void Typewriter::setTile(int x, int y, int pal)
 
 	if(!c) return;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	map_base[(y*32)+x] &= ~(7 << 12);
 	map_base[(y*32)+x] |= (pal << 12);
 

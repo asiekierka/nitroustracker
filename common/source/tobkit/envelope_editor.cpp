@@ -30,7 +30,7 @@
 #include <cmath>
 #undef sqrtf32
 
-#ifndef __NDS__
+#ifndef NT_PLATFORM_NDS
 #include "libnds/math.h"
 #include "libnds/trig_lut.h"
 #endif

@@ -43,7 +43,7 @@ class Screen {
         }
 
 		inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col) {
-#if defined(TOBKIT_PLATFORM_3DS)
+#if defined(NT_PLATFORM_3DS)
             *(pixels+getPitch()*tx+getPitch()-1-ty) = col;
 #else
             *(pixels+getPitch()*ty+tx) = col;
@@ -51,7 +51,7 @@ class Screen {
         }
 
         inline void fillRow(u32 tx, u32 ty, u32 bw, u32 col) {
-#if defined(TOBKIT_PLATFORM_NDS)
+#if defined(NT_PLATFORM_NDS)
     		dmaFillHalfWords(col, pixels+getPitch()*ty+tx, bw*2);
 #else
             for (u32 i = 0; i < bw; i++)

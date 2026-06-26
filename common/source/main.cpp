@@ -24,13 +24,13 @@
 
 // #define SHOW_ALL_SETTINGS
 
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
 #include <nds.h>
 #include <fat.h>
 #define GURU // Show guru meditations
 #define ENABLE_EFFECT_MENU
 #define ENABLE_PIANO_PAK
-#elif defined(__3DS__)
+#elif defined(NT_PLATFORM_3DS)
 #include <3ds.h>
 #endif
 
@@ -207,7 +207,7 @@ GUI *gui;
 	RadioButton::RadioButtonGroup *rbgoutput;
 	RadioButton *rboutputmono, *rboutputstereo;
 	GroupBox *gboutput;
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	RadioButton::RadioButtonGroup *rbgfreq;
 	RadioButton *rbfreq32, *rbfreq47;
 	GroupBox *gbfreq;
@@ -232,7 +232,7 @@ GUI *gui;
 // </Main Screen>
 
 // <Things that suddenly pop up>
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
     Typewriter *tw = NULL;
 #endif
 	void (*twOkCallback)(const char*);
@@ -645,7 +645,7 @@ void handleSampleChange(const u16 newsample)
 
 void handleOverlayWidgetChange(u8 screen, bool visible)
 {
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	if (screen == SUB_SCREEN)
 	{
 		if (visible) oamDisable(&oamSub);
@@ -1131,7 +1131,7 @@ void deleteTypewriter(void)
 {
     gui->unregisterOverlayWidget();
     typewriter_active = false;
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
     if(tw)
     {
         delete tw;
@@ -1144,7 +1144,7 @@ void deleteTypewriter(void)
 
 void clearTypewriterText(void)
 {
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
 	tw->setText("");
 #endif
 }
@@ -1296,7 +1296,7 @@ void drawMainScreen(void)
 void redrawSubScreen(void)
 {
 	u16 col = settings->getTheme()->col_bg;
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
     // clean only ~3/4ths of the screen, as the rest is covered by the piano
 	u32 colcol = col | col << 16;
 	dmaFillWords(colcol, sub_screen->pixels, 256 * 153 * 2);
@@ -1417,7 +1417,7 @@ void setRecordMode(bool is_on)
 	else
 		col = settings->getTheme()->col_bg; // bg color
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	u32 colcol = (col) | (col << 16);
 	dmaFillWords(colcol, sub_screen->pixels, 256 * 2);
 	dmaFillWords(colcol, sub_screen->pixels + (256*191), 256 * 2);
@@ -1474,7 +1474,7 @@ void handlePotPosChangeFromSong(u16 newpotpos)
 	// Update other GUI Elements
 	updateGuiToNewPattern(song->getPotEntry(state->potpos));
 
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
 	if (tw)
 		tw->pleaseDraw();
 #endif
@@ -2145,7 +2145,7 @@ void reloadSkin(void)
 {
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	// fill the quirky little square next to the piano
 	for (int y = 153; y < 192;++y)
 	{
@@ -2361,7 +2361,7 @@ struct TypewriterState {
     bool isFileName;
 };
 
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
 void handleTypewriterOk()
 {
     twOkCallback(tw->getText());
@@ -2373,7 +2373,7 @@ void switchScreens();
 void showTypewriter(TypewriterState state)
 {
     // TODO: Migrate to new TobKit to eliminate such ugliness
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
 #define SUB_BG1_X0 (*(vu16*)0x04001014)
 #define SUB_BG1_Y0 (*(vu16*)0x04001016)
 
@@ -2395,7 +2395,7 @@ void showTypewriter(TypewriterState state)
 	typewriter_active = true;
 	tw->reveal();
 #else
-#if defined(__3DS__)
+#if defined(NT_PLATFORM_3DS)
     static char text[512];
 
     // Ensure the bottom screen is on top
@@ -2687,7 +2687,7 @@ void sample_show_normalize_window(void)
 }
 
 #define RIGHT_SIDE_BUTTON_WIDTH 30
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 #define RIGHT_SIDE_BUTTON_X(screen) (255 - (RIGHT_SIDE_BUTTON_WIDTH))
 #else
 #define RIGHT_SIDE_BUTTON_X(screen) ((screen)->getWidth() - 1 - RIGHT_SIDE_BUTTON_WIDTH)
@@ -2730,7 +2730,7 @@ void handleOutputModeChange(u8 outputMode)
 	stopPlay();
 }
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 void handleOutputFreqChange(u8 freq)
 {
 	settings->setFreq47kHz(freq != 0);
@@ -2755,11 +2755,11 @@ void adjustMainScreenWidgets(int width_delta)
 
 void switchScreens(void)
 {
-#ifndef __NDS__
+#ifndef NT_PLATFORM_NDS
 	int old_main_screen_width = main_screen->getWidth();
 #endif
 	if (!PlatformVideoSwapScreens()) return;
-#ifndef __NDS__
+#ifndef NT_PLATFORM_NDS
 	int new_main_screen_width = main_screen->getWidth();
 	if (old_main_screen_width != new_main_screen_width) {
 		adjustMainScreenWidgets(new_main_screen_width - old_main_screen_width);
@@ -2770,7 +2770,7 @@ void switchScreens(void)
 		pv->clearSelection();
 	redraw_main_requested = false;
 	drawMainScreen();
-#ifndef __NDS__
+#ifndef NT_PLATFORM_NDS
 	redrawSubScreen();
 #endif
 }
@@ -2780,7 +2780,7 @@ void switchScreens(void)
 // Create the song and do other init stuff yet to be determined.
 void setupSong(void) {
 	song = new Song(6, 125);
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	action_buffer = new ActionBuffer(isDSiMode() ? 1024 : 256);
 #else
 	action_buffer = new ActionBuffer(2048);
@@ -3441,7 +3441,7 @@ void setupGUI(bool dldi_enabled)
 	gui->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	gui->setOnOverlayChanged(handleOverlayWidgetChange);
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	kb = new Piano(0, piano_y, piano_width, piano_height, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen);
 #else
 	kb = new Piano(0, piano_y, piano_width, piano_height, NULL, NULL, sub_screen);
@@ -3450,7 +3450,7 @@ void setupGUI(bool dldi_enabled)
 	kb->registerNoteCallback(handleNoteStroke);
 	kb->registerReleaseCallback(handleNoteRelease);
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	fxkb = new FXKeyboard(0, piano_y, (u16*)CHAR_BASE_BLOCK_SUB(0), (u16*)SCREEN_BASE_BLOCK_SUB(1/*8*/), sub_screen, onFxKeyPressed, false);
 #else
 	fxkb = new FXKeyboard(0, piano_y, NULL, NULL, sub_screen, onFxKeyPressed, false);
@@ -3919,7 +3919,7 @@ void setupGUI(bool dldi_enabled)
 		nblinesbeat = new NumberBox(93, 72, 32, 17, sub_screen, settings->getLinesPerBeat(), 1, 64);
 		nblinesbeat->registerChangeCallback(handleLinesBeatChange);
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
@@ -3966,7 +3966,7 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(gboutput, 0, 4);
 		tabbox->registerWidget(nblinesbeat, 0, 4);
 		tabbox->registerWidget(gblinesbeat, 0, 4);
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
@@ -4430,7 +4430,7 @@ void VblankHandler(void)
 	}
 #endif
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	oamUpdate(&oamSub);
 #endif
 
@@ -4475,7 +4475,7 @@ int main(int argc, char **argv) {
 	if (!PlatformInit()) exit(1);
 	bool fat_success = PlatformInitFilesystem();
 
-#if defined(__NDS__) || defined(__3DS__)
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
 	// parse argv[0], if present
 	if (argc >= 1 && argv != NULL && argv[0] != NULL) {
 		char *path_split = strrchr(argv[0], '/');
@@ -4534,7 +4534,7 @@ int main(int argc, char **argv) {
 	PlatformVideoFadeIn();
 #endif
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	if(!fat_success)
 		showMessage("dldi init failed", true);
 #endif

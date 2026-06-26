@@ -30,7 +30,7 @@ Screen::Screen(tobkit_pixel_t *_pixels, int _width, int _height, int _pitch)
 }
 
 void Screen::clear(tobkit_pixel_t col) {
-#if defined(__NDS__)
+#if defined(NT_PLATFORM_NDS)
 	u32 colcol = col * 0x10001;
 	dmaFillWords(colcol, pixels, 192*256*2);
 #else

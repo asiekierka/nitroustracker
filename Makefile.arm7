@@ -18,7 +18,7 @@ BINDIRS		:=
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF
+DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF -DNT_PLATFORM_NDS
 
 # Libraries
 # ---------
@@ -86,7 +86,7 @@ SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -name "*.cpp")
 # Compiler and linker flags
 # -------------------------
 
-DEFINES		+= -D__NDS__ -DARM7 -DBLOCKSDS
+DEFINES		+= -D__NDS__ -DNT_PLATFORM_NDS -DARM7 -DBLOCKSDS
 ifeq ($(DEBUG),true)
 DEFINES		+= -DDEBUG -fstack-protector-strong
 else

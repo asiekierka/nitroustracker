@@ -23,7 +23,7 @@ TOOLSDIR	:= tools
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF -DTOBKIT_PLATFORM_NDS
+DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF -DNT_PLATFORM_NDS
 
 # Libraries
 # ---------
@@ -108,7 +108,7 @@ SOURCES_CPP	:= $(shell find -L $(SOURCEDIRS) -maxdepth 1 -name "*.cpp")
 # Compiler and linker flags
 # -------------------------
 
-DEFINES		+= -D__NDS__ -DARM9 -DBLOCKSDS -DVERSION=\"$(VERSION)\" -DGIT_HASH=\"$(GIT_HASH)\"
+DEFINES		+= -D__NDS__ -DNT_PLATFORM_NDS -DARM9 -DBLOCKSDS -DVERSION=\"$(VERSION)\" -DGIT_HASH=\"$(GIT_HASH)\"
 ifeq ($(DEBUG),true)
 DEFINES		+= -DDEBUG -fstack-protector-strong
 else

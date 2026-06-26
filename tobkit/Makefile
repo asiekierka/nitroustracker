@@ -22,7 +22,7 @@ TOOLSDIR	:= ../tools
 # Defines passed to all files
 # ---------------------------
 
-DEFINES		:= -DTOBKIT_PLATFORM_NDS
+DEFINES		:= -D__NDS__ -DARM9 -DNT_PLATFORM_NDS
 
 # Libraries
 # ---------

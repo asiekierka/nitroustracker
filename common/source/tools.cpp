@@ -65,7 +65,7 @@ void PrintFreeMem(void)
 	printf("FreeMem=%dbyte    \n", ntxm_getFreeMem());
 }
 
-#if defined(__3DS__) || defined(__NDS__)
+#if defined(NT_PLATFORM_3DS) || defined(NT_PLATFORM_NDS)
 #include <malloc.h>
 void printMallInfo(void)
 {

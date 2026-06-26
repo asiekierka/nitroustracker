@@ -21,7 +21,7 @@ limitations under the License.
 #include <stdlib.h>
 
 #include "fxkeyboard.h"
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 #include "effectinput.h"
 #endif
 
@@ -84,7 +84,7 @@ void FXKeyboard::setTheme(Theme* theme_, u16 bgcolor_)
 	
 	if (!isExposed()) return;
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	memcpy(BG_PALETTE_SUB, fxkb_pal, 32);
 #endif
 	
@@ -99,7 +99,7 @@ void FXKeyboard::hide(void)
 
 void tobkit::FXKeyboard::show(void)
 {
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 	dmaCopy(effectinputTiles, char_base, sizeof(effectinputTiles));
 	memcpy(BG_PALETTE_SUB, fxkb_pal, 32);
 #endif
@@ -241,7 +241,7 @@ void FXKeyboard::eraseButtonLabels(void)
 void FXKeyboard::draw(void) {
 	if (!isExposed()) return;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	u16 lstate, rstate;
 
 	/* 

@@ -29,7 +29,7 @@
 #undef sqrtf32
 #include <cstdio>
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 #include "loophandle.h"
 #else
 #include "libnds/math.h"
@@ -55,7 +55,7 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_s
 	scrollthingypos(0), scrollthingywidth(width-2*SCROLLBUTTON_HEIGHT-ZOOM_BUTTONS_MARGIN+2), pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
 	offset_guide_pos(0), snap_to_zero_crossings(true), draw_mode(false)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	gfxLine = oamAllocateGfx(&oamSub, SpriteSize_16x32, SpriteColorFormat_16Color);
 	gfxLoopHandle = oamAllocateGfx(&oamSub, SpriteSize_8x8, SpriteColorFormat_16Color);
 
@@ -95,7 +95,7 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_s
 
 SampleDisplay::~SampleDisplay(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	oamFreeGfx(&oamSub, gfxLine);
 	oamFreeGfx(&oamSub, gfxLoopHandle);
 #endif
@@ -284,11 +284,11 @@ void SampleDisplay::setSample(Sample *_smp)
 	
 	if(_smp == NULL) {
 		loop_points_visible = false;
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 		oamDisable(&oamSub);
 #endif
 	}
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	else if (isExposed())
 		oamEnable(&oamSub);
 #endif
@@ -351,7 +351,7 @@ void SampleDisplay::setDrawMode(bool _on)
 {
 	draw_mode = _on;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	if (draw_mode)
 		oamDisable(&oamSub);
 	else
@@ -387,7 +387,7 @@ void SampleDisplay::setSnapToZeroCrossing(bool snap)
 
 void SampleDisplay::reveal(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	if(smp) oamEnable(&oamSub);
 #endif
 	Widget::reveal();
@@ -395,7 +395,7 @@ void SampleDisplay::reveal(void)
 
 void SampleDisplay::occlude(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	oamDisable(&oamSub);
 #endif
 	Widget::occlude();
@@ -403,7 +403,7 @@ void SampleDisplay::occlude(void)
 
 void SampleDisplay::setTheme(Theme *theme_, u16 bgcolor_)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	*(SPRITE_PALETTE_SUB+1) = theme_->col_loop;
 	*(SPRITE_PALETTE_SUB+1+16) = theme_->col_outline;
 	*(SPRITE_PALETTE_SUB+2+16) = theme_->col_loop;
@@ -485,7 +485,7 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 
 void SampleDisplay::drawLoopHandles(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	u16 loop_start_pos = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart());
 	u16 loop_end_pos   = smp == 0 ? 0 : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
@@ -522,7 +522,7 @@ void SampleDisplay::draw(void)
 		drawBorder(theme->col_signal);
 	}
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	drawLoopHandles(); // Hides loop points if no sample/loop
 #endif
 
@@ -761,7 +761,7 @@ void SampleDisplay::draw(void)
 
 	}
 
-#ifndef TOBKIT_PLATFORM_NDS
+#ifndef NT_PLATFORM_NDS
 	//
 	// Loop Points
 	//

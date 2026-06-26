@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "tobkit/piano.h"
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 #include "piano.h"
 #endif
 #include "piano_hit.h"
@@ -41,7 +41,7 @@ char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_i
 	onNote = 0;
 	onRelease = 0;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	// Piano::draw is never invoked before Piano::setTheme
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
 #endif
@@ -61,7 +61,7 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
 	Widget::setTheme(theme_, bgcolor_);
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	// doesn't conflict with fx keyboard, so safe to write these
 	memcpy(BG_PALETTE_SUB+16, piano_fullnotehighlight_Palette, 32);
 	memcpy(BG_PALETTE_SUB+32, piano_halfnotehighlight_Palette, 32);
@@ -69,7 +69,7 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 
 	if (!isExposed()) return;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
 #endif
 
@@ -79,7 +79,7 @@ void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
 
 void Piano::show(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	dmaCopy(pianoTiles, char_base, sizeof(pianoTiles));
 	memcpy(BG_PALETTE_SUB, piano_Palette, 32);
 #endif
@@ -113,7 +113,7 @@ void Piano::penDown(u16 px, u16 py)
 	u8 note = piano_hit[kby][kbx % 14] + ((kbx / 14) * 12);
 
 	setKeyPal(note);
-#ifndef TOBKIT_PLATFORM_NDS
+#ifndef NT_PLATFORM_NDS
 	pleaseDraw();
 #endif
 	if(onNote) {
@@ -150,7 +150,7 @@ void Piano::penMove(u16 px, u16 py)
 		// draw();
 	}
 
-	#ifndef TOBKIT_PLATFORM_NDS
+	#ifndef NT_PLATFORM_NDS
 		pleaseDraw();
 	#endif
 }
@@ -164,7 +164,7 @@ void Piano::penUp(u16 px, u16 py)
 	{
 		onRelease(curr_note, false);
 	}
-#ifndef TOBKIT_PLATFORM_NDS
+#ifndef NT_PLATFORM_NDS
 	curr_note = 255;
 	pleaseDraw();
 #endif
@@ -192,7 +192,7 @@ void Piano::hideKeyLabels(void)
 {
 	key_labels_visible = false;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
     for(u8 key=0; key<getKeyCount(); ++key)
         eraseKeyLabel(key);
 #else
@@ -243,7 +243,7 @@ void Piano::genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 
 
 void Piano::draw(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 	// Fill screen with empty tiles
 	for (int i = 0; i < 768; i++) map_base[i] = 28;
 
@@ -299,7 +299,7 @@ void Piano::draw(void)
 // Set the key corresp. to note to palette corresp. to pal_idx
 void Piano::setKeyPal(u8 note)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
   u8 px, py, hit_row, pal_idx;
 
   if(isSharpNote(note))
@@ -339,7 +339,7 @@ bool Piano::isSharpNote(u8 note) const
 // Reset piano colors to normal
 void Piano::resetPals(void)
 {
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
   u8 px,py;
   for(px=0; px<PIANO_WIDTH_TILES; ++px) {
     for(py=0; py<PIANO_HEIGHT_TILES; ++py) {
@@ -354,7 +354,7 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 	int xpos, ypos, offset;
 	u16 col;
 
-#ifndef TOBKIT_PLATFORM_NDS
+#ifndef NT_PLATFORM_NDS
     if(!visible)
         return;
 #endif

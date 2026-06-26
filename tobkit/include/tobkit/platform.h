@@ -17,17 +17,17 @@ limitations under the License.
 #ifndef _PLATFORM_H_
 #define _PLATFORM_H_
 
-#if defined(TOBKIT_PLATFORM_NDS)
+#if defined(NT_PLATFORM_NDS)
 #include "platform_nds.h"
-#elif defined(TOBKIT_PLATFORM_3DS)
+#elif defined(NT_PLATFORM_3DS)
 #include "platform_n3ds.h"
-#elif defined(TOBKIT_PLATFORM_SDL3)
+#elif defined(NT_PLATFORM_SDL3)
 #include "platform_sdl3.h"
 #else
 #error No platform defined!
 #endif
 
-#if !defined(TOBKIT_PLATFORM_NDS)
+#if !defined(NT_PLATFORM_NDS)
 #define ITCM_CODE
 #define div32(a,b) ((a)/(b))
 #endif

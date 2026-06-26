@@ -29,7 +29,7 @@
 #include "tools.h"
 #include "ntxm/ntxmtools.h"
 
-#if defined(__NDS__) || defined(__3DS__)
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
 #define SETTINGS_DEFAULT_DATA_DIR "/data/NitroTracker"
 #else
 #define SETTINGS_DEFAULT_DATA_DIR "."
@@ -60,7 +60,7 @@ fat(use_fat), changed(false)
 
 	if(fat == true)
 	{
-#if defined(__NDS__) || defined(__3DS__)
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
 		if (launch_path == NULL)
 		{
 			dirCreate("/data");

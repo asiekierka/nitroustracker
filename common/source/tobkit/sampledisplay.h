@@ -136,7 +136,7 @@ class SampleDisplay: public Widget {
 
 		u8 draw_last_x, draw_last_y;
 
-#ifdef TOBKIT_PLATFORM_NDS
+#ifdef NT_PLATFORM_NDS
 		u16 *gfxLoopHandle, *gfxLine;
 #endif
 };

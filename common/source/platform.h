@@ -21,7 +21,7 @@
 #include "tobkit/screen.h"
 using namespace tobkit;
 
-#ifdef __NDS__
+#ifdef NT_PLATFORM_NDS
 typedef u16 PlatformKeyMask;
 #else
 typedef u32 PlatformKeyMask;

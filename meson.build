@@ -117,10 +117,8 @@ icon_pngs = [
 ]
 
 sdl3_dep = dependency('sdl3', required: true)
-add_project_arguments('-DSDL3', language: 'c')
-add_project_arguments('-DTOBKIT_PLATFORM_SDL3', language: 'c')
-add_project_arguments('-DSDL3', language: 'cpp')
-add_project_arguments('-DTOBKIT_PLATFORM_SDL3', language: 'cpp')
+add_project_arguments('-DNT_PLATFORM_SDL3', language: 'c')
+add_project_arguments('-DNT_PLATFORM_SDL3', language: 'cpp')
 add_project_arguments('-DVERSION="WIP"', language: 'cpp')
 add_project_arguments('-DGIT_HASH="WIP"', language: 'cpp')
 add_project_arguments('-DDEBUG', language: 'cpp')

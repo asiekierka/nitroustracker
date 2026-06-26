@@ -32,7 +32,7 @@
 
 // A collection of utilities for everyday coding
 #define debugprintf ntxm_dprintf
-#if !defined(__NDS__)
+#if !defined(NT_PLATFORM_NDS)
 #define sassert(...) {}
 #endif
 
