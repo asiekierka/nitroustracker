@@ -77,6 +77,8 @@ class Widget {
 		bool set_occluded(bool value);
 
 		// Resize
+		inline u16 getX(void) { return x; }
+		inline u16 getY(void) { return y; }
 		inline u16 getWidth(void) { return width; }
 		inline u16 getHeight(void) { return height; }
 		void resize(u16 w, u16 h);
