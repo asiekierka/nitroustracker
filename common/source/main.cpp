@@ -383,6 +383,12 @@ static bool uiPotSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2, u16 *sel_y2, b
 	return is_box;
 }
 
+void deleteSong()
+{
+    CommandSetSong(nullptr);
+    delete song;
+}
+
 void handleNoteFill(u8 note)
 {
 	u16 sel_x1, sel_y1, sel_x2, sel_y2;
@@ -944,7 +950,7 @@ void loadModule(void)
 	if(file==0) return;
 
 	pv->unmuteAll();
-	delete song; // For christs sake do some checks before deleting the song!!
+	deleteSong(); // TODO: Do some checks before deleting the song?
 
 	mod_loading = true;
 	showSlowLoadOperation([file](){
@@ -953,7 +959,7 @@ void loadModule(void)
 		err = xm_transport.load(file->name_with_path.c_str(), &newsong);
 		if (err)
 		{
-			setSong(new Song(10, 125));
+			setSong(new Song());
 			return xm_transport.getError(err);
 		}
 		else
@@ -1835,7 +1841,7 @@ void zapInstruments(void)
 
 void zapSong(void) {
 	deleteMessageBox();
-	delete song;
+	deleteSong();
 	setSong(new Song());
 	updateMemoryState(true);
 }
@@ -2787,7 +2793,7 @@ void switchScreens(void)
 
 // Create the song and do other init stuff yet to be determined.
 void setupSong(void) {
-	song = new Song(6, 125);
+	song = new Song();
 #ifdef NT_PLATFORM_NDS
 	action_buffer = new ActionBuffer(isDSiMode() ? 1024 : 256);
 #else
