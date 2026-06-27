@@ -37,13 +37,26 @@ namespace tobkit {
 #define PV_CHAR_WIDTH	4
 #define PV_CHAR_HEIGHT	8
 
+#ifdef NT_PLATFORM_3DS
+#define MUTE_REL_X	1
+#define MUTE_TEXT_REL_X 2
+#define MUTE_Y		1+9
+#define MUTE_WIDTH	14
+
+#define SOLO_REL_X	MUTE_WIDTH+2
+#else
 #define MUTE_REL_X	9
-#define MUTE_X(i)		(PV_BORDER_WIDTH+(i)*getCellWidth()+MUTE_REL_X)
+#define MUTE_TEXT_REL_X 0
 #define MUTE_Y		1
 #define MUTE_WIDTH	10
-#define MUTE_HEIGHT	9
 
 #define SOLO_REL_X	20
+#endif
+#define MUTE_X(i)		(PV_BORDER_WIDTH+(i)*getCellWidth()+MUTE_REL_X)
+
+#define MUTE_HEIGHT	9
+
+#define SOLO_TEXT_REL_X MUTE_TEXT_REL_X
 #define SOLO_X(i)		(PV_BORDER_WIDTH+(i)*getCellWidth()+SOLO_REL_X)
 #define SOLO_Y		MUTE_Y
 #define SOLO_WIDTH	MUTE_WIDTH

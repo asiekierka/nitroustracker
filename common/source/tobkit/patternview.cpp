@@ -393,7 +393,7 @@ void PatternView::draw(void)
 				text_col = theme->col_pv_mutesolo_text;
 			}
 			drawGradient(mute_col1, mute_col2, MUTE_X(i), MUTE_Y, MUTE_WIDTH, MUTE_HEIGHT);
-			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+1, 0, text_col, 255);
+			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+MUTE_TEXT_REL_X+1, MUTE_Y-1, text_col, 255);
 		}
 		
 		if(solo_channels[chn] == true)
@@ -410,7 +410,7 @@ void PatternView::draw(void)
 		}
 		
 		drawGradient(solo_col1, solo_col2, SOLO_X(i), SOLO_Y, SOLO_WIDTH, SOLO_HEIGHT);
-		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+2, 0, text_col, 255);
+		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+SOLO_TEXT_REL_X+2, MUTE_Y-1, text_col, 255);
 	}
 }
 
