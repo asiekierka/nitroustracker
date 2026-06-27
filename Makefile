@@ -14,7 +14,7 @@ export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 GAME_TITLE	:= NitrousTracker
 GAME_AUTHOR	:= v$(VERSION)
-GAME_ICON	:= icon.bmp
+GAME_ICON	:= assets/icon.bmp
 
 # DLDI and internal SD slot of DSi
 # --------------------------------

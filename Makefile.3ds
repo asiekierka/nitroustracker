@@ -36,7 +36,7 @@ export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 APP_TITLE	:= NitrousTracker
 APP_DESCRIPTION	:= v$(VERSION)
-ICON		:= icon48.png
+ICON		:= assets/icon48.png
 
 TARGET		:=	nitroustracker
 BUILD		:=	build_3ds
