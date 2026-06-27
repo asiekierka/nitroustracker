@@ -78,8 +78,8 @@ CFLAGS	+= -std=gnu23
 # include and lib
 #---------------------------------------------------------------------------------
 LIBNTXM := $(TOPDIR)/libntxm/libntxm
+OUTELF  := $(TOPDIR)/build/nitroustracker.elf
 LIBDIRS	:= $(CTRULIB) $(LIBNTXM)
-
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -88,7 +88,7 @@ LIBDIRS	:= $(CTRULIB) $(LIBNTXM)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/build/$(TARGET)
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -198,7 +198,7 @@ endif
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(GFXBUILD)
+	@rm -fr $(BUILD) $(TARGET).3dsx $(TARGET).elf $(OUTPUT).smdh $(GFXBUILD)
 	@make -C libntxm/libntxm -f Makefile.3ds clean
 
 #---------------------------------------------------------------------------------
@@ -213,14 +213,17 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).3dsx : $(TOPDIR)/build/$(TARGET).elf $(_3DSXDEPS)
+$(TOPDIR)/nitroustracker.3dsx : $(OUTPUT).3dsx
+	cp $< $@
+
+$(OUTPUT).3dsx : $(OUTPUT).elf $(_3DSXDEPS)
 
 $(OFILES_SOURCES) : $(HFILES)
 
 $(LIBNTXM)/lib/libntxm.a :
 	@make -C $(TOPDIR)/libntxm/libntxm -f Makefile.3ds
 
-$(TOPDIR)/build/$(TARGET).elf : $(OFILES) $(LIBNTXM)/lib/libntxm.a
+$(OUTPUT).elf : $(OFILES) $(LIBNTXM)/lib/libntxm.a
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
