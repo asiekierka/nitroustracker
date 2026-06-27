@@ -291,23 +291,27 @@ void drawSampleNumbers(void)
 	Instrument *inst = song->getInstrument(state->instrument);
 	if(inst == NULL)
 	{
-		for(u8 key=0; key<kb->getKeyCount(); ++key)
+		for(int key=0; key<kb->getKeyCount(); ++key)
 		{
 			kb->setKeyLabel(key, '0');
 		}
-		return;
 	}
-
-	char label;
-	u8 note, sample_id;
-	for(u8 key=0; key<kb->getKeyCount(); ++key)
+	else
 	{
-		note = state->basenote + key;
-		sample_id = inst->getNoteSample(note) & 0x0F;
-		label = (sample_id >= 0xA) ? (sample_id - 0xA + 'a') : (sample_id + '0');
+    	char label;
+    	u8 note, sample_id;
+    	for(int key=0; key<kb->getKeyCount(); ++key)
+    	{
+    		note = state->basenote + key;
+    		sample_id = inst->getNoteSample(note) & 0x0F;
+    		label = (sample_id >= 0xA) ? (sample_id - 0xA + 'a') : (sample_id + '0');
 
-		kb->setKeyLabel(key, label);
+    		kb->setKeyLabel(key, label);
+    	}
 	}
+#ifndef NT_PLATFORM_NDS
+    kb->pleaseDraw();
+#endif
 }
 
 void updateKeyLabels(void)
@@ -315,7 +319,7 @@ void updateKeyLabels(void)
 	if (fxkb->is_visible()) return;
 
 	kb->hideKeyLabels();
-	if(lbsamples->is_visible() == true)
+	if(state->map_samples)
 	{
 		drawSampleNumbers();
 		kb->showKeyLabels();
@@ -454,6 +458,9 @@ void handleNoteStroke(u8 note)
 		u8 sample_id = state->sample & 0xF;
 		label = (sample_id >= 0xA) ? (sample_id - 0xA + 'a') : (sample_id + '0');
 		kb->setKeyLabel(note, label);
+#ifndef NT_PLATFORM_NDS
+        kb->pleaseDraw();
+#endif
 	}
 
 	onKeypress(note);

@@ -184,8 +184,12 @@ void Piano::showKeyLabels(void)
 {
 	key_labels_visible = true;
 
-	for(u8 key=0; key<getKeyCount(); ++key)
+#ifdef NT_PLATFORM_NDS
+	for(int key=0; key<getKeyCount(); ++key)
 		drawKeyLabel(key);
+#else
+    draw();
+#endif
 }
 
 void Piano::hideKeyLabels(void)
@@ -193,7 +197,7 @@ void Piano::hideKeyLabels(void)
 	key_labels_visible = false;
 
 #ifdef NT_PLATFORM_NDS
-    for(u8 key=0; key<getKeyCount(); ++key)
+    for(int key=0; key<getKeyCount(); ++key)
         eraseKeyLabel(key);
 #else
     draw();
@@ -215,11 +219,15 @@ void Piano::setInMappingMode(bool instmap)
 
 void Piano::setKeyLabel(u8 key, char label)
 {
+#ifdef NT_PLATFORM_NDS
 	eraseKeyLabel(key);
+#endif
 
 	key_labels[key] = label;
 
+#ifdef NT_PLATFORM_NDS
 	drawKeyLabel(key);
+#endif
 }
 
 /* ===================== PRIVATE ===================== */
@@ -289,7 +297,7 @@ void Piano::draw(void)
 
 		if(key_labels_visible)
 		{
-    		for(u8 key=0; key<getKeyCount(); ++key)
+    		for(int key=0; key<getKeyCount(); ++key)
     			drawKeyLabel(key);
 		}
 	}
