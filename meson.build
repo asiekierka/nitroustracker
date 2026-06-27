@@ -4,6 +4,7 @@ project(
     default_options: ['buildtype=debugoptimized', 'debug=true', 'optimization=2', 'c_std=gnu2x', 'cpp_std=gnu++20', 'warning_level=3']
 )
 cc = meson.get_compiler('c')
+cxx = meson.get_compiler('cpp')
 windows_build = target_machine.system() == 'windows'
 
 conf_data = configuration_data()
@@ -118,6 +119,16 @@ icon_pngs = [
 ]
 
 sdl3_dep = dependency('sdl3', required: true)
+add_project_arguments(
+	cc.get_supported_arguments([
+		'-Wno-unused-parameter'
+	]),
+	language: 'c')
+add_project_arguments(
+	cxx.get_supported_arguments([
+		'-Wno-unused-parameter'
+	]),
+	language: 'cpp')
 add_project_arguments('-DNT_PLATFORM_SDL3', language: 'c')
 add_project_arguments('-DNT_PLATFORM_SDL3', language: 'cpp')
 add_project_arguments('-DVERSION="WIP"', language: 'cpp')

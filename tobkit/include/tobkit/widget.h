@@ -134,7 +134,7 @@ class Widget {
 		void drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th);
 		void drawHorizontalGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th);
 
-		inline const u16 interpolateColor(u16 col1, u16 col2, int alpha /* 0..4095 */) {
+		inline u16 interpolateColor(u16 col1, u16 col2, int alpha /* 0..4095 */) const {
 			return RGB5A1(
 				(((RGB5A1_R(col1) - RGB5A1_R(col2)) * alpha) + (RGB5A1_R(col2) << 12)) >> 12,
 				(((RGB5A1_G(col1) - RGB5A1_G(col2)) * alpha) + (RGB5A1_G(col2) << 12)) >> 12,

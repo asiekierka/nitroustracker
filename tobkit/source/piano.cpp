@@ -184,6 +184,7 @@ void Piano::showKeyLabels(void)
 {
     if (key_labels_visible)
         return;
+
 	key_labels_visible = true;
 
 #ifdef NT_PLATFORM_NDS
@@ -198,6 +199,7 @@ void Piano::hideKeyLabels(void)
 {
     if (!key_labels_visible)
         return;
+
 	key_labels_visible = false;
 
 #ifdef NT_PLATFORM_NDS

@@ -4533,7 +4533,7 @@ int main(int argc, char **argv) {
 		}
 	}
 #else
-	launch_path = (char*) malloc(4097);
+	launch_path = (char*) ntxm_cmalloc(4097);
 	launch_path[0] = 0;
 	getcwd(launch_path, 4096);
 	launch_path[4096] = 0;
