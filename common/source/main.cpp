@@ -3609,17 +3609,17 @@ void setupGUI(bool dldi_enabled)
 		tbpotloop->setCaption("loop");
 		tbpotloop->registerToggleCallback(handleLoopToggle);
 
-		labelptnlen = new Label(87, 48, 50, 12, sub_screen, false);
+		labelptnlen = new Label(87, 48, tabbox_width - 2 - 87, 12, sub_screen, false);
 		labelptnlen->setCaption("ptn len:");
-		nsptnlen = new NumberSlider(105, 60, 32, 17, sub_screen, DEFAULT_PATTERN_LENGTH, 1, 256, true);
+		nsptnlen = new NumberSlider(tabbox_width - 2 - 32, 60, 32, 17, sub_screen, DEFAULT_PATTERN_LENGTH, 1, 256, true);
 		nsptnlen->registerChangeCallback(handlePtnLengthChange);
 
 		labelchannels = new Label(87, 22, 48, 12, sub_screen, false);
 		labelchannels->setCaption("chn:  4");
-		buttonlesschannels = new Button(112, 34, 12, 12, sub_screen);
+		buttonlesschannels = new Button(tabbox_width - 2 - 25, 34, 12, 12, sub_screen);
 		buttonlesschannels->setCaption("-");
 		buttonlesschannels->registerPushCallback(handleChannelDel);
-		buttonmorechannels = new Button(125, 34, 12, 12, sub_screen);
+		buttonmorechannels = new Button(tabbox_width - 2 - 12, 34, 12, 12, sub_screen);
 		buttonmorechannels->setCaption("+");
 		buttonmorechannels->registerPushCallback(handleChannelAdd);
 
@@ -3659,7 +3659,7 @@ void setupGUI(bool dldi_enabled)
 		labelramusage = new Label(87, 78, 52, 12, sub_screen, false);
 		labelramusage->setCaption("ram use");
 
-		memoryiindicator = new MemoryIndicator(87, 90, 50, 8, sub_screen);
+		memoryiindicator = new MemoryIndicator(87, 90, tabbox_width - 2 - 87, 8, sub_screen);
 
 		tabbox->registerWidget(lbpot, 0, 0);
 		tabbox->registerWidget(buttonpotup, 0, 0);
