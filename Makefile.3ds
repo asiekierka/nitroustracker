@@ -176,7 +176,7 @@ ifneq ($(ROMFS),)
 	export _3DSXFLAGS += --romfs=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: all clean
+.PHONY: all clean libntxm
 
 #---------------------------------------------------------------------------------
 all: $(BUILD) $(GFXBUILD) $(DEPSDIR) $(ROMFS_T3XFILES) $(T3XHFILES)
@@ -220,10 +220,10 @@ $(OUTPUT).3dsx : $(OUTPUT).elf $(_3DSXDEPS)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-$(LIBNTXM)/lib/libntxm.a :
-	@make -C $(TOPDIR)/libntxm/libntxm -f Makefile.3ds
+$(OUTPUT).elf : $(OFILES) libntxm
 
-$(OUTPUT).elf : $(OFILES) $(LIBNTXM)/lib/libntxm.a
+libntxm :
+	@make -C $(TOPDIR)/libntxm/libntxm -f Makefile.3ds
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
