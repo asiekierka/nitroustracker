@@ -19,6 +19,7 @@ libntxm_sources = [
   'libntxm/libntxm/source/common/vibrato_sine_table.c',
   'libntxm/libntxm/source/player/player.cpp',
   'libntxm/libntxm/source/single/fifocommand.cpp',
+  'libntxm/libntxm/source/single/ntxmsound.cpp',
   'libntxm/libntxm/source/single/platform_sdl3.cpp',
   'libntxm/libntxm/source/transport/mod_transport.cpp',
   'libntxm/libntxm/source/transport/wav.cpp',
