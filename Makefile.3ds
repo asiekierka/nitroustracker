@@ -77,7 +77,8 @@ CFLAGS	+= -std=gnu23
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CTRULIB) $(TOPDIR)/libntxm/libntxm
+LIBNTXM := $(TOPDIR)/libntxm/libntxm
+LIBDIRS	:= $(CTRULIB) $(LIBNTXM)
 
 
 #---------------------------------------------------------------------------------
@@ -198,6 +199,7 @@ endif
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(GFXBUILD)
+	@make -C libntxm/libntxm -f Makefile.3ds clean
 
 #---------------------------------------------------------------------------------
 $(GFXBUILD)/%.t3x	$(BUILD)/%.h	:	%.t3s
@@ -211,11 +213,14 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).3dsx	:	$(DEPSDIR)/$(TARGET).elf $(_3DSXDEPS)
+$(OUTPUT).3dsx : $(TOPDIR)/build/$(TARGET).elf $(_3DSXDEPS)
 
 $(OFILES_SOURCES) : $(HFILES)
 
-$(DEPSDIR)/$(TARGET).elf	:	$(OFILES)
+$(LIBNTXM)/lib/libntxm.a :
+	@make -C $(TOPDIR)/libntxm/libntxm -f Makefile.3ds
+
+$(TOPDIR)/build/$(TARGET).elf : $(OFILES) $(LIBNTXM)/lib/libntxm.a
 
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
