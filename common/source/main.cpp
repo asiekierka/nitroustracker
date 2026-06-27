@@ -796,6 +796,8 @@ void setSong(Song *newsong)
 	updateLabelChannels();
 	updateLabelSongLen();
 	updateTempoAndBpm();
+	buttonmorechannels->set_enabled(song->getChannels() < MAX_CHANNELS);
+	buttonlesschannels->set_enabled(song->getChannels() > 1);
 	nsptnlen->setValue(song->getPatternLength(song->getPotEntry(state->potpos)));
 	nsrestartpos->setValue(song->getRestartPosition());
 	tbqueuelock->setState(false);
@@ -942,7 +944,7 @@ void handleDelfile(void)
 }
 
 
-void loadModule(void)
+void loadSong(void)
 {
 	deleteMessageBox();
 
@@ -982,12 +984,12 @@ void handleLoad(void)
 		stopPlay();
 
 		if (state->unsaved_changes) {
-			mb = new MessageBox(sub_screen, "you have unsaved changes", 2, "load", loadModule, "cancel", deleteMessageBox);
+			mb = new MessageBox(sub_screen, "you have unsaved changes", 2, "load", loadSong, "cancel", deleteMessageBox);
 			gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 			mb->reveal();
 			mb->pleaseDraw();
 		} else
-			loadModule();
+			loadSong();
 
 	}
 	else if(strcasecmp(fn + strlen(fn) - 4, ".wav")==0)
@@ -1642,6 +1644,11 @@ void handleChannelAdd(void)
 {
 	// TODO: turn into undo operation
 	song->channelAdd();
+
+	buttonlesschannels->enable();
+	buttonmorechannels->set_enabled(song->getChannels() < MAX_CHANNELS);
+
+
 	redraw_main_requested = true;
 	updateLabelChannels();
 	setHasUnsavedChanges(true);
@@ -1652,6 +1659,9 @@ void handleChannelDel(void)
 {
 	// TODO: turn into undo operation
 	song->channelDel();
+
+	buttonmorechannels->enable();
+	buttonlesschannels->set_enabled(song->getChannels() > 1);
 
 	// Move back cursor if necessary
 	if(state->channel > song->getChannels()-1) {
