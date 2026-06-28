@@ -174,6 +174,7 @@ PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B, PlatformKey_X = KE
 PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT, PlatformKey_TOUCH = KEY_TOUCH;
 PlatformKeyMask PlatformKeysHeld, PlatformKeysDown, PlatformKeysUp;
 u16 PlatformTouchX, PlatformTouchY;
+u8 PlatformTouchScreen = TOUCH_SCREEN_BOTTOM;
 
 static PlatformKeyMask keys_that_are_repeated = KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
 

@@ -60,9 +60,9 @@ class GUI {
 		void unregisterOverlayWidget(u8 screen = SUB_SCREEN);
 
 		// Event calls
-		void penDown(u16 x, u16 y);
-		void penUp(u16 x, u16 y); // Remove the coordinates here!
-		void penMove(u16 x, u16 y);
+		void penDown(u16 x, u16 y, u8 screen = SUB_SCREEN);
+		void penUp(u16 x, u16 y, u8 screen = SUB_SCREEN); // Remove the coordinates here!
+		void penMove(u16 x, u16 y, u8 screen = SUB_SCREEN);
 		void buttonPress(u16 buttons);
 		void buttonRelease(u16 buttons);
 
@@ -70,10 +70,6 @@ class GUI {
 		void draw(void);
 		void drawMainScreen(void);
 		void drawSubScreen(void);
-
-		// Screen switch
-		void switchScreens(void);
-		u8 getActiveScreen(void);
 
 		// Show/Hide all elements
 		void showAll(void);
@@ -90,15 +86,16 @@ class GUI {
 		std::vector<Widget*> widgets_main, widgets_sub;
 		std::vector<Widget*> shortcuts;
 		Widget *activeWidget;
-		u8 activeScreen;
 		void (*onOverlayChanged)(u8, bool);
 		Widget *overlayWidgetMain, *overlayWidgetSub;
-		u16 overlayShortcuts;
 		Theme *theme;
 		u16 bgcolor;
+		u16 overlayShortcuts;
+		u16 activeWidgetTouchX, activeWidgetTouchY;
+		u8 activeWidgetTouchScreen;
 
 		// Find the widget that got hit
-		Widget *getWidgetAt(u16 x, u16 y);
+		Widget *getWidgetAt(u16 x, u16 y, u8 screen);
 		Widget *getWidgetForButtons(u16 buttons);
 };
 

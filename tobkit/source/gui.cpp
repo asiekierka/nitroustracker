@@ -23,7 +23,7 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 GUI::GUI()
-	:activeWidget(0), activeScreen(SUB_SCREEN), onOverlayChanged(0),
+	:activeWidget(0), onOverlayChanged(0),
 	overlayWidgetMain(0), overlayWidgetSub(0), overlayShortcuts(0)
 {
 	u8 i;
@@ -139,27 +139,31 @@ void GUI::setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool))
 }
 
 // Event calls
-void GUI::penDown(u16 x, u16 y)
+void GUI::penDown(u16 x, u16 y, u8 screen)
 {
-	Widget *w = getWidgetAt(x,y);
+	Widget *w = getWidgetAt(x,y,screen);
 	if(w!=0) {
 		activeWidget = w;
+		activeWidgetTouchX = x;
+		activeWidgetTouchY = y;
+		activeWidgetTouchScreen = screen;
 		w->penDown(x, y);
 	}
 }
 
-void GUI::penUp(u16 x, u16 y)
+void GUI::penUp(u16 x, u16 y, u8 screen)
 {
-	if(activeWidget!=0) {
-		if(activeWidget->is_visible()==true) {
-			Widget *w = activeWidget;
-			activeWidget = 0;
-			w->penUp(x, y);
-		}
+	if(activeWidget && activeWidget->is_visible()) {
+		Widget *w = activeWidget;
+		activeWidget = 0;
+        if(activeWidgetTouchScreen != screen)
+            w->penUp(activeWidgetTouchX, activeWidgetTouchY);
+        else
+            w->penUp(x, y);
 	}
 }
 
-void GUI::penMove(u16 x, u16 y) {
+void GUI::penMove(u16 x, u16 y, u8 screen) {
 	// Check if the pen moved off the active widget
 	/*
 	if((activeWidget!=0)&&(activeWidget->is_visible()==true)) {
@@ -177,8 +181,13 @@ void GUI::penMove(u16 x, u16 y) {
 	if(w!=0) {
 		w->penMove(x, y);
 	}*/
-	if(activeWidget!=0)
+	if(activeWidget) {
+	    if(activeWidgetTouchScreen != screen)
+			return;
+		activeWidgetTouchX = x;
+    	activeWidgetTouchY = y;
 		activeWidget->penMove(x, y);
+	}
 }
 
 void GUI::buttonPress(u16 buttons)
@@ -240,14 +249,6 @@ void GUI::drawSubScreen(void)
 		overlayWidgetSub->pleaseDraw();
 }
 
-void GUI::switchScreens(void) {
-	activeScreen = 1-activeScreen;
-}
-
-u8 GUI::getActiveScreen(void) {
-	return activeScreen;
-}
-
 // Show/Hide all elements
 void GUI::showAll(void)
 {
@@ -297,23 +298,23 @@ void GUI::revealAll(void)
 
 // Find the widget that got hit
 // Does notreturn invisible widgets
-Widget *GUI::getWidgetAt(u16 x, u16 y) {
+Widget *GUI::getWidgetAt(u16 x, u16 y, u8 screen) {
 
 	u16 wx, wy, ww, wh;
 
 	// Do we have an overlay?
-	if((activeScreen == MAIN_SCREEN)&&(overlayWidgetMain!=0)) {
+	if((screen == MAIN_SCREEN)&&(overlayWidgetMain!=0)) {
 		return overlayWidgetMain;
 	}
 
-	if((activeScreen == SUB_SCREEN)&&(overlayWidgetSub!=0)) {
+	if((screen == SUB_SCREEN)&&(overlayWidgetSub!=0)) {
 		return overlayWidgetSub;
 	}
 
 	// Else follow the normal procedure
 	bool found = false;
 	std::vector<Widget*>::iterator w_it, end_it;
-	if(activeScreen == MAIN_SCREEN) {
+	if(screen == MAIN_SCREEN) {
 		w_it = widgets_main.begin();
 		end_it = widgets_main.end();
 	} else {

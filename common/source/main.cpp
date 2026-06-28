@@ -121,8 +121,6 @@ using namespace tobkit;
 #define FILETYPE_SAMPLE	1
 #define FILETYPE_INST	2
 
-u8 frame = 0;
-
 char *launch_path = NULL;
 
 bool typewriter_active = false;
@@ -2812,7 +2810,6 @@ void switchScreens(void)
 		adjustMainScreenWidgets(new_main_screen_width - old_main_screen_width);
 	}
 #endif
-	gui->switchScreens();
 	if (!fxkb->is_visible())
 		pv->clearSelection();
 	redraw_main_requested = false;
@@ -4436,25 +4433,29 @@ void VblankHandler(void)
 {
 	PlatformInputUpdate();
 
+	u8 touchScreen = PlatformTouchScreen;
+	if(PlatformVideoAreScreensSwapped())
+	    touchScreen = 1 - touchScreen;
+
 	if(PlatformKeysDown & PlatformKey_TOUCH)
 	{
-		gui->penDown(PlatformTouchX, PlatformTouchY);
+		gui->penDown(PlatformTouchX, PlatformTouchY, touchScreen);
 		redraw_main_requested = true;
 	}
 
 	if(PlatformKeysUp & PlatformKey_TOUCH)
 	{
-		gui->penUp(PlatformTouchX, PlatformTouchY);
+		gui->penUp(PlatformTouchX, PlatformTouchY, touchScreen);
 		lastx = -255;
 		lasty = -255;
 	}
 
 	if( (PlatformKeysHeld & PlatformKey_TOUCH) && ( (abs(PlatformTouchX - lastx)>0) || (abs(PlatformTouchY - lasty)>0) ) ) // PenMove
 	{
-		gui->penMove(PlatformTouchX, PlatformTouchY);
+		gui->penMove(PlatformTouchX, PlatformTouchY, touchScreen);
 		lastx = PlatformTouchX;
 		lasty = PlatformTouchY;
-		if(gui->getActiveScreen() == MAIN_SCREEN)
+		if(touchScreen == MAIN_SCREEN)
 			redraw_main_requested = true;
 	}
 
@@ -4523,8 +4524,6 @@ void VblankHandler(void)
 		redraw_main_requested = false;
 		drawMainScreen();
 	}
-
-	frame = (frame + 1) % 2;
 }
 
 void applySettings(void)

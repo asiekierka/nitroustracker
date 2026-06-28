@@ -45,6 +45,10 @@ extern PlatformKeyMask PlatformKey_A, PlatformKey_B, PlatformKey_X, PlatformKey_
 extern PlatformKeyMask PlatformKey_START, PlatformKey_SELECT, PlatformKey_TOUCH;
 extern PlatformKeyMask PlatformKeysDown, PlatformKeysUp, PlatformKeysHeld;
 extern u16 PlatformTouchX, PlatformTouchY;
+extern u8 PlatformTouchScreen;
+
+#define TOUCH_SCREEN_TOP 0
+#define TOUCH_SCREEN_BOTTOM 1
 
 void PlatformSetInputLayout(Handedness handedness);
 void PlatformInputUpdate(void);

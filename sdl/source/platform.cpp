@@ -135,11 +135,11 @@ void PlatformClearSubScreen(tobkit_pixel_t color) {
 void update_touch_coords(float x, float y) {
     x /= scale;
     y /= scale;
-	if (y >= main_screen->getHeight()
-	    && y < (main_screen->getHeight() + sub_screen->getHeight())
+	if (y >= 0 && y < (main_screen->getHeight() + sub_screen->getHeight())
 		&& x >= 0 && x < main_screen->getWidth()) {
+		PlatformTouchScreen = y >= main_screen->getHeight() ? TOUCH_SCREEN_BOTTOM : TOUCH_SCREEN_TOP;
 		PlatformTouchX = x;
-		PlatformTouchY = y - main_screen->getHeight();
+		PlatformTouchY = y - (PlatformTouchScreen ? main_screen->getHeight() : 0);
 	} else {
 		PlatformTouchX = 0;
 		PlatformTouchY = 0;
@@ -210,6 +210,7 @@ PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B, PlatformKey_X = KE
 PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT, PlatformKey_TOUCH = KEY_TOUCH;
 PlatformKeyMask PlatformKeysHeld = 0, PlatformKeysDown = 0, PlatformKeysUp = 0;
 u16 PlatformTouchX, PlatformTouchY;
+u8 PlatformTouchScreen;
 
 static PlatformKeyMask keys_that_are_repeated = KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
 
