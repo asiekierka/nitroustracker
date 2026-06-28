@@ -4538,13 +4538,13 @@ void applySettings(void)
 }
 
 //---------------------------------------------------------------------------------
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
 //---------------------------------------------------------------------------------
 #ifdef GURU
 	defaultExceptionHandler();
 #endif
 
-	if (!PlatformInit()) exit(1);
+	if (!PlatformInit(argc, argv)) exit(1);
 	bool fat_success = PlatformInitFilesystem();
 
 #if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)

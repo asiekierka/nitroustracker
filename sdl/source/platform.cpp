@@ -18,6 +18,8 @@
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_surface.h>
+#include <cstdlib>
+#include <unistd.h>
 #include "platform.h"
 
 Screen *main_screen, *sub_screen;
@@ -52,7 +54,25 @@ static void unlock_screens(void) {
 	SDL_UnlockTexture(textureSub);
 }
 
-bool PlatformInit(void) {
+bool PlatformInit(int argc, char *argv[]) {
+    int width = 256;
+    int height = 192;
+
+    int c;
+    while ((c = getopt(argc, argv, "H:W:")) >= 0) {
+        switch (c) {
+        case 'W':
+            width = atoi(optarg);
+            break;
+        case 'H':
+            height = atoi(optarg);
+            break;
+        }
+    }
+
+	main_screen = new Screen(NULL, width, height, width);
+	sub_screen = new Screen(NULL, width, height, width);
+
 	SDL_SetAppMetadata("NitrousTracker", VERSION, "pl.asie.nitroustracker");
 
 	if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
@@ -61,7 +81,7 @@ bool PlatformInit(void) {
 
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
-	window = SDL_CreateWindow("NitrousTracker", 256, 384, 0);
+	window = SDL_CreateWindow("NitrousTracker", width, height * 2, 0);
 	if (window == NULL) {
 		return false;
 	}
@@ -71,21 +91,18 @@ bool PlatformInit(void) {
 		return false;
 	}
 
-	textureMain = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, 256, 192);
+	textureMain = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, main_screen->getWidth(), main_screen->getHeight());
 	if (textureMain == NULL) {
 		return false;
 	}
 
-	textureSub = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, 256, 192);
+	textureSub = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, sub_screen->getWidth(), sub_screen->getHeight());
 	if (textureSub == NULL) {
 		return false;
 	}
 
 	SDL_SetTextureScaleMode(textureMain, SDL_SCALEMODE_PIXELART);
 	SDL_SetTextureScaleMode(textureSub, SDL_SCALEMODE_PIXELART);
-
-	main_screen = new Screen(NULL, 256, 192, 256);
-	sub_screen = new Screen(NULL, 256, 192, 256);
 
 	lock_screens();
 
@@ -112,9 +129,11 @@ void PlatformClearSubScreen(tobkit_pixel_t color) {
 }
 
 void update_touch_coords(float x, float y) {
-	if (y >= 192 && y < 384 && x >= 0 && x < 256) {
+	if (y >= main_screen->getHeight()
+	    && y < (main_screen->getHeight() + sub_screen->getHeight())
+		&& x >= 0 && x < main_screen->getWidth()) {
 		PlatformTouchX = x;
-		PlatformTouchY = y - 192;
+		PlatformTouchY = y - main_screen->getHeight();
 	} else {
 		PlatformTouchX = 0;
 		PlatformTouchY = 0;
@@ -128,12 +147,12 @@ bool PlatformWaitVBlank(void) {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(renderer);
 
-	src = {0, 0, 256, 192};
-	dest = {0, screensSwapped ? 192.0f : 0.0f, 256, 192};
+	src = {0, 0, (float)main_screen->getWidth(), (float)main_screen->getHeight()};
+	dest = {0, (float)(screensSwapped ? main_screen->getHeight() : 0), (float)main_screen->getWidth(), (float)main_screen->getHeight()};
 	SDL_RenderTexture(renderer, textureMain, &src, &dest);
 
-	src = {0, 0, 256, 192};
-	dest = {0, !screensSwapped ? 192.0f : 0.0f, 256, 192};
+	src = {0, 0, (float)sub_screen->getWidth(), (float)sub_screen->getHeight()};
+	dest = {0, (float)(!screensSwapped ? main_screen->getHeight() : 0), (float)sub_screen->getWidth(), (float)sub_screen->getHeight()};
 	SDL_RenderTexture(renderer, textureSub, &src, &dest);
 
 	SDL_RenderPresent(renderer);

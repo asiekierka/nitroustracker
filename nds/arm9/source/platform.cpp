@@ -28,7 +28,7 @@ bool PlatformInitFilesystem(void) {
     return fatInitDefault();
 }
 
-bool PlatformInit(void) {
+bool PlatformInit(int argc, char *argv[]) {
 	// Hide everything
 #ifndef DEBUG
 	setBrightness(3, 16);

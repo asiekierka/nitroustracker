@@ -30,7 +30,7 @@ typedef u32 PlatformKeyMask;
 extern Screen *main_screen, *sub_screen;
 
 bool PlatformInitFilesystem(void);
-bool PlatformInit(void);
+bool PlatformInit(int argc, char *argv[]);
 void PlatformExit(void);
 void PlatformClearMainScreen(tobkit_pixel_t color);
 void PlatformClearSubScreen(tobkit_pixel_t color);

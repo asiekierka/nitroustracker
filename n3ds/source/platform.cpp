@@ -28,9 +28,7 @@ bool PlatformInitFilesystem(void) {
     return true;
 }
 
-bool PlatformInit(void) {
-	csndInit();
-
+bool PlatformInit(int argc, char *argv[]) {
     gfxInit(GSP_RGB5_A1_OES, GSP_RGB5_A1_OES, false);
     gfxSetDoubleBuffering(GFX_TOP, true);
     gfxSetDoubleBuffering(GFX_BOTTOM, false);
@@ -47,8 +45,6 @@ bool PlatformInit(void) {
 
 void PlatformExit(void) {
 	gfxExit();
-
-	csndExit();
 }
 
 void PlatformFlipMainScreen(void) {
