@@ -69,7 +69,7 @@ void PatternView::penDown(u16 px, u16 py)
 	pen_down = true;
 	
 	// Selection
-	if(py > y + MUTE_Y) // To avoid selecing stuff when pressing the mute/solo buttons
+	if(py > y + MUTE_Y + MUTE_HEIGHT) // To avoid selecting stuff when pressing the mute/solo buttons
 	{
 		selection_exists = pickCell(px, py, &sel_start_x, &sel_start_y);
 		if(selection_exists == true)
@@ -114,7 +114,8 @@ void PatternView::penMove(u16 px, u16 py)
 {
 	this->px = px;
 	this->py = py;
-	updateSelection();
+
+	if(py > y + MUTE_Y + MUTE_HEIGHT) updateSelection();
 }
 
 void PatternView::buttonPress(u16 button)
