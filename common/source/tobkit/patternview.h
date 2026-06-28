@@ -106,10 +106,10 @@ class PatternView: public Widget {
 	public:
 		// Constructor sets base variables
 		PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, State *_state);
-		
+
 		// Drawing request
 		void pleaseDraw(void);
-		
+
 		void setSize(u16 _width, u16 _height);
 
 		// Event calls
@@ -117,34 +117,34 @@ class PatternView: public Widget {
 		void penUp(u16 px, u16 py);
 		void penMove(u16 px, u16 py);
 		void buttonPress(u16 button);
-		
+
 		void updateSelection(void);
-		
+
 		// Fills the parameters with the selection coordinates. Returns true if no selection exists.
 		bool getSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2, u16 *sel_y2);
-		
+
 		// Sets the selection to the given coordinates
 		void setSelection(u16 sel_x1, u16 sel_y1, u16 sel_x2, u16 sel_y2);
-		
+
 		void clearSelection(void);
-		
+
 		void setSong(Song *s);
 		void setLinesPerBeat(u16 lpb);
-		
+
 		void registerMuteCallback(void (*onMute_)(bool *channels_muted));
-		
+
 		void muteAll(void);
 		void unmuteAll(void);
-		
+
 		// Returns the solo-ed channel, or -1 if no channel is solo
 		s16 soloChannel(void);
-		
+
 		bool isMuted(u16 channel);
 		void unmute(u16 channel);
 		void toggleEffectsVisibility(bool on);
 
-		void setTheme(Theme *theme_, u16 bgcolor_) { 
-			theme = theme_; 
+		void setTheme(Theme *theme_, u16 bgcolor_) {
+			theme = theme_;
 			bgcolor = bgcolor_;
 			col_notes = theme_->col_pv_notes;
 			col_instr = theme_->col_pv_instr;
@@ -158,10 +158,10 @@ class PatternView: public Widget {
 			col_effect_param_dark = theme_->col_pv_effect_param_dark;
 		}
 		void recalcHscroll(void);
-		
+
 	private:
 		void draw(void);
-		
+
 
 		inline void drawHexByte(u8 byte, u16 cx, u16 cy, u16 col)
 		{
@@ -187,7 +187,7 @@ class PatternView: public Widget {
 				u8 effect_param;
 			} Cell;
 			*/
-			
+
 			Cell *cell = &(pattern[cellx][celly]);
 
 			u16 realx = PV_BORDER_WIDTH+1+px*getCellWidth();
@@ -212,21 +212,21 @@ class PatternView: public Widget {
 			// Instrument
 			if(cell->instrument != NO_INSTRUMENT)
 				drawHexByte(cell->instrument+1, realx+3*PV_CHAR_WIDTH+1, realy, instrcol); // Adding one because FT2 indices start with 1
-			
+
 			if (cell->volume != NO_VOLUME)
 			{
 				drawHexByte(cell->volume, realx + 5 * PV_CHAR_WIDTH + 2, realy, volumecol);
 			}
 
-			// volume effect column slightly buggy and needs 
+			// volume effect column slightly buggy and needs
 			// song.cpp adjustment in libntxm, lets leave that commented for now
-			
+
 			// else {
 			// 	if (cell->effect2 != 0xff && cell->volume == NO_VOLUME)
 			// 	{
 			// 		char eff;
 			// 		u8 vol = cell->volume_raw;
-					
+
 			// 		if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
 			// 			eff = VSLIDEDOWN;
 			// 		else if ((vol >= 0x70) && (vol <= 0x7F)) // Volume slide up
@@ -256,19 +256,19 @@ class PatternView: public Widget {
 			// 		}
 			// 	}
 			// }
-			
+
 			if(effects_visible) {
 				// Effect and effect parameter
 				if (cell->effect != 0xff)
 					drawSmallChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
-						
+
 				if (cell->effect_param != 0x00 || cell->effect != 0xff)
 					drawHexByte(cell->effect_param, realx+8*PV_CHAR_WIDTH+3, realy, effectparamcol);
 			}
 		}
-		
+
 		void updateFromState(void);
-	
+
 		inline u16 getCellWidth(void)
 		{
 			if (effects_visible) {
@@ -304,30 +304,30 @@ class PatternView: public Widget {
 			return getNumVisibleRows()/2-1;
 		}
 
-		
+
 		void callMuteCallback(void);
-		
+
 		void (*onMute)(bool *channels_muted);
-		
+
 		bool pickCell(u16 px, u16 py, u16 *cx, u16 *cy);
-		
+
 		Cell **pattern;
 		Song *song;
 		State *state;
 
 		u16 col_notes, col_instr, col_volume, col_effect, col_effect_param,
 			col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark, col_effect_param_dark;
-		
+
 		u16 hscrollpos, lines_per_beat;
-		
+
 		bool selection_exists, pen_down;
 		bool effects_visible;
-		
+
 		u16 cell_width;
 		u16 px, py;
 		u16 sel_start_x, sel_end_x, sel_start_y, sel_end_y;
 		u16 sel_x, sel_y, sel_w, sel_h;
-		
+
 		bool solo_channels[32];
 		bool mute_channels[32];
 };
