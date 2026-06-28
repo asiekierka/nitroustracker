@@ -22,6 +22,7 @@ libntxm_sources = [
   'libntxm/libntxm/source/single/fifocommand.cpp',
   'libntxm/libntxm/source/single/ntxmsound.cpp',
   'libntxm/libntxm/source/single/platform_sdl3.cpp',
+  'libntxm/libntxm/source/transport/format_transport.cpp',
   'libntxm/libntxm/source/transport/mod_transport.cpp',
   'libntxm/libntxm/source/transport/wav.cpp',
   'libntxm/libntxm/source/transport/xm_transport.cpp'

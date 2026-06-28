@@ -56,6 +56,7 @@
 using namespace tobkit;
 
 #include <ntxm/fifocommand.h>
+#include <ntxm/mod_transport.h>
 #include <ntxm/song.h>
 #include <ntxm/xm_transport.h>
 #include <ntxm/wav.h>
@@ -245,6 +246,7 @@ int lastx, lasty;
 Song *song;
 State *state;
 Settings *settings;
+ModTransport mod_transport;
 XMTransport xm_transport;
 
 CellArray *clipboard = NULL;
@@ -959,10 +961,14 @@ void loadSong(void)
 
 	mod_loading = true;
 	showSlowLoadOperation([file](){
+	    const char *fn = file->name_with_path.c_str();
 		Song *newsong;
-		u16 err;
-		err = xm_transport.load(file->name_with_path.c_str(), &newsong);
-		if (err)
+		FormatTransportError err;
+		if(!strcasecmp(fn + strlen(fn) - 3, ".xm"))
+		    err = xm_transport.load(fn, &newsong);
+		else
+		    err = mod_transport.load(fn, &newsong);
+		if (err != FormatTransportError::SUCCESS)
 		{
 			setSong(new Song());
 			return xm_transport.getError(err);
@@ -982,7 +988,7 @@ void handleLoad(void)
 	if(file==0) return;
 
 	const char *fn = file->name.c_str();
-	if(strcasecmp(fn + strlen(fn) - 3, ".xm")==0)
+	if(!strcasecmp(fn + strlen(fn) - 3, ".xm") || !strcasecmp(fn + strlen(fn) - 4, ".mod"))
 	{
 		stopPlay();
 
@@ -995,7 +1001,7 @@ void handleLoad(void)
 			loadSong();
 
 	}
-	else if(strcasecmp(fn + strlen(fn) - 4, ".wav")==0)
+	else if(!strcasecmp(fn + strlen(fn) - 4, ".wav"))
 	{
 		showSlowLoadOperation([file](){
 			bool success = loadSample(file->name_with_path.c_str());
@@ -1028,7 +1034,7 @@ void saveFile(void)
 	mb->pleaseDraw();
 
 	bool saved = false;
-	int err = 0;
+	FormatTransportError err = FormatTransportError::SUCCESS;
 	if(rbsong->getActive() == true) // Save the song
 	{
 		if(song != 0) {
@@ -1050,7 +1056,7 @@ void saveFile(void)
 		}
 	}
 
-	if (saved && err == 0) {
+	if (saved && err == FormatTransportError::SUCCESS) {
 		unlink(filename);
 		rename(filename_tmp, filename);
 	}
@@ -1061,7 +1067,7 @@ void saveFile(void)
 
 	debugprintf("done\n");
 
-	if(err > 0)
+	if(err != FormatTransportError::SUCCESS)
 	{
 		showMessage(xm_transport.getError(err), true);
 	} else
@@ -3535,6 +3541,7 @@ void setupGUI(bool dldi_enabled)
 		fileselector->addFilter("sample", samplefilter);
 
 		std::vector<std::string> songfilter;
+		songfilter.push_back("mod");
 		songfilter.push_back("xm");
 		fileselector->addFilter("song", songfilter);
 		std::vector<std::string> instfilter;
