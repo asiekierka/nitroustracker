@@ -796,8 +796,11 @@ void setSong(Song *newsong)
 	updateLabelChannels();
 	updateLabelSongLen();
 	updateTempoAndBpm();
+	buttonpotdown->set_enabled(song->getPotEntry(state->potpos) > 0);
+	buttonpotup->set_enabled(song->getPotEntry(state->potpos) < MAX_PATTERNS-1);
 	buttonmorechannels->set_enabled(song->getChannels() < MAX_CHANNELS);
 	buttonlesschannels->set_enabled(song->getChannels() > 1);
+	buttondel->set_enabled(song->getPotLength()>1);
 	nsptnlen->setValue(song->getPatternLength(song->getPotEntry(state->potpos)));
 	nsrestartpos->setValue(song->getRestartPosition());
 	tbqueuelock->setState(false);
@@ -1459,6 +1462,9 @@ void updateGuiToNewPattern(u8 newpattern)
 {
 	// Update pattern length slider
 	nsptnlen->setValue(song->getPatternLength(newpattern));
+
+	buttonpotdown->set_enabled(newpattern > 0);
+	buttonpotup->set_enabled(newpattern < MAX_PATTERNS-1);
 }
 
 
@@ -1536,6 +1542,8 @@ void handlePotDec(void) {
 	char str[3];
 	snprintf(str, sizeof(str), "%2x", pattern);
 	lbpot->set(state->potpos, str);
+	buttonpotdown->set_enabled(song->getPotEntry(state->potpos) > 0);
+	buttonpotup->set_enabled(song->getPotEntry(state->potpos) < MAX_PATTERNS-1);
 	setHasUnsavedChanges(true);
 }
 
@@ -1564,6 +1572,8 @@ void handlePotInc(void)
 	char str[3];
 	snprintf(str, sizeof(str), "%2x", pattern);
 	lbpot->set(state->potpos, str);
+	buttonpotdown->set_enabled(song->getPotEntry(state->potpos) > 0);
+	buttonpotup->set_enabled(song->getPotEntry(state->potpos) < MAX_PATTERNS-1);
 	setHasUnsavedChanges(true);
 }
 
@@ -1573,6 +1583,9 @@ void handlePotIns(void)
 {
 	if (!song->potIns(state->potpos, song->getPotEntry(state->potpos)))
 		return;
+
+	buttondel->set_enabled(song->getPotLength()>1);
+
 	// TODO: turn into undo operation
 	action_buffer->clear();
 	ntxm_flush_dcache();
@@ -1589,6 +1602,7 @@ void handlePotDel(void)
 	}
 
 	song->potDel(state->potpos);
+	buttondel->set_enabled(song->getPotLength()>1);
 
 	// TODO: turn into undo operation
 	action_buffer->clear();
