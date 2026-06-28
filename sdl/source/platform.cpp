@@ -24,6 +24,7 @@
 
 Screen *main_screen, *sub_screen;
 static bool screensSwapped;
+static float scale = 1.0f;
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
@@ -59,13 +60,16 @@ bool PlatformInit(int argc, char *argv[]) {
     int height = 192;
 
     int c;
-    while ((c = getopt(argc, argv, "H:W:")) >= 0) {
+    while ((c = getopt(argc, argv, "H:S:W:")) >= 0) {
         switch (c) {
         case 'W':
             width = atoi(optarg);
             break;
         case 'H':
             height = atoi(optarg);
+            break;
+        case 'S':
+            scale = atof(optarg);
             break;
         }
     }
@@ -81,7 +85,7 @@ bool PlatformInit(int argc, char *argv[]) {
 
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
-	window = SDL_CreateWindow("NitrousTracker", width, height * 2, 0);
+	window = SDL_CreateWindow("NitrousTracker", (int) (scale * width), (int) (scale * height * 2), 0);
 	if (window == NULL) {
 		return false;
 	}
@@ -129,6 +133,8 @@ void PlatformClearSubScreen(tobkit_pixel_t color) {
 }
 
 void update_touch_coords(float x, float y) {
+    x /= scale;
+    y /= scale;
 	if (y >= main_screen->getHeight()
 	    && y < (main_screen->getHeight() + sub_screen->getHeight())
 		&& x >= 0 && x < main_screen->getWidth()) {
@@ -148,11 +154,11 @@ bool PlatformWaitVBlank(void) {
 	SDL_RenderClear(renderer);
 
 	src = {0, 0, (float)main_screen->getWidth(), (float)main_screen->getHeight()};
-	dest = {0, (float)(screensSwapped ? main_screen->getHeight() : 0), (float)main_screen->getWidth(), (float)main_screen->getHeight()};
+	dest = {0, scale * (screensSwapped ? main_screen->getHeight() : 0), scale * main_screen->getWidth(), scale * main_screen->getHeight()};
 	SDL_RenderTexture(renderer, textureMain, &src, &dest);
 
 	src = {0, 0, (float)sub_screen->getWidth(), (float)sub_screen->getHeight()};
-	dest = {0, (float)(!screensSwapped ? main_screen->getHeight() : 0), (float)sub_screen->getWidth(), (float)sub_screen->getHeight()};
+	dest = {0, scale * (!screensSwapped ? main_screen->getHeight() : 0), scale * sub_screen->getWidth(), scale * sub_screen->getHeight()};
 	SDL_RenderTexture(renderer, textureSub, &src, &dest);
 
 	SDL_RenderPresent(renderer);
