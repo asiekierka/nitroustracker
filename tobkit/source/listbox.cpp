@@ -49,7 +49,7 @@ void ListBox::pleaseDraw(void)
 // Event calls
 void ListBox::penDown(u16 px, u16 py)
 {
-	u8 relx = px-x, rely = py-y;
+	u16 relx = px-x, rely = py-y;
 	if(relx<width-SCROLLBAR_WIDTH) {
 		// Item select
 		u16 rel_item_clicked;
@@ -60,7 +60,7 @@ void ListBox::penDown(u16 px, u16 py)
 			if(onChange != 0) {
 				onChange(activeelement);
 			}
-			
+
 			draw();
 		}
 	} else {
@@ -109,14 +109,14 @@ void ListBox::penDown(u16 px, u16 py)
 			draw();
 		}
 	}
-	
+
 }
 
 void ListBox::penUp(u16 px, u16 py)
 {
 	u8 previousstate = buttonstate;
 	buttonstate = 0;
-	
+
 	if(previousstate != 0) {
 		draw();
 	}
@@ -136,7 +136,7 @@ void ListBox::penMove(u16 px, u16 py)
 		if(scrollthingypos > max_scrollthingypos) {
 			scrollthingypos = max_scrollthingypos;
 		}
-		
+
 		// Calculate new scroll position
 		s16 max_scrollpos = elements.size()-height/ROW_HEIGHT;
 		if(max_scrollpos<0) max_scrollpos = 0;
@@ -145,10 +145,10 @@ void ListBox::penMove(u16 px, u16 py)
 		} else {
 			scrollpos = scrollthingypos * max_scrollpos / max_scrollthingypos;
 		}
-		
+
 		//iprintf("scrollthingy: %u\nscroll: %u\nmaxscroll: %d\n",scrollthingypos,scrollpos,max_scrollpos);
 		if(scrollpos != oldscrollpos) {
-			// Snap scrollthingy position 
+			// Snap scrollthingy position
 			scrollthingypos = scrollpos * max_scrollthingypos/ max_scrollpos;
 			draw();
 			oldscrollpos = scrollpos;
@@ -163,9 +163,9 @@ void ListBox::registerChangeCallback(void (*onChange_)(u16)) {
 
 // Add / delete elements
 void ListBox::add(const char *name) {
-	
+
 	elements.push_back(name);
-	
+
 	if(elements.size() <= (u16)((height-1)/ROW_HEIGHT)) {
 		calcScrollThingy();
 		draw();
@@ -177,18 +177,18 @@ void ListBox::del(void)
 {
 	if(elements.size()>0) {
 		elements.erase(elements.begin()+activeelement);
-		
+
 		// Move activeelemnt up if the last active element was deleted
 		if(activeelement > elements.size()-1) {
 			activeelement = elements.size()-1;
 		}
-		
+
 		// If an element from the bottom of the list was deleted so that
 		// the last row is empty, scroll up if possible
 		if(scrollpos>elements.size()-height/ROW_HEIGHT) {
 			scrollpos = elements.size()-height/ROW_HEIGHT;
 		}
-		
+
 		if(activeelement >= scrollpos) {
 			calcScrollThingy();
 			draw();
@@ -207,7 +207,7 @@ void ListBox::ins(u16 idx, const char *name)
 void ListBox::set(u16 idx, const char *name)
 {
 	elements.at(idx) = name;
-	
+
 	if( (idx >= scrollpos) && (idx < scrollpos+(height-1)/ROW_HEIGHT) ) {
 		draw();
 	}
@@ -284,7 +284,7 @@ void ListBox::draw(void)
 	for(i=0;i<rows_displayed-1;++i) {
 		drawHLine(1,ROW_HEIGHT*(i+1),width-SCROLLBAR_WIDTH-1,theme->col_sepline);
 	}
-	
+
 	// Fill rows
 	for(i=0;i<rows_displayed;++i) {
 		u16 col_bottom = theme->col_list_1;
@@ -303,7 +303,7 @@ void ListBox::draw(void)
 	if(show_numbers) {
 		drawVLine(COUNTER_WIDTH,1,height-2,theme->col_list_sep_vertical);
 	}
-	
+
 	// Scrollbar
 	// Upper Button
 	if(buttonstate==SCROLLUP) {
@@ -311,7 +311,7 @@ void ListBox::draw(void)
 	} else {
 		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-SCROLLBAR_WIDTH+1, 1, 8, 8);
 	}
-	
+
 	// This draws the up-arrow
 	s8 j, p;
 	for(j=0;j<3;j++) {
@@ -319,32 +319,32 @@ void ListBox::draw(void)
 			drawPixel(width-SCROLLBAR_WIDTH+4+p, j+3, theme->col_icon_bt);
 		}
 	}
-	
+
 	drawBox(width-SCROLLBAR_WIDTH, 0, 9, 9, theme->col_outline);
-	
+
 	// Lower Button
 	if(buttonstate==SCROLLDOWN) {
 		drawGradient(theme->col_scrollbar_arr_bg1, theme->col_scrollbar_arr_bg2, width-SCROLLBAR_WIDTH+1, height-9, 8, 8);
 	} else {
 		drawGradient(theme->col_scrollbar_arr_bg2, theme->col_scrollbar_arr_bg1, width-SCROLLBAR_WIDTH+1, height-9, 8, 8);
 	}
-	
+
 	// This draws the down-arrow
 	for(j=2;j>=0;j--) {
 		for(p=-j;p<=j;++p) {
 			drawPixel(width-SCROLLBAR_WIDTH+4+p, -j+height-4, theme->col_icon_bt);
 		}
 	}
-	
+
 	drawBox(width-SCROLLBAR_WIDTH, height-9, 9, 9, theme->col_outline);
-	
+
 	drawBox(width-SCROLLBAR_WIDTH, 0, SCROLLBAR_WIDTH, height, theme->col_outline);
-	
+
 	// Clear Scrollbar
 	drawGradient(theme->col_scrollbar_bg1, theme->col_scrollbar_bg2, width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT, SCROLLBAR_WIDTH-2, height-2*SCROLLBUTTON_HEIGHT);
 
 	if (height >= 2*SCROLLBUTTON_HEIGHT+scrollthingyheight) {
-	
+
 		// The scroll thingy
 		if(buttonstate==SCROLLTHINGY) {
 			drawFullBox(width-SCROLLBAR_WIDTH+1, SCROLLBUTTON_HEIGHT-1+scrollthingypos, SCROLLBAR_WIDTH-2, scrollthingyheight, theme->col_scrollbar_active);
@@ -353,7 +353,7 @@ void ListBox::draw(void)
 		}
 		drawBox(width-SCROLLBAR_WIDTH, SCROLLBUTTON_HEIGHT+scrollthingypos-1, SCROLLBAR_WIDTH, scrollthingyheight, theme->col_outline);
 	}
-	
+
 	// Numbers (if enabled)
 	u16 contentoffset;
 	if(show_numbers) {
@@ -367,15 +367,15 @@ void ListBox::draw(void)
 		}
 		for(i=0;(i<height/ROW_HEIGHT)&&(scrollpos+i<elements.size());++i) {
 			snprintf(numberstr, sizeof(numberstr), "%2x", (u16) (scrollpos+i+offset));
-			drawString(numberstr, 2, ROW_HEIGHT*i+2, 
+			drawString(numberstr, 2, ROW_HEIGHT*i+2,
 			scrollpos+i == activeelement ? theme->col_text_lb_highlight : theme->col_text_lb);
 		}
-		
+
 		contentoffset = COUNTER_WIDTH;
 	} else {
 		contentoffset = 0;
 	}
-	
+
 	// Content
 	for(i=0;(i<height/ROW_HEIGHT)&&(scrollpos+i<elements.size());++i) {
 		drawString(elements.at(scrollpos+i).c_str(), contentoffset+2, ROW_HEIGHT*i+2,
@@ -384,7 +384,7 @@ void ListBox::draw(void)
 			height-(ROW_HEIGHT*i+4)
 		);
 	}
-	
+
 	drawBorder(theme->col_outline);
 }
 
@@ -396,17 +396,17 @@ void ListBox::calcScrollThingy(void)
 		scrollthingyheight = height-2*SCROLLBUTTON_HEIGHT+2;
 	else
 		scrollthingyheight = (height-2*SCROLLBUTTON_HEIGHT+2) * (height/ROW_HEIGHT)/elements.size();
-	
+
 	if(scrollthingyheight > height-2*SCROLLBUTTON_HEIGHT+2)
 		scrollthingyheight = height-2*SCROLLBUTTON_HEIGHT+2;
-	
+
 	if(scrollthingyheight < MIN_SCROLLTHINGYHEIGHT)
 		scrollthingyheight = MIN_SCROLLTHINGYHEIGHT;
-	
+
 	s16 max_scrollpos = elements.size()-height/ROW_HEIGHT;
 	if(max_scrollpos < 0)
 		max_scrollpos = 0;
-	
+
 	u16 max_scrollthingypos = height-2*SCROLLBUTTON_HEIGHT-scrollthingyheight+2;
 	if(max_scrollpos == 0)
 		scrollthingypos = 0;
