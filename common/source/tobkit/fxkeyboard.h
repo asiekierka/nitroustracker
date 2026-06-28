@@ -76,6 +76,7 @@ namespace tobkit {
 
 		// Event calls
 		void penDown(u16 x, u16 y);
+		void penMove(u16 x, u16 y);
 		void penUp(u16 x, u16 y);
 
 		void setTheme(Theme* theme_, u16 bgcolor_);

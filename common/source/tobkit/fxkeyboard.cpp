@@ -62,6 +62,23 @@ void FXKeyboard::penDown(u16 px, u16 py)
 	draw();
 }
 
+void FXKeyboard::penMove(u16 px, u16 py)
+{
+	if (px > FXBUTTON_WIDTH * NUM_FXKEYS) return;
+
+	for (int i=0;i<NUM_FXKEYS;++i) fxkb_state[i] &= ~0x1;
+
+	u8 bt_ind = ntxm_clamp(px / FXBUTTON_WIDTH, 0, NUM_FXKEYS-1);
+
+	if (fxkb_state[bt_ind] != FXBUTTON_DISABLED)
+		fxkb_state[bt_ind] |= 0x1;
+
+	useDarkTitle(fxkb_state[bt_ind] == FXBUTTON_DISABLED);
+	setLastCmd(fxkb_state[bt_ind] == FXBUTTON_DISABLED ? NO_EFFECT : fxkb_vals[bt_ind]);
+
+	updateCaptionForFx(fxkb_vals[bt_ind]);
+	draw();
+}
 
 void FXKeyboard::penUp(u16 px, u16 py)
 {
