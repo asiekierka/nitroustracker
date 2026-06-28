@@ -78,7 +78,7 @@ CFLAGS	+= -std=gnu23
 # include and lib
 #---------------------------------------------------------------------------------
 LIBNTXM := $(TOPDIR)/libntxm/libntxm
-OUTELF  := $(TOPDIR)/build_3ds/nitroustracker.elf
+OUTELF  := $(TOPDIR)/$(BUILD)/nitroustracker.elf
 LIBDIRS	:= $(CTRULIB) $(LIBNTXM)
 
 #---------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ LIBDIRS	:= $(CTRULIB) $(LIBNTXM)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/build_3ds/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/$(BUILD)/$(TARGET)
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -169,7 +169,7 @@ else
 endif
 
 ifeq ($(strip $(NO_SMDH)),)
-	export _3DSXFLAGS += --smdh=$(CURDIR)/$(TARGET).smdh
+	export _3DSXFLAGS += --smdh=$(CURDIR)/$(BUILD)/$(TARGET).smdh
 endif
 
 ifneq ($(ROMFS),)
