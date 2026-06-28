@@ -52,9 +52,6 @@ jobs:
           apt-get update -y
           apt-get install -y --no-install-recommends python3 python3-pil
 
-      - name: Build libntxm
-        run: cd libntxm/libntxm && make -f Makefile.3ds
-
       - name: Build
         run: make -f Makefile.3ds VERSION=git
 
