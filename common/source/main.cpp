@@ -28,10 +28,11 @@
 #include <nds.h>
 #include <fat.h>
 #define GURU // Show guru meditations
-#define ENABLE_EFFECT_MENU
 #define ENABLE_PIANO_PAK
+#define SHOW_RAM_USAGE
 #elif defined(NT_PLATFORM_3DS)
 #include <3ds.h>
+#define SHOW_RAM_USAGE
 #endif
 
 #include <stdio.h>
@@ -564,8 +565,10 @@ void updateSampleList(Instrument *inst)
 
 void updateMemoryState(bool print)
 {
+#ifdef SHOW_RAM_USAGE
 	memoryiindicator->pleaseDraw();
 	memoryiindicator_disk->pleaseDraw();
+#endif
 #ifdef DEBUG
 	if (print) PrintFreeMem();
 #endif
@@ -3566,10 +3569,12 @@ void setupGUI(bool dldi_enabled)
 
 		rbgdiskop->registerChangeCallback(handleDiskOPChangeFileType);
 
+#ifdef SHOW_RAM_USAGE
 		memoryiindicator_disk = new MemoryIndicator(3, 51, 34, 8, sub_screen, true);
 
 		labelramusage_disk = new Label(8, 59, 34, 10, sub_screen, false);
 		labelramusage_disk->setCaption("ram");
+#endif
 
 		cbsamplepreview = new CheckBox(4, 70, 34, 14, sub_screen, false, true);
 		cbsamplepreview->setCaption("pre");
@@ -3605,8 +3610,10 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(rbsong, 0, 1);
 		tabbox->registerWidget(rbsample, 0, 1);
 		//tabbox->registerWidget(rbinst, 0, 1);
+#ifdef SHOW_RAM_USAGE
 		tabbox->registerWidget(memoryiindicator_disk, 0, 1);
 		tabbox->registerWidget(labelramusage_disk, 0, 1);
+#endif
 		tabbox->registerWidget(cbsamplepreview, 0, 1);
 		tabbox->registerWidget(buttondelfile, 0, 1);
 		tabbox->registerWidget(buttonsave, 0, 1);
@@ -3693,10 +3700,12 @@ void setupGUI(bool dldi_enabled)
 		buttonzap->setCaption("zap!");
 		buttonzap->registerPushCallback(handleZap);
 
+#ifdef SHOW_RAM_USAGE
 		labelramusage = new Label(87, 78, 52, 12, sub_screen, false);
 		labelramusage->setCaption("ram use");
 
 		memoryiindicator = new MemoryIndicator(87, 90, tabbox_width - 2 - 87, 8, sub_screen);
+#endif
 
 		tabbox->registerWidget(lbpot, 0, 0);
 		tabbox->registerWidget(buttonpotup, 0, 0);
@@ -3720,8 +3729,10 @@ void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(labelsongname, 0, 0);
 		tabbox->registerWidget(buttonrenamesong, 0, 0);
 		tabbox->registerWidget(buttonzap, 0, 0);
+#ifdef SHOW_RAM_USAGE
 		tabbox->registerWidget(memoryiindicator, 0, 0);
 		tabbox->registerWidget(labelramusage, 0, 0);
+#endif
 	}
 	// </Song gui>
 
