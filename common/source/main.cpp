@@ -260,7 +260,7 @@ bool multisamp_from_mapsamp = false;
 bool mod_loading = false;
 
 // TODO: Make own class for tracker control and remove forward declarations
-void handleButtons(u16 buttons, u16 buttonsheld);
+void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup);
 void HandleTick(void);
 void handlePotPosChangeFromSong(u16 newpotpos);
 void handleSampleChange(u16 sample);
@@ -2151,7 +2151,7 @@ void setEffectParam(u16 eff_par, bool new_e_cmd, bool force_clear=false, bool ov
 	}
 }
 
-void handleTranspose(s32 transpose_amount)
+void handleSelTranspose(s32 transpose_amount)
 {
 	const s32 min_note = 0;  // c-0
 	const s32 max_note = 95; // h-7
@@ -2173,6 +2173,53 @@ void handleTranspose(s32 transpose_amount)
 				*fill->ptr(chn - sel_x1, row - sel_y1) = cell;
 			}
 		action_buffer->add(song, new MultipleCellSetAction(state, sel_x1, sel_y1, fill, false));
+		redraw_main_requested = true;
+		updateSampleOffsetGuide();
+	}
+}
+
+void handleInPlaceTranspose(s32 direction, bool wide)
+{
+	const s32 min_note = 0;  // c-0
+	const s32 max_note = 95; // h-7
+	bool changed = false;
+	s32 transpose_amount = direction;
+	if(wide)
+	    transpose_amount *= (pv->getComponentNavOffset() == PV_COMPONENT_NOTE ? 12 : (pv->getComponentNavOffset() == PV_COMPONENT_EFFECT ? 1 : 16));
+	Cell cell = song->getPattern(song->getPotEntry(state->potpos))[state->channel][state->getCursorRow()];
+	switch(pv->getComponentNavOffset())
+	{
+	    case PV_COMPONENT_NOTE:
+			if(cell.note != EMPTY_NOTE && cell.note != STOP_NOTE)
+			{
+				s32 new_note = (s32)cell.note + transpose_amount;
+				if (new_note >= min_note && new_note <= max_note)
+				{
+					cell.note = (u8)new_note;
+					changed = true;
+				}
+			}
+			break;
+		case PV_COMPONENT_INSTRUMENT:
+		    // TODO
+			changed = true;
+			break;
+		case PV_COMPONENT_VOLUME:
+		    cell.volume = (cell.volume + transpose_amount) & 0x7F;
+			changed = true;
+			break;
+		case PV_COMPONENT_EFFECT:
+		    cell.effect = (cell.effect + transpose_amount) & 0xF;
+			changed = true;
+			break;
+		case PV_COMPONENT_EFFECT_PARAM:
+		    cell.effect_param = (cell.effect_param + transpose_amount);
+			changed = true;
+			break;
+	}
+	if(changed)
+	{
+	    action_buffer->add(song, new SingleCellSetAction(state, state->channel, state->getCursorRow(), cell));
 		redraw_main_requested = true;
 		updateSampleOffsetGuide();
 	}
@@ -2261,14 +2308,14 @@ void handleThemeButton(void)
 	fbtheme->reveal();
 }
 
-void handleTransposeUp(void)
+void handleSelTransposeUp(void)
 {
-	handleTranspose((PlatformKeysHeld & PlatformKey_R) ? 12 : 1);
+	handleSelTranspose((PlatformKeysHeld & PlatformKey_R) ? 12 : 1);
 }
 
-void handleTransposeDown(void)
+void handleSelTransposeDown(void)
 {
-	handleTranspose((PlatformKeysHeld & PlatformKey_R) ? -12 : -1);
+	handleSelTranspose((PlatformKeysHeld & PlatformKey_R) ? -12 : -1);
 }
 
 // number slider
@@ -4179,10 +4226,10 @@ void setupGUI(bool dldi_enabled)
 		labeltranspose->setCaption("trps"); */
 		buttontransposedown = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 74, 14, 12, main_screen);
 		buttontransposedown->setCaption("-");
-		buttontransposedown->registerPushCallback(handleTransposeDown);
+		buttontransposedown->registerPushCallback(handleSelTransposeDown);
 		buttontransposeup = new Button(RIGHT_SIDE_BUTTON_X(main_screen) + RIGHT_SIDE_BUTTON_WIDTH - 14, 74, 14, 12, main_screen);
 		buttontransposeup->setCaption("+");
-		buttontransposeup->registerPushCallback(handleTransposeUp);
+		buttontransposeup->registerPushCallback(handleSelTransposeUp);
 
 		tbeffects = new ToggleButton(tabbox_endx + 18, add_oct_number_y + 1, 16, 16, sub_screen);
 		tbeffects->setBitmap(icon_fx_raw, 12, 12);
@@ -4334,11 +4381,40 @@ void updateSampleOffsetGuide(void)
 
 
 // Update the state for certain keypresses
-void handleButtons(u16 buttons, u16 buttonsheld)
+void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
 {
 	u16 ptnlen = song->getPatternLength(song->getPotEntry(state->potpos));
+	bool pv_changed = false;
 
-	if(!(buttonsheld & PlatformKey_R))
+	static bool a_no_dpad_pressed;
+
+	if(buttons & PlatformKey_A)
+	{
+	    a_no_dpad_pressed = true;
+	}
+	else if(buttonsup & PlatformKey_A)
+	{
+	    if(a_no_dpad_pressed)
+    	{
+            pv->setPerComponentNav(!pv->isPerComponentNav());
+            pv_changed = true;
+    	    a_no_dpad_pressed = false;
+    	}
+	}
+	else if(buttonsheld & PlatformKey_A)
+	{
+	    a_no_dpad_pressed &= (buttonsheld & (PlatformKey_UP | PlatformKey_DOWN | PlatformKey_LEFT | PlatformKey_RIGHT)) == 0;
+		if(buttons & PlatformKey_UP)
+		    handleInPlaceTranspose(1, true);
+		if(buttons & PlatformKey_DOWN)
+            handleInPlaceTranspose(-1, true);
+		if(buttons & PlatformKey_LEFT)
+		    handleInPlaceTranspose(-1, false);
+		if(buttons & PlatformKey_RIGHT)
+		    handleInPlaceTranspose(1, false);
+	}
+
+	if(!(buttonsheld & (PlatformKey_R | PlatformKey_A)))
 	{
 		if(buttons & PlatformKey_UP)
 		{
@@ -4355,10 +4431,7 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 
 			state->setCursorRow(newrow);
 
-			pv->updateSelection();
-			updateSampleOffsetGuide();
-			redraw_main_requested = true;
-
+			pv_changed = true;
 		}
 		else if(buttons & PlatformKey_DOWN)
 		{
@@ -4374,30 +4447,48 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 
 			state->setCursorRow(newrow);
 
-			pv->updateSelection();
-			updateSampleOffsetGuide();
-			redraw_main_requested = true;
+			pv_changed = true;
 		}
 	}
 
-	if((buttons & PlatformKey_LEFT)&&(!typewriter_active))
+	if(!(buttonsheld & PlatformKey_A) && !typewriter_active)
 	{
-		if(state->channel>0) {
-			state->channel--;
-			pv->updateSelection();
-			updateSampleOffsetGuide();
-			redraw_main_requested = true;
-		}
-	}
-	else if((buttons & PlatformKey_RIGHT)&&(!typewriter_active))
-	{
-		if(state->channel < song->getChannels()-1)
-		{
-			state->channel++;
-			pv->updateSelection();
-			updateSampleOffsetGuide();
-			redraw_main_requested = true;
-		}
+	    int offset = 0;
+		int chnOffset = 0;
+    	if(buttons & PlatformKey_LEFT)
+    	{
+            offset = -1;
+    	}
+    	else if(buttons & PlatformKey_RIGHT)
+    	{
+            offset = 1;
+    	}
+
+        if(pv->isPerComponentNav())
+        {
+            int newComponentOffset = pv->getComponentNavOffset() + offset;
+            if(newComponentOffset >= 0 && newComponentOffset <= pv->getMaxComponentNavOffset())
+            {
+                pv->setComponentNavOffset(newComponentOffset);
+                pv_changed = true;
+            }
+            else
+            {
+                chnOffset = offset;
+            }
+        }
+        else
+        {
+            chnOffset = offset;
+        }
+
+        if(chnOffset && (state->channel + chnOffset) >= 0 && (state->channel + chnOffset) < song->getChannels())
+   		{
+   			state->channel += chnOffset;
+            if(pv->isPerComponentNav())
+                 pv->setComponentNavOffset((chnOffset >= 0) ? 0 : pv->getMaxComponentNavOffset());
+            pv_changed = true;
+   		}
 	}
 	else if(buttons & PlatformKey_START)
 	{
@@ -4427,6 +4518,13 @@ void handleButtons(u16 buttons, u16 buttonsheld)
 	}
 	*/
 #endif
+
+    if(pv_changed)
+    {
+        pv->updateSelection();
+        updateSampleOffsetGuide();
+        redraw_main_requested = true;
+    }
 }
 
 void VblankHandler(void)
@@ -4450,7 +4548,7 @@ void VblankHandler(void)
 		lasty = -255;
 	}
 
-	if( (PlatformKeysHeld & PlatformKey_TOUCH) && ( (abs(PlatformTouchX - lastx)>0) || (abs(PlatformTouchY - lasty)>0) ) ) // PenMove
+	if( (PlatformKeysHeld & PlatformKey_TOUCH) && ((PlatformTouchX != lastx) || (PlatformTouchY != lasty)) )
 	{
 		gui->penMove(PlatformTouchX, PlatformTouchY, touchScreen);
 		lastx = PlatformTouchX;
@@ -4467,7 +4565,7 @@ void VblankHandler(void)
 			move_to_top();
 	}
 
-	if(PlatformKeysDown & ~PlatformKey_TOUCH)
+	if((PlatformKeysDown | PlatformKeysUp) & ~PlatformKey_TOUCH)
 	{
 		if((PlatformKeysDown & PlatformKey_X)||(PlatformKeysDown & PlatformKey_L)) {
 			switchScreens();
@@ -4477,9 +4575,9 @@ void VblankHandler(void)
 			fastscroll = true;
 		}
 
-		gui->buttonPress(PlatformKeysDown);
-		handleButtons(PlatformKeysDown, PlatformKeysHeld);
-		pv->pleaseDraw();
+		if(PlatformKeysDown & ~PlatformKey_TOUCH)
+		    gui->buttonPress(PlatformKeysDown);
+		handleButtons(PlatformKeysDown, PlatformKeysHeld, PlatformKeysUp);
 	}
 
 	if(PlatformKeysUp)

@@ -36,6 +36,16 @@ namespace tobkit {
 #define PV_CELL_HEIGHT	8
 #define PV_CHAR_WIDTH	4
 #define PV_CHAR_HEIGHT	8
+#define PV_CELL_NOTE_X (1)
+#define PV_CELL_NOTE_WIDTH (PV_CHAR_WIDTH*3)
+#define PV_CELL_INST_X (PV_CELL_NOTE_X+PV_CELL_NOTE_WIDTH+1)
+#define PV_CELL_INST_WIDTH (PV_CHAR_WIDTH*2)
+#define PV_CELL_VOL_X (PV_CELL_INST_X+PV_CELL_INST_WIDTH+1)
+#define PV_CELL_VOL_WIDTH (PV_CHAR_WIDTH*2)
+#define PV_CELL_FX_X (PV_CELL_VOL_X+PV_CELL_VOL_WIDTH+1)
+#define PV_CELL_FX_WIDTH (PV_CHAR_WIDTH*3)
+#define PV_CELL_WIDTH PV_CELL_FX_X
+#define PV_CELL_WIDTH_FX (PV_CELL_FX_X+PV_CELL_FX_WIDTH+1)
 
 #define MUTE_REL_X	9
 #define MUTE_X(i)		(PV_BORDER_WIDTH+(i)*getCellWidth()+MUTE_REL_X)
@@ -94,6 +104,12 @@ namespace tobkit {
 
 const u8 notes_chars[] =   {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
 const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
+
+#define PV_COMPONENT_NOTE 0
+#define PV_COMPONENT_INSTRUMENT 1
+#define PV_COMPONENT_VOLUME 2
+#define PV_COMPONENT_EFFECT 3
+#define PV_COMPONENT_EFFECT_PARAM 4
 
 // TODO: Define width/height of cells
 // Make displayed info configurable (vol, effect)
@@ -159,6 +175,16 @@ class PatternView: public Widget {
 		}
 		void recalcHscroll(void);
 
+		inline bool isPerComponentNav() { return componentnav; }
+		inline void setPerComponentNav(bool value) { componentnav = value; }
+
+		inline int getComponentNavOffset() { return componentpos; }
+		inline void setComponentNavOffset(int value) { componentpos = value; }
+
+		inline int getMaxComponentNavOffset() {
+		    return effects_visible ? PV_COMPONENT_EFFECT_PARAM : PV_COMPONENT_VOLUME;
+		}
+
 	private:
 		void draw(void);
 
@@ -171,13 +197,13 @@ class PatternView: public Widget {
 			drawSmallChar(byte%0x10, cx+PV_CHAR_WIDTH, cy, col);
 		}
 
-		inline void drawCell(u16 cellx, u16 celly, u16 px, u16 py, bool dark)
+		inline void drawCell(u16 cellx, u16 celly, u16 px, u16 py, u8 dark)
 		{
-			u16 notecol = dark?col_notes_dark:col_notes;
-			u16 instrcol = dark?col_instr_dark:col_instr;
-			u16 volumecol = dark?col_volume_dark:col_volume;
-			u16 effectcol = dark?col_effect_dark:col_effect;
-			u16 effectparamcol = dark?col_effect_param_dark:col_effect_param;
+			u16 notecol = (dark&0x1)?col_notes_dark:col_notes;
+			u16 instrcol = (dark&0x2)?col_instr_dark:col_instr;
+			u16 volumecol = (dark&0x4)?col_volume_dark:col_volume;
+			u16 effectcol = (dark&0x8)?col_effect_dark:col_effect;
+			u16 effectparamcol = (dark&0x10)?col_effect_param_dark:col_effect_param;
 			/*
 			typedef struct {
 				u8 note;
@@ -190,32 +216,32 @@ class PatternView: public Widget {
 
 			Cell *cell = &(pattern[cellx][celly]);
 
-			u16 realx = PV_BORDER_WIDTH+1+px*getCellWidth();
+			u16 realx = PV_BORDER_WIDTH+px*getCellWidth();
 			u16 realy = 2+py*PV_CELL_HEIGHT;
 
 			// Check for empty note or stop-note
 			if(cell->note == STOP_NOTE) {
-				drawSmallChar(DOT,   realx                , realy, notecol);
-				drawSmallChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
-				drawSmallChar(DOT,   realx+2*PV_CHAR_WIDTH, realy, notecol);
+				drawSmallChar(DOT,   realx+PV_CELL_NOTE_X,                 realy, notecol);
+				drawSmallChar(MINUS, realx+PV_CELL_NOTE_X+PV_CHAR_WIDTH,   realy, notecol);
+				drawSmallChar(DOT,   realx+PV_CELL_NOTE_X+2*PV_CHAR_WIDTH, realy, notecol);
 			} else if(cell->note != EMPTY_NOTE) {
 				// Note
-				drawSmallChar(notes_chars[cell->note%12], realx, realy, notecol);
+				drawSmallChar(notes_chars[cell->note%12], realx+PV_CELL_NOTE_X, realy, notecol);
 				if(notes_signs[cell->note%12]) {
-					drawSmallChar(SHARP, realx+1*PV_CHAR_WIDTH, realy, notecol);
+					drawSmallChar(SHARP, realx+PV_CELL_NOTE_X+PV_CHAR_WIDTH, realy, notecol);
 				} else {
-					drawSmallChar(MINUS, realx+1*PV_CHAR_WIDTH, realy, notecol);
+					drawSmallChar(MINUS, realx+PV_CELL_NOTE_X+PV_CHAR_WIDTH, realy, notecol);
 				}
-				drawSmallChar(cell->note/12, realx+2*PV_CHAR_WIDTH, realy, notecol);
+				drawSmallChar(cell->note/12, realx+PV_CELL_NOTE_X+2*PV_CHAR_WIDTH, realy, notecol);
 			}
 
 			// Instrument
 			if(cell->instrument != NO_INSTRUMENT)
-				drawHexByte(cell->instrument+1, realx+3*PV_CHAR_WIDTH+1, realy, instrcol); // Adding one because FT2 indices start with 1
+				drawHexByte(cell->instrument+1, realx+PV_CELL_INST_X, realy, instrcol); // Adding one because FT2 indices start with 1
 
 			if (cell->volume != NO_VOLUME)
 			{
-				drawHexByte(cell->volume, realx + 5 * PV_CHAR_WIDTH + 2, realy, volumecol);
+				drawHexByte(cell->volume, realx+PV_CELL_VOL_X, realy, volumecol);
 			}
 
 			// volume effect column slightly buggy and needs
@@ -260,10 +286,10 @@ class PatternView: public Widget {
 			if(effects_visible) {
 				// Effect and effect parameter
 				if (cell->effect != 0xff)
-					drawSmallChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
+					drawSmallChar(cell->effect, realx+PV_CELL_FX_X, realy, effectcol);
 
 				if (cell->effect_param != 0x00 || cell->effect != 0xff)
-					drawHexByte(cell->effect_param, realx+8*PV_CHAR_WIDTH+3, realy, effectparamcol);
+					drawHexByte(cell->effect_param, realx+PV_CELL_FX_X+PV_CHAR_WIDTH, realy, effectparamcol);
 			}
 		}
 
@@ -271,12 +297,10 @@ class PatternView: public Widget {
 
 		inline u16 getCellWidth(void)
 		{
-			if (effects_visible) {
-				cell_width = 45;
-			} else {
-				cell_width = 32;
-			}
-			return cell_width;
+			if (effects_visible)
+			    return PV_CELL_WIDTH_FX;
+			else
+			    return PV_CELL_WIDTH;
 		}
 
 		inline u16 getEffectiveWidth(void)
@@ -304,7 +328,6 @@ class PatternView: public Widget {
 			return getNumVisibleRows()/2-1;
 		}
 
-
 		void callMuteCallback(void);
 
 		void (*onMute)(bool *channels_muted);
@@ -318,7 +341,8 @@ class PatternView: public Widget {
 		u16 col_notes, col_instr, col_volume, col_effect, col_effect_param,
 			col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark, col_effect_param_dark;
 
-		u16 hscrollpos, lines_per_beat;
+		u8 hscrollpos;
+		u16 lines_per_beat;
 
 		bool selection_exists, pen_down;
 		bool effects_visible;
@@ -328,8 +352,11 @@ class PatternView: public Widget {
 		u16 sel_start_x, sel_end_x, sel_start_y, sel_end_y;
 		u16 sel_x, sel_y, sel_w, sel_h;
 
-		bool solo_channels[32];
-		bool mute_channels[32];
+		bool solo_channels[MAX_CHANNELS];
+		bool mute_channels[MAX_CHANNELS];
+
+		u8 componentpos;
+		bool componentnav;
 };
 
 };
