@@ -57,7 +57,7 @@ void FXKeyboard::penDown(u16 px, u16 py)
 		useDarkTitle(true);
 		setLastCmd(NO_EFFECT);
 	}
-		
+
 	updateCaptionForFx(fxkb_vals[bt_ind]);
 	draw();
 }
@@ -98,13 +98,13 @@ void FXKeyboard::setTheme(Theme* theme_, u16 bgcolor_)
 
 	genPal(fxkb_cols, fxkb_pal);
 	Widget::setTheme(theme_, bgcolor_);
-	
+
 	if (!isExposed()) return;
 
 #ifdef NT_PLATFORM_NDS
 	memcpy(BG_PALETTE_SUB, fxkb_pal, 32);
 #endif
-	
+
 	draw();
 }
 
@@ -140,7 +140,7 @@ void FXKeyboard::updateCaptionForFx(u8 val)
 	if (category == FX_CATEGORY_NORMAL)
 		setCaption(button_captions[val]);
 	else if (category == FX_CATEGORY_E)
-		setCaption(E_captions[val]); 
+		setCaption(E_captions[val]);
 
 	drawCaption();
 }
@@ -173,7 +173,7 @@ void FXKeyboard::setCategory(u8 newcat) {
 			memset(fxkb_state, FXBUTTON_DISABLED, NUM_FXKEYS);
 			break;
 	}
-	
+
 	draw();
 }
 
@@ -206,10 +206,10 @@ void FXKeyboard::genPal(u16 *fxkb_cols_base, u16 *pal) {
 
 void FXKeyboard::drawCaption(void) {
 	if (!isExposed()) return;
-	
+
 	drawFullBox(1, 3, width, 5, bgcolor);
 	u16 capcol = darken_title ? theme->col_fxkeyboard_cmd_desc_disabled : theme->col_fxkeyboard_cmd_desc;
-	drawSmallString(caption, ((NUM_FXKEYS * FXBUTTON_WIDTH) / 2) - (2 * strlen(caption)) + 4, 3, capcol);  // width=(3px char+1px space) / 2 
+	drawSmallString(caption, ((NUM_FXKEYS * FXBUTTON_WIDTH) / 2) - (2 * strlen(caption)) + 4, 3, capcol);  // width=(3px char+1px space) / 2
 }
 
 void FXKeyboard::drawButtonLabel(u8 key, u8 cat, bool visible)
@@ -218,15 +218,19 @@ void FXKeyboard::drawButtonLabel(u8 key, u8 cat, bool visible)
 	u16 col = theme->col_fxkeyboard_btn_label;
 	u16 smallcol1 = theme->col_fxkeyboard_minilabel_x;
 	u16 smallcol2 = theme->col_fxkeyboard_minilabel_y;
-	
+
 	if(visible == true) {
 		col |= RGB5A1_ALPHA_BIT;
 		smallcol1 |= RGB5A1_ALPHA_BIT;
 		smallcol2 |= RGB5A1_ALPHA_BIT;
+	} else {
+	    col &= ~RGB5A1_ALPHA_BIT;
+		smallcol1 &= ~RGB5A1_ALPHA_BIT;
+		smallcol2 &= ~RGB5A1_ALPHA_BIT;
 	}
-		
+
 	char label[] = {fxlabels[cat][key], 0};
-	
+
 	drawString(label, xpos, 15, col);
 
 	char small_caption[3] = {0}; // one wasted byte...noone will notice
@@ -261,7 +265,7 @@ void FXKeyboard::draw(void) {
 #ifdef NT_PLATFORM_NDS
 	u16 lstate, rstate;
 
-	/* 
+	/*
 				|-------|-------|------- tiles
 				|-----------|----------- buttons
 
@@ -269,8 +273,8 @@ void FXKeyboard::draw(void) {
 	  to preserve exelotl's nice design we draw the tiles in
 	  pairs, consisting of 3 horizontal tiles per button pair
 
-	  the tileset is arranged such that adding the state of 
-	  a button to a tile index in the default state produces 
+	  the tileset is arranged such that adding the state of
+	  a button to a tile index in the default state produces
 	  the tile index of the desired state
 
 	  basically this depends on the order of the tiles in
@@ -306,9 +310,9 @@ void FXKeyboard::draw(void) {
 	if (NUM_FXKEYS % 2 == 1)
 	{
 		rstate=fxkb_state[NUM_FXKEYS-1];
-		
+
 		const u16 oddend[10]={
-			TILE_BLANK, TILE_LCORNER+rstate, TILE_LEDGE+rstate, TILE_LEDGE+rstate, VFLIP(TILE_LCORNER+rstate), 
+			TILE_BLANK, TILE_LCORNER+rstate, TILE_LEDGE+rstate, TILE_LEDGE+rstate, VFLIP(TILE_LCORNER+rstate),
 			TILE_BLANK, TILE_ODD_END_EDGE+rstate, TILE_ODD_END_MID+rstate, TILE_ODD_END_MID+rstate, VFLIP(TILE_ODD_END_EDGE+rstate)
 		};
 
@@ -324,7 +328,7 @@ void FXKeyboard::draw(void) {
 
 	for(int py=0; py<FXKEYBOARD_HEIGHT_TILES; ++py)
 		memcpy(map_base + (32*(py+y/8)+(x/8)), fxkb_map + (FXKEYBOARD_WIDTH_TILES * py), FXKEYBOARD_WIDTH_TILES * 2);
-	
+
 #else
 	drawFullBox(0, 0, width, height, theme->col_bg); // hide the piano
 
