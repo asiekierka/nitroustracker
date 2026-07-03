@@ -473,7 +473,7 @@ void handleNoteStroke(u8 note)
 	onKeypress(note);
 
 	// Play the note
-	CommandPlayNoteAuto(state->instrument, state->basenote + note, 255, note);
+	CommandPlayNoteAuto(state->instrument, state->basenote + note, MAX_VOLUME, note);
 
 	dsmidi_handler.noteStroke(true, state->instrument & 0xF, state->basenote + note);
 }
@@ -520,7 +520,7 @@ void handlePianoPakStroke(u8 note)
 	onKeypress(note);
 
 	// Play the note
-	CommandPlayNoteAuto(state->instrument, state->basenote + note, 255, note);
+	CommandPlayNoteAuto(state->instrument, state->basenote + note, MAX_VOLUME, note);
 
 	dsmidi_handler.noteStroke(true, state->instrument & 0xF, state->basenote + note);
 }
@@ -1241,14 +1241,7 @@ void copyFxParam(void) {
 
 	Cell targetcell = song->getPattern(song->getPotEntry(state->potpos))[sel_x1][sel_y1];
 
-	u8 prm = targetcell.effect_param;
-	u8 prm2 = targetcell.effect2_param; // if no main param
-
-	if (prm == 0 && prm2 != 0)
-		dbeffectpar->setValue(prm2);
-	else
-		dbeffectpar->setValue(prm);
-
+	dbeffectpar->setValue(targetcell.effect_param);
 
 	redraw_main_requested = true;
 }
@@ -1976,7 +1969,7 @@ void previewWav(void) {
 	// Play it
 	state->preview_sample = smp;
 	ntxm_flush_dcache();
-	CommandPlaySample(smp, 4*12, 255, 0);
+	CommandPlaySample(smp, 4*12, MAX_VOLUME, 0);
 
 	// When the sample has finished playing, the arm7 sends a signal,
 	// so the arm9 can delete the sample
@@ -3828,7 +3821,7 @@ void setupGUI(bool dldi_enabled)
 		labelfinetune = new Label(75, sampletabbox_y + 33, 30, 10, sub_screen, false);
 		labelfinetune->setCaption("tun");
 
-		nssamplevolume = new NumberSlider(40, sampletabbox_y + 9, 32, 17, sub_screen, 64, 0, 64);
+		nssamplevolume = new NumberSlider(40, sampletabbox_y + 9, 32, 17, sub_screen, MAX_VOLUME, 0, MAX_VOLUME);
 		nssamplevolume->registerChangeCallback(handleSampleVolumeChange);
 
 		nspanning = new NumberSlider(40, sampletabbox_y + 28, 32, 17, sub_screen, 64, 0, 127, false);
@@ -4168,7 +4161,7 @@ void setupGUI(bool dldi_enabled)
 		labelnotevol = new Label(RIGHT_SIDE_BUTTON_X(main_screen) + 5, 34, RIGHT_SIDE_BUTTON_WIDTH - 7, 9, main_screen, false, true, true);
 		labelnotevol->setCaption("vol");
 
-		nsnotevolume	 = new NumberSlider(RIGHT_SIDE_BUTTON_X(main_screen), 45, RIGHT_SIDE_BUTTON_WIDTH, 17, main_screen, 127, 0, 127, true, true);
+		nsnotevolume	 = new NumberSlider(RIGHT_SIDE_BUTTON_X(main_screen), 45, RIGHT_SIDE_BUTTON_WIDTH, 17, main_screen, MAX_VOLUME, 0, MAX_VOLUME, true, true);
 		nsnotevolume->registerPostChangeCallback(handleNoteVolumeChanged);
 
 		buttonsetnotevol = new Button(RIGHT_SIDE_BUTTON_X(main_screen), 61, RIGHT_SIDE_BUTTON_WIDTH, 12, main_screen);
