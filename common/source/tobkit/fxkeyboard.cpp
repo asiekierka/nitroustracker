@@ -141,6 +141,8 @@ void FXKeyboard::updateCaptionForFx(u8 val)
 		setCaption(button_captions[val]);
 	else if (category == FX_CATEGORY_E)
 		setCaption(E_captions[val]);
+	else if (category == FX_CATEGORY_FT)
+	    setCaption(ft2_captions[val]);
 
 	drawCaption();
 }
@@ -158,15 +160,18 @@ void FXKeyboard::setCategory(u8 newcat) {
 	{
 		case FX_CATEGORY_NORMAL:
 			fxkb_vals[14] = 0xF;
-			memset(&fxkb_state[5], FXBUTTON_DISABLED, 3);
 			break;
 
 		case FX_CATEGORY_E:
 			fxkb_vals[14] = 0xE;
 			fxkb_state[0] = FXBUTTON_DISABLED;
-			memset(&fxkb_state[3], FXBUTTON_DISABLED, 9);
-			fxkb_state[6] = FXBUTTON_NORMAL;
+			fxkb_state[8] = FXBUTTON_DISABLED;
+			fxkb_state[15] = FXBUTTON_DISABLED;
 			break;
+
+		case FX_CATEGORY_FT:
+		    memset(fxkb_state + 7, FXBUTTON_DISABLED, NUM_FXKEYS - 7);
+		    break;
 
 		default:
 			useDarkTitle(true);
@@ -239,6 +244,8 @@ void FXKeyboard::drawButtonLabel(u8 key, u8 cat, bool visible)
 		snprintf(small_caption, 3, "%1XX", fxkb_vals[key]);
 	else if (cat == FX_CATEGORY_NORMAL)
 		sprintf(small_caption, "X%s", ((labels_cat0 >> key) & 0x1) ? "Y" : "X");
+	else if (cat == FX_CATEGORY_FT && key < 7)
+		sprintf(small_caption, "X%s", (key == 1 || key == 4 || key == 5 || key == 6) ? "Y" : "X");
 	else
 		return; // buttons in the other two categories do not have labels yet
 

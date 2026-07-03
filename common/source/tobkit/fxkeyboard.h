@@ -125,6 +125,13 @@ namespace tobkit {
 									 "EAX: FINE VOLUME SLIDE UP", "EBX: FINE VOLUME SLIDE DOWN",
 									 "ECX: NOTE CUT", "EDX: NOTE DELAY", "EEX: PATTERN DELAY", "EFX: FUNK IT" };
 
+		const char* ft2_captions[16] = {
+		    "GXX: SET GLOBAL VOLUME", "HXY: GLOBAL VOLUME SLIDE", "KXX: KEY OFF", "LXX: SET ENVELOPE POSITION",
+			"PXY: PANNING SLIDE", "RXY: RETRIGGER", "TXY: TREMOR", "",
+			"", "", "", "",
+			"", "", "", ""
+		};
+
 		void genPal(u16* fxkb_cols_base, u16* pal);
 
 		void (*onFxKeypress)(u8 val);
