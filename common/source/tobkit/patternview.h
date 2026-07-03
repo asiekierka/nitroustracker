@@ -25,6 +25,7 @@
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
+#include "fxkeyboard.h"
 #include "tobkit/widget.h"
 #include "ntxm/song.h"
 
@@ -213,56 +214,47 @@ class PatternView: public Widget {
 			if(cell->instrument != NO_INSTRUMENT)
 				drawHexByte(cell->instrument+1, realx+3*PV_CHAR_WIDTH+1, realy, instrcol); // Adding one because FT2 indices start with 1
 
-			if (cell->volume != NO_VOLUME)
+			u8 vol = cell->volume;
+			if (vol >= 0x10 && vol <= 0x5F)
 			{
-				drawHexByte(cell->volume, realx + 5 * PV_CHAR_WIDTH + 2, realy, volumecol);
+				drawHexByte(vol - 0x10, realx + 5 * PV_CHAR_WIDTH + 2, realy, volumecol);
 			}
+			else
+			{
+			    u8 eff = 0;
+    			if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
+    			    eff = VSLIDEDOWN;
+    			else if ((vol >= 0x70) && (vol <= 0x7F)) // Volume slide up
+    				eff = VSLIDEUP;
+    			else if ((vol >= 0x80) && (vol <= 0x8F)) // Fine volume slide down
+    				eff = FVSLIDEDOWN;
+    			else if ((vol >= 0x90) && (vol <= 0x9F)) // Fine volume slide up
+    				eff = FVSLIDEUP;
+    			else if ((vol >= 0xA0) && (vol <= 0xAF)) // Set vibrato speed (calls vibrato)
+    				eff = SETVIBRATOSPD;
+    			else if ((vol >= 0xB0) && (vol <= 0xBF)) // Vibrato
+    				eff = SETVIBRATO;
+    			else if ((vol >= 0xC0) && (vol <= 0xCF)) // Set panning
+    				eff = SETPANPOS;
+    			else if ((vol >= 0xD0) && (vol <= 0xDF)) // Panning slide left
+    				eff = PANSLIDELEFT;
+    			else if ((vol >= 0xE0) && (vol <= 0xEF)) // Panning slide right
+    				eff = PANSLIDERIGHT;
+    			else if (vol >= 0xF0) // Tone porta
+    				eff = NOTEPORTA;
 
-			// volume effect column slightly buggy and needs
-			// song.cpp adjustment in libntxm, lets leave that commented for now
-
-			// else {
-			// 	if (cell->effect2 != 0xff && cell->volume == NO_VOLUME)
-			// 	{
-			// 		char eff;
-			// 		u8 vol = cell->volume_raw;
-
-			// 		if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
-			// 			eff = VSLIDEDOWN;
-			// 		else if ((vol >= 0x70) && (vol <= 0x7F)) // Volume slide up
-			// 			eff = VSLIDEUP;
-			// 		else if ((vol >= 0x80) && (vol <= 0x8F)) // Fine volume slide down
-			// 			eff = FVSLIDEDOWN;
-			// 		else if ((vol >= 0x90) && (vol <= 0x9F)) // Fine volume slide up
-			// 			eff = FVSLIDEUP;
-			// 		else if ((vol >= 0xA0) && (vol <= 0xAF)) // Set vibrato speed (calls vibrato)
-			// 			eff = SETVIBRATOSPD;
-			// 		else if ((vol >= 0xB0) && (vol <= 0xBF)) // Vibrato
-			// 			eff = SETVIBRATO;
-			// 		else if ((vol >= 0xC0) && (vol <= 0xCF)) // Set panning
-			// 			eff = SETPANPOS;
-			// 		else if ((vol >= 0xD0) && (vol <= 0xDF)) // Panning slide left
-			// 			eff = PANSLIDELEFT;
-			// 		else if ((vol <= 0x1f)) // Panning slide right
-			// 			eff = PANSLIDERIGHT;
-			// 		else if (vol >= 0xF0) // Tone porta
-			// 			eff = NOTEPORTA;
-			// 		else {
-			// 			eff = 0;
-			// 		}
-			// 		if (eff != 0) {
-			// 			drawSmallChar(eff, realx + 5 * PV_CHAR_WIDTH + 2, realy, effectcol);
-			// 			drawSmallChar(cell->effect2_param & 0x0F, realx + 6 * PV_CHAR_WIDTH + 2, realy, effectparamcol);
-			// 		}
-			// 	}
-			// }
+    			if(eff != 0) {
+    			    drawSmallChar(eff, realx + 5 * PV_CHAR_WIDTH + 2, realy, effectcol);
+    				drawSmallChar(vol & 0x0F, realx + 6 * PV_CHAR_WIDTH + 2, realy, effectparamcol);
+  		        }
+			}
 
 			if(effects_visible) {
 				// Effect and effect parameter
-				if (cell->effect != 0xff)
+				if (cell->effect != NO_EFFECT)
 					drawSmallChar(cell->effect, realx+7*PV_CHAR_WIDTH+3, realy, effectcol);
 
-				if (cell->effect_param != 0x00 || cell->effect != 0xff)
+				if (cell->effect_param != 0x00 || cell->effect != NO_EFFECT)
 					drawHexByte(cell->effect_param, realx+8*PV_CHAR_WIDTH+3, realy, effectparamcol);
 			}
 		}

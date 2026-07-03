@@ -2267,13 +2267,13 @@ void handleTransposeDown(void)
 // number slider
 void handleNoteVolumeChanged(s32 vol)
 {
-	setNoteVol(vol);
+	setNoteVol(vol + 0x10);
 }
 
 // button
 void handleSetNoteVol(void)
 {
-	setNoteVol(nsnotevolume->getValue());
+	setNoteVol(nsnotevolume->getValue() + 0x10);
 }
 
 void handleToggleEffectsVisibility(bool on)
@@ -2359,6 +2359,10 @@ void onFxKeyPressed(u8 val)
 	if (fxkb->getCategory() == FX_CATEGORY_E) {
 		setEffectCommand(0xE);
 		setEffectParam((val << 4) | (dbeffectpar->getValue() & 0x0f), true);
+	} else if (fxkb->getCategory() == FX_CATEGORY_FT) {
+	    // TODO
+  	} else if (fxkb->getCategory() == FX_CATEGORY_VOL) {
+       // TODO
 	} else {
 		setEffectCommand(val);
 		setEffectParam(dbeffectpar->getValue(), false, false, false);
