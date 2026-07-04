@@ -37,7 +37,10 @@ static const u8 fullkeyOffset[12] = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
 :Widget(_x, _y, _width, _height, _screen),
-char_base(_char_base), map_base(_map_base), key_labels_visible(false), mapping_instrument(false), curr_note(255)
+#ifdef NT_PLATFORM_NDS
+char_base(_char_base), map_base(_map_base),
+#endif
+key_labels_visible(false), mapping_instrument(false), curr_note(255)
 {
 	onNote = 0;
 	onRelease = 0;
@@ -56,10 +59,12 @@ Piano::~Piano() {
 }
 
 void Piano::setTheme(Theme *theme_, u16 bgcolor_) {
+#ifdef NT_PLATFORM_NDS
 	u16 piano_cols[9] = { theme_->col_piano_full_col1, theme_->col_piano_full_col2, theme_->col_piano_half_col1, theme_->col_piano_half_col2,
 						theme_->col_piano_full_highlight_col1, theme_->col_piano_full_highlight_col2, theme_->col_piano_half_highlight_col1,
 						theme_->col_piano_half_highlight_col2, theme_->col_piano_outline};
 	genPal(piano_cols, piano_Palette, piano_fullnotehighlight_Palette, piano_halfnotehighlight_Palette);
+#endif
 	Widget::setTheme(theme_, bgcolor_);
 
 #ifdef NT_PLATFORM_NDS

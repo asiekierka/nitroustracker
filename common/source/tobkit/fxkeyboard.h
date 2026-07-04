@@ -99,8 +99,10 @@ namespace tobkit {
 		u8 category;
 		u8 last_cmd;
 
+#ifdef NT_PLATFORM_NDS
 		u16 fxkb_map[FXKEYBOARD_WIDTH_TILES*FXKEYBOARD_HEIGHT_TILES] __attribute__((aligned(4))) = { 0 };
 		u16 fxkb_pal[16];
+#endif
 		u8 fxkb_state[NUM_FXKEYS] = { 0 };
 		u8 fxkb_vals[NUM_FXKEYS] = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xf };
 
@@ -108,37 +110,6 @@ namespace tobkit {
 
 		char* caption;
 		bool darken_title;
-
-		const char* fxlabels[NUM_CATEGORIES] = { "0123456789abcdf", "0123456789abcde", "GHKLPRTX       ", "+-DLMPRSUV    " };
-		const char* category_captions[NUM_CATEGORIES] = { "EFFECT COMMANDS", "EXY: EXTENDED COMMANDS", "FT2 COMMANDS", "VOLUME COLUMN COMMANDS" };
-		const char* button_captions[16] = { "0XY: ARPEGGIO", "1XX: PORTAMENTO UP", "2XX: PORTAMENTO DOWN",
-									 "3XX: PORTAMENTO TO NOTE", "4XY: VIBRATO", "5XY: PORTAMENTO TO NOTE \x60 VOLUME SLIDE",
-									 "6XY: VIBRATO WITH VOLUME SLIDE", "7XY: TREMOLO", "8XX: SET NOTE PANNING POSITION",
-									 "9XX: SAMPLE OFFSET", "AXY: VOLUME SLIDE", "BXX: JUMP TO ORDER", "CXX: SET NOTE VOLUME",
-									 "DXX: PATTERN BREAK", "UNUSED", "FXX: SET SONG SPEED \x60 BPM" };
-
-		const char* E_captions[16] = { "E0X: AMIGA LED FILTER TOGGLE", "E1X: FINE PORTAMENTO UP",
-									 "E2X: FINE PORTAMENTO DOWN", "E3X: GLISSANDO CONTROL",
-									 "E4X: VIBRATO CONTROL", "E5X: SET NOTE FINETUNE",
-									 "E6X: PATTERN LOOP", "E7X: TREMOLO CONTROL",
-									 "E8X: SET NOTE PANNING POSITION", "E9X: RETRIGGER NOTE",
-									 "EAX: FINE VOLUME SLIDE UP", "EBX: FINE VOLUME SLIDE DOWN",
-									 "ECX: NOTE CUT", "EDX: NOTE DELAY", "EEX: PATTERN DELAY", "EFX: FUNK IT" };
-
-		const char* ft2_captions[16] = {
-		    "GXX: SET GLOBAL VOLUME", "HXY: GLOBAL VOLUME SLIDE", "KXX: KEY OFF", "LXX: SET ENVELOPE POSITION",
-			"PXY: PANNING SLIDE", "RXY: RETRIGGER", "TXY: TREMOR", "",
-			"", "", "", "",
-			"", "", "", ""
-		};
-
-		const char* vol_captions[16] = {
-		    "+X: VOLUME SLIDE UP", "-X: VOLUME SLIDE DOWN", "DX: FINE VOLUME SLIDE DOWN", "LX: PANNING SLIDE LEFT",
-			"MX: PORTAMENTO TO NOTE", "PX: SET NOTE PANNING POSITION", "RX: PANNING SLIDE RIGHT",
-			"SX: SET VIBRATO SPEED", "UX: FINE VOLUME SLIDE UP", "VX: VIBRATO",
-			"", "", "", "",
-			"", ""
-		};
 
 		void genPal(u16* fxkb_cols_base, u16* pal);
 

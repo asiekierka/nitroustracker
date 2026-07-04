@@ -25,6 +25,37 @@ limitations under the License.
 #include "effectinput.h"
 #endif
 
+static const char* fxlabels[NUM_CATEGORIES] = { "0123456789abcdf", "0123456789abcde", "GHKLPRTX       ", "+-DLMPRSUV    " };
+static const char* category_captions[NUM_CATEGORIES] = { "EFFECT COMMANDS", "EXY: EXTENDED COMMANDS", "FT2 COMMANDS", "VOLUME COLUMN COMMANDS" };
+static const char* button_captions[16] = { "0XY: ARPEGGIO", "1XX: PORTAMENTO UP", "2XX: PORTAMENTO DOWN",
+							 "3XX: PORTAMENTO TO NOTE", "4XY: VIBRATO", "5XY: PORTAMENTO TO NOTE \x60 VOLUME SLIDE",
+							 "6XY: VIBRATO WITH VOLUME SLIDE", "7XY: TREMOLO", "8XX: SET NOTE PANNING POSITION",
+							 "9XX: SAMPLE OFFSET", "AXY: VOLUME SLIDE", "BXX: JUMP TO ORDER", "CXX: SET NOTE VOLUME",
+							 "DXX: PATTERN BREAK", "UNUSED", "FXX: SET SONG SPEED \x60 BPM" };
+
+static const char* E_captions[16] = { "E0X: AMIGA LED FILTER TOGGLE", "E1X: FINE PORTAMENTO UP",
+							 "E2X: FINE PORTAMENTO DOWN", "E3X: GLISSANDO CONTROL",
+							 "E4X: VIBRATO CONTROL", "E5X: SET NOTE FINETUNE",
+							 "E6X: PATTERN LOOP", "E7X: TREMOLO CONTROL",
+							 "E8X: SET NOTE PANNING POSITION", "E9X: RETRIGGER NOTE",
+							 "EAX: FINE VOLUME SLIDE UP", "EBX: FINE VOLUME SLIDE DOWN",
+							 "ECX: NOTE CUT", "EDX: NOTE DELAY", "EEX: PATTERN DELAY", "EFX: FUNK IT" };
+
+static const char* ft2_captions[16] = {
+    "GXX: SET GLOBAL VOLUME", "HXY: GLOBAL VOLUME SLIDE", "KXX: KEY OFF", "LXX: SET ENVELOPE POSITION",
+	"PXY: PANNING SLIDE", "RXY: RETRIGGER", "TXY: TREMOR", "",
+	"", "", "", "",
+	"", "", "", ""
+};
+
+static const char* vol_captions[16] = {
+    "+X: VOLUME SLIDE UP", "-X: VOLUME SLIDE DOWN", "DX: FINE VOLUME SLIDE DOWN", "LX: PANNING SLIDE LEFT",
+	"MX: PORTAMENTO TO NOTE", "PX: SET NOTE PANNING POSITION", "RX: PANNING SLIDE RIGHT",
+	"SX: SET VIBRATO SPEED", "UX: FINE VOLUME SLIDE UP", "VX: VIBRATO",
+	"", "", "", "",
+	"", ""
+};
+
 using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
@@ -90,13 +121,14 @@ void FXKeyboard::penUp(u16 px, u16 py)
 
 void FXKeyboard::setTheme(Theme* theme_, u16 bgcolor_)
 {
+#ifdef NT_PLATFORM_NDS
 	u16 fxkb_cols[6] = {
 		theme_->col_bg, theme_->col_fxkeyboard_col1, theme_->col_fxkeyboard_col2,
 		theme_->col_fxkeyboard_col1_disabled, theme_->col_fxkeyboard_col2_disabled,
 		theme_->col_outline
 	};
-
 	genPal(fxkb_cols, fxkb_pal);
+#endif
 	Widget::setTheme(theme_, bgcolor_);
 
 	if (!isExposed()) return;

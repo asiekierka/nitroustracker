@@ -53,9 +53,11 @@ class Piano: public Widget {
 	private:
 		void (*onNote)(u8);
 		void (*onRelease)(u8, bool);
-		u16 *char_base, *map_base;
 
+#ifdef NT_PLATFORM_NDS
+        u16 *char_base, *map_base;
 		unsigned short piano_Palette[16], piano_fullnotehighlight_Palette[16], piano_halfnotehighlight_Palette[16];
+#endif
 
 		void draw(void);
 		int getKeyXOffset(int key) const;
