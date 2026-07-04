@@ -622,7 +622,7 @@ void handleSampleChange(const u16 newsample)
 
 	sampledisplay->setSample(smp);
 	sampledisplay->hideLoopPoints();
-	nssamplevolume->setValue( (smp->getVolume()+1)/4 );
+	nssamplevolume->setValue(smp->getVolume());
 	nspanning->setValue(smp->getPanning()/2);
 	nsrelnote->setValue(smp->getRelNote());
 	nsfinetune->setValue(smp->getFinetune());
