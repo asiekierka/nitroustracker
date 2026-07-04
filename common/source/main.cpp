@@ -2360,12 +2360,16 @@ void onFxKeyPressed(u8 val)
 		setEffectCommand(0xE);
 		setEffectParam((val << 4) | (dbeffectpar->getValue() & 0x0f), true);
 	} else if (fxkb->getCategory() == FX_CATEGORY_FT) {
-	    // TODO
+	    static const u8 ft_key_mapping[] = { 16, 17, 20, 21, 25, 27, 29 };
+		if (val >= sizeof(ft_key_mapping))
+		    return;
+		setEffectCommand(ft_key_mapping[val]);
+		setEffectParam(dbeffectpar->getValue(), false);
   	} else if (fxkb->getCategory() == FX_CATEGORY_VOL) {
        // TODO
 	} else {
 		setEffectCommand(val);
-		setEffectParam(dbeffectpar->getValue(), false, false, false);
+		setEffectParam(dbeffectpar->getValue(), false);
 	}
 
 	pv->clearSelection();

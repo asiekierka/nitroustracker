@@ -132,6 +132,13 @@ namespace tobkit {
 			"", "", "", ""
 		};
 
+		const char* vol_captions[16] = {
+		    "GXX: SET GLOBAL VOLUME", "HXY: GLOBAL VOLUME SLIDE", "KXX: KEY OFF", "LXX: SET ENVELOPE POSITION",
+			"PXY: PANNING SLIDE", "RXY: RETRIGGER", "TXY: TREMOR", "",
+			"", "", "", "",
+			"", "", "", ""
+		};
+
 		void genPal(u16* fxkb_cols_base, u16* pal);
 
 		void (*onFxKeypress)(u8 val);

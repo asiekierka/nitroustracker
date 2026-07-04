@@ -166,7 +166,6 @@ void FXKeyboard::setCategory(u8 newcat) {
 			fxkb_vals[14] = 0xE;
 			fxkb_state[0] = FXBUTTON_DISABLED;
 			fxkb_state[8] = FXBUTTON_DISABLED;
-			fxkb_state[15] = FXBUTTON_DISABLED;
 			break;
 
 		case FX_CATEGORY_FT:
