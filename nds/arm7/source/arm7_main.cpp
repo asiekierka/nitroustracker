@@ -26,10 +26,6 @@
 
 #include <ntxm/ntxm7.h>
 
-extern "C" {
-  #include "ntxm/linear_freq_table.h"
-}
-
 #ifdef MIDI
 #include <dswifi7.h>
 #endif

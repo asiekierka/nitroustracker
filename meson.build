@@ -13,12 +13,11 @@ conf_data.set('version', meson.project_version())
 libntxm_sources = [
   'libntxm/libntxm/source/common/demokit.c',
   'libntxm/libntxm/source/common/instrument.cpp',
-  'libntxm/libntxm/source/common/linear_freq_table.c',
   'libntxm/libntxm/source/common/ntxmtools.c',
   'libntxm/libntxm/source/common/sample.cpp',
   'libntxm/libntxm/source/common/song.cpp',
+  'libntxm/libntxm/source/common/tables.c',
   'libntxm/libntxm/source/player/player.cpp',
-  'libntxm/libntxm/source/player/tables.c',
   'libntxm/libntxm/source/single/fifocommand.cpp',
   'libntxm/libntxm/source/single/ntxmsound.cpp',
   'libntxm/libntxm/source/single/platform_sdl3.cpp',
