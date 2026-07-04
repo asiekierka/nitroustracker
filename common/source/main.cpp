@@ -2967,14 +2967,10 @@ void handleSampleVolumeChange(s32 newvol)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	u8 vol;
-	if(newvol>=64) {
-		vol = 255;
-	} else {
-		vol = newvol*4;
-	}
+	if(newvol>64) newvol = 64;
+	if(smp->getVolume() == newvol) return;
 
-	smp->setVolume(vol);
+	smp->setVolume(newvol);
 	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
@@ -2989,10 +2985,11 @@ void handleSamplePanningChange(s32 newpanning)
 
 	u8 pan = newpanning * 2;
 
-	if (smp->getPanning() != pan) setHasUnsavedChanges(true);
+	if (smp->getPanning() == pan) return;
+
 	smp->setPanning(pan);
-	smp->setBasePanning();
 	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
 }
 
 void handleSampleRelNoteChange(s32 newnote)
@@ -3003,11 +3000,11 @@ void handleSampleRelNoteChange(s32 newnote)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	ntxm_flush_dcache();
+	if (smp->getRelNote() == newnote) return;
 
-	if (smp->getRelNote() != newnote) setHasUnsavedChanges(true);
 	smp->setRelNote(newnote);
-
+	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
 }
 
 void handleSampleFineTuneChange(s32 newfinetune)
@@ -3018,10 +3015,11 @@ void handleSampleFineTuneChange(s32 newfinetune)
 	Sample *smp = inst->getSample(state->sample);
 	if(smp==0) return;
 
-	ntxm_flush_dcache();
+	if (smp->getFinetune() == newfinetune) return;
 
-	if (smp->getFinetune() != newfinetune) setHasUnsavedChanges(true);
 	smp->setFinetune(newfinetune);
+	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
 }
 
 void handleMuteAll(void)
