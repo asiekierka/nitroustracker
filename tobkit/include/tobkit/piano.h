@@ -58,13 +58,20 @@ class Piano: public Widget {
 		unsigned short piano_Palette[16], piano_fullnotehighlight_Palette[16], piano_halfnotehighlight_Palette[16];
 
 		void draw(void);
-		void setKeyPal(u8 note);
 		int getKeyXOffset(int key) const;
 		bool isSharpNote(u8 note) const;
-		void resetPals(void);
 		void genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 *pal_half_highlight);
 		void drawKeyLabel(u8 key, bool visible=true);
 		void eraseKeyLabel(u8 key);
+
+		void drawOnKeyPressChange(u8 key, bool pressed);
+
+#ifdef NT_PLATFORM_NDS
+		void resetKeyPals(void);
+		void setKeyPal(u8 note);
+#else
+		void drawKey(int key, bool pressed, bool onlyKey = false);
+#endif
 
 		char *key_labels;
 		bool key_labels_visible;

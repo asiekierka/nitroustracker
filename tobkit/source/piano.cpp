@@ -29,9 +29,10 @@ using namespace tobkit;
 #define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
 static const u8 halfkeys[5] = {1, 3, 6, 8, 10};
+static const bool fullkeyFlag[12] = {true, false, true, false, true, true, false, true, false, true, false, true};
 static const u8 fullkeys[7] = {0, 2, 4, 5, 7, 9, 11};
 static const u8 fullkeysDrawn[7] = {0, 1, 3, 5, 6, 8, 10};
-static const u8 fullkeyoffset[12] = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
+static const u8 fullkeyOffset[12] = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
 
 /* ===================== PUBLIC ===================== */
 Piano::Piano(u16 _x, u16 _y, u16 _width, u16 _height, u16 *_char_base, u16 *_map_base, Screen *_screen)
@@ -93,7 +94,12 @@ void Piano::pleaseDraw(void) {
 }
 
 int Piano::getKeyXOffset(int key) const {
-    return (fullkeyoffset[key % 12] * 16) + ((key / 12) * 112) + (isSharpNote(key) ? 11 : 0);
+#ifdef NT_PLATFORM_NDS
+    int octaveOffset = 111;
+#else
+    int octaveOffset = 112;
+#endif
+    return (fullkeyOffset[key % 12] * 16) + ((key / 12) * octaveOffset) + (isSharpNote(key) ? 11 : 0);
 }
 
 int Piano::getKeyCount(void) const {
@@ -112,15 +118,12 @@ void Piano::penDown(u16 px, u16 py)
 
 	u8 note = piano_hit[kby][kbx % 14] + ((kbx / 14) * 12);
 
-	setKeyPal(note);
-#ifndef NT_PLATFORM_NDS
-	pleaseDraw();
-#endif
+	curr_note = note;
+	drawOnKeyPressChange(curr_note, true);
+
 	if(onNote) {
 		onNote(note);
 	}
-
-	curr_note = note;
 }
 
 void Piano::penMove(u16 px, u16 py)
@@ -134,40 +137,32 @@ void Piano::penMove(u16 px, u16 py)
 
 	// Only when it moves to another note
 	if (note != curr_note) {
-		resetPals();
+	    drawOnKeyPressChange(curr_note, false);
+
 		if(onRelease) {
 			onRelease(curr_note, true);
 		}
 
-		setKeyPal(note);
+		curr_note = note;
+		drawOnKeyPressChange(curr_note, true);
 
 		if(onNote) {
 			onNote(note);
 		}
-
-		curr_note = note;
-
-		// draw();
 	}
-
-	#ifndef NT_PLATFORM_NDS
-		pleaseDraw();
-	#endif
 }
 
 
 void Piano::penUp(u16 px, u16 py)
 {
-	resetPals();
+    drawOnKeyPressChange(curr_note, false);
 
 	if(onRelease)
 	{
 		onRelease(curr_note, false);
 	}
-#ifndef NT_PLATFORM_NDS
+
 	curr_note = 255;
-	pleaseDraw();
-#endif
 }
 
 // Callback registration
@@ -182,23 +177,21 @@ void Piano::registerReleaseCallback(void (*onRelease_)(u8, bool)) {
 // Key label handling
 void Piano::showKeyLabels(void)
 {
-    if (key_labels_visible)
+    if (key_labels_visible) {
         return;
+    }
 
 	key_labels_visible = true;
 
-#ifdef NT_PLATFORM_NDS
 	for(int key=0; key<getKeyCount(); ++key)
 		drawKeyLabel(key);
-#else
-    draw();
-#endif
 }
 
 void Piano::hideKeyLabels(void)
 {
-    if (!key_labels_visible)
+    if (!key_labels_visible) {
         return;
+    }
 
 	key_labels_visible = false;
 
@@ -226,14 +219,24 @@ void Piano::setInMappingMode(bool instmap)
 void Piano::setKeyLabel(u8 key, char label)
 {
 #ifdef NT_PLATFORM_NDS
-	eraseKeyLabel(key);
+    if (key_labels_visible) {
+	    eraseKeyLabel(key);
+    }
 #endif
+
+    if (key_labels[key] == label) {
+        return;
+    }
 
 	key_labels[key] = label;
 
+	if (key_labels_visible) {
 #ifdef NT_PLATFORM_NDS
-	drawKeyLabel(key);
+	    drawKeyLabel(key);
+#else
+        drawKey(key, curr_note == key);
 #endif
+	}
 }
 
 /* ===================== PRIVATE ===================== */
@@ -255,6 +258,58 @@ void Piano::genPal(u16 *piano_cols_base, u16 *pal, u16 *pal_full_highlight, u16 
 	pal[0] = piano_cols_base[8];
 }
 
+void Piano::drawOnKeyPressChange(u8 key, bool pressed)
+{
+#ifdef NT_PLATFORM_NDS
+    if (pressed)
+        setKeyPal(key);
+    else
+        resetKeyPals();
+#else
+    drawKey(key, pressed);
+#endif
+}
+
+#ifndef NT_PLATFORM_NDS
+void Piano::drawKey(int key, bool pressed, bool onlyKey)
+{
+    if (key >= getKeyCount())
+        return;
+
+    int subkey = key % 12;
+    int key_draw_x = getKeyXOffset(key);
+
+    if (fullkeyFlag[subkey]) {
+        const u8 FULLKEY_WIDTH = 15;
+        const u8 FULLKEY_HEIGHT = 38;
+
+        u16 col1 = !pressed ? theme->col_piano_full_col1 : theme->col_piano_full_highlight_col1;
+		u16 col2 = !pressed ? theme->col_piano_full_col2 : theme->col_piano_full_highlight_col2;
+
+        drawFullBox(1+key_draw_x, 1, FULLKEY_WIDTH, FULLKEY_HEIGHT, col2);
+		drawHorizontalGradient(col2, col1, 2 + key_draw_x, 2, FULLKEY_WIDTH-2, FULLKEY_HEIGHT-2);
+
+		if (!onlyKey) {
+    		// draw overlapping half-keys
+    		if (subkey > 0 && !fullkeyFlag[subkey - 1]) drawKey(key - 1, curr_note == (key - 1));
+    		if (subkey < 11 && !fullkeyFlag[subkey + 1]) drawKey(key + 1, curr_note == (key + 1));
+		}
+    } else {
+        const u8 HALFKEY_WIDTH = 10;
+        const u8 HALFKEY_HEIGHT = 23;
+
+        u16 col1 = !pressed ? theme->col_piano_half_col1 : theme->col_piano_half_highlight_col2;
+		u16 col2 = !pressed ? theme->col_piano_half_col2 : theme->col_piano_half_highlight_col1;
+
+		drawFullBox(1+key_draw_x, 1, HALFKEY_WIDTH, HALFKEY_HEIGHT, col2);
+		drawGradient(col2, col1, 2 + key_draw_x, 2, HALFKEY_WIDTH-2, HALFKEY_HEIGHT-2);
+    }
+
+    if (key_labels_visible)
+        drawKeyLabel(key);
+}
+#endif
+
 void Piano::draw(void)
 {
 #ifdef NT_PLATFORM_NDS
@@ -271,49 +326,31 @@ void Piano::draw(void)
 		drawFullBox(0, 0, width, height, theme->col_bg);
 	} else {
 		drawFullBox(0, 1, width, height-1, theme->col_piano_outline);
-
-		const u8 FULLKEY_WIDTH = 15;
-		const u8 FULLKEY_HEIGHT = 38;
-
-		const u8 HALFKEY_WIDTH = 10;
-		const u8 HALFKEY_HEIGHT = 23;
-
-		for (int i = 0,key_draw_x = 0;i<(width / 16); ++i,key_draw_x+=16)
-		{
-			u16 col1 = curr_note != (fullkeys[i % 7] + ((i / 7) * 12)) ? theme->col_piano_full_col1 : theme->col_piano_full_highlight_col1;
-			u16 col2 = curr_note != (fullkeys[i % 7] + ((i / 7) * 12)) ? theme->col_piano_full_col2 : theme->col_piano_full_highlight_col2;
-
-			drawFullBox(1+key_draw_x, 1, FULLKEY_WIDTH, FULLKEY_HEIGHT, col2);
-			drawHorizontalGradient(col2, col1, 2 + key_draw_x, 2, FULLKEY_WIDTH-2, FULLKEY_HEIGHT-2);
-		}
-
-		for (int j = 0, key_draw_x = 0; ; ++j,key_draw_x+=16)
-		{
-			if ((j % 5)==0||(j % 5)==2)
-				key_draw_x += 16;
-			if (key_draw_x > (width - 16))
-			    break;
-
-			u16 col1 = curr_note != (halfkeys[j % 5] + ((j / 5) * 12)) ? theme->col_piano_half_col1 : theme->col_piano_half_highlight_col2;
-			u16 col2 = curr_note != (halfkeys[j % 5] + ((j / 5) * 12)) ? theme->col_piano_half_col2 : theme->col_piano_half_highlight_col1;
-
-			drawFullBox(1+key_draw_x - 5, 1, HALFKEY_WIDTH, HALFKEY_HEIGHT, col2);
-			drawGradient(col2, col1, 2 + key_draw_x - 5, 2, HALFKEY_WIDTH-2, HALFKEY_HEIGHT-2);
-		}
-
-		if(key_labels_visible)
-		{
-    		for(int key=0; key<getKeyCount(); ++key)
-    			drawKeyLabel(key);
-		}
+		for (int i = 0; i < getKeyCount(); i++)
+		    if (fullkeyFlag[i % 12])
+		        drawKey(i, curr_note == i, true);
+		for (int i = 0; i < getKeyCount(); i++)
+		    if (!fullkeyFlag[i % 12])
+		        drawKey(i, curr_note == i, true);
 	}
 #endif
+}
+
+#ifdef NT_PLATFORM_NDS
+// Reset piano colors to normal
+void Piano::resetKeyPals(void)
+{
+  u8 px,py;
+  for(px=0; px<PIANO_WIDTH_TILES; ++px) {
+    for(py=0; py<PIANO_HEIGHT_TILES; ++py) {
+      map_base[32*(py+y/8)+(px+x/8)] &= ~(3 << 12); // Clear bits 12 and 13 (from the left)
+    }
+  }
 }
 
 // Set the key corresp. to note to palette corresp. to pal_idx
 void Piano::setKeyPal(u8 note)
 {
-#ifdef NT_PLATFORM_NDS
   u8 px, py, hit_row, pal_idx;
 
   if(isSharpNote(note))
@@ -338,29 +375,13 @@ void Piano::setKeyPal(u8 note)
       }
     }
   }
-#endif
 }
+#endif
 
 // 1 for halftones, 0 for fulltones
 bool Piano::isSharpNote(u8 note) const
 {
-	for(int i=0;i<5;++i) {
-		if((note%12)==halfkeys[i]) return true;
-	}
-	return false;
-}
-
-// Reset piano colors to normal
-void Piano::resetPals(void)
-{
-#ifdef NT_PLATFORM_NDS
-  u8 px,py;
-  for(px=0; px<PIANO_WIDTH_TILES; ++px) {
-    for(py=0; py<PIANO_HEIGHT_TILES; ++py) {
-      map_base[32*(py+y/8)+(px+x/8)] &= ~(3 << 12); // Clear bits 12 and 13 (from the left)
-    }
-  }
-#endif
+    return !fullkeyFlag[note % 12];
 }
 
 void Piano::drawKeyLabel(u8 key, bool visible)
@@ -388,6 +409,8 @@ void Piano::drawKeyLabel(u8 key, bool visible)
 
 	if(visible)
 		col |= RGB5A1_ALPHA_BIT;
+	else
+		col &= ~RGB5A1_ALPHA_BIT;
 
 	xpos = offset + getKeyXOffset(key);
 

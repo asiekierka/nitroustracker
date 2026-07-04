@@ -310,20 +310,20 @@ void drawSampleNumbers(void)
     		kb->setKeyLabel(key, label);
     	}
 	}
-#ifndef NT_PLATFORM_NDS
-    kb->pleaseDraw();
-#endif
 }
 
 void updateKeyLabels(void)
 {
-	if (fxkb->is_visible()) return;
+	if (!kb->is_visible()) return;
 
-	kb->hideKeyLabels();
 	if(state->map_samples)
 	{
 		drawSampleNumbers();
 		kb->showKeyLabels();
+	}
+	else
+	{
+	    kb->hideKeyLabels();
 	}
 }
 
@@ -465,9 +465,6 @@ void handleNoteStroke(u8 note)
 		u8 sample_id = state->sample & 0xF;
 		label = (sample_id >= 0xA) ? (sample_id - 0xA + 'a') : (sample_id + '0');
 		kb->setKeyLabel(note, label);
-#ifndef NT_PLATFORM_NDS
-        kb->pleaseDraw();
-#endif
 	}
 
 	onKeypress(note);
@@ -3343,6 +3340,7 @@ void handleToggleMapSamples(bool is_active)
 
 	state->map_samples = is_active;
 	kb->setInMappingMode(is_active);
+	updateKeyLabels();
 }
 
 void toggleQueueLock(bool is_active)
@@ -4097,7 +4095,7 @@ void setupGUI(bool dldi_enabled)
 
 	int add_oct_label_y = piano_y - 27;
 	int add_oct_number_y = piano_y - 18;
-	int tb_effect_y = piano_y - 17;
+	// int tb_effect_y = piano_y - 17;
 
 	tbrecord = new ToggleButton(tabbox_endx + 1, add_oct_number_y + 1, 16, 16, sub_screen, true, true);
 	tbrecord->setBitmap(icon_record_raw, 12, 12);
