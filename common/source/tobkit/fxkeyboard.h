@@ -133,10 +133,11 @@ namespace tobkit {
 		};
 
 		const char* vol_captions[16] = {
-		    "GXX: SET GLOBAL VOLUME", "HXY: GLOBAL VOLUME SLIDE", "KXX: KEY OFF", "LXX: SET ENVELOPE POSITION",
-			"PXY: PANNING SLIDE", "RXY: RETRIGGER", "TXY: TREMOR", "",
+		    "+X: VOLUME SLIDE UP", "-X: VOLUME SLIDE DOWN", "DX: FINE VOLUME SLIDE DOWN", "LX: PANNING SLIDE LEFT",
+			"MX: PORTAMENTO TO NOTE", "PX: SET NOTE PANNING POSITION", "RX: PANNING SLIDE RIGHT",
+			"SX: SET VIBRATO SPEED", "UX: FINE VOLUME SLIDE UP", "VX: VIBRATO",
 			"", "", "", "",
-			"", "", "", ""
+			"", ""
 		};
 
 		void genPal(u16* fxkb_cols_base, u16* pal);

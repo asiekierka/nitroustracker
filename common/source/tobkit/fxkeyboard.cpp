@@ -143,6 +143,8 @@ void FXKeyboard::updateCaptionForFx(u8 val)
 		setCaption(E_captions[val]);
 	else if (category == FX_CATEGORY_FT)
 	    setCaption(ft2_captions[val]);
+	else if (category == FX_CATEGORY_VOL)
+	    setCaption(vol_captions[val]);
 
 	drawCaption();
 }
@@ -171,6 +173,10 @@ void FXKeyboard::setCategory(u8 newcat) {
 		case FX_CATEGORY_FT:
 		    memset(fxkb_state + 7, FXBUTTON_DISABLED, NUM_FXKEYS - 7);
 		    break;
+
+    	case FX_CATEGORY_VOL:
+    	    memset(fxkb_state + 10, FXBUTTON_DISABLED, NUM_FXKEYS - 10);
+    	    break;
 
 		default:
 			useDarkTitle(true);

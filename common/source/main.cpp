@@ -1300,7 +1300,7 @@ void changeOctave(u8 newoctave)
 void handleEffectsCategoryChange(u8 newcat)
 {
 	fxkb->setCategory(newcat);
-	dbeffectpar->setSingleDigit(newcat == FX_CATEGORY_E);
+	dbeffectpar->setSingleDigit(newcat == FX_CATEGORY_E || newcat == FX_CATEGORY_VOL);
 }
 
 
@@ -2366,7 +2366,10 @@ void onFxKeyPressed(u8 val)
 		setEffectCommand(ft_key_mapping[val]);
 		setEffectParam(dbeffectpar->getValue(), false);
   	} else if (fxkb->getCategory() == FX_CATEGORY_VOL) {
-       // TODO
+       static const u8 vol_key_mapping[] = { 7, 6, 8, 13, 15, 12, 14, 10, 9, 11 };
+		if (val >= sizeof(vol_key_mapping))
+		    return;
+		setNoteVol((vol_key_mapping[val] << 4) | (dbeffectpar->getValue() & 0x0f));
 	} else {
 		setEffectCommand(val);
 		setEffectParam(dbeffectpar->getValue(), false);
