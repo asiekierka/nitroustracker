@@ -34,6 +34,7 @@ distinct licenses:
     * dserial: [BSD-3-Clause License](licenses/COPYING.dserial)
     * tinyusb: [MIT License](licenses/COPYING.tinyusb)
   * libntxm: [GNU General Public License v3](licenses/COPYING.nitrotracker)
+    * ft2play: [BSD-3-Clause License](licenses/COPYING.ft2play)
   * tobkit: [Apache License 2.0](licenses/COPYING.tobkit)
 * BlocksDS SDK:
   * crt0: [Mozilla Public License v2](licenses/COPYING.crt0)
