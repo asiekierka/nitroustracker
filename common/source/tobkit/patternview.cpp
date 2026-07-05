@@ -293,6 +293,9 @@ void PatternView::draw(void)
 		}
 	}
 
+	s16 firstrow = state->getCursorRow()-getCursorBarPos();
+	s16 realrow;
+
 	// H-Lines
 	u16 linescol;
 	if(state->recording == true) {
@@ -301,10 +304,9 @@ void PatternView::draw(void)
 		linescol = theme->col_pv_lines;
 	}
 
-	s16 realrow;
 	u16 ptnlen = song->getPatternLength(song->getPotEntry(state->potpos));
 	for(u16 i=0; i<getNumVisibleRows(); ++i) {
-		realrow = i-getCursorBarPos()+state->getCursorRow();
+		realrow = firstrow+i;
 
 		if((realrow>=0)&&(realrow<=ptnlen)) {
 			if(realrow%lines_per_beat==0) {
@@ -357,24 +359,24 @@ void PatternView::draw(void)
 				 PV_CURSORBAR_Y+1, cursorWidth-1, PV_CELL_HEIGHT-1);
 
 	// Numbers on the left
-	s16 ip;
-	for(ip=state->getCursorRow()-getCursorBarPos();ip<=state->getCursorRow()+getCursorBarPos()+1;++ip) {
-		if((ip>=0)&&(ip<ptnlen)) {
-			drawHexByte(ip, 1, 2+(ip+getCursorBarPos()-state->getCursorRow())*PV_CHAR_HEIGHT, ip % lines_per_beat == 0 ? theme->col_pv_left_numbers_highlight : theme->col_pv_left_numbers);
+	for(u16 i=0; i<getNumVisibleRows(); ++i) {
+		realrow = firstrow+i;
+		if((realrow>=0)&&(realrow<ptnlen)) {
+			drawHexByte(realrow, 1, i*PV_CELL_HEIGHT+2, realrow % lines_per_beat == 0 ? theme->col_pv_left_numbers_highlight : theme->col_pv_left_numbers);
 		}
 	}
 
 	// Pattern data
-	s16 firstrow = state->getCursorRow()-getCursorBarPos();
 	int highlight_row = getNumVisibleRows() / 2 - 1;
 
 	for(u16 i=0;i<getNumVisibleChannels();++i)
 	{
 		for(u16 j=0;j<getNumVisibleRows();++j)
 		{
-			if((firstrow+j>=0)&&(firstrow+j<ptnlen))
+			realrow = firstrow+j;
+			if((realrow>=0)&&(realrow<ptnlen))
 			{
-				drawCell(hscrollpos+i, firstrow+j, i, j, (j == highlight_row) ? -1 : 0);
+				drawCell(hscrollpos+i, realrow, i, j, (j == highlight_row) ? -1 : 0);
 			}
 		}
 	}
