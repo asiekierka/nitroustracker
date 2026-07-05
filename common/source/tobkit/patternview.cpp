@@ -40,9 +40,10 @@ PatternView::PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_scree
 	:Widget(_x, _y, _width, _height, _screen),
 	onMute(0), pattern(0), song(0), state(_state),
 	hscrollpos(0), lines_per_beat(8), selection_exists(false), pen_down(false),
-	effects_visible(true), cell_width(50)
+	effects_visible(true),
+	componentpos(0), componentnav(false)
 {
-	for(int i=0;i<32;++i)
+	for(int i=0;i<MAX_CHANNELS;++i)
 	{
 		mute_channels[i] = false;
 		solo_channels[i] = false;
@@ -337,9 +338,23 @@ void PatternView::draw(void)
 	}
 
 	// Cursor
-	drawBox(PV_BORDER_WIDTH-1+(state->channel-hscrollpos)*getCellWidth(), PV_CURSORBAR_Y, getCellWidth()+1, PV_CELL_HEIGHT+1, theme->col_pv_pb_cell);
-	drawGradient(theme->col_pv_cb_col1_highlight, theme->col_pv_cb_col2_highlight, PV_BORDER_WIDTH+(state->channel-hscrollpos)*getCellWidth(),
-				 PV_CURSORBAR_Y+1, getCellWidth()-1, PV_CELL_HEIGHT-1);
+	int cursorX = 0;
+	int cursorWidth = getCellWidth();
+	if(componentnav) {
+	    // Per-component navigation
+		if(componentpos >= PV_COMPONENT_EFFECT && !effects_visible) componentpos = PV_COMPONENT_VOLUME;
+		switch(componentpos) {
+		case PV_COMPONENT_NOTE:         cursorX = PV_CELL_NOTE_X; cursorWidth = PV_CELL_NOTE_WIDTH; break;
+		case PV_COMPONENT_INSTRUMENT:   cursorX = PV_CELL_INST_X; cursorWidth = PV_CELL_INST_WIDTH; break;
+		case PV_COMPONENT_VOLUME:       cursorX = PV_CELL_VOL_X;  cursorWidth = PV_CELL_VOL_WIDTH; break;
+		case PV_COMPONENT_EFFECT:       cursorX = PV_CELL_FX_X;   cursorWidth = PV_CHAR_WIDTH; break;
+		case PV_COMPONENT_EFFECT_PARAM: cursorX = PV_CELL_FX_X+PV_CHAR_WIDTH;   cursorWidth = 2*PV_CHAR_WIDTH; break;
+		}
+		cursorX -= 1; cursorWidth += 2;
+	}
+	drawBox(PV_BORDER_WIDTH-1+(state->channel-hscrollpos)*getCellWidth()+cursorX, PV_CURSORBAR_Y, cursorWidth+1, PV_CELL_HEIGHT+1, theme->col_pv_pb_cell);
+	drawGradient(theme->col_pv_cb_col1_highlight, theme->col_pv_cb_col2_highlight, PV_BORDER_WIDTH+(state->channel-hscrollpos)*getCellWidth()+cursorX,
+				 PV_CURSORBAR_Y+1, cursorWidth-1, PV_CELL_HEIGHT-1);
 
 	// Numbers on the left
 	s16 ip;
@@ -359,11 +374,7 @@ void PatternView::draw(void)
 		{
 			if((firstrow+j>=0)&&(firstrow+j<ptnlen))
 			{
-				//drawCell(hscrollpos+i, firstrow+j, (i*getCellWidth()+PV_BORDER_WIDTH+2)/PV_CHAR_WIDTH/*i*14+3*/, j);
-				if(j == highlight_row)
-					drawCell(hscrollpos+i, firstrow+j, i, j, true);
-				else
-					drawCell(hscrollpos+i, firstrow+j, i, j, false);
+				drawCell(hscrollpos+i, firstrow+j, i, j, (j == highlight_row) ? -1 : 0);
 			}
 		}
 	}
@@ -467,18 +478,18 @@ void PatternView::callMuteCallback(void)
 	if(onMute == 0)
 		return;
 
-	bool muted_channels[32];
+	bool muted_channels[MAX_CHANNELS];
 
 	if( soloChannel() != -1 )
 	{
-		for(u8 chn=0; chn<32; ++chn)
+		for(u8 chn=0; chn<MAX_CHANNELS; ++chn)
 		{
 			muted_channels[chn] = !solo_channels[chn];
 		}
 	}
 	else
 	{
-		for(u8 chn=0; chn<32; ++chn)
+		for(u8 chn=0; chn<MAX_CHANNELS; ++chn)
 		{
 			muted_channels[chn] = mute_channels[chn];
 		}
