@@ -255,7 +255,6 @@ DSMIDIHandler dsmidi_handler;
 char last_themepath[SETTINGS_FILENAME_LEN + 1];
 char *preview_smp_path = NULL;
 
-bool fastscroll = false;
 bool multisamp_from_mapsamp = false;
 bool mod_loading = false;
 
@@ -4420,7 +4419,7 @@ void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
 		{
 			int newrow = state->getCursorRow();
 
-			if(fastscroll == false) {
+			if(!(buttonsheld & PlatformKey_B)) {
 				newrow--;
 			} else
 			{
@@ -4437,7 +4436,7 @@ void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
 		{
 			int newrow = state->getCursorRow();
 
-			if(fastscroll == false){
+			if(!(buttonsheld & PlatformKey_B)){
 				newrow++;
 			} else {
 				newrow += 4;
@@ -4455,6 +4454,8 @@ void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
 	{
 	    int offset = 0;
 		int chnOffset = 0;
+		bool stepMovement = pv->isPerComponentNav() && !(buttonsheld & PlatformKey_B);
+
     	if(buttons & PlatformKey_LEFT)
     	{
             offset = -1;
@@ -4464,7 +4465,7 @@ void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
             offset = 1;
     	}
 
-        if(pv->isPerComponentNav())
+        if(stepMovement)
         {
             int newComponentOffset = pv->getComponentNavOffset() + offset;
             if(newComponentOffset >= 0 && newComponentOffset <= pv->getMaxComponentNavOffset())
@@ -4485,7 +4486,7 @@ void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
         if(chnOffset && (state->channel + chnOffset) >= 0 && (state->channel + chnOffset) < song->getChannels())
    		{
    			state->channel += chnOffset;
-            if(pv->isPerComponentNav())
+            if(stepMovement)
                  pv->setComponentNavOffset((chnOffset >= 0) ? 0 : pv->getMaxComponentNavOffset());
             pv_changed = true;
    		}
@@ -4571,10 +4572,6 @@ void VblankHandler(void)
 			switchScreens();
 		}
 
-		if(PlatformKeysDown & PlatformKey_B) {
-			fastscroll = true;
-		}
-
 		if(PlatformKeysDown & ~PlatformKey_TOUCH)
 		    gui->buttonPress(PlatformKeysDown);
 		handleButtons(PlatformKeysDown, PlatformKeysHeld, PlatformKeysUp);
@@ -4583,9 +4580,6 @@ void VblankHandler(void)
 	if(PlatformKeysUp)
 	{
 		gui->buttonRelease(PlatformKeysUp);
-
-		if(PlatformKeysUp & PlatformKey_B)
-			fastscroll = false;
 	}
 
 #ifdef ENABLE_PIANO_PAK
