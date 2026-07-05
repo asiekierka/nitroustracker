@@ -72,6 +72,7 @@ nitroustracker_sources = [
   'common/source/tobkit/patternview.cpp',
   'common/source/tobkit/recordbox.cpp',
   'common/source/tobkit/sampledisplay.cpp',
+  'sdl/source/display_manager.cpp',
   'sdl/source/platform.cpp'
 ]
 

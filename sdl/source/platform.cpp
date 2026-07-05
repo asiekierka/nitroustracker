@@ -14,53 +14,25 @@
  */
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_rect.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_surface.h>
 #include <cstdlib>
 #include <unistd.h>
 #include "platform.h"
+#include "display_manager.h"
 
-Screen *main_screen, *sub_screen;
-static bool screensSwapped;
-static float scale = 1.0f;
-
-static SDL_Window *window = NULL;
-static SDL_Renderer *renderer = NULL;
-static SDL_Texture *textureMain = NULL, *textureSub = NULL;
+static DisplayManager *display;
 
 bool PlatformInitFilesystem(void) {
     return true;
 }
 
-#ifndef SDL_SCALEMODE_PIXELART
-#define SDL_SCALEMODE_PIXELART SDL_SCALEMODE_NEAREST
-#endif
-
-static void lock_screens(void) {
-	SDL_Rect rectMain = {0, 0, main_screen->getWidth(), main_screen->getHeight()};
-	SDL_Rect rectSub = {0, 0, sub_screen->getWidth(), sub_screen->getHeight()};
-	int pitchMain, pitchSub;
-
-	SDL_LockTexture(textureMain, &rectMain, (void**) &main_screen->pixels, &pitchMain);
-	SDL_LockTexture(textureSub, &rectSub, (void**) &sub_screen->pixels, &pitchSub);
-
-	main_screen->setSize(textureMain->w, textureMain->h, pitchMain >> 1);
-	sub_screen->setSize(textureSub->w, textureSub->h, pitchSub >> 1);
-}
-
-static void unlock_screens(void) {
-	SDL_UnlockTexture(textureMain);
-	SDL_UnlockTexture(textureSub);
-}
-
 bool PlatformInit(int argc, char *argv[]) {
-    int width = 256;
-    int height = 192;
+    int width = 0;
+    int height = 0;
+    float scale = 0.0f;
+    bool multiWindow = false;
 
     int c;
-    while ((c = getopt(argc, argv, "H:S:W:")) >= 0) {
+    while ((c = getopt(argc, argv, "H:MS:W:")) >= 0) {
         switch (c) {
         case 'W':
             width = atoi(optarg);
@@ -71,11 +43,11 @@ bool PlatformInit(int argc, char *argv[]) {
         case 'S':
             scale = atof(optarg);
             break;
+        case 'M':
+	       	multiWindow = true;
+	        break;
         }
     }
-
-	main_screen = new Screen(NULL, width, height, width);
-	sub_screen = new Screen(NULL, width, height, width);
 
 	SDL_SetAppMetadata("NitrousTracker", VERSION, "pl.asie.nitroustracker");
 
@@ -85,39 +57,14 @@ bool PlatformInit(int argc, char *argv[]) {
 
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
-	window = SDL_CreateWindow("NitrousTracker", (int) (scale * width), (int) (scale * height * 2), 0);
-	if (window == NULL) {
-		return false;
-	}
-
-	renderer = SDL_CreateRenderer(window, NULL);
-	if (renderer == NULL) {
-		return false;
-	}
-
-	textureMain = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, main_screen->getWidth(), main_screen->getHeight());
-	if (textureMain == NULL) {
-		return false;
-	}
-
-	textureSub = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, sub_screen->getWidth(), sub_screen->getHeight());
-	if (textureSub == NULL) {
-		return false;
-	}
-
-	SDL_SetTextureScaleMode(textureMain, SDL_SCALEMODE_PIXELART);
-	SDL_SetTextureScaleMode(textureSub, SDL_SCALEMODE_PIXELART);
-
-	lock_screens();
+	display = new DisplayManager(width, height, scale, multiWindow);
 
 	return true;
 }
 
 void PlatformExit(void) {
-	SDL_DestroyTexture(textureSub);
-	SDL_DestroyTexture(textureMain);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
+	delete display;
+
 	SDL_Quit();
 }
 
@@ -132,54 +79,27 @@ void PlatformClearSubScreen(tobkit_pixel_t color) {
 	sub_screen->clear(color);
 }
 
-void update_touch_coords(float x, float y) {
-    x /= scale;
-    y /= scale;
-	if (y >= 0 && y < (main_screen->getHeight() + sub_screen->getHeight())
-		&& x >= 0 && x < main_screen->getWidth()) {
-		PlatformTouchScreen = y >= main_screen->getHeight() ? TOUCH_SCREEN_BOTTOM : TOUCH_SCREEN_TOP;
-		PlatformTouchX = x;
-		PlatformTouchY = y - (PlatformTouchScreen ? main_screen->getHeight() : 0);
-	} else {
-		PlatformTouchX = 0;
-		PlatformTouchY = 0;
-	}
-}
-
 bool PlatformWaitVBlank(void) {
-	SDL_FRect src, dest;
-
-	unlock_screens();
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(renderer);
-
-	src = {0, 0, (float)main_screen->getWidth(), (float)main_screen->getHeight()};
-	dest = {0, scale * (screensSwapped ? main_screen->getHeight() : 0), scale * main_screen->getWidth(), scale * main_screen->getHeight()};
-	SDL_RenderTexture(renderer, textureMain, &src, &dest);
-
-	src = {0, 0, (float)sub_screen->getWidth(), (float)sub_screen->getHeight()};
-	dest = {0, scale * (!screensSwapped ? main_screen->getHeight() : 0), scale * sub_screen->getWidth(), scale * sub_screen->getHeight()};
-	SDL_RenderTexture(renderer, textureSub, &src, &dest);
-
-	SDL_RenderPresent(renderer);
-	lock_screens();
+	display->draw();
 
 	PlatformKeysDown = 0;
 	PlatformKeysUp = 0;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
+		// TODO: multi-window simultaneous touches are not handled
 		switch (event.type) {
 			case SDL_EVENT_MOUSE_BUTTON_DOWN:
 				PlatformKeysDown |= PlatformKey_TOUCH;
-				update_touch_coords(event.button.x, event.button.y);
+				display->convertTouchCoords(event.button.windowID, event.button.x, event.button.y);
 				break;
 			case SDL_EVENT_MOUSE_MOTION:
-				update_touch_coords(event.motion.x, event.motion.y);
+				display->convertTouchCoords(event.motion.windowID, event.motion.x, event.motion.y);
 				break;
 			case SDL_EVENT_MOUSE_BUTTON_UP:
 				PlatformKeysUp |= PlatformKey_TOUCH;
-				update_touch_coords(-1, -1);
+				PlatformTouchX = 0;
+				PlatformTouchY = 0;
 				break;
 			case SDL_EVENT_QUIT:
 				return false;
@@ -197,12 +117,11 @@ void PlatformVideoFadeIn(void) {
 }
 
 bool PlatformVideoAreScreensSwapped(void) {
-    return screensSwapped;
+    return display->getScreensSwapped();
 }
 
 bool PlatformVideoSwapScreens(void) {
-	screensSwapped = !screensSwapped;
-	return true;
+	return display->swapScreens();
 }
 
 PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP, PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
