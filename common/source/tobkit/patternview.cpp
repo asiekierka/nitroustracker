@@ -61,6 +61,11 @@ void PatternView::setSize(u16 _width, u16 _height)
 {
 	width = _width;
 	height = _height;
+
+	// ensure the highlighted channel remians visible
+	while ((state->channel-hscrollpos)*getCellWidth() >= getEffectiveWidth()) {
+        hscrollpos++;
+    }
 }
 
 // Event calls
