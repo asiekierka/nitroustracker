@@ -59,6 +59,19 @@ class Screen {
 #endif
         }
 
+        inline void fillColumn(u32 tx, u32 ty, u32 bh, u32 col) {
+#if defined(NT_PLATFORM_3DS)
+			u32 offset = ty+bh;
+			if (!(offset & 1)) {
+				u32 colcol = col * 0x10001;
+				__ndsabi_wordset4(pixels+getPitch()*tx+getPitch()-offset, bh*2, colcol);
+				return;
+			}
+#endif
+            for (u32 i = 0; i < bh; i++)
+                drawPixel(tx, ty+i, col);
+        }
+
         tobkit_pixel_t *pixels;
 
     private:

@@ -212,10 +212,17 @@ void Widget::drawBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 ITCM_CODE
 void Widget::drawFullBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 {
+#if defined(NT_PLATFORM_3DS)
+	if (th == 0) return;
+
+	for(int j=0;j<tw;++j)
+		screen->fillColumn(x+tx+j, y+ty, th, col);
+#else
 	if (tw == 0) return;
 
 	for(int j=0;j<th;++j)
 		screen->fillRow(x+tx, y+ty+j, tw, col);
+#endif
 }
 
 void Widget::drawBorder(u16 col) {
@@ -284,7 +291,7 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 			}
 
 			screen->drawPixel(xp, yp, col);
-	
+
 			d += 2 * dy;
 		}
 	}

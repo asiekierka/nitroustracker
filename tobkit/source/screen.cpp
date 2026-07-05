@@ -33,6 +33,9 @@ void Screen::clear(tobkit_pixel_t col) {
 #if defined(NT_PLATFORM_NDS)
 	u32 colcol = col * 0x10001;
 	dmaFillWords(colcol, pixels, 192*256*2);
+#elif defined(NT_PLATFORM_3DS)
+	u32 colcol = col * 0x10001;
+	__ndsabi_wordset4(pixels, pitch*width*2, colcol);
 #else
     for (int iy = 0; iy < height; iy++)
         for (int ix = 0; ix < width; ix++)

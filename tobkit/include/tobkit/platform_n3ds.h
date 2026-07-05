@@ -32,4 +32,12 @@ typedef u16 tobkit_pixel_t;
 #define RGB5A1_G(c) (((c) >> 6) & 0x1F)
 #define RGB5A1_B(c) (((c) >> 1) & 0x1F)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+void __ndsabi_wordset4(void *dest, size_t n, int c);
+#ifdef __cplusplus
+};
+#endif
+
 #endif
