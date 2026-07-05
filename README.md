@@ -1,8 +1,8 @@
 # NitrousTracker
 
-Originally by 0xtob ^ 0x80
+Originally by 0xtob ^ 0x80.
 
-Forked by NitrousTracker developers
+Fork maintained by NitrousTracker developers.
 
 ## About
 
@@ -31,16 +31,23 @@ distinct licenses:
 
 * NitrousTracker: [GNU General Public License v3](licenses/COPYING.nitrotracker)
   * libdsmi: [GNU Lesser General Public License v2.1](licenses/COPYING.nitrotracker)
-    * dserial: [BSD-3-Clause License](licenses/COPYING.dserial)
-    * tinyusb: [MIT License](licenses/COPYING.tinyusb)
+    * dserial: [BSD-3-Clause License](licenses/nds/COPYING.dserial)
+    * tinyusb: [MIT License](licenses/nds/COPYING.tinyusb)
   * libntxm: [GNU General Public License v3](licenses/COPYING.nitrotracker)
     * ft2play: [BSD-3-Clause License](licenses/COPYING.ft2play)
   * tobkit: [Apache License 2.0](licenses/COPYING.tobkit)
-* BlocksDS SDK:
-  * crt0: [Mozilla Public License v2](licenses/COPYING.crt0)
-  * dswifi: [MIT License](licenses/COPYING.dswifi)
-  * FatFs: [FatFs License](licenses/COPYING.fatfs)
-  * libnds: [zlib License](licenses/COPYING.libnds)
-  * lwIP: [BSD-3-Clause License](licenses/COPYING.lwip)
-  * mbedTLS: [Apache License 2.0](licenses/COPYING.mbedtls)
-  * picolibc: [MIT/BSD-style licenses](licenses/COPYING.picolibc)
+* BlocksDS SDK (NDS port):
+  * crt0: [Mozilla Public License v2](licenses/nds/COPYING.crt0)
+  * dswifi: [MIT License](licenses/nds/COPYING.dswifi)
+  * FatFs: [FatFs License](licenses/nds/COPYING.fatfs)
+  * libnds: [zlib License](licenses/nds/COPYING.libnds)
+  * lwIP: [BSD-3-Clause License](licenses/nds/COPYING.lwip)
+  * mbedTLS: [Apache License 2.0](licenses/nds/COPYING.mbedtls)
+  * picolibc: [MIT/BSD-style licenses](licenses/nds/COPYING.picolibc)
+* devkitARM (3DS port):
+  * crt0: [Mozilla Public License v2](licenses/n3ds/COPYING.crt0)
+  * libctru: [zlib License](licenses/n3ds/COPYING.libctru)
+  * libnds: [zlib License](licenses/n3ds/COPYING.libnds)
+  * newlib: [MIT/BSD/Apache-style licenses](licenses/n3ds/COPYING.newlib)
+* SDL port:
+  * SDL3: [zlib License](licenses/sdl/COPYING.sdl3)
