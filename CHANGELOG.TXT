@@ -4,7 +4,10 @@ New features:
 
 - native 3DS port - bigger screens, more RAM, higher quality software audio mixer
 - ported over FastTracker 2 play routine - much better playback accuracy and near-complete effect support
-  - note: this may require twekas to old songs which depended on NitroTracker play routine quirks
+  - note: this may require tweaks to old songs which depended on NitroTracker play routine quirks. some
+    quirks are adjusted for on load - resaving such songs should make them play more accurately in
+    FT2-compatible players as well.
+- support for editing note components with buttons only, by using A / A + D-Pad
 - [#65] .mod import support
 
 Improvements:
