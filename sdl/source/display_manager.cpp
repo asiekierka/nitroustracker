@@ -14,12 +14,9 @@
  */
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_video.h>
-#include <cstdio>
 #include "display_manager.h"
 
-#ifndef SDL_SCALEMODE_PIXELART
+#if !SDL_VERSION_ATLEAST(3, 4, 0)
 #define SDL_SCALEMODE_PIXELART SDL_SCALEMODE_NEAREST
 #endif
 
