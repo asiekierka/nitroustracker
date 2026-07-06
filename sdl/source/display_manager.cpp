@@ -49,10 +49,10 @@ DisplayManager::DisplayManager(int width, int height, float _scale, bool multiWi
 		height = 192;
 	}
 
-	int widthTop = width;
-	int heightTop = height;
-	int widthBottom = width;
-	int heightBottom = height;
+	widthTop = width;
+	heightTop = height;
+	widthBottom = width;
+	heightBottom = height;
 
 	if (autoArrange) {
 		// Auto-arrange windows
@@ -109,7 +109,9 @@ void DisplayManager::draw() {
 	screen = screensSwapped ? sub_screen : main_screen;
 	src = {0, 0, (float)screen->getWidth(), (float)screen->getHeight()};
 	dest = {0, 0, scale * screen->getWidth(), scale * screen->getHeight()};
-	if (!isMultiWindow()) {
+	if (isMultiWindow()) {
+		dest.x += scale * (widthTop - screen->getWidth()) / 2.0f;
+	} else {
 		dest.x += scale * ((getMaxWidth() - screen->getWidth()) / 2.0f);
 	}
 	SDL_RenderTexture(rendererTop, textureTop, &src, &dest);
@@ -124,7 +126,9 @@ void DisplayManager::draw() {
 	screen = !screensSwapped ? sub_screen : main_screen;
 	src = {0, 0, (float)screen->getWidth(), (float)screen->getHeight()};
 	dest = {0, 0, scale * screen->getWidth(), scale * screen->getHeight()};
-	if (!isMultiWindow()) {
+	if (isMultiWindow()) {
+		dest.x += scale * (widthBottom - screen->getWidth()) / 2.0f;
+	} else {
 		dest.x += scale * ((getMaxWidth() - screen->getWidth()) / 2.0f);
 		dest.y += scale * secondWindowYOffset;
 	}
@@ -156,7 +160,9 @@ void DisplayManager::convertTouchCoords(SDL_WindowID windowId, float x, float y)
 	}
 
 	Screen *screen = isBottomScreen ? sub_screen : main_screen;
-	if (!isMultiWindow()) {
+	if (isMultiWindow()) {
+		x -= ((isBottomScreen ? widthBottom : widthTop) - screen->getWidth()) / 2.0f;
+	} else {
 		x -= (getMaxWidth() - screen->getWidth()) / 2.0f;
 	}
 
@@ -168,8 +174,20 @@ void DisplayManager::convertTouchCoords(SDL_WindowID windowId, float x, float y)
 }
 
 void DisplayManager::lockScreens(void) {
-	SDL_Rect rectMain = {0, 0, main_screen->getWidth(), main_screen->getHeight()};
-	SDL_Rect rectSub = {0, 0, sub_screen->getWidth(), sub_screen->getHeight()};
+	int widthMain, heightMain, widthSub, heightSub;
+
+	if (!screensSwapped) {
+		widthMain = widthTop;
+		heightMain = heightTop;
+		widthSub = widthBottom;
+		heightSub = heightBottom;
+	} else {
+		widthMain = widthSub = getMinWidth();
+		heightMain = heightSub = getMinHeight();
+	}
+
+	SDL_Rect rectMain = {0, 0, widthMain, heightMain};
+	SDL_Rect rectSub = {0, 0, widthSub, heightSub};
 	int pitchMain, pitchSub;
 
 	SDL_Texture *textureMain = screensSwapped ? textureBottom : textureTop;
@@ -178,8 +196,8 @@ void DisplayManager::lockScreens(void) {
 	SDL_LockTexture(textureMain, &rectMain, (void**) &main_screen->pixels, &pitchMain);
 	SDL_LockTexture(textureSub, &rectSub, (void**) &sub_screen->pixels, &pitchSub);
 
-	main_screen->setSize(textureMain->w, textureMain->h, pitchMain >> 1);
-	sub_screen->setSize(textureSub->w, textureSub->h, pitchSub >> 1);
+	main_screen->setSize(widthMain, heightMain, pitchMain >> 1);
+	sub_screen->setSize(widthSub, heightSub, pitchSub >> 1);
 }
 
 void DisplayManager::unlockScreens(void) {

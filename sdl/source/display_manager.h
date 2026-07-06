@@ -35,6 +35,7 @@ public:
 	inline bool isMultiWindow() const { return windowTop != windowBottom; }
 
 private:
+	int widthTop, heightTop, widthBottom, heightBottom;
 	bool screensSwapped = false;
 	float scale = 1.0f;
 	SDL_Window *windowTop = NULL;
@@ -44,8 +45,10 @@ private:
 	SDL_Texture *textureTop = NULL;
 	SDL_Texture *textureBottom = NULL;
 
-	inline int getMaxWidth() const { return main_screen->getWidth() > sub_screen->getWidth() ? main_screen->getWidth() : sub_screen->getWidth(); }
-	inline int getMaxHeight() const { return main_screen->getHeight() > sub_screen->getHeight() ? main_screen->getHeight() : sub_screen->getHeight(); }
+	inline int getMinWidth() const { return widthTop < widthBottom ? widthTop : widthBottom; }
+	inline int getMinHeight() const { return heightTop < heightBottom ? heightTop : heightBottom; }
+	inline int getMaxWidth() const { return widthTop > widthBottom ? widthTop : widthBottom; }
+	inline int getMaxHeight() const { return heightTop > heightBottom ? heightTop : heightBottom; }
 	void lockScreens();
 	void unlockScreens();
 };
