@@ -89,7 +89,7 @@ int main(int argc, char ** argv) {
 #else
 	irqEnable(IRQ_VBLANK | IRQ_VCOUNT);
 #endif
-	initClockIRQTimer(3);
+	initClockIRQTimer(1);
 
 	// Create ntxm player
 	ntxm7 = new NTXM7(ntxmTimerHandler);
