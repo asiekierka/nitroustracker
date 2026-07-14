@@ -1730,12 +1730,14 @@ void handlePtnLengthChange(s32 newlength)
 
 void handleTempoChange(u8 tempo) {
 	song->setTempo(tempo);
+	CommandOnSongSpeedChanged();
 	setHasUnsavedChanges(true);
 	ntxm_flush_dcache();
 }
 
 void handleBpmChange(s32 bpm) {
 	song->setBpm(bpm);
+	CommandOnSongSpeedChanged();
 	setHasUnsavedChanges(true);
 	ntxm_flush_dcache();
 }
