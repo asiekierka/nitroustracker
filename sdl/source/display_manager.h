@@ -21,7 +21,8 @@
 
 extern Screen *main_screen, *sub_screen;
 
-class DisplayManager {
+class DisplayManager
+{
 public:
 	DisplayManager(int width, int height, float scale, bool multiWindow);
 	~DisplayManager();
@@ -45,10 +46,22 @@ private:
 	SDL_Texture *textureTop = NULL;
 	SDL_Texture *textureBottom = NULL;
 
-	inline int getMinWidth() const { return widthTop < widthBottom ? widthTop : widthBottom; }
-	inline int getMinHeight() const { return heightTop < heightBottom ? heightTop : heightBottom; }
-	inline int getMaxWidth() const { return widthTop > widthBottom ? widthTop : widthBottom; }
-	inline int getMaxHeight() const { return heightTop > heightBottom ? heightTop : heightBottom; }
+	inline int getMinWidth() const
+	{
+		return widthTop < widthBottom ? widthTop : widthBottom;
+	}
+	inline int getMinHeight() const
+	{
+		return heightTop < heightBottom ? heightTop : heightBottom;
+	}
+	inline int getMaxWidth() const
+	{
+		return widthTop > widthBottom ? widthTop : widthBottom;
+	}
+	inline int getMaxHeight() const
+	{
+		return heightTop > heightBottom ? heightTop : heightBottom;
+	}
 	void lockScreens();
 	void unlockScreens();
 };

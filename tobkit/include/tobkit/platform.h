@@ -29,7 +29,7 @@ limitations under the License.
 
 #if !defined(NT_PLATFORM_NDS)
 #define ITCM_CODE
-#define div32(a,b) ((a)/(b))
+#define div32(a, b) ((a) / (b))
 #endif
 
 #endif

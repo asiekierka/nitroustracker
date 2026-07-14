@@ -24,8 +24,8 @@
 
 #include "numbersliderrelnote.h"
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 
 #include "tobkit/numberbox.h"
 
@@ -33,77 +33,85 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberSliderRelNote::NumberSliderRelNote(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value)
-	:Widget(_x, _y, _width, _height, _screen),
-	value(_value), btnstate(0), min(-48), max(71)
+NumberSliderRelNote::NumberSliderRelNote(u16 _x, u16 _y, u16 _width,
+                                         u16 _height, Screen *_screen,
+                                         s32 _value)
+    : Widget(_x, _y, _width, _height, _screen), value(_value), btnstate(0),
+      min(-48), max(71)
 {
 	onChange = 0;
 }
 
 // Drawing request
-void NumberSliderRelNote::pleaseDraw(void) {
+void NumberSliderRelNote::pleaseDraw(void)
+{
 	draw();
 }
 
 // Event calls
 void NumberSliderRelNote::penDown(u16 px, u16 py)
 {
-	if (!enabled) return;
-	if((px>x)&&(px<x+32)&&(py>y)&&(py<y+17)) {
+	if (!enabled)
+		return;
+	if ((px > x) && (px < x + 32) && (py > y) && (py < y + 17)) {
 		btnstate = true;
 		lasty = py;
 	}
-	
+
 	draw();
 }
 
 void NumberSliderRelNote::penUp(u16 px, u16 py)
 {
-	if (!enabled) return;
+	if (!enabled)
+		return;
 	btnstate = false;
 	draw();
 }
 
 void NumberSliderRelNote::penMove(u16 px, u16 py)
 {
-	if (!enabled) return;
-	s16 dy = lasty-py;
-	if(abs(dy)>3) {
-		s16 newval = value+dy/4;
-		if(newval > max) {
-			value=max;
-		} else if(newval<min) {
-			value=min;
+	if (!enabled)
+		return;
+	s16 dy = lasty - py;
+	if (abs(dy) > 3) {
+		s16 newval = value + dy / 4;
+		if (newval > max) {
+			value = max;
+		} else if (newval < min) {
+			value = min;
 		} else {
-			value=newval;
+			value = newval;
 		}
 		draw();
-		
-		if(onChange!=0) {
+
+		if (onChange != 0) {
 			onChange(value);
 		}
-		
+
 		lasty = py;
 	}
 }
 
 void NumberSliderRelNote::setValue(s32 val)
 {
-	if((val<=max)&&(val>=min)) {
+	if ((val <= max) && (val >= min)) {
 		value = val;
-		if(onChange!=0) {
+		if (onChange != 0) {
 			onChange(value);
 		}
 		draw();
 	}
 }
 
-s32 NumberSliderRelNote::getValue(void) {
+s32 NumberSliderRelNote::getValue(void)
+{
 	return value;
 }
 
 // Callback registration
-void NumberSliderRelNote::registerChangeCallback(void (*onChange_)(s32)) {
+void NumberSliderRelNote::registerChangeCallback(void (*onChange_)(s32))
+{
 	onChange = onChange_;
 }
 
@@ -111,65 +119,67 @@ void NumberSliderRelNote::registerChangeCallback(void (*onChange_)(s32)) {
 
 void NumberSliderRelNote::draw(void)
 {
-	if(!isExposed())
+	if (!isExposed())
 		return;
-	
-	u16 col_light = enabled ? theme->col_light_ctrl : theme->col_light_ctrl_disabled;
-	u16 col_dark = enabled ? theme->col_dark_ctrl : theme->col_dark_ctrl_disabled;
+
+	u16 col_light =
+	    enabled ? theme->col_light_ctrl : theme->col_light_ctrl_disabled;
+	u16 col_dark =
+	    enabled ? theme->col_dark_ctrl : theme->col_dark_ctrl_disabled;
 	// Slider thingy
-	if(btnstate==true) {
+	if (btnstate == true) {
 		drawGradient(col_dark, col_light, 1, 1, 8, 15);
 	} else {
 		drawGradient(col_light, col_dark, 1, 1, 8, 15);
 	}
-	
+
 	// This draws the up-arrow
-	s8 i,j;
-	for(j=0;j<3;j++) {
-		for(i=-j;i<=j;++i) {
-			drawPixel(4+i, j+3, theme->col_text_bt);
+	s8 i, j;
+	for (j = 0; j < 3; j++) {
+		for (i = -j; i <= j; ++i) {
+			drawPixel(4 + i, j + 3, theme->col_text_bt);
 		}
 	}
-	
+
 	// This draws the connection
 	drawVLine(4, 6, 5, theme->col_text_bt);
-	
+
 	// This draws the down-arrow
-	for(j=2;j>=0;j--) {
-		for(i=-j;i<=j;++i) {
-			drawPixel(4+i, 13-j, theme->col_text_bt);
+	for (j = 2; j >= 0; j--) {
+		for (i = -j; i <= j; ++i) {
+			drawPixel(4 + i, 13 - j, theme->col_text_bt);
 		}
 	}
-	
+
 	drawBox(0, 0, 9, 17, theme->col_outline);
-	
+
 	// Number display
-	drawFullBox(9,1,width-10,height-2,theme->col_lighter_bg);
-	
-	u8 octave = (value+4*12) / 12;
-	u8 note = (value+4*12)%12;
-	
+	drawFullBox(9, 1, width - 10, height - 2, theme->col_lighter_bg);
+
+	u8 octave = (value + 4 * 12) / 12;
+	u8 note = (value + 4 * 12) % 12;
+
 	const char *nstr = "";
-	
-	switch(note) {
-		case(0): nstr = "c-"; break;
-		case(1): nstr = "c#"; break;
-		case(2): nstr = "d-"; break;
-		case(3): nstr = "d#"; break;
-		case(4): nstr = "e-"; break;
-		case(5): nstr = "f-"; break;
-		case(6): nstr = "f#"; break;
-		case(7): nstr = "g-"; break;
-		case(8): nstr = "g#"; break;
-		case(9): nstr = "a-"; break;
-		case(10): nstr = "a#"; break;
-		case(11): nstr = "h-"; break;
+
+	switch (note) {
+	case (0): nstr = "c-"; break;
+	case (1): nstr = "c#"; break;
+	case (2): nstr = "d-"; break;
+	case (3): nstr = "d#"; break;
+	case (4): nstr = "e-"; break;
+	case (5): nstr = "f-"; break;
+	case (6): nstr = "f#"; break;
+	case (7): nstr = "g-"; break;
+	case (8): nstr = "g#"; break;
+	case (9): nstr = "a-"; break;
+	case (10): nstr = "a#"; break;
+	case (11): nstr = "h-"; break;
 	}
-	
+
 	char notestr[4];
 	snprintf(notestr, sizeof(notestr), "%s%u", nstr, octave);
 	drawString(notestr, 10, 5, theme->col_text_value);
-	
+
 	// Border
 	drawBorder(theme->col_outline);
 }

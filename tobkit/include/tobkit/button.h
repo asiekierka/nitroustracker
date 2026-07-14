@@ -25,37 +25,40 @@ Only Push event
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class Button: public Widget {
-	public:
-		Button(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible=true);
-	
-		~Button();
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 x, u16 y);
-		void penUp(u16 x, u16 y);
-		void penMove(u16 x, u16 y);
-		void buttonPress(u16 button);
-		
-		inline bool isPenDown(void) const { return penIsDown; }
-		void setCaption(const char *caption);
-		
-	private:
-		void (*onPush)(void);
-		bool penIsDown;
-		
-		void draw(u8 down);
-		char *caption;
+class Button : public Widget
+{
+public:
+	Button(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	       bool _visible = true);
+
+	~Button();
+
+	// Callback registration
+	void registerPushCallback(void (*onPush_)(void));
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 x, u16 y);
+	void penUp(u16 x, u16 y);
+	void penMove(u16 x, u16 y);
+	void buttonPress(u16 button);
+
+	inline bool isPenDown(void) const { return penIsDown; }
+	void setCaption(const char *caption);
+
+private:
+	void (*onPush)(void);
+	bool penIsDown;
+
+	void draw(u8 down);
+	char *caption;
 };
 
-};
+}; // namespace tobkit
 
 #endif

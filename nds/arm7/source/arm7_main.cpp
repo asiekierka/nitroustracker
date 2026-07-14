@@ -36,36 +36,39 @@ static volatile bool exitflag = false;
 extern bool ntxm_recording;
 
 int vcount;
-touchPosition first,tempPos;
+touchPosition first, tempPos;
 
-void VcountHandler() {
-	if(ntxm_recording == true)
+void VcountHandler()
+{
+	if (ntxm_recording == true)
 		return;
 
 	inputGetAndSend();
 }
 
-
 void VblankHandler(void)
 {
 #ifdef MIDI
-	if(ntxm_recording == false)
+	if (ntxm_recording == false)
 		Wifi_Update(); // update wireless in vblank
 #endif
 }
 
 // This is the callback for the timer
-void ntxmTimerHandler(void) {
+void ntxmTimerHandler(void)
+{
 	ntxm7->timerHandler();
 }
 
-void powerButtonHandler(void) {
+void powerButtonHandler(void)
+{
 	exitflag = true;
 }
 
 //---------------------------------------------------------------------------------
-int main(int argc, char ** argv) {
-//---------------------------------------------------------------------------------
+int main(int argc, char **argv)
+{
+	//---------------------------------------------------------------------------------
 	enableSound();
 	readUserSettings();
 	ledBlink(LED_ALWAYS_ON);

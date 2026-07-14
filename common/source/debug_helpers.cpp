@@ -18,7 +18,7 @@
 
 void saveScreenshot(tobkit::Screen *top_screen, tobkit::Screen *bottom_screen)
 {
-    // FIXME: Reimplement
+	// FIXME: Reimplement
 	/* debugprintf("Saving screenshot\n");
 	u8 *screenbuf = (u8*)ntxm_cmalloc(256*192*3*2);
 	u8 *screenptr = screenbuf;
@@ -63,9 +63,11 @@ void dumpSample(Song *song, int instrument, int sample)
 	sprintf(filename, "smp%02d.raw", smpfilenr);
 
 	Instrument *inst = song->getInstrument(instrument);
-	if(inst==0) return;
+	if (inst == 0)
+		return;
 	Sample *smp = inst->getSample(sample);
-	if(smp==0) return;
+	if (smp == 0)
+		return;
 	void *data = smp->getData();
 	u32 size = smp->getSize();
 

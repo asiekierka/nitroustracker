@@ -14,30 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #include "tobkit/messagebox.h"
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 using namespace tobkit;
 
-#define MB_MIN_WIDTH	150
-#define MB_HEIGHT	46
+#define MB_MIN_WIDTH 150
+#define MB_HEIGHT 46
 
 /* ===================== PUBLIC ===================== */
 
 // Takes a list of alternating button captions and callbacks
 MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
-	:Widget((_screen->getWidth()-MB_MIN_WIDTH)/2, (_screen->getHeight()-MB_HEIGHT)/2, MB_MIN_WIDTH, MB_HEIGHT, _screen),
-	n_buttons(n_buttons)
+    : Widget((_screen->getWidth() - MB_MIN_WIDTH) / 2,
+             (_screen->getHeight() - MB_HEIGHT) / 2, MB_MIN_WIDTH, MB_HEIGHT,
+             _screen),
+      n_buttons(n_buttons)
 {
 	msg = ntxm_cstrdup(message);
 
 	// Go through the list of given captions/callback pointers and add a button for each of them
-	callbacks = (void (**)(void))ntxm_cmalloc(sizeof(void (*)(void))*n_buttons);
+	callbacks =
+	    (void (**)(void))ntxm_cmalloc(sizeof(void (*)(void)) * n_buttons);
 
 	va_list marker;
 	va_start(marker, n_buttons);
@@ -46,9 +49,8 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 	width = 10;
 	char *str;
 	// void (*onPush)(void);
-	for(u8 i=0;i<n_buttons;++i)
-	{
-		str = va_arg(marker, char*);
+	for (u8 i = 0; i < n_buttons; ++i) {
+		str = va_arg(marker, char *);
 		/* onPush = */ va_arg(marker, void (*)(void));
 		width += getStringWidth(str) + 14;
 	}
@@ -59,38 +61,36 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 		minwidth = MB_MIN_WIDTH;
 
 	int fixedbuttonwidth = 0;
-	if(width < minwidth)
-	{
+	if (width < minwidth) {
 		width = minwidth;
-		if(n_buttons>0) {
+		if (n_buttons > 0) {
 			fixedbuttonwidth = (width - 10) / n_buttons - 10;
 		}
-	} else if(width > 256) {
+	} else if (width > 256) {
 		width = 256;
 	}
 
 	// Set x
-	x = (screen->getWidth()-width)/2;
+	x = (screen->getWidth() - width) / 2;
 
-	if(n_buttons > 0)
-	{
+	if (n_buttons > 0) {
 		u8 xpos = x + 10;
-		buttons = (Button**)ntxm_cmalloc(sizeof(Button*)*n_buttons);
+		buttons = (Button **)ntxm_cmalloc(sizeof(Button *) * n_buttons);
 		u8 buttonwidth;
 
 		va_start(marker, n_buttons);
 
-		for(u8 i=0; i<n_buttons; ++i)
-		{
-			char* caption = va_arg(marker, char*);
+		for (u8 i = 0; i < n_buttons; ++i) {
+			char *caption = va_arg(marker, char *);
 			void (*onPush)(void) = va_arg(marker, void (*)(void));
 
-			if(fixedbuttonwidth == 0) {
-				buttonwidth = getStringWidth(caption)+4;
+			if (fixedbuttonwidth == 0) {
+				buttonwidth = getStringWidth(caption) + 4;
 			} else {
 				buttonwidth = fixedbuttonwidth;
 			}
-			buttons[i] = new Button(xpos, y+24, buttonwidth, 14, _screen, true);
+			buttons[i] =
+			    new Button(xpos, y + 24, buttonwidth, 14, _screen, true);
 			gui.registerWidget(buttons[i], 0);
 			buttons[i]->setCaption(caption);
 			buttons[i]->registerPushCallback(onPush);
@@ -99,7 +99,6 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 		}
 
 		va_end(marker);
-
 	}
 }
 
@@ -109,35 +108,35 @@ MessageBox::~MessageBox(void)
 
 	//delete label;
 	ntxm_free(callbacks);
-	for(u8 i=0; i<n_buttons; ++i) {
+	for (u8 i = 0; i < n_buttons; ++i) {
 		delete buttons[i];
 	}
-	if(n_buttons > 0) {
+	if (n_buttons > 0) {
 		ntxm_free(buttons);
 	}
 }
 
-
 // Drawing request
-void MessageBox::pleaseDraw(void) {
+void MessageBox::pleaseDraw(void)
+{
 	draw();
 }
 
-
 // Event calls
-void MessageBox::penDown(u16 x, u16 y) {
+void MessageBox::penDown(u16 x, u16 y)
+{
 	gui.penDown(x, y);
 }
 
-void MessageBox::penUp(u16 x, u16 y) {
+void MessageBox::penUp(u16 x, u16 y)
+{
 	gui.penUp(x, y);
 }
 
 void MessageBox::show(void)
 {
 	gui.showAll();
-	if(!isExposed())
-	{
+	if (!isExposed()) {
 		Widget::show();
 		pleaseDraw();
 	}
@@ -160,11 +159,12 @@ void MessageBox::setTheme(Theme *theme_, u16 bgcolor_)
 
 void MessageBox::draw(void)
 {
-	drawGradient(theme->col_messagebox_title_col1, theme->col_messagebox_title_col2, 0, 1, width, 15);
+	drawGradient(theme->col_messagebox_title_col1,
+	             theme->col_messagebox_title_col2, 0, 1, width, 15);
 	drawHLine(0, 16, width, theme->col_outline);
-	drawFullBox(0, 17, width, MB_HEIGHT-17, theme->col_light_bg);
+	drawFullBox(0, 17, width, MB_HEIGHT - 17, theme->col_light_bg);
 	drawBorder(theme->col_outline);
-	u8 labelx = (width-getStringWidth(msg))/2;
+	u8 labelx = (width - getStringWidth(msg)) / 2;
 	drawString(msg, labelx, 3, theme->col_messagebox_title_text, width);
 	gui.draw();
 }

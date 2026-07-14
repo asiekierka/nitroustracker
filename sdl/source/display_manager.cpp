@@ -13,8 +13,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <SDL3/SDL.h>
 #include "display_manager.h"
+#include <SDL3/SDL.h>
 
 #if !SDL_VERSION_ATLEAST(3, 4, 0)
 #define SDL_SCALEMODE_PIXELART SDL_SCALEMODE_NEAREST
@@ -22,7 +22,8 @@
 
 Screen *main_screen, *sub_screen;
 
-static bool IsDualScreenShapePlatform() {
+static bool IsDualScreenShapePlatform()
+{
 	// Try to detect dual-screen Android handhelds.
 	if (!strcmp("Android", SDL_GetPlatform())) {
 		int count = 0;
@@ -34,7 +35,9 @@ static bool IsDualScreenShapePlatform() {
 	return false;
 }
 
-DisplayManager::DisplayManager(int width, int height, float _scale, bool multiWindow) {
+DisplayManager::DisplayManager(int width, int height, float _scale,
+                               bool multiWindow)
+{
 	bool autoArrange = !width && !height;
 
 	scale = _scale;
@@ -59,22 +62,33 @@ DisplayManager::DisplayManager(int width, int height, float _scale, bool multiWi
 	}
 
 	main_screen = new Screen(nullptr, widthTop, heightTop, widthTop);
-    sub_screen = new Screen(nullptr, widthBottom, heightBottom, widthBottom);
+	sub_screen = new Screen(nullptr, widthBottom, heightBottom, widthBottom);
 
 	if (multiWindow) {
-		windowTop = SDL_CreateWindow("NitrousTracker A", (int) (scale * widthTop), (int) (scale * heightTop), 0);
-		windowBottom = SDL_CreateWindow("NitrousTracker B", (int) (scale * widthBottom), (int) (scale * heightBottom), 0);
+		windowTop =
+		    SDL_CreateWindow("NitrousTracker A", (int)(scale * widthTop),
+		                     (int)(scale * heightTop), 0);
+		windowBottom =
+		    SDL_CreateWindow("NitrousTracker B", (int)(scale * widthBottom),
+		                     (int)(scale * heightBottom), 0);
 	} else {
-		windowTop = SDL_CreateWindow("NitrousTracker", (int) (scale * getMaxWidth()), (int) (scale * (heightTop + heightBottom)), 0);
+		windowTop =
+		    SDL_CreateWindow("NitrousTracker", (int)(scale * getMaxWidth()),
+		                     (int)(scale * (heightTop + heightBottom)), 0);
 		windowBottom = windowTop;
 	}
 
 	// TODO: NULL checks...
 	rendererTop = SDL_CreateRenderer(windowTop, nullptr);
-	rendererBottom = multiWindow ? SDL_CreateRenderer(windowBottom, nullptr) : rendererTop;
+	rendererBottom =
+	    multiWindow ? SDL_CreateRenderer(windowBottom, nullptr) : rendererTop;
 
-	textureTop = SDL_CreateTexture(rendererTop, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, widthTop, heightTop);
-	textureBottom = SDL_CreateTexture(rendererBottom, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, widthBottom, heightBottom);
+	textureTop =
+	    SDL_CreateTexture(rendererTop, SDL_PIXELFORMAT_ABGR1555,
+	                      SDL_TEXTUREACCESS_STREAMING, widthTop, heightTop);
+	textureBottom = SDL_CreateTexture(rendererBottom, SDL_PIXELFORMAT_ABGR1555,
+	                                  SDL_TEXTUREACCESS_STREAMING, widthBottom,
+	                                  heightBottom);
 
 	SDL_SetTextureScaleMode(textureTop, SDL_SCALEMODE_PIXELART);
 	SDL_SetTextureScaleMode(textureBottom, SDL_SCALEMODE_PIXELART);
@@ -82,7 +96,8 @@ DisplayManager::DisplayManager(int width, int height, float _scale, bool multiWi
 	lockScreens();
 }
 
-DisplayManager::~DisplayManager() {
+DisplayManager::~DisplayManager()
+{
 	SDL_DestroyTexture(textureBottom);
 	SDL_DestroyTexture(textureTop);
 	if (isMultiWindow())
@@ -93,7 +108,8 @@ DisplayManager::~DisplayManager() {
 	SDL_DestroyWindow(windowTop);
 }
 
-void DisplayManager::draw() {
+void DisplayManager::draw()
+{
 	SDL_FRect src, dest;
 	Screen *screen;
 
@@ -135,14 +151,16 @@ void DisplayManager::draw() {
 	lockScreens();
 }
 
-bool DisplayManager::swapScreens() {
+bool DisplayManager::swapScreens()
+{
 	unlockScreens();
 	screensSwapped = !screensSwapped;
 	lockScreens();
 	return true;
 }
 
-void DisplayManager::convertTouchCoords(SDL_WindowID windowId, float x, float y) {
+void DisplayManager::convertTouchCoords(SDL_WindowID windowId, float x, float y)
+{
 	bool isBottomScreen;
 
 	x /= scale;
@@ -158,19 +176,23 @@ void DisplayManager::convertTouchCoords(SDL_WindowID windowId, float x, float y)
 
 	Screen *screen = isBottomScreen ? sub_screen : main_screen;
 	if (isMultiWindow()) {
-		x -= ((isBottomScreen ? widthBottom : widthTop) - screen->getWidth()) / 2.0f;
+		x -= ((isBottomScreen ? widthBottom : widthTop) - screen->getWidth()) /
+		     2.0f;
 	} else {
 		x -= (getMaxWidth() - screen->getWidth()) / 2.0f;
 	}
 
-	if (x >= 0.0f && y >= 0.0f && x < screen->getWidth() && y < screen->getHeight()) {
-		PlatformTouchScreen = isBottomScreen ? TOUCH_SCREEN_BOTTOM : TOUCH_SCREEN_TOP;
+	if (x >= 0.0f && y >= 0.0f && x < screen->getWidth() &&
+	    y < screen->getHeight()) {
+		PlatformTouchScreen =
+		    isBottomScreen ? TOUCH_SCREEN_BOTTOM : TOUCH_SCREEN_TOP;
 		PlatformTouchX = x;
 		PlatformTouchY = y;
 	}
 }
 
-void DisplayManager::lockScreens(void) {
+void DisplayManager::lockScreens(void)
+{
 	int widthMain, heightMain, widthSub, heightSub;
 
 	if (!screensSwapped) {
@@ -190,14 +212,17 @@ void DisplayManager::lockScreens(void) {
 	SDL_Texture *textureMain = screensSwapped ? textureBottom : textureTop;
 	SDL_Texture *textureSub = !screensSwapped ? textureBottom : textureTop;
 
-	SDL_LockTexture(textureMain, &rectMain, (void**) &main_screen->pixels, &pitchMain);
-	SDL_LockTexture(textureSub, &rectSub, (void**) &sub_screen->pixels, &pitchSub);
+	SDL_LockTexture(textureMain, &rectMain, (void **)&main_screen->pixels,
+	                &pitchMain);
+	SDL_LockTexture(textureSub, &rectSub, (void **)&sub_screen->pixels,
+	                &pitchSub);
 
 	main_screen->setSize(widthMain, heightMain, pitchMain >> 1);
 	sub_screen->setSize(widthSub, heightSub, pitchSub >> 1);
 }
 
-void DisplayManager::unlockScreens(void) {
+void DisplayManager::unlockScreens(void)
+{
 	SDL_UnlockTexture(textureTop);
 	SDL_UnlockTexture(textureBottom);
 }

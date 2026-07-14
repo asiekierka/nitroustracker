@@ -35,30 +35,37 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 // Constructor sets base variables
-NormalizeBox::NormalizeBox(Screen *_screen, void (*_onOk)(void), void (*_onAuto)(void), void (*_onCancel)(void))
-	:Widget((_screen->getWidth()-NORMALIZEBOX_WIDTH)/2, (_screen->getHeight()-NORMALIZEBOX_HEIGHT)/2,
-		NORMALIZEBOX_WIDTH, NORMALIZEBOX_HEIGHT, _screen),
-	onOk(_onOk), onAuto(_onAuto), onCancel(_onCancel)
+NormalizeBox::NormalizeBox(Screen *_screen, void (*_onOk)(void),
+                           void (*_onAuto)(void), void (*_onCancel)(void))
+    : Widget((_screen->getWidth() - NORMALIZEBOX_WIDTH) / 2,
+             (_screen->getHeight() - NORMALIZEBOX_HEIGHT) / 2,
+             NORMALIZEBOX_WIDTH, NORMALIZEBOX_HEIGHT, _screen),
+      onOk(_onOk), onAuto(_onAuto), onCancel(_onCancel)
 {
 	title = "adjust amplitude";
-	
-	nspercent = new NumberSlider(x+(NORMALIZEBOX_WIDTH-32)/2, y+20, 32, 17, _screen, 100, 0, 500);
-	
-	labelpercent = new Label(x+(NORMALIZEBOX_WIDTH-32)/2 + 34, y+25, 20, 12, _screen, false);
+
+	nspercent = new NumberSlider(x + (NORMALIZEBOX_WIDTH - 32) / 2, y + 20, 32,
+	                             17, _screen, 100, 0, 500);
+
+	labelpercent = new Label(x + (NORMALIZEBOX_WIDTH - 32) / 2 + 34, y + 25, 20,
+	                         12, _screen, false);
 	labelpercent->setCaption("%");
-	
-	buttonok = new Button(x+(NORMALIZEBOX_WIDTH-50)/2 - 45, y+40, 45, 14, _screen);
+
+	buttonok = new Button(x + (NORMALIZEBOX_WIDTH - 50) / 2 - 45, y + 40, 45,
+	                      14, _screen);
 	buttonok->setCaption("ok");
 	buttonok->registerPushCallback(_onOk);
-	
-	buttonauto = new Button(x+(NORMALIZEBOX_WIDTH-50)/2 + 5, y+40, 40, 14, _screen);
+
+	buttonauto = new Button(x + (NORMALIZEBOX_WIDTH - 50) / 2 + 5, y + 40, 40,
+	                        14, _screen);
 	buttonauto->setCaption("auto");
 	buttonauto->registerPushCallback(_onAuto);
 
-	buttoncancel = new Button(x+(NORMALIZEBOX_WIDTH-50)/2 + 50, y+40, 45, 14, _screen);
+	buttoncancel = new Button(x + (NORMALIZEBOX_WIDTH - 50) / 2 + 50, y + 40,
+	                          45, 14, _screen);
 	buttoncancel->setCaption("cancel");
 	buttoncancel->registerPushCallback(_onCancel);
-	
+
 	gui.registerWidget(nspercent, 0);
 	gui.registerWidget(labelpercent, 0);
 	gui.registerWidget(buttonok, 0);
@@ -82,15 +89,18 @@ void NormalizeBox::pleaseDraw(void)
 }
 
 // Event calls
-void NormalizeBox::penDown(u16 px, u16 py) {
+void NormalizeBox::penDown(u16 px, u16 py)
+{
 	gui.penDown(px, py);
 }
 
-void NormalizeBox::penUp(u16 px, u16 py) {
+void NormalizeBox::penUp(u16 px, u16 py)
+{
 	gui.penUp(px, py);
 }
 
-void NormalizeBox::penMove(u16 px, u16 py) {
+void NormalizeBox::penMove(u16 px, u16 py)
+{
 	gui.penMove(px, py);
 }
 
@@ -114,7 +124,7 @@ void NormalizeBox::reveal(void)
 void NormalizeBox::setTheme(Theme *theme_, u16 bgcolor_)
 {
 	theme = theme_;
-	bgcolor=bgcolor_;
+	bgcolor = bgcolor_;
 	gui.setTheme(theme, theme->col_light_bg);
 }
 
@@ -122,13 +132,16 @@ void NormalizeBox::setTheme(Theme *theme_, u16 bgcolor_)
 
 void NormalizeBox::draw(void)
 {
-	drawGradient(theme->col_messagebox_title_col1, theme->col_messagebox_title_col2, 1, 1, width - 2, 15);
+	drawGradient(theme->col_messagebox_title_col1,
+	             theme->col_messagebox_title_col2, 1, 1, width - 2, 15);
 	drawHLine(1, 16, width - 2, theme->col_outline);
-	drawFullBox(1, 17, width - 2, NORMALIZEBOX_HEIGHT-17, theme->col_light_bg);
+	drawFullBox(1, 17, width - 2, NORMALIZEBOX_HEIGHT - 17,
+	            theme->col_light_bg);
 	drawBorder(theme->col_outline);
-	
-	u8 titlewidth = getStringWidth(title)+5;
-	drawString(title, (NORMALIZEBOX_WIDTH-titlewidth)/2, 3, theme->col_messagebox_title_text, titlewidth+5);
-	
+
+	u8 titlewidth = getStringWidth(title) + 5;
+	drawString(title, (NORMALIZEBOX_WIDTH - titlewidth) / 2, 3,
+	           theme->col_messagebox_title_text, titlewidth + 5);
+
 	gui.draw();
 }

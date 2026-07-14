@@ -21,45 +21,48 @@ limitations under the License.
 #include <stdio.h>
 #include <vector>
 
-namespace tobkit {
+namespace tobkit
+{
 
-class RadioButton: public Widget {
+class RadioButton : public Widget
+{
+public:
+	class RadioButtonGroup
+	{
 	public:
-		class RadioButtonGroup {
-			public:
-				RadioButtonGroup();
-				
-				void add(RadioButton *rb);
-				void pushed(RadioButton *rb);
-				void setActive(u8 idx);
-				void registerChangeCallback(void (*onChange_)(u8));
-	
-			private:
-				std::vector<RadioButton*> rbvec;
-				void (*onChange)(u8);
-		};
-		
-		RadioButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
-				RadioButtonGroup *_rbg, bool _visible=true);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		
-		void setCaption(const char *caption);
-		void setActive(bool _active);
-		bool getActive(void);
-		
+		RadioButtonGroup();
+
+		void add(RadioButton *rb);
+		void pushed(RadioButton *rb);
+		void setActive(u8 idx);
+		void registerChangeCallback(void (*onChange_)(u8));
+
 	private:
-		void draw(void);
-	
-		RadioButtonGroup *rbg;
-		bool active;
-		const char *label;
+		std::vector<RadioButton *> rbvec;
+		void (*onChange)(u8);
+	};
+
+	RadioButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	            RadioButtonGroup *_rbg, bool _visible = true);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 px, u16 py);
+
+	void setCaption(const char *caption);
+	void setActive(bool _active);
+	bool getActive(void);
+
+private:
+	void draw(void);
+
+	RadioButtonGroup *rbg;
+	bool active;
+	const char *label;
 };
 
-};
+}; // namespace tobkit
 
 #endif

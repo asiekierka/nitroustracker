@@ -17,12 +17,12 @@ limitations under the License.
 #ifndef _PLATFORM_SDL3_H_
 #define _PLATFORM_SDL3_H_
 
-#include <SDL3/SDL.h>
 #include "ntxm/common.h"
+#include <SDL3/SDL.h>
 
 typedef u16 tobkit_pixel_t;
 
-#define RGB5A1(r,g,b,a) (((b) << 10) | ((g) << 5) | (r) | ((a) << 15))
+#define RGB5A1(r, g, b, a) (((b) << 10) | ((g) << 5) | (r) | ((a) << 15))
 #define RGB5A1_ALPHA_BIT 0x8000
 #define RGB5A1_R(c) ((c) & 0x1F)
 #define RGB5A1_G(c) (((c) >> 5) & 0x1F)

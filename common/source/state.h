@@ -32,42 +32,49 @@
 
 #define STATE_FILENAME_LEN 255
 
-class State {
-	public:
-		State(void);
-		~State(void);
-		void reset(void);
-		void resetSong(void); // resets only song-specific settings
+class State
+{
+public:
+	State(void);
+	~State(void);
+	void reset(void);
+	void resetSong(void); // resets only song-specific settings
 
-		inline u16 getPlaybackRow() { return this->row; }
-		inline void setPlaybackRow(u16 row) { this->row = row; if(!scroll_lock) { this->cursor_row = row; } }
-		inline u16 getCursorRow() { return this->cursor_row; }
-		inline void setCursorRow(u16 row) { this->cursor_row = row; }
+	inline u16 getPlaybackRow() { return this->row; }
+	inline void setPlaybackRow(u16 row)
+	{
+		this->row = row;
+		if (!scroll_lock) {
+			this->cursor_row = row;
+		}
+	}
+	inline u16 getCursorRow() { return this->cursor_row; }
+	inline void setCursorRow(u16 row) { this->cursor_row = row; }
 
-		char *song_filename;
-		char *sample_filename;
+	char *song_filename;
+	char *sample_filename;
 
-		Sample *preview_sample;
+	Sample *preview_sample;
 
-		s16 queued_potpos;
-		u8 potpos;
-		u8 channel;
+	s16 queued_potpos;
+	u8 potpos;
+	u8 channel;
 
-		u8 add;
-		u8 basenote;
-		u8 instrument;	// Current instrument
-		u8 sample;
-		bool recording;
-		bool playing;
-		bool pause;
-		bool unsaved_changes;
+	u8 add;
+	u8 basenote;
+	u8 instrument; // Current instrument
+	u8 sample;
+	bool recording;
+	bool playing;
+	bool pause;
+	bool unsaved_changes;
 
-		bool map_samples;
-		bool scroll_lock;
+	bool map_samples;
+	bool scroll_lock;
 
-	private:
-		u16 row;
-		u16 cursor_row;
+private:
+	u16 row;
+	u16 cursor_row;
 };
 
 #endif

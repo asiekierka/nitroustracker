@@ -17,40 +17,42 @@ limitations under the License.
 #ifndef _MESSAGEBOX_H_
 #define _MESSAGEBOX_H_
 
-#include "widget.h"
+#include "button.h"
 #include "gui.h"
 #include "label.h"
-#include "button.h"
+#include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class MessageBox: public Widget {
-	public:
-		MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...);
-		~MessageBox(void);
-		
-		// Drawing request
-		void pleaseDraw(void);
-	
-		// Event calls
-		void penDown(u16 x, u16 y);
-		void penUp(u16 x, u16 y);
-	
-		void show(void);
-		void reveal(void);
-		void setTheme(Theme *theme_, u16 bgcolor_);
-		
-	private:
-		void draw(void);	
-	
-		GUI gui;
-		//Label *label;
-		char *msg;
-		Button **buttons;
-		void (**callbacks)(void);
-		u8 n_buttons;
+class MessageBox : public Widget
+{
+public:
+	MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...);
+	~MessageBox(void);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 x, u16 y);
+	void penUp(u16 x, u16 y);
+
+	void show(void);
+	void reveal(void);
+	void setTheme(Theme *theme_, u16 bgcolor_);
+
+private:
+	void draw(void);
+
+	GUI gui;
+	//Label *label;
+	char *msg;
+	Button **buttons;
+	void (**callbacks)(void);
+	u8 n_buttons;
 };
 
-};
+}; // namespace tobkit
 
 #endif

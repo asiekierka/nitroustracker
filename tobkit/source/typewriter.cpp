@@ -26,26 +26,28 @@ limitations under the License.
 
 using namespace tobkit;
 
-#define MAX_TEXT_LEN	256 // TODO: make dynamic
+#define MAX_TEXT_LEN 256 // TODO: make dynamic
 
 #define TW_TILE_WIDTH 26
 #define TW_TILE_HEIGHT 12
 #define TW_TILE_X 4
 #define TW_TILE_Y 16
-#define TW_WIDTH	((TW_TILE_WIDTH)*8+(TW_TILE_X)*2)
-#define TW_HEIGHT	((TW_TILE_HEIGHT)*8+(TW_TILE_Y)*2-1)
+#define TW_WIDTH ((TW_TILE_WIDTH) * 8 + (TW_TILE_X) * 2)
+#define TW_HEIGHT ((TW_TILE_HEIGHT) * 8 + (TW_TILE_Y) * 2 - 1)
 
 /* ===================== PUBLIC ===================== */
 
-Typewriter::Typewriter(const char *_msg, u16 *_char_base,
-	u16 *_map_base, u8 _palette_offset, Screen *_screen, vu16* _trans_reg_x,
-	vu16* _trans_reg_y, bool _is_file_name)
-	:Widget((_screen->getWidth()-TW_WIDTH)/2, (_screen->getHeight()-TW_HEIGHT)/2-15, TW_WIDTH, TW_HEIGHT, _screen),
-	char_base(_char_base), map_base(_map_base), palette_offset(_palette_offset),
-	kx(x+TW_TILE_X), ky(y+TW_TILE_Y),
-	mode(TYPEWRITER_MODE_NORMAL),
-	trans_reg_x(_trans_reg_x), trans_reg_y(_trans_reg_y),
-	is_file_name(_is_file_name), cursorpos(0), strlength(0)
+Typewriter::Typewriter(const char *_msg, u16 *_char_base, u16 *_map_base,
+                       u8 _palette_offset, Screen *_screen, vu16 *_trans_reg_x,
+                       vu16 *_trans_reg_y, bool _is_file_name)
+    : Widget((_screen->getWidth() - TW_WIDTH) / 2,
+             (_screen->getHeight() - TW_HEIGHT) / 2 - 15, TW_WIDTH, TW_HEIGHT,
+             _screen),
+      char_base(_char_base), map_base(_map_base),
+      palette_offset(_palette_offset), kx(x + TW_TILE_X), ky(y + TW_TILE_Y),
+      mode(TYPEWRITER_MODE_NORMAL), trans_reg_x(_trans_reg_x),
+      trans_reg_y(_trans_reg_y), is_file_name(_is_file_name), cursorpos(0),
+      strlength(0)
 {
 	onOk = 0;
 	onCancel = 0;
@@ -56,22 +58,26 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 
 	u8 msglength = getStringWidth(_msg);
 
-	msglabel = new Label(x+4, y+6, msglength+4, 12, _screen, false);
+	msglabel = new Label(x + 4, y + 6, msglength + 4, 12, _screen, false);
 	msglabel->setCaption(_msg);
 	gui.registerWidget(msglabel, 0, SUB_SCREEN);
 
-	label = new Label(x+msglength+8, y+4, TW_WIDTH-msglength-12, 15, _screen, true, false, false, true);
+	label = new Label(x + msglength + 8, y + 4, TW_WIDTH - msglength - 12, 15,
+	                  _screen, true, false, false, true);
 	gui.registerWidget(label, 0, SUB_SCREEN);
 
-	buttonok = new Button(x+TW_WIDTH/2-50-2 - 29, y+TW_HEIGHT-12-4, 50, 12, _screen);
+	buttonok = new Button(x + TW_WIDTH / 2 - 50 - 2 - 29,
+	                      y + TW_HEIGHT - 12 - 4, 50, 12, _screen);
 	buttonok->setCaption("ok");
 	gui.registerWidget(buttonok, 0, SUB_SCREEN);
 
-	buttoncancel = new Button((x+TW_WIDTH/2+2) + 25, y+TW_HEIGHT-12-4, 50, 12, _screen);
+	buttoncancel = new Button((x + TW_WIDTH / 2 + 2) + 25,
+	                          y + TW_HEIGHT - 12 - 4, 50, 12, _screen);
 	buttoncancel->setCaption("cancel");
 	gui.registerWidget(buttoncancel, 0, SUB_SCREEN);
 
-	buttonclear = new Button((x+TW_WIDTH/2-50-2 + 25), y+TW_HEIGHT-12-4, 50, 12, _screen);
+	buttonclear = new Button((x + TW_WIDTH / 2 - 50 - 2 + 25),
+	                         y + TW_HEIGHT - 12 - 4, 50, 12, _screen);
 	buttonclear->setCaption("clear");
 	gui.registerWidget(buttonclear, 0, SUB_SCREEN);
 #ifdef NT_PLATFORM_NDS
@@ -80,7 +86,7 @@ Typewriter::Typewriter(const char *_msg, u16 *_char_base,
 	*_trans_reg_y = -ky;
 #endif
 
-	text = (char*)ntxm_ccalloc(1, MAX_TEXT_LEN+1);
+	text = (char *)ntxm_ccalloc(1, MAX_TEXT_LEN + 1);
 }
 
 Typewriter::~Typewriter(void)
@@ -93,8 +99,8 @@ Typewriter::~Typewriter(void)
 	ntxm_free(text);
 
 #ifdef NT_PLATFORM_NDS
-	for(int py=0; py<TW_TILE_HEIGHT; ++py) {
-		memset(map_base + 32*py, 0, TW_TILE_WIDTH*2);
+	for (int py = 0; py < TW_TILE_HEIGHT; ++py) {
+		memset(map_base + 32 * py, 0, TW_TILE_WIDTH * 2);
 	}
 #endif
 }
@@ -102,16 +108,21 @@ Typewriter::~Typewriter(void)
 void Typewriter::genPal(void)
 {
 	const u16 tw_themecols[] = {
-		theme->col_typewriter_mod_key, theme->col_typewriter_key,
-		theme->col_typewriter_key_label, theme->col_typewriter_bg,
-		theme->col_outline, theme->col_typewriter_mod_key_label,
-		(is_file_name ? theme->col_typewriter_disabled_key : theme->col_typewriter_key)
+	    theme->col_typewriter_mod_key,
+	    theme->col_typewriter_key,
+	    theme->col_typewriter_key_label,
+	    theme->col_typewriter_bg,
+	    theme->col_outline,
+	    theme->col_typewriter_mod_key_label,
+	    (is_file_name ? theme->col_typewriter_disabled_key
+	                  : theme->col_typewriter_key)
 	};
 
 	memcpy(&typewriterPal[1], tw_themecols, 7 * sizeof(u16));
 }
 // Drawing request
-void Typewriter::pleaseDraw(void) {
+void Typewriter::pleaseDraw(void)
+{
 	draw();
 }
 
@@ -119,73 +130,65 @@ void Typewriter::pleaseDraw(void) {
 void Typewriter::penDown(u16 px, u16 py)
 {
 	// Inside the kb?
-	if((px>=kx)&&(px<=kx+TW_TILE_WIDTH*8)&&(py>=ky)&&(py<=ky+TW_TILE_HEIGHT*8))
-	{
-		tilex = (px-kx)/8;
-		tiley = (py-ky)/8;
+	if ((px >= kx) && (px <= kx + TW_TILE_WIDTH * 8) && (py >= ky) &&
+	    (py <= ky + TW_TILE_HEIGHT * 8)) {
+		tilex = (px - kx) / 8;
+		tiley = (py - ky) / 8;
 
-		if(tilex>=1 && tilex<(TW_TILE_WIDTH-1) && tiley<TW_TILE_HEIGHT)
-		{
+		if (tilex >= 1 && tilex < (TW_TILE_WIDTH - 1) &&
+		    tiley < TW_TILE_HEIGHT) {
 			char c;
-			if((mode==TYPEWRITER_MODE_CAPS)||(mode==TYPEWRITER_MODE_SHIFT))
-				c = typewriter_Hit_Shift[tilex+(tiley*TW_TILE_WIDTH)];
+			if ((mode == TYPEWRITER_MODE_CAPS) ||
+			    (mode == TYPEWRITER_MODE_SHIFT))
+				c = typewriter_Hit_Shift[tilex + (tiley * TW_TILE_WIDTH)];
 			else
-				c = typewriter_Hit[tilex+(tiley*TW_TILE_WIDTH)];
+				c = typewriter_Hit[tilex + (tiley * TW_TILE_WIDTH)];
 
-			if (is_file_name && strchr("*/:<>|\"\?\x7F", c))
-			{
+			if (is_file_name && strchr("*/:<>|\"\?\x7F", c)) {
 				c = NOK;
 			} else {
 				setTile(tilex, tiley, 4);
 			}
 
-			if(c==CAP)
-			{
-				if((mode==TYPEWRITER_MODE_CAPS)||(mode==TYPEWRITER_MODE_SHIFT)) {
+			if (c == CAP) {
+				if ((mode == TYPEWRITER_MODE_CAPS) ||
+				    (mode == TYPEWRITER_MODE_SHIFT)) {
 					mode = TYPEWRITER_MODE_NORMAL;
 				} else {
 					mode = TYPEWRITER_MODE_CAPS;
 				}
 				redraw();
-			}
-			else if (c==SHF)
-			{
-				if((mode==TYPEWRITER_MODE_CAPS)||(mode==TYPEWRITER_MODE_SHIFT)) {
+			} else if (c == SHF) {
+				if ((mode == TYPEWRITER_MODE_CAPS) ||
+				    (mode == TYPEWRITER_MODE_SHIFT)) {
 					mode = TYPEWRITER_MODE_NORMAL;
 				} else {
 					mode = TYPEWRITER_MODE_SHIFT;
 				}
 				redraw();
-			}
-			else if (c==BSP)
-			{
-				if(cursorpos > 0) {
-					for(u16 i=cursorpos-1;i<=strlength;++i) {
-						text[i] = text[i+1];
+			} else if (c == BSP) {
+				if (cursorpos > 0) {
+					for (u16 i = cursorpos - 1; i <= strlength; ++i) {
+						text[i] = text[i + 1];
 					}
-					text[strlength+1] = 0;
+					text[strlength + 1] = 0;
 					cursorpos--;
 					strlength--;
 					label->setCaption(text);
 					drawCursor();
 				}
-			}
-			else if (c==RET)
-			{
-				if(onOk!=0) {
+			} else if (c == RET) {
+				if (onOk != 0) {
 					onOk();
 				}
-			}
-			else if(c!=NOK)
-			{
-				if(mode==TYPEWRITER_MODE_SHIFT) {
+			} else if (c != NOK) {
+				if (mode == TYPEWRITER_MODE_SHIFT) {
 					mode = TYPEWRITER_MODE_NORMAL;
 					redraw();
 				}
-				if(strlength<MAX_TEXT_LEN)
-				{
-					for(u16 i=strlength;i>cursorpos;i--) {
-						text[i] = text[i-1];
+				if (strlength < MAX_TEXT_LEN) {
+					for (u16 i = strlength; i > cursorpos; i--) {
+						text[i] = text[i - 1];
 					}
 					text[cursorpos] = c;
 					cursorpos++;
@@ -196,8 +199,9 @@ void Typewriter::penDown(u16 px, u16 py)
 			}
 		}
 
-	// Inside the button area?
-	} else if ((px>x)&&(px<x+TW_WIDTH)&&(py<y+TW_HEIGHT)&&(py>ky+TW_TILE_HEIGHT*8)) {
+		// Inside the button area?
+	} else if ((px > x) && (px < x + TW_WIDTH) && (py < y + TW_HEIGHT) &&
+	           (py > ky + TW_TILE_HEIGHT * 8)) {
 		gui.penDown(px, py);
 	}
 }
@@ -210,10 +214,10 @@ void Typewriter::penUp(u16 px, u16 py)
 
 void Typewriter::buttonPress(u16 button)
 {
-	if((button==KEY_LEFT)&&(cursorpos>0)) {
+	if ((button == KEY_LEFT) && (cursorpos > 0)) {
 		cursorpos--;
 		redraw();
-	} else if((button==KEY_RIGHT)&&(cursorpos<=strlength)) {
+	} else if ((button == KEY_RIGHT) && (cursorpos <= strlength)) {
 		cursorpos++;
 		redraw();
 	}
@@ -248,7 +252,8 @@ void Typewriter::setText(const char *text_)
 	redraw();
 }
 
-char *Typewriter::getText(void) {
+char *Typewriter::getText(void)
+{
 	return text;
 }
 
@@ -280,10 +285,12 @@ void Typewriter::setTheme(Theme *theme_, u16 bgcolor_)
 	genPal();
 
 #ifdef NT_PLATFORM_NDS
-	memcpy(BG_PALETTE_SUB+palette_offset*16, typewriterPal, 32);
+	memcpy(BG_PALETTE_SUB + palette_offset * 16, typewriterPal, 32);
 	// generate highlight palette
 	for (int i = 0; i < 16; i++) {
-		BG_PALETTE_SUB[palette_offset * 16 + 16 + i] = (i == 1 || i == 2 || i == 7) ? theme->col_typewriter_pressed_key : theme->col_typewriter_bg;
+		BG_PALETTE_SUB[palette_offset * 16 + 16 + i] =
+		    (i == 1 || i == 2 || i == 7) ? theme->col_typewriter_pressed_key
+		                                 : theme->col_typewriter_bg;
 	}
 #endif
 }
@@ -302,7 +309,7 @@ void Typewriter::draw(void)
 // don't draw the box new
 void Typewriter::redraw(void)
 {
-	if(!isExposed())
+	if (!isExposed())
 		return;
 
 	label->pleaseDraw();
@@ -312,18 +319,19 @@ void Typewriter::redraw(void)
 
 #ifdef NT_PLATFORM_NDS
 	u16 map_offset;
-	if((mode == TYPEWRITER_MODE_CAPS)||(mode == TYPEWRITER_MODE_SHIFT)) {
-		map_offset = TW_TILE_WIDTH*TW_TILE_HEIGHT;
+	if ((mode == TYPEWRITER_MODE_CAPS) || (mode == TYPEWRITER_MODE_SHIFT)) {
+		map_offset = TW_TILE_WIDTH * TW_TILE_HEIGHT;
 	} else {
 		map_offset = 0;
 	}
 
 	u16 tile_attr = palette_offset << 12;
-    for(u8 py=0; py<TW_TILE_HEIGHT; ++py) {
-		for(u8 px=0; px<TW_TILE_WIDTH; ++px) {
-		  map_base[32*py+px] = typewriterMap[map_offset+26*py+px] | tile_attr;
-        }
-    }
+	for (u8 py = 0; py < TW_TILE_HEIGHT; ++py) {
+		for (u8 px = 0; px < TW_TILE_WIDTH; ++px) {
+			map_base[32 * py + px] =
+			    typewriterMap[map_offset + 26 * py + px] | tile_attr;
+		}
+	}
 #endif
 }
 
@@ -336,7 +344,7 @@ void Typewriter::drawCursor(void)
 	cursorx = lx - x + getStringWidth(text, cursorpos) + 1;
 	cursory = ly - y + 1;
 	cursorheight = lh - 2;
-	if(cursorx<lx -x + lw) {
+	if (cursorx < lx - x + lw) {
 		drawVLine(cursorx, cursory, cursorheight, theme->col_typewriter_cursor);
 	}
 }
@@ -347,32 +355,31 @@ void Typewriter::setTile(int x, int y, int pal)
 	char c;
 	int x2, y2;
 
-	c = typewriter_Hit[(y*TW_TILE_WIDTH)+x];
+	c = typewriter_Hit[(y * TW_TILE_WIDTH) + x];
 
-	if(!c) return;
+	if (!c)
+		return;
 
 #ifdef NT_PLATFORM_NDS
-	map_base[(y*32)+x] &= ~(7 << 12);
-	map_base[(y*32)+x] |= (pal << 12);
+	map_base[(y * 32) + x] &= ~(7 << 12);
+	map_base[(y * 32) + x] |= (pal << 12);
 
-	x2 = x; y2 = y;
-	while(typewriter_Hit[(y2*TW_TILE_WIDTH)+x2]==c)
-	{
-		map_base[(y2*32)+x2] &= ~(7 << 12);
-		map_base[(y2*32)+x2] |= (pal << 12);
+	x2 = x;
+	y2 = y;
+	while (typewriter_Hit[(y2 * TW_TILE_WIDTH) + x2] == c) {
+		map_base[(y2 * 32) + x2] &= ~(7 << 12);
+		map_base[(y2 * 32) + x2] |= (pal << 12);
 
 		x2 = x;
-		while(typewriter_Hit[(y2*TW_TILE_WIDTH)+x2]==c)
-		{
-			map_base[(y2*32)+x2] &= ~(7 << 12);
-			map_base[(y2*32)+x2] |= (pal << 12);
+		while (typewriter_Hit[(y2 * TW_TILE_WIDTH) + x2] == c) {
+			map_base[(y2 * 32) + x2] &= ~(7 << 12);
+			map_base[(y2 * 32) + x2] |= (pal << 12);
 			x2++;
 		}
 		x2 = x;
-		while(typewriter_Hit[(y2*TW_TILE_WIDTH)+x2]==c)
-		{
-			map_base[(y2*32)+x2] &= ~(7 << 12);
-			map_base[(y2*32)+x2] |= (pal << 12);
+		while (typewriter_Hit[(y2 * TW_TILE_WIDTH) + x2] == c) {
+			map_base[(y2 * 32) + x2] &= ~(7 << 12);
+			map_base[(y2 * 32) + x2] |= (pal << 12);
 			x2--;
 		}
 
@@ -380,24 +387,22 @@ void Typewriter::setTile(int x, int y, int pal)
 		y2++;
 	}
 
-	x2 = x; y2 = y;
-	while(typewriter_Hit[(y2*TW_TILE_WIDTH)+x2]==c)
-	{
-		map_base[(y2*32)+x2] &= ~(7 << 12);
-		map_base[(y2*32)+x2] |= (pal << 12);
+	x2 = x;
+	y2 = y;
+	while (typewriter_Hit[(y2 * TW_TILE_WIDTH) + x2] == c) {
+		map_base[(y2 * 32) + x2] &= ~(7 << 12);
+		map_base[(y2 * 32) + x2] |= (pal << 12);
 
 		x2 = x;
-		while(typewriter_Hit[(y2*TW_TILE_WIDTH)+x2]==c)
-		{
-			map_base[(y2*32)+x2] &= ~(7 << 12);
-			map_base[(y2*32)+x2] |= (pal << 12);
+		while (typewriter_Hit[(y2 * TW_TILE_WIDTH) + x2] == c) {
+			map_base[(y2 * 32) + x2] &= ~(7 << 12);
+			map_base[(y2 * 32) + x2] |= (pal << 12);
 			x2++;
 		}
 		x2 = x;
-		while(typewriter_Hit[(y2*TW_TILE_WIDTH)+x2]==c)
-		{
-			map_base[(y2*32)+x2] &= ~(7 << 12);
-			map_base[(y2*32)+x2] |= (pal << 12);
+		while (typewriter_Hit[(y2 * TW_TILE_WIDTH) + x2] == c) {
+			map_base[(y2 * 32) + x2] &= ~(7 << 12);
+			map_base[(y2 * 32) + x2] |= (pal << 12);
 			x2--;
 		}
 

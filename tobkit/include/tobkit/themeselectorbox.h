@@ -17,55 +17,59 @@ limitations under the License.
 #ifndef THEMESELECTORBOX_H
 #define THEMESELECTORBOX_H
 
-#include "widget.h"
+#include "button.h"
+#include "fileselector.h"
 #include "gui.h"
 #include "listbox.h"
-#include "fileselector.h"
-#include "button.h"
+#include "widget.h"
 
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
 
-namespace tobkit {
+namespace tobkit
+{
 
-class ThemeSelectorBox: public Widget {
-	public:
-		ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File), void (*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void));
-		~ThemeSelectorBox(void);
+class ThemeSelectorBox : public Widget
+{
+public:
+	ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File),
+	                 void (*_onOk)(void), void (*_onReset)(void),
+	                 void (*_onCancel)(void));
+	~ThemeSelectorBox(void);
 
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penMove(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-	
-		// Drawing request
-		void pleaseDraw(void);
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penMove(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
 
-		void show(void);
-		void reveal(void);
-		void setTheme(Theme *theme_, u16 bgcolor_);
+	// Drawing request
+	void pleaseDraw(void);
 
-		void setDir(std::string dir);
-		std::string getDir(void);
+	void show(void);
+	void reveal(void);
+	void setTheme(Theme *theme_, u16 bgcolor_);
 
-		FileSelector *filesel;
+	void setDir(std::string dir);
+	std::string getDir(void);
 
-	protected:
-		void draw(void);
-		
-		void (*onSelect)(File);
-		void (*onOk)(void);
-		void (*onReset)(void);
-		void (*onCancel)(void);
-		
-		GUI gui;
-		const char *title;
-		Button *buttonok, *buttoncancel, *buttonreset;
-	private:
+	FileSelector *filesel;
 
+protected:
+	void draw(void);
+
+	void (*onSelect)(File);
+	void (*onOk)(void);
+	void (*onReset)(void);
+	void (*onCancel)(void);
+
+	GUI gui;
+	const char *title;
+	Button *buttonok, *buttoncancel, *buttonreset;
+
+private:
 };
 
-};
+}; // namespace tobkit
 
 #endif

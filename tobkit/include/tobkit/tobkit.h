@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef _TOBKIT_H_
 #define _TOBKIT_H_
 
-#include "platform.h"
 #include "bitbutton.h"
 #include "button.h"
 #include "checkbox.h"
@@ -25,14 +24,15 @@ limitations under the License.
 #include "gradienticon.h"
 #include "groupbox.h"
 #include "gui.h"
-#include "piano.h"
 #include "label.h"
 #include "listbox.h"
 #include "memoryindicator.h"
 #include "messagebox.h"
 #include "numberbox.h"
 #include "numberslider.h"
+#include "piano.h"
 #include "pixmap.h"
+#include "platform.h"
 #include "radiobutton.h"
 #include "tabbox.h"
 #include "theme.h"

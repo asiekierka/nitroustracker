@@ -14,35 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "tobkit/widget.h"
 
 using namespace tobkit;
 
-#include "font_8x11_raw.h"
-#include "font_8x11.inc"
 #include "font_3x5_raw.h"
+#include "font_8x11.inc"
+#include "font_8x11_raw.h"
 
-
-#define	abs(x)	(x<0?(-x):(x))
+#define abs(x) (x < 0 ? (-x) : (x))
 
 /* ===================== PUBLIC ===================== */
 
-Widget::Widget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible, bool _occluded)
-	:x(_x), y(_y), width(_width), height(_height), enabled(true), do_overdraw(true), screen(_screen), visible(_visible), occluded(_occluded)
+Widget::Widget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+               bool _visible, bool _occluded)
+    : x(_x), y(_y), width(_width), height(_height), enabled(true),
+      do_overdraw(true), screen(_screen), visible(_visible), occluded(_occluded)
 {
-
 }
 
 // Get position
 void Widget::getPos(u16 *_x, u16 *_y, u16 *_width, u16 *_height)
 {
-	if (_x != NULL) *_x = x;
-	if (_y != NULL) *_y = y;
-	if (_width != NULL) *_width = width;
-	if (_height != NULL) *_height = height;
+	if (_x != NULL)
+		*_x = x;
+	if (_y != NULL)
+		*_y = y;
+	if (_width != NULL)
+		*_width = width;
+	if (_height != NULL)
+		*_height = height;
 }
 
 void Widget::setPos(u16 _x, u16 _y)
@@ -54,34 +58,32 @@ void Widget::setPos(u16 _x, u16 _y)
 // Toggle visibility
 void Widget::show(void)
 {
-	if(!visible)
-	{
+	if (!visible) {
 		visible = true;
-		if(!occluded)
+		if (!occluded)
 			pleaseDraw();
 	}
 }
 
 void Widget::hide(void)
 {
-	if(isExposed())
+	if (isExposed())
 		overdraw();
 	visible = false;
 }
 
 void Widget::occlude(void)
 {
-	if(isExposed())
-			overdraw();
+	if (isExposed())
+		overdraw();
 	occluded = true;
 }
 
 void Widget::reveal(void)
 {
-	if(occluded)
-	{
+	if (occluded) {
 		occluded = false;
-		if(visible)
+		if (visible)
 			pleaseDraw();
 	}
 }
@@ -97,8 +99,7 @@ void Widget::resize(u16 w, u16 h)
 // Toggle enabled/disabled
 void Widget::enable(void)
 {
-	if(!enabled)
-	{
+	if (!enabled) {
 		enabled = true;
 		pleaseDraw();
 	}
@@ -106,8 +107,7 @@ void Widget::enable(void)
 
 void Widget::disable(void)
 {
-	if(enabled)
-	{
+	if (enabled) {
 		enabled = false;
 		pleaseDraw();
 	}
@@ -118,21 +118,30 @@ void Widget::disable(void)
 bool Widget::set_visible(bool value)
 {
 	bool changed = value != visible;
-	if (value) show(); else hide();
+	if (value)
+		show();
+	else
+		hide();
 	return changed;
 }
 
 bool Widget::set_occluded(bool value)
 {
 	bool changed = value != occluded;
-	if (value) occlude(); else reveal();
+	if (value)
+		occlude();
+	else
+		reveal();
 	return changed;
 }
 
 bool Widget::set_enabled(bool value)
 {
 	bool changed = value != enabled;
-	if (value) enable(); else disable();
+	if (value)
+		enable();
+	else
+		disable();
 	return changed;
 }
 
@@ -145,37 +154,39 @@ void Widget::set_overdraw(bool value)
 // Draw utility functions
 
 ITCM_CODE
-void Widget::drawString(const char* str, u16 tx, u16 ty, u16 color, u16 maxwidth, u16 maxheight)
+void Widget::drawString(const char *str, u16 tx, u16 ty, u16 color,
+                        u16 maxwidth, u16 maxheight)
 {
 	// Draw text
 	u8 charidx;
 	u16 i, j;
-	u16 drawpos = 0; u8 col;
+	u16 drawpos = 0;
+	u8 col;
 
 	u8 fontheight = font_8x11.height;
 	u8 height = fontheight;
-	if (height > maxheight) height = maxheight;
+	if (height > maxheight)
+		height = maxheight;
 
-	while(*str)
-	{
-		charidx = font_8x11.char_index[(u8) *str];
+	while (*str) {
+		charidx = font_8x11.char_index[(u8)*str];
 		u8 width = font_8x11.char_widths[charidx];
-		if ((drawpos+width) > maxwidth)
+		if ((drawpos + width) > maxwidth)
 			break;
 
-		for(j=0;j<height;++j) {
-			col = font_8x11.data[fontheight*charidx + j];
-			for(i=0;i<8;++i,col>>=1) {
+		for (j = 0; j < height; ++j) {
+			col = font_8x11.data[fontheight * charidx + j];
+			for (i = 0; i < 8; ++i, col >>= 1) {
 				// Print a character from the bitmap font
 				// each char is 8 pixels wide, and 8 pixels
 				// are in a byte.
-				if(col & 1) {
-					drawPixel(i+tx+drawpos, j+ty, color);
+				if (col & 1) {
+					drawPixel(i + tx + drawpos, j + ty, color);
 				}
 			}
 		}
 
-		drawpos += width+1;
+		drawpos += width + 1;
 		str++;
 	}
 }
@@ -183,13 +194,13 @@ void Widget::drawString(const char* str, u16 tx, u16 ty, u16 color, u16 maxwidth
 ITCM_CODE
 void Widget::drawSmallChar(u8 c, u16 cx, u16 cy, u16 col)
 {
-	u16 i,j;
-	for(j=0;j<5;++j) {
-		for(i=0;i<3;++i) {
-			u16 pixelidx = 3*GLYPH_3X5_COUNT*j+3*c+i;
-			if(font_3x5_raw[pixelidx/8]&BIT(pixelidx%8)) {
+	u16 i, j;
+	for (j = 0; j < 5; ++j) {
+		for (i = 0; i < 3; ++i) {
+			u16 pixelidx = 3 * GLYPH_3X5_COUNT * j + 3 * c + i;
+			if (font_3x5_raw[pixelidx / 8] & BIT(pixelidx % 8)) {
 				//*(*vram+SCREEN_WIDTH*(2+cy*8+j)+1+cx*4+i) = col;
-				drawPixel(cx+i, cy+j, col);
+				drawPixel(cx + i, cy + j, col);
 			}
 		}
 	}
@@ -198,14 +209,14 @@ void Widget::drawSmallChar(u8 c, u16 cx, u16 cy, u16 col)
 ITCM_CODE
 void Widget::drawBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 {
-	u32 i,j;
-	for(i=0;i<tw;++i) {
-		drawPixel(i+tx, ty, col);
-		drawPixel(i+tx, ty+th-1, col);
+	u32 i, j;
+	for (i = 0; i < tw; ++i) {
+		drawPixel(i + tx, ty, col);
+		drawPixel(i + tx, ty + th - 1, col);
 	}
-	for(j=1;j<th-1;++j) {
-		drawPixel(tx, ty+j, col);
-		drawPixel(tx+tw-1, ty+j, col);
+	for (j = 1; j < th - 1; ++j) {
+		drawPixel(tx, ty + j, col);
+		drawPixel(tx + tw - 1, ty + j, col);
 	}
 }
 
@@ -213,33 +224,38 @@ ITCM_CODE
 void Widget::drawFullBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 {
 #if defined(NT_PLATFORM_3DS)
-	if (th == 0) return;
+	if (th == 0)
+		return;
 
-	for(int j=0;j<tw;++j)
-		screen->fillColumn(x+tx+j, y+ty, th, col);
+	for (int j = 0; j < tw; ++j)
+		screen->fillColumn(x + tx + j, y + ty, th, col);
 #else
-	if (tw == 0) return;
+	if (tw == 0)
+		return;
 
-	for(int j=0;j<th;++j)
-		screen->fillRow(x+tx, y+ty+j, tw, col);
+	for (int j = 0; j < th; ++j)
+		screen->fillRow(x + tx, y + ty + j, tw, col);
 #endif
 }
 
-void Widget::drawBorder(u16 col) {
+void Widget::drawBorder(u16 col)
+{
 	drawBox(0, 0, width, height, col);
 }
 
 ITCM_CODE
-void Widget::drawHLine(u16 tx, u16 ty, u16 length, u16 col) {
-	for(int i=0;i<length;++i) {
-		drawPixel(i+tx, ty, col);
+void Widget::drawHLine(u16 tx, u16 ty, u16 length, u16 col)
+{
+	for (int i = 0; i < length; ++i) {
+		drawPixel(i + tx, ty, col);
 	}
 }
 
 ITCM_CODE
-void Widget::drawVLine(u16 tx, u16 ty, u16 length, u16 col) {
-	for(int i=0;i<length;++i) {
-		drawPixel(tx, i+ty, col);
+void Widget::drawVLine(u16 tx, u16 ty, u16 length, u16 col)
+{
+	for (int i = 0; i < length; ++i) {
+		drawPixel(tx, i + ty, col);
 	}
 }
 
@@ -253,39 +269,38 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 	y2 = ty2 + y;
 
 	// Guarantees that all lines go from left to right
-	if ( x2 < x1 )
-	{
+	if (x2 < x1) {
 		u32 tmp;
-		tmp = x2; x2 = x1; x1 = tmp;
-		tmp = y2; y2 = y1; y1 = tmp;
+		tmp = x2;
+		x2 = x1;
+		x1 = tmp;
+		tmp = y2;
+		y2 = y1;
+		y1 = tmp;
 	}
 
-	s32 dy,dx;
+	s32 dy, dx;
 	dy = y2 - y1;
 	dx = x2 - x1;
 
 	// If the gradient is greater than one we have to flip the axes
-	if ( abs(dy) < dx )
-	{
-		u16 xp,yp;
+	if (abs(dy) < dx) {
+		u16 xp, yp;
 		s32 d;
 		s32 add = 1;
 
 		xp = x1;
 		yp = y1;
 
-		if(dy < 0)
-		{
+		if (dy < 0) {
 			dy = -dy;
-			add =- 1;
+			add = -1;
 		}
 
-		d = 2*dy - dx;
+		d = 2 * dy - dx;
 
-		for(; xp<=x2; xp++)
-		{
-			if(d > 0)
-			{
+		for (; xp <= x2; xp++) {
+			if (d > 0) {
 				yp += add;
 				d -= 2 * dx;
 			}
@@ -294,20 +309,25 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 
 			d += 2 * dy;
 		}
-	}
-	else
-	{
+	} else {
 		u16 tmp;
-		tmp = x1; x1 = y1; y1 = tmp;
-		tmp = x2; x2 = y2; y2 = tmp;
+		tmp = x1;
+		x1 = y1;
+		y1 = tmp;
+		tmp = x2;
+		x2 = y2;
+		y2 = tmp;
 
-		if ( x2 < x1 )
-		{
-			tmp = x2; x2 = x1; x1 = tmp;
-			tmp = y2; y2 = y1; y1 = tmp;
+		if (x2 < x1) {
+			tmp = x2;
+			x2 = x1;
+			x1 = tmp;
+			tmp = y2;
+			y2 = y1;
+			y1 = tmp;
 		}
 
-		u16 xp,yp;
+		u16 xp, yp;
 		s32 d;
 
 		dy = y2 - y1;
@@ -315,10 +335,9 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 
 		s32 add = 1;
 
-		if(dy < 0)
-		{
+		if (dy < 0) {
 			dy = -dy;
-			add=-1;
+			add = -1;
 		}
 
 		xp = x1;
@@ -326,10 +345,9 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 
 		d = 2 * dy - dx;
 
-		for(; xp<=x2; xp++) {
+		for (; xp <= x2; xp++) {
 
-			if(d > 0)
-			{
+			if (d > 0) {
 				yp += add;
 				d -= 2 * dx;
 			}
@@ -342,7 +360,8 @@ void Widget::drawBresLine(u16 tx1, u16 ty1, u16 tx2, u16 ty2, u16 col)
 }
 
 ITCM_CODE
-void Widget::drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th) {
+void Widget::drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th)
+{
 	if (col1 == col2) {
 		drawFullBox(tx, ty, tw, th, col1);
 		return;
@@ -351,19 +370,22 @@ void Widget::drawGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th) {
 	u16 j;
 	u16 col;
 
-	if (tw == 0) return;
+	if (tw == 0)
+		return;
 
-	int step = div32((1<<12), th);
+	int step = div32((1 << 12), th);
 	int pos = 0;
 
-	for(j=0;j<th;++j,pos+=step) {
+	for (j = 0; j < th; ++j, pos += step) {
 		col = interpolateColor(col1, col2, pos);
-		screen->fillRow(x+tx, y+ty+j, tw, col);
+		screen->fillRow(x + tx, y + ty + j, tw, col);
 	}
 }
 
 ITCM_CODE
-void Widget::drawHorizontalGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, u16 th) {
+void Widget::drawHorizontalGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw,
+                                    u16 th)
+{
 	if (col1 == col2) {
 		drawFullBox(tx, ty, tw, th, col1);
 		return;
@@ -372,16 +394,17 @@ void Widget::drawHorizontalGradient(u16 col1, u16 col2, u16 tx, u16 ty, u16 tw, 
 	u16 i, j;
 	u16 col;
 
-	if (tw == 0) return;
+	if (tw == 0)
+		return;
 
-	int step = div32((1<<12), tw);
+	int step = div32((1 << 12), tw);
 	int pos = 0;
 
-	for(j=0;j<tw;++j,pos+=step) {
+	for (j = 0; j < tw; ++j, pos += step) {
 		col = interpolateColor(col1, col2, pos);
 
-		for (i=0;i<th;++i) {
-			drawPixel(tx+j, ty+i, col);
+		for (i = 0; i < th; ++i) {
+			drawPixel(tx + j, ty + i, col);
 		}
 	}
 }
@@ -391,33 +414,39 @@ ITCM_CODE
 u32 Widget::getStringWidth(const char *str, u16 limit)
 {
 	u32 res = 0;
-	for(u16 i=0; i<limit; ++i, ++str) {
+	for (u16 i = 0; i < limit; ++i, ++str) {
 		char c = *str;
-		if (c == '\0') break;
-		res += font_8x11.char_widths[font_8x11.char_index[(u8) *str]] + 1;
+		if (c == '\0')
+			break;
+		res += font_8x11.char_widths[font_8x11.char_index[(u8)*str]] + 1;
 	}
 	return res ? res - 1 : 0;
 }
 
 ITCM_CODE
-void Widget::drawMonochromeIcon(u16 tx, u16 ty, u16 tw, u16 th, const u8 *icon, u16 color) {
+void Widget::drawMonochromeIcon(u16 tx, u16 ty, u16 tw, u16 th, const u8 *icon,
+                                u16 color)
+{
 	u16 pixelidx = 0;
-	for(u16 j=0;j<th;++j) {
-		for(u16 i=0;i<tw;++i,++pixelidx) {
-			if(icon[pixelidx/8] & BIT(pixelidx%8) ) {
-				drawPixel(tx+i, ty+j, color);
+	for (u16 j = 0; j < th; ++j) {
+		for (u16 i = 0; i < tw; ++i, ++pixelidx) {
+			if (icon[pixelidx / 8] & BIT(pixelidx % 8)) {
+				drawPixel(tx + i, ty + j, color);
 			}
 		}
 	}
 }
 
 ITCM_CODE
-void Widget::drawMonochromeIconOffset(u16 tx, u16 ty, u16 tw, u16 th, u16 ix, u16 iy, u16 iw, u16 ih, const u8 *icon, u16 color) {
-	for(u16 j=0;j<th;++j) {
-		u16 pixelidx = ((iy+j) * iw) + ix;
-		for(u16 i=0;i<tw;++i,++pixelidx) {
-			if(icon[pixelidx/8] & BIT(pixelidx%8) ) {
-				drawPixel(tx+i, ty+j, color);
+void Widget::drawMonochromeIconOffset(u16 tx, u16 ty, u16 tw, u16 th, u16 ix,
+                                      u16 iy, u16 iw, u16 ih, const u8 *icon,
+                                      u16 color)
+{
+	for (u16 j = 0; j < th; ++j) {
+		u16 pixelidx = ((iy + j) * iw) + ix;
+		for (u16 i = 0; i < tw; ++i, ++pixelidx) {
+			if (icon[pixelidx / 8] & BIT(pixelidx % 8)) {
+				drawPixel(tx + i, ty + j, color);
 			}
 		}
 	}
@@ -426,7 +455,7 @@ void Widget::drawMonochromeIconOffset(u16 tx, u16 ty, u16 tw, u16 th, u16 ix, u1
 // Stylus utility functions
 bool Widget::isInRect(u16 x, u16 y, u16 x1, u16 y1, u16 x2, u16 y2)
 {
-	return ( (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2) );
+	return ((x >= x1) && (x <= x2) && (y >= y1) && (y <= y2));
 }
 
 bool Widget::isExposed(void)

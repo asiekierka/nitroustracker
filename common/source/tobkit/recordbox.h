@@ -25,65 +25,68 @@
 #ifndef _RECORDBOX_H_
 #define _RECORDBOX_H_
 
-#include "tobkit/widget.h"
 #include "tobkit/button.h"
 #include "tobkit/label.h"
+#include "tobkit/widget.h"
 
 #include "ntxm/song.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-#define RECORDBOX_WIDTH			150
-#define RECORDBOX_HEIGHT		64
-#define RECORDBOX_SOUNDDATA_SECONDS 8 
+#define RECORDBOX_WIDTH 150
+#define RECORDBOX_HEIGHT 64
+#define RECORDBOX_SOUNDDATA_SECONDS 8
 #ifdef NT_PLATFORM_3DS
-#define RECORDBOX_SAMPLING_FREQ		16364
-#define RECORDBOX_SOUNDDATA_SIZE	0x40000
+#define RECORDBOX_SAMPLING_FREQ 16364
+#define RECORDBOX_SOUNDDATA_SIZE 0x40000
 #else
-#define RECORDBOX_SAMPLING_FREQ		16384
-#define RECORDBOX_SOUNDDATA_SIZE	((RECORDBOX_SOUNDDATA_SECONDS)*2*(RECORDBOX_SAMPLING_FREQ))
+#define RECORDBOX_SAMPLING_FREQ 16384
+#define RECORDBOX_SOUNDDATA_SIZE                                               \
+	((RECORDBOX_SOUNDDATA_SECONDS) * 2 * (RECORDBOX_SAMPLING_FREQ))
 #endif
-#define RECORDBOX_CROP_SAMPLES_END	500
-#define RECORDBOX_CROP_SAMPLES_START	100
+#define RECORDBOX_CROP_SAMPLES_END 500
+#define RECORDBOX_CROP_SAMPLES_START 100
 
-class RecordBox: public Widget {
-	public:
-		// Constructor sets base variables
-		RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(void), Sample *_sample, Instrument *_instrument,
-			    u8 _smpidx);
-		~RecordBox(void);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-		void buttonPress(u16 button);
-		void buttonRelease(u16 button);
-		
-		Sample *getSample(void);
-		void setTheme(Theme *theme_, u16 bgcolor_);
-		
-	private:
-		void draw(void);
-		bool startRecording(void);
-		void stopRecording(void);
-		
-		bool recording, btndown;
+class RecordBox : public Widget
+{
+public:
+	// Constructor sets base variables
+	RecordBox(Screen *_screen, void (*_onOk)(void), void (*_onCancel)(void),
+	          Sample *_sample, Instrument *_instrument, u8 _smpidx);
+	~RecordBox(void);
 
-		void (*onOk)(void);
-		void (*onCancel)(void);
-		
-		const char *title;
-		Label *labelmsg, *labelmsg2, *labelrec;
-		Button *buttoncancel;
-		Sample *sample;
-		Instrument *instrument;
-		u8 smpidx;
-		u16 *sound_data;
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
+	void buttonPress(u16 button);
+	void buttonRelease(u16 button);
+
+	Sample *getSample(void);
+	void setTheme(Theme *theme_, u16 bgcolor_);
+
+private:
+	void draw(void);
+	bool startRecording(void);
+	void stopRecording(void);
+
+	bool recording, btndown;
+
+	void (*onOk)(void);
+	void (*onCancel)(void);
+
+	const char *title;
+	Label *labelmsg, *labelmsg2, *labelrec;
+	Button *buttoncancel;
+	Sample *sample;
+	Instrument *instrument;
+	u8 smpidx;
+	u16 *sound_data;
 };
 
-};
+}; // namespace tobkit
 
 #endif

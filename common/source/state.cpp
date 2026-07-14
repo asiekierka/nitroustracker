@@ -24,17 +24,19 @@
 
 #include "state.h"
 
-#include <stdlib.h>
 #include "ntxm/ntxmtools.h"
+#include <stdlib.h>
 
-State::State(void) {
-	song_filename = (char*) ntxm_cmalloc(STATE_FILENAME_LEN + 1);
-	sample_filename = (char*) ntxm_cmalloc(STATE_FILENAME_LEN + 1);
-	
+State::State(void)
+{
+	song_filename = (char *)ntxm_cmalloc(STATE_FILENAME_LEN + 1);
+	sample_filename = (char *)ntxm_cmalloc(STATE_FILENAME_LEN + 1);
+
 	reset();
 }
 
-State::~State(void) {
+State::~State(void)
+{
 	ntxm_free(song_filename);
 	ntxm_free(sample_filename);
 }
@@ -55,7 +57,7 @@ void State::resetSong(void) // resets only song-specific settings
 	cursor_row = 0;
 	channel = 0;
 	add = 1;
-	basenote = 4*12;
+	basenote = 4 * 12;
 	instrument = 0;
 	sample = 0;
 	recording = false;

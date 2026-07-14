@@ -23,10 +23,11 @@ extern "C" {
 
 // Fixed point conversion macros
 
-#define inttof32(n)         ((n) * (1 << 12)) ///< Convert int to f32
-#define f32toint(n)         ((n) / (1 << 12)) ///< Convert f32 to int
-#define floattof32(n)       ((int)((n) * (1 << 12))) ///< Convert float to f32
-#define f32tofloat(n)       (((float)(n)) / (float)(1 << 12)) ///< Convert f32 to float
+#define inttof32(n) ((n) * (1 << 12))          ///< Convert int to f32
+#define f32toint(n) ((n) / (1 << 12))          ///< Convert f32 to int
+#define floattof32(n) ((int)((n) * (1 << 12))) ///< Convert float to f32
+#define f32tofloat(n)                                                          \
+	(((float)(n)) / (float)(1 << 12)) ///< Convert f32 to float
 
 // Fixed Point versions
 
@@ -41,7 +42,7 @@ extern "C" {
 ///     Returns 20.12 result.
 static inline int32_t divf32(int32_t num, int32_t den)
 {
-    return ((int64_t)((uint64_t)(int64_t)num << 12)) / den;
+	return ((int64_t)((uint64_t)(int64_t)num << 12)) / den;
 }
 
 /// Fixed point multiply.
@@ -55,8 +56,8 @@ static inline int32_t divf32(int32_t num, int32_t den)
 ///     Returns 20.12 result.
 static inline int32_t mulf32(int32_t a, int32_t b)
 {
-    int64_t result = (int64_t)a * (int64_t)b;
-    return (int32_t)(result >> 12);
+	int64_t result = (int64_t)a * (int64_t)b;
+	return (int32_t)(result >> 12);
 }
 
 #pragma GCC diagnostic push
@@ -75,7 +76,7 @@ static inline int32_t mulf32(int32_t a, int32_t b)
 ///     20.12 result.
 static inline uint32_t sqrtf32(uint32_t a)
 {
-    return (uint32_t)__builtin_sqrt((double)((uint64_t)a << 12));
+	return (uint32_t)__builtin_sqrt((double)((uint64_t)a << 12));
 }
 
 // restore previous diagnostic settings (works with GCC and clang)
@@ -92,9 +93,8 @@ static inline uint32_t sqrtf32(uint32_t a)
 ///     32 bit integer remainder.
 static inline int32_t mod32(int32_t num, int32_t den)
 {
-    return num % den;
+	return num % den;
 }
-
 
 /// Integer 64 bit divide.
 ///
@@ -107,7 +107,7 @@ static inline int32_t mod32(int32_t num, int32_t den)
 ///     32 bit integer result.
 static inline int32_t div64(int64_t num, int32_t den)
 {
-    return num / den;
+	return num / den;
 }
 
 /// Integer 64 bit modulo.
@@ -121,7 +121,7 @@ static inline int32_t div64(int64_t num, int32_t den)
 ///     Returns 32 bit integer remainder.
 static inline int32_t mod64(int64_t num, int32_t den)
 {
-    return num % den;
+	return num % den;
 }
 
 /// 32-bit integer sqrt.
@@ -133,7 +133,7 @@ static inline int32_t mod64(int64_t num, int32_t den)
 ///     32 bit integer result.
 static inline uint32_t sqrt32(uint32_t a)
 {
-    return (uint32_t)__builtin_sqrt((double)a);
+	return (uint32_t)__builtin_sqrt((double)a);
 }
 
 #ifdef __cplusplus

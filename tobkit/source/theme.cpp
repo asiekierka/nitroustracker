@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include "tobkit/platform.h"
 #include "tobkit/theme.h"
+#include "tobkit/platform.h"
 #include <stdio.h>
 #include <string.h>
 
 using namespace tobkit;
 
-ColorScheme::ColorScheme() {
+ColorScheme::ColorScheme()
+{
 	col_bg = RGB5A1(4, 6, 15, 1);
 	col_env_bg = col_bg;
 	col_medium_bg = RGB5A1(9, 11, 17, 1);
@@ -127,13 +128,13 @@ ColorScheme::ColorScheme() {
 	col_messagebox_title_text = col_text;
 	col_fxkeyboard_col1 = col_piano_full_col1;
 	col_fxkeyboard_col2 = col_piano_full_col2;
-	col_fxkeyboard_col1_disabled = col_light_ctrl_disabled;	
+	col_fxkeyboard_col1_disabled = col_light_ctrl_disabled;
 	col_fxkeyboard_col2_disabled = col_dark_ctrl_disabled;
 	col_fxkeyboard_btn_label = col_piano_label;
-	col_fxkeyboard_cmd_desc = col_text_light;	
-	col_fxkeyboard_cmd_desc_disabled = col_dark_ctrl_disabled;	
-	col_fxkeyboard_minilabel_x = col_pv_notes &~ RGB5A1_ALPHA_BIT;	
-	col_fxkeyboard_minilabel_y = col_pv_effect &~ RGB5A1_ALPHA_BIT;
+	col_fxkeyboard_cmd_desc = col_text_light;
+	col_fxkeyboard_cmd_desc_disabled = col_dark_ctrl_disabled;
+	col_fxkeyboard_minilabel_x = col_pv_notes & ~RGB5A1_ALPHA_BIT;
+	col_fxkeyboard_minilabel_y = col_pv_effect & ~RGB5A1_ALPHA_BIT;
 	col_typewriter_disabled_key = RGB5A1(25, 25, 25, 1);
 	col_light_ctrl_pressed = col_dark_ctrl;
 	col_dark_ctrl_pressed = col_light_ctrl;
@@ -147,16 +148,16 @@ ColorScheme::ColorScheme() {
 	col_smp_offset_guide = col_list_sep_vertical;
 }
 
-Theme::Theme(char* themepath, bool use_fat)
+Theme::Theme(char *themepath, bool use_fat)
 {
-	if (use_fat && themepath != NULL)
-	{
+	if (use_fat && themepath != NULL) {
 		loadTheme(themepath);
 	}
 }
 
-bool Theme::loadTheme(const char* themefile) {
-	FILE* themedef = fopen(themefile, "r");
+bool Theme::loadTheme(const char *themefile)
+{
+	FILE *themedef = fopen(themefile, "r");
 	if (themedef != NULL) {
 		tobkit::ColorScheme scheme;
 		bool result = parseTheme(themedef, scheme.data);
@@ -172,16 +173,16 @@ bool Theme::loadTheme(const char* themefile) {
 
 			debugprintf("loaded theme '%s'\n", themefile);
 			return true;
-		}
-		else
-			debugprintf("failed to parse theme at '%s', using builtin\n", themefile);
-	}
-	else
+		} else
+			debugprintf("failed to parse theme at '%s', using builtin\n",
+			            themefile);
+	} else
 		debugprintf("no theme found at '%s', using builtin\n", themefile);
 	return false;
 }
 
-void Theme::loadDefault(void) {
+void Theme::loadDefault(void)
+{
 	tobkit::ColorScheme scheme;
 
 	memcpy(data, scheme.data, sizeof(data));
@@ -191,8 +192,7 @@ void Theme::loadDefault(void) {
 
 /* ===================== PRIVATE ===================== */
 
-
-bool Theme::stringToRGB15(char* str, u16* col)
+bool Theme::stringToRGB15(char *str, u16 *col)
 {
 	if (str == NULL)
 		return false;
@@ -208,31 +208,33 @@ bool Theme::stringToRGB15(char* str, u16* col)
 }
 
 // not needed as we are not writing themes currently
-void Theme::RGB15ToString(u16 col, char* str)
+void Theme::RGB15ToString(u16 col, char *str)
 {
-	sprintf(str, "%02x%02x%02x", (col & 0x1f) << 3, ((col >> 5) & 0x1f) << 3, (col >> 10 & 0x1f) << 3);
+	sprintf(str, "%02x%02x%02x", (col & 0x1f) << 3, ((col >> 5) & 0x1f) << 3,
+	        (col >> 10 & 0x1f) << 3);
 }
 
-
-bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
+bool Theme::parseTheme(FILE *theme_, u16 *theme_cols)
+{
 	if (theme_ == NULL || theme_cols == NULL)
 		return false;
 
 	int r, g, b, k, l, parsed;
 
-	bool theme_has_key[NUM_COLORS] = { 0 };
+	bool theme_has_key[NUM_COLORS] = {0};
 
-	for (l = 0;;++l) {
+	for (l = 0;; ++l) {
 		parsed = fscanf(theme_, "%d=%02x%02x%02x%*[^\n]\n", &k, &r, &g, &b);
 		if (parsed == EOF)
 			break;
-			
+
 		if (parsed != 4 || k < 0) {
 			debugprintf("theme parse error on line %d\n", l + 1);
 			return false;
-		}
-		else if (k > NUM_COLORS - 1) {
-			debugprintf("theme parse error on line %d (key out of bounds, max %d)  \n", l + 1, NUM_COLORS - 1);
+		} else if (k > NUM_COLORS - 1) {
+			debugprintf(
+			    "theme parse error on line %d (key out of bounds, max %d)  \n",
+			    l + 1, NUM_COLORS - 1);
 			return false;
 		}
 		theme_cols[k] = RGB5A1(r >> 3, g >> 3, b >> 3, 1);
@@ -243,37 +245,59 @@ bool Theme::parseTheme(FILE* theme_, u16* theme_cols) {
 		ntxm_dprintf("ignoring empty theme\n");
 		return false;
 	}
-	
+
 	// check if specific colours were specified by the theme
 	// if not replace them with their previous colour from the same theme
-	if (!theme_has_key[99]) theme_cols[99] = theme_cols[3];		// Sample editor zoom buttons
-	if (!theme_has_key[100]) theme_cols[100] = theme_cols[13];	// Message box title gradient col1
-	if (!theme_has_key[101]) theme_cols[101] = theme_cols[14];	// Message box title gradient col2
-	if (!theme_has_key[102]) theme_cols[102] = theme_cols[27];	// Message box title text
+	if (!theme_has_key[99])
+		theme_cols[99] = theme_cols[3]; // Sample editor zoom buttons
+	if (!theme_has_key[100])
+		theme_cols[100] = theme_cols[13]; // Message box title gradient col1
+	if (!theme_has_key[101])
+		theme_cols[101] = theme_cols[14]; // Message box title gradient col2
+	if (!theme_has_key[102])
+		theme_cols[102] = theme_cols[27]; // Message box title text
 
-	if (!theme_has_key[103]) theme_cols[103] = theme_cols[84];	// Fxkb button gradient 1
-	if (!theme_has_key[104]) theme_cols[104] = theme_cols[85];	// Fxkb button gradient 2
-	if (!theme_has_key[105]) theme_cols[105] = theme_cols[7];	// Fxkb disabled button gradient 1 
-	if (!theme_has_key[106]) theme_cols[106] = theme_cols[8];	// Fxkb disabled button gradient 2
-	if (!theme_has_key[107]) theme_cols[107] = theme_cols[35];	// Fxkb big button label
-	if (!theme_has_key[108]) theme_cols[108] = theme_cols[28];	// Fxkb command desc label
-	if (!theme_has_key[109]) theme_cols[109] = theme_cols[8];	// Fxkb disabled command desc label
-	if (!theme_has_key[110]) theme_cols[110] = theme_cols[61];	// Fxkb button param label 'X'
-	if (!theme_has_key[111]) theme_cols[111] = theme_cols[67];	// Fxkb button param label 'Y'
-	if (!theme_has_key[112]) theme_cols[112] = theme_cols[93];	// Typewriter disabled key
+	if (!theme_has_key[103])
+		theme_cols[103] = theme_cols[84]; // Fxkb button gradient 1
+	if (!theme_has_key[104])
+		theme_cols[104] = theme_cols[85]; // Fxkb button gradient 2
+	if (!theme_has_key[105])
+		theme_cols[105] = theme_cols[7]; // Fxkb disabled button gradient 1
+	if (!theme_has_key[106])
+		theme_cols[106] = theme_cols[8]; // Fxkb disabled button gradient 2
+	if (!theme_has_key[107])
+		theme_cols[107] = theme_cols[35]; // Fxkb big button label
+	if (!theme_has_key[108])
+		theme_cols[108] = theme_cols[28]; // Fxkb command desc label
+	if (!theme_has_key[109])
+		theme_cols[109] = theme_cols[8]; // Fxkb disabled command desc label
+	if (!theme_has_key[110])
+		theme_cols[110] = theme_cols[61]; // Fxkb button param label 'X'
+	if (!theme_has_key[111])
+		theme_cols[111] = theme_cols[67]; // Fxkb button param label 'Y'
+	if (!theme_has_key[112])
+		theme_cols[112] = theme_cols[93]; // Typewriter disabled key
 
-	if (!theme_has_key[113]) theme_cols[113] = theme_cols[6];   // Light button gradient (pressed)
-	if (!theme_has_key[114]) theme_cols[114] = theme_cols[5];   // Dark button gradient (pressed)
-	if (!theme_has_key[115]) theme_cols[115] = theme_cols[29];  // Button text (pressed)
-	if (!theme_has_key[116]) theme_cols[116] = theme_cols[25];  // Button icon (pressed)
-	if (!theme_has_key[117]) theme_cols[117] = theme_cols[81];  // Togglebutton background (on) 1
-	if (!theme_has_key[118]) theme_cols[118] = theme_cols[81];  // Togglebutton background (on) 2
-	if (!theme_has_key[119]) theme_cols[119] = theme_cols[81];  // Togglebutton background (off) 2
-	if (!theme_has_key[120]) theme_cols[120] = theme_cols[74];  // Mute/solo pressed button text
-	if (!theme_has_key[121]) theme_cols[121] = theme_cols[24];  // Selected tab icon
-	if (!theme_has_key[122]) theme_cols[122] = theme_cols[80];  // Sample display offset preview
-
-
+	if (!theme_has_key[113])
+		theme_cols[113] = theme_cols[6]; // Light button gradient (pressed)
+	if (!theme_has_key[114])
+		theme_cols[114] = theme_cols[5]; // Dark button gradient (pressed)
+	if (!theme_has_key[115])
+		theme_cols[115] = theme_cols[29]; // Button text (pressed)
+	if (!theme_has_key[116])
+		theme_cols[116] = theme_cols[25]; // Button icon (pressed)
+	if (!theme_has_key[117])
+		theme_cols[117] = theme_cols[81]; // Togglebutton background (on) 1
+	if (!theme_has_key[118])
+		theme_cols[118] = theme_cols[81]; // Togglebutton background (on) 2
+	if (!theme_has_key[119])
+		theme_cols[119] = theme_cols[81]; // Togglebutton background (off) 2
+	if (!theme_has_key[120])
+		theme_cols[120] = theme_cols[74]; // Mute/solo pressed button text
+	if (!theme_has_key[121])
+		theme_cols[121] = theme_cols[24]; // Selected tab icon
+	if (!theme_has_key[122])
+		theme_cols[122] = theme_cols[80]; // Sample display offset preview
 
 	return true;
 }

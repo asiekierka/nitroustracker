@@ -15,8 +15,8 @@ limitations under the License.
 ======================================================================*/
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tobkit/bitbutton.h"
 
@@ -24,27 +24,31 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-BitButton::BitButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, const u8 *_bitmap, u8 _bmpwidth,
-	u8 _bmpheight, u8 _bmpx, u8 _bmpy, bool _visible)
-	:Widget(_x, _y, _width, _height, _screen, _visible),
-	 penIsDown(false), bitmap(_bitmap), bmpwidth(_bmpwidth), bmpheight(_bmpheight), bmpx(_bmpx), bmpy(_bmpy)
+BitButton::BitButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+                     const u8 *_bitmap, u8 _bmpwidth, u8 _bmpheight, u8 _bmpx,
+                     u8 _bmpy, bool _visible)
+    : Widget(_x, _y, _width, _height, _screen, _visible), penIsDown(false),
+      bitmap(_bitmap), bmpwidth(_bmpwidth), bmpheight(_bmpheight), bmpx(_bmpx),
+      bmpy(_bmpy)
 {
 	onPush = 0;
 }
 
-void BitButton::registerPushCallback(void (*onPush_)(void)) {
+void BitButton::registerPushCallback(void (*onPush_)(void))
+{
 	onPush = onPush_;
 }
 
 // Drawing request
-void BitButton::pleaseDraw(void) {
+void BitButton::pleaseDraw(void)
+{
 	draw(penIsDown);
 }
 
 // Event calls
 void BitButton::penDown(u16 x, u16 y)
 {
-	if(!enabled)
+	if (!enabled)
 		return;
 	penIsDown = true;
 	draw(1);
@@ -52,17 +56,18 @@ void BitButton::penDown(u16 x, u16 y)
 
 void BitButton::penUp(u16 x, u16 y)
 {
-	if (!enabled) return;
+	if (!enabled)
+		return;
 	penIsDown = false;
 	draw(0);
-	if(onPush) {
+	if (onPush) {
 		onPush();
 	}
 }
 
 void BitButton::buttonPress(u16 button)
 {
-	if(onPush) {
+	if (onPush) {
 		onPush();
 	}
 }
@@ -71,19 +76,25 @@ void BitButton::buttonPress(u16 button)
 
 void BitButton::draw(u8 down)
 {
-	if(!isExposed()) return;
+	if (!isExposed())
+		return;
 
-	if(enabled)
-	{
-		if(down) {
-			drawGradient(theme->col_dark_ctrl_pressed, theme->col_light_ctrl_pressed, 1, 1, width - 2, height - 2);
+	if (enabled) {
+		if (down) {
+			drawGradient(theme->col_dark_ctrl_pressed,
+			             theme->col_light_ctrl_pressed, 1, 1, width - 2,
+			             height - 2);
 		} else {
-			drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1, width - 2, height - 2);
+			drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1,
+			             width - 2, height - 2);
 		}
 	} else {
-		drawGradient(theme->col_light_ctrl_disabled, theme->col_dark_ctrl_disabled, 1, 1, width - 2, height - 2);
+		drawGradient(theme->col_light_ctrl_disabled,
+		             theme->col_dark_ctrl_disabled, 1, 1, width - 2,
+		             height - 2);
 	}
 	drawBorder(theme->col_outline);
 
-	drawMonochromeIcon(bmpx, bmpy, bmpwidth, bmpheight, bitmap, down ? theme->col_icon_bt_pressed : theme->col_icon_bt);
+	drawMonochromeIcon(bmpx, bmpy, bmpwidth, bmpheight, bitmap,
+	                   down ? theme->col_icon_bt_pressed : theme->col_icon_bt);
 }

@@ -27,22 +27,23 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/dir.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <sys/dir.h>
+#include <unistd.h>
 
 // Helper for converting a string to lower case
 void lowercase(char *str)
 {
-	for(u8 i=0;i<strlen(str);++i) {
-		if((str[i]>=65)&&(str[i]<=90)) {
-			str[i]+=32;
+	for (u8 i = 0; i < strlen(str); ++i) {
+		if ((str[i] >= 65) && (str[i] <= 90)) {
+			str[i] += 32;
 		}
 	}
 }
 
-bool dirExists(const char *path) {
+bool dirExists(const char *path)
+{
 	DIR *dir;
 	if (!(dir = opendir(path))) {
 		return false;
@@ -52,7 +53,8 @@ bool dirExists(const char *path) {
 	}
 }
 
-void dirCreate(const char *path) {
+void dirCreate(const char *path)
+{
 	if (!dirExists(path)) {
 		mkdir(path, 0777);
 	}

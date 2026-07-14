@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "tobkit/label.h"
 
@@ -24,16 +24,18 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Label::Label(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _has_border, bool _albino, bool _no_bg, bool _right_aligned)
-	:Widget(_x, _y, _width, _height, _screen),
-	onPush(0), caption(0), has_border(_has_border), is_albino(_albino), no_bg(_no_bg), right_aligned(_right_aligned)
+Label::Label(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+             bool _has_border, bool _albino, bool _no_bg, bool _right_aligned)
+    : Widget(_x, _y, _width, _height, _screen), onPush(0), caption(0),
+      has_border(_has_border), is_albino(_albino), no_bg(_no_bg),
+      right_aligned(_right_aligned)
 {
-
 }
 
 Label::~Label(void)
 {
-	if (caption) ntxm_free(caption);
+	if (caption)
+		ntxm_free(caption);
 }
 
 // Callback registration
@@ -43,30 +45,33 @@ void Label::registerPushCallback(void (*onPush_)(void))
 }
 
 // Drawing request
-void Label::pleaseDraw(void) {
-	if(isExposed())
+void Label::pleaseDraw(void)
+{
+	if (isExposed())
 		draw();
 }
 
 // Event calls
 void Label::penDown(u16 x, u16 y)
 {
-	if(onPush != 0) {
+	if (onPush != 0) {
 		onPush();
 	}
 }
 
 void Label::setCaption(const char *_caption)
 {
-	if (caption) ntxm_free(caption);
+	if (caption)
+		ntxm_free(caption);
 
-	caption = (char*)ntxm_cmalloc(strlen(_caption)+1);
+	caption = (char *)ntxm_cmalloc(strlen(_caption) + 1);
 	strcpy(caption, _caption);
 
 	draw();
 }
 
-char *Label::getCaption(void) {
+char *Label::getCaption(void)
+{
 	return caption;
 }
 
@@ -74,17 +79,14 @@ char *Label::getCaption(void) {
 
 void Label::draw(void)
 {
-	if(!isExposed())
+	if (!isExposed())
 		return;
 
 	u16 col_bg, col_text;
-	if(is_albino)
-	{
+	if (is_albino) {
 		col_bg = theme->col_bg;
 		col_text = theme->col_text_light;
-	}
-	else
-	{
+	} else {
 		col_bg = theme->col_light_bg;
 		col_text = theme->col_text;
 	}
@@ -92,27 +94,24 @@ void Label::draw(void)
 	int caption_x_offset = 0;
 	int caption_y_offset = 0;
 
-	if(has_border)
-	{
-		if(!no_bg) {
+	if (has_border) {
+		if (!no_bg) {
 			drawFullBox(1, 1, width - 2, height - 2, theme->col_lighter_bg);
-			col_text = theme->col_text_value; 
+			col_text = theme->col_text_value;
 		}
 
 		drawBorder(theme->col_outline);
 		caption_x_offset += 2;
 		caption_y_offset += 2;
-		
-	}
-	else
-	{
-		if(!no_bg)
+
+	} else {
+		if (!no_bg)
 			drawFullBox(0, 0, width, height, col_bg);
 	}
 
-	if(caption) {
+	if (caption) {
 		int caption_width = width - (caption_x_offset * 2);
-		if(right_aligned) {
+		if (right_aligned) {
 			// TODO: this is a kludge...
 			const char *caption_local = caption;
 			int string_width = getStringWidth(caption_local);
@@ -120,9 +119,11 @@ void Label::draw(void)
 				caption_local++;
 				string_width = getStringWidth(caption_local);
 			}
-			drawString(caption_local,caption_x_offset,caption_y_offset,col_text,caption_width);
+			drawString(caption_local, caption_x_offset, caption_y_offset,
+			           col_text, caption_width);
 		} else {
-			drawString(caption,caption_x_offset,caption_y_offset,col_text,caption_width);
+			drawString(caption, caption_x_offset, caption_y_offset, col_text,
+			           caption_width);
 		}
 	}
 }

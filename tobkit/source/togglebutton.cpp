@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tobkit/togglebutton.h"
 
@@ -23,9 +23,10 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ToggleButton::ToggleButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible, bool _is_record)
-	:Widget(_x, _y, _width, _height, _screen, _visible),
-	penIsDown(false), on(false), has_bitmap(false), is_record(_is_record)
+ToggleButton::ToggleButton(u16 _x, u16 _y, u16 _width, u16 _height,
+                           Screen *_screen, bool _visible, bool _is_record)
+    : Widget(_x, _y, _width, _height, _screen, _visible), penIsDown(false),
+      on(false), has_bitmap(false), is_record(_is_record)
 {
 	onToggle = 0;
 	caption = NULL;
@@ -38,23 +39,26 @@ ToggleButton::~ToggleButton()
 }
 
 // Callback registration
-void ToggleButton::registerToggleCallback(void (*onToggle_)(bool)) {
+void ToggleButton::registerToggleCallback(void (*onToggle_)(bool))
+{
 	onToggle = onToggle_;
 }
 
 // Drawing request
-void ToggleButton::pleaseDraw(void) {
+void ToggleButton::pleaseDraw(void)
+{
 	draw();
 }
 
 // Event calls
 void ToggleButton::penDown(u16 x, u16 y)
 {
-	if (!enabled) return;
+	if (!enabled)
+		return;
 	penIsDown = true;
 	on = !on;
 	draw();
-	if(onToggle) {
+	if (onToggle) {
 		onToggle(on);
 	}
 }
@@ -69,7 +73,7 @@ void ToggleButton::buttonPress(u16 button)
 {
 	on = !on;
 	draw();
-	if(onToggle) {
+	if (onToggle) {
 		onToggle(on);
 	}
 }
@@ -92,11 +96,10 @@ void ToggleButton::setBitmap(const u8 *_bmp, int _width, int _height)
 
 void ToggleButton::setState(bool _on)
 {
-	if(on != _on)
-	{
+	if (on != _on) {
 		on = _on;
 		draw();
-		if(onToggle) {
+		if (onToggle) {
 			onToggle(on);
 		}
 	}
@@ -109,40 +112,41 @@ bool ToggleButton::getState(void)
 
 /* ===================== PRIVATE ===================== */
 
-#define MAX(x,y)	((x)>(y)?(x):(y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 void ToggleButton::draw(void)
 {
-	if(!isExposed()) return;
+	if (!isExposed())
+		return;
 	u16 bg1 = on ? theme->col_tb_bg_on_col1 : theme->col_tb_bg_off_col1;
 	u16 bg2 = on ? theme->col_tb_bg_on_col2 : theme->col_tb_bg_off_col2;
 
 	bg1 = enabled ? bg1 : theme->col_dark_ctrl_disabled;
-	bg2 = enabled ? bg2 : theme->col_dark_ctrl_disabled;  
+	bg2 = enabled ? bg2 : theme->col_dark_ctrl_disabled;
 
 	drawGradient(bg1, bg2, 1, 1, width - 2, height - 2);
 	drawBorder(theme->col_outline);
-	
+
 	u16 col;
 
-	if(penIsDown) {
-		if(on) {
+	if (penIsDown) {
+		if (on) {
 			col = bg1;
 		} else {
 			col = theme->col_tb_fg_on;
 		}
 	} else {
-		if(on) {
+		if (on) {
 			col = theme->col_tb_fg_on;
 		} else {
 			col = is_record ? theme->col_signal_off : theme->col_tb_fg_off;
 		}
 	}
-	if(has_bitmap) {
+	if (has_bitmap) {
 		drawMonochromeIcon(2, 2, bmpwidth, bmpheight, bitmap, col);
 	}
 
 	if (caption != NULL)
-		drawString(caption, MAX(2, ((width-getStringWidth(caption))/2) ), height/2-5, col);
+		drawString(caption, MAX(2, ((width - getStringWidth(caption)) / 2)),
+		           height / 2 - 5, col);
 }
-

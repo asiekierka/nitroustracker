@@ -19,43 +19,46 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class NumberSlider: public Widget {
-	public:
-		NumberSlider(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value=0, s32 _min=0, s32 _max=255,
-						bool _hex=false, bool _is_8bit=false);
-	
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-		void penMove(u16 px, u16 py);
+class NumberSlider : public Widget
+{
+public:
+	NumberSlider(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	             s32 _value = 0, s32 _min = 0, s32 _max = 255,
+	             bool _hex = false, bool _is_8bit = false);
 
-		void setValue(s32 val);
-		s32 getValue(void);
-		
-		// Callback registration
-		void registerPostChangeCallback(void (*onPostChange_)(s32));
-		void registerChangeCallback(void (*onChange_)(s32));
-		
-	private:
-		void draw(void);
-		
-		void (*onPostChange)(s32);
-		void (*onChange)(s32);
-		
-		s32 value;
-		u8 lasty;
-		bool btnstate;
-		s32 min;
-		s32 max;
-		bool hex;
-		bool is_8bit;
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
+	void penMove(u16 px, u16 py);
+
+	void setValue(s32 val);
+	s32 getValue(void);
+
+	// Callback registration
+	void registerPostChangeCallback(void (*onPostChange_)(s32));
+	void registerChangeCallback(void (*onChange_)(s32));
+
+private:
+	void draw(void);
+
+	void (*onPostChange)(s32);
+	void (*onChange)(s32);
+
+	s32 value;
+	u8 lasty;
+	bool btnstate;
+	s32 min;
+	s32 max;
+	bool hex;
+	bool is_8bit;
 };
 
-};
+}; // namespace tobkit
 
 #endif

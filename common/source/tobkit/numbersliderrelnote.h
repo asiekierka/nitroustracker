@@ -27,37 +27,40 @@
 
 #include "tobkit/widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class NumberSliderRelNote: public Widget {
-	public:
-		NumberSliderRelNote(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, s32 _value=0);
-	
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-		void penMove(u16 px, u16 py);
+class NumberSliderRelNote : public Widget
+{
+public:
+	NumberSliderRelNote(u16 _x, u16 _y, u16 _width, u16 _height,
+	                    Screen *_screen, s32 _value = 0);
 
-		void setValue(s32 val);
-		s32 getValue(void);
-		
-		// Callback registration
-		void registerChangeCallback(void (*onChange_)(s32));
-		
-	private:
-		void draw(void);
-		
-		void (*onChange)(s32);
-		
-		s32 value;
-		u8 lasty;
-		bool btnstate;
-		s32 min, max;
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
+	void penMove(u16 px, u16 py);
+
+	void setValue(s32 val);
+	s32 getValue(void);
+
+	// Callback registration
+	void registerChangeCallback(void (*onChange_)(s32));
+
+private:
+	void draw(void);
+
+	void (*onChange)(s32);
+
+	s32 value;
+	u8 lasty;
+	bool btnstate;
+	s32 min, max;
 };
 
-};
+}; // namespace tobkit
 
 #endif

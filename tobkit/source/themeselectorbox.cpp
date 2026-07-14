@@ -17,45 +17,52 @@ limitations under the License.
 #include <limits.h>
 #include <unistd.h>
 
-#include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
-#include <algorithm>
 
 #include "tobkit/themeselectorbox.h"
 
-
-#define THEMESELBOX_WIDTH		180
-#define THEMESELBOX_HEIGHT		128
+#define THEMESELBOX_WIDTH 180
+#define THEMESELBOX_HEIGHT 128
 
 using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ThemeSelectorBox::ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File), void(*_onOk)(void), void (*_onReset)(void), void (*_onCancel)(void))
-	:Widget((_screen->getWidth()-THEMESELBOX_WIDTH)/2, (_screen->getHeight()-THEMESELBOX_HEIGHT)/3,
-		THEMESELBOX_WIDTH, THEMESELBOX_HEIGHT, _screen), onSelect(_onSelect), onOk(_onOk), onReset(_onReset), onCancel(_onCancel)
+ThemeSelectorBox::ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File),
+                                   void (*_onOk)(void), void (*_onReset)(void),
+                                   void (*_onCancel)(void))
+    : Widget((_screen->getWidth() - THEMESELBOX_WIDTH) / 2,
+             (_screen->getHeight() - THEMESELBOX_HEIGHT) / 3, THEMESELBOX_WIDTH,
+             THEMESELBOX_HEIGHT, _screen),
+      onSelect(_onSelect), onOk(_onOk), onReset(_onReset), onCancel(_onCancel)
 {
-    title = "choose a theme";
+	title = "choose a theme";
 
-	buttonok = new Button(x+(THEMESELBOX_WIDTH-50)/2 - 55, y+THEMESELBOX_HEIGHT-20, 50, 14, _screen);
+	buttonok = new Button(x + (THEMESELBOX_WIDTH - 50) / 2 - 55,
+	                      y + THEMESELBOX_HEIGHT - 20, 50, 14, _screen);
 	buttonok->setCaption("apply");
 	buttonok->registerPushCallback(onOk);
 
-	buttonreset = new Button(x+(THEMESELBOX_WIDTH-50)/2, y+THEMESELBOX_HEIGHT-20, 50, 14, _screen);
+	buttonreset = new Button(x + (THEMESELBOX_WIDTH - 50) / 2,
+	                         y + THEMESELBOX_HEIGHT - 20, 50, 14, _screen);
 	buttonreset->setCaption("reset");
 	buttonreset->registerPushCallback(onReset);
 
-	buttoncancel = new Button(x+(THEMESELBOX_WIDTH-50)/2 + 55, y+THEMESELBOX_HEIGHT-20, 50, 14, _screen);
+	buttoncancel = new Button(x + (THEMESELBOX_WIDTH - 50) / 2 + 55,
+	                          y + THEMESELBOX_HEIGHT - 20, 50, 14, _screen);
 	buttoncancel->setCaption("cancel");
 	buttoncancel->registerPushCallback(onCancel);
-	
-	filesel = new FileSelector(x + 10, y + 25, THEMESELBOX_WIDTH-20, THEMESELBOX_HEIGHT - 50, _screen, true);
+
+	filesel = new FileSelector(x + 10, y + 25, THEMESELBOX_WIDTH - 20,
+	                           THEMESELBOX_HEIGHT - 50, _screen, true);
 	filesel->registerFileSelectCallback(onSelect);
 	std::vector<std::string> themefilter;
 	themefilter.push_back("nttheme");
@@ -87,15 +94,18 @@ std::string ThemeSelectorBox::getDir(void)
 	return filesel->getDir();
 }
 // Event calls
-void ThemeSelectorBox::penDown(u16 px, u16 py) {
+void ThemeSelectorBox::penDown(u16 px, u16 py)
+{
 	gui.penDown(px, py);
 }
 
-void ThemeSelectorBox::penUp(u16 px, u16 py) {
+void ThemeSelectorBox::penUp(u16 px, u16 py)
+{
 	gui.penUp(px, py);
 }
 
-void ThemeSelectorBox::penMove(u16 px, u16 py) {
+void ThemeSelectorBox::penMove(u16 px, u16 py)
+{
 	gui.penMove(px, py);
 }
 
@@ -114,7 +124,7 @@ void ThemeSelectorBox::reveal(void)
 void ThemeSelectorBox::setTheme(Theme *theme_, u16 bgcolor_)
 {
 	theme = theme_;
-	bgcolor=bgcolor_;
+	bgcolor = bgcolor_;
 	gui.setTheme(theme, theme->col_light_bg);
 }
 
@@ -124,22 +134,21 @@ void ThemeSelectorBox::pleaseDraw(void)
 	draw();
 }
 
-
 /* ===================== PROTECTED ===================== */
 
 void ThemeSelectorBox::draw(void)
 {
-	drawGradient(theme->col_messagebox_title_col1, theme->col_messagebox_title_col2, 1, 1, width - 2, 15);
+	drawGradient(theme->col_messagebox_title_col1,
+	             theme->col_messagebox_title_col2, 1, 1, width - 2, 15);
 	drawHLine(1, 16, width - 2, theme->col_outline);
-	drawFullBox(1, 17, width - 2, THEMESELBOX_HEIGHT-17, theme->col_light_bg);
+	drawFullBox(1, 17, width - 2, THEMESELBOX_HEIGHT - 17, theme->col_light_bg);
 	drawBorder(theme->col_outline);
-	
-	u8 titlewidth = getStringWidth(title)+5;
-	drawString(title, (THEMESELBOX_WIDTH-titlewidth)/2, 4, theme->col_messagebox_title_text, titlewidth+5);
-	
+
+	u8 titlewidth = getStringWidth(title) + 5;
+	drawString(title, (THEMESELBOX_WIDTH - titlewidth) / 2, 4,
+	           theme->col_messagebox_title_text, titlewidth + 5);
+
 	gui.draw();
 }
 
 /* ===================== PRIVATE ===================== */
-
-

@@ -19,36 +19,37 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
-
-class CheckBox: public Widget
+namespace tobkit
 {
-	public:
-		CheckBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
-			 bool _visible=true, bool checked=false, bool albino=false);
-		~CheckBox();
-		
-		void setCaption(const char *_label);
-		void setChecked(bool checked_);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		
-		void registerToggleCallback(void (*onToggle_)(bool));
-		
-	private:
-		char *label;
-		bool checked;
-		bool albino; // different color setting for dark bg
-		
-		void (*onToggle)(bool);
-		
-		void draw(void);
+
+class CheckBox : public Widget
+{
+public:
+	CheckBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	         bool _visible = true, bool checked = false, bool albino = false);
+	~CheckBox();
+
+	void setCaption(const char *_label);
+	void setChecked(bool checked_);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 px, u16 py);
+
+	void registerToggleCallback(void (*onToggle_)(bool));
+
+private:
+	char *label;
+	bool checked;
+	bool albino; // different color setting for dark bg
+
+	void (*onToggle)(bool);
+
+	void draw(void);
 };
 
-};
+}; // namespace tobkit
 
 #endif

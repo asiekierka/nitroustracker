@@ -19,23 +19,25 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
 class MemoryIndicator : public Widget
 {
-	public:
-		MemoryIndicator(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible=true);
-		~MemoryIndicator();
-	
+public:
+	MemoryIndicator(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	                bool _visible = true);
+	~MemoryIndicator();
+
 	// Drawing request
 	void pleaseDraw(void);
-			
-	private:
-		void draw(void);
-		
-		u32 total_ram;
+
+private:
+	void draw(void);
+
+	u32 total_ram;
 };
 
-};
+}; // namespace tobkit
 
 #endif /*MEMORYINDICATOR_H_*/

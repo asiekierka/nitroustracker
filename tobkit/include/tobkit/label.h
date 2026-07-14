@@ -19,38 +19,41 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class Label: public Widget {
-	public:
-		Label(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _has_border=true,
-		      bool _albino=false, bool _no_bg=false, bool _right_aligned=false);
-		~Label(void);
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 x, u16 y);
-		
-		void setCaption(const char *caption);
-		char *getCaption(void);	
-	
-	private:
-		void draw(void);
-		
-		void (*onPush)(void);
-		char *caption;
-	
-		bool has_border;
-		bool is_albino;
-		bool no_bg;
-		bool right_aligned;
+class Label : public Widget
+{
+public:
+	Label(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	      bool _has_border = true, bool _albino = false, bool _no_bg = false,
+	      bool _right_aligned = false);
+	~Label(void);
+
+	// Callback registration
+	void registerPushCallback(void (*onPush_)(void));
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 x, u16 y);
+
+	void setCaption(const char *caption);
+	char *getCaption(void);
+
+private:
+	void draw(void);
+
+	void (*onPush)(void);
+	char *caption;
+
+	bool has_border;
+	bool is_albino;
+	bool no_bg;
+	bool right_aligned;
 };
 
-};
+}; // namespace tobkit
 
 #endif

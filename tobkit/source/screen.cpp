@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "tobkit/widget.h"
 
@@ -24,27 +24,28 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 Screen::Screen(tobkit_pixel_t *_pixels, int _width, int _height, int _pitch)
-    :pixels(_pixels), width(_width), height(_height), pitch(_pitch)
+    : pixels(_pixels), width(_width), height(_height), pitch(_pitch)
 {
-
 }
 
-void Screen::clear(tobkit_pixel_t col) {
+void Screen::clear(tobkit_pixel_t col)
+{
 #if defined(NT_PLATFORM_NDS)
 	u32 colcol = col * 0x10001;
-	dmaFillWords(colcol, pixels, 192*256*2);
+	dmaFillWords(colcol, pixels, 192 * 256 * 2);
 #elif defined(NT_PLATFORM_3DS)
 	u32 colcol = col * 0x10001;
-	__ndsabi_wordset4(pixels, pitch*width*2, colcol);
+	__ndsabi_wordset4(pixels, pitch * width * 2, colcol);
 #else
-    for (int iy = 0; iy < height; iy++)
-        for (int ix = 0; ix < width; ix++)
-            drawPixel(ix, iy, col);
+	for (int iy = 0; iy < height; iy++)
+		for (int ix = 0; ix < width; ix++)
+			drawPixel(ix, iy, col);
 #endif
 }
 
-void Screen::setSize(int _width, int _height, int _pitch) {
-    width = _width;
-    height = _height;
-    pitch = _pitch;
+void Screen::setSize(int _width, int _height, int _pitch)
+{
+	width = _width;
+	height = _height;
+	pitch = _pitch;
 }

@@ -20,40 +20,44 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-RadioButton::RadioButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
-	RadioButtonGroup *_rbg, bool _visible)
-	:Widget(_x, _y, _width, _height, _screen, _visible),
-	rbg(_rbg), active(false)
+RadioButton::RadioButton(u16 _x, u16 _y, u16 _width, u16 _height,
+                         Screen *_screen, RadioButtonGroup *_rbg, bool _visible)
+    : Widget(_x, _y, _width, _height, _screen, _visible), rbg(_rbg),
+      active(false)
 {
 	rbg->add(this);
 }
-	
+
 // Drawing request
-void RadioButton::pleaseDraw(void) {
+void RadioButton::pleaseDraw(void)
+{
 	draw();
 }
 
 // Event calls
-void RadioButton::penDown(u16 px, u16 py) {
-	if (!enabled) return;
+void RadioButton::penDown(u16 px, u16 py)
+{
+	if (!enabled)
+		return;
 	rbg->pushed(this);
 }
 
 void RadioButton::setCaption(const char *caption)
 {
 	label = caption;
-	if(isExposed())
+	if (isExposed())
 		draw();
 }
 
 void RadioButton::setActive(bool _active)
 {
 	active = _active;
-	if(isExposed())
+	if (isExposed())
 		draw();
 }
 
-bool RadioButton::getActive(void) {
+bool RadioButton::getActive(void)
+{
 	return active;
 }
 
@@ -61,28 +65,31 @@ bool RadioButton::getActive(void) {
 
 void RadioButton::draw(void)
 {
-	if (!isExposed()) return;
+	if (!isExposed())
+		return;
 	// Draw the dot
 	//drawFullBox(2, 2, 7, 7, col);
-	u16 col_light = enabled ? theme->col_light_ctrl : theme->col_light_ctrl_disabled;
-	u16 col_dark = enabled ? theme->col_dark_ctrl : theme->col_dark_ctrl_disabled;
-	drawGradient(col_light, col_dark ,2, 2, 7, 7);
-	
+	u16 col_light =
+	    enabled ? theme->col_light_ctrl : theme->col_light_ctrl_disabled;
+	u16 col_dark =
+	    enabled ? theme->col_dark_ctrl : theme->col_dark_ctrl_disabled;
+	drawGradient(col_light, col_dark, 2, 2, 7, 7);
+
 	drawHLine(3, 1, 5, theme->col_outline);
 	drawHLine(3, 9, 5, theme->col_outline);
 	drawVLine(1, 3, 5, theme->col_outline);
 	drawVLine(9, 3, 5, theme->col_outline);
-	
+
 	drawPixel(2, 2, theme->col_outline);
 	drawPixel(8, 2, theme->col_outline);
 	drawPixel(2, 8, theme->col_outline);
 	drawPixel(8, 8, theme->col_outline);
-	
+
 	// Filled or not
-	if(active == true) {
+	if (active == true) {
 		drawFullBox(4, 4, 3, 3, theme->col_checkmark);
 	}
-	
+
 	// Text
 	drawString(label, 13, 0, theme->col_text);
 }

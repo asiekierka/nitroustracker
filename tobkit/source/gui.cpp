@@ -23,11 +23,11 @@ using namespace tobkit;
 /* ===================== PUBLIC ===================== */
 
 GUI::GUI()
-	:activeWidget(0), onOverlayChanged(0),
-	overlayWidgetMain(0), overlayWidgetSub(0), overlayShortcuts(0)
+    : activeWidget(0), onOverlayChanged(0), overlayWidgetMain(0),
+      overlayWidgetSub(0), overlayShortcuts(0)
 {
 	u8 i;
-	for(i=0;i<14;++i) {
+	for (i = 0; i < 14; ++i) {
 		shortcuts.push_back(0);
 	}
 }
@@ -38,13 +38,13 @@ void GUI::setTheme(Theme *theme_, u16 bgcolor_)
 	theme = theme_;
 	bgcolor = bgcolor_;
 
-	for(std::vector<Widget*>::iterator w_it=widgets_sub.begin();w_it!=widgets_sub.end();++w_it)
-	{
+	for (std::vector<Widget *>::iterator w_it = widgets_sub.begin();
+	     w_it != widgets_sub.end(); ++w_it) {
 		(*w_it)->setTheme(theme_, bgcolor);
 	}
 
-	for(std::vector<Widget*>::iterator w_it=widgets_main.begin();w_it!=widgets_main.end();++w_it)
-	{
+	for (std::vector<Widget *>::iterator w_it = widgets_main.begin();
+	     w_it != widgets_main.end(); ++w_it) {
 		(*w_it)->setTheme(theme_, bgcolor);
 	}
 }
@@ -53,17 +53,15 @@ void GUI::setTheme(Theme *theme_, u16 bgcolor_)
 // Touches on widget's area are redirected to the widget
 void GUI::registerWidget(Widget *w, u16 listeningButtons, u8 screen)
 {
-	if(screen == MAIN_SCREEN)
+	if (screen == MAIN_SCREEN)
 		widgets_main.push_back(w);
 	else
 		widgets_sub.push_back(w);
 
-	if(listeningButtons != 0)
-	{
+	if (listeningButtons != 0) {
 		u8 i;
-		for(i=0;i<14;++i)
-		{
-			if(listeningButtons & BIT(i))
+		for (i = 0; i < 14; ++i) {
+			if (listeningButtons & BIT(i))
 				shortcuts[i] = w;
 		}
 	}
@@ -74,35 +72,38 @@ void GUI::registerWidget(Widget *w, u16 listeningButtons, u8 screen)
 // Removes a widget from the GUI
 void GUI::unregisterWidget(Widget *w)
 {
-  if(activeWidget == w) {
-    activeWidget = 0;
-  }
+	if (activeWidget == w) {
+		activeWidget = 0;
+	}
 
-  std::vector<Widget*>::iterator wit = widgets_main.begin();
-  for(;wit!=widgets_main.end()&&*wit != w; ++wit);
-  if( *wit == w) {
-    widgets_main.erase(wit);
-  }
+	std::vector<Widget *>::iterator wit = widgets_main.begin();
+	for (; wit != widgets_main.end() && *wit != w; ++wit)
+		;
+	if (*wit == w) {
+		widgets_main.erase(wit);
+	}
 
-  wit = widgets_sub.begin();
-  for(;wit!=widgets_sub.end()&&*wit != w; ++wit);
-  if( *wit == w) {
-    widgets_sub.erase(wit);
-  }
+	wit = widgets_sub.begin();
+	for (; wit != widgets_sub.end() && *wit != w; ++wit)
+		;
+	if (*wit == w) {
+		widgets_sub.erase(wit);
+	}
 
-  //TODO: This only deletes 1 shortcut
-  wit = shortcuts.begin();
-  for(;wit!=shortcuts.end()&&*wit == w; ++wit);
-  if( *wit == w) {
-    shortcuts.erase(wit);
-  }
+	//TODO: This only deletes 1 shortcut
+	wit = shortcuts.begin();
+	for (; wit != shortcuts.end() && *wit == w; ++wit)
+		;
+	if (*wit == w) {
+		shortcuts.erase(wit);
+	}
 }
 
 // Registers a widget that is in top of all other widgets and has input
 // priority, like a popup-window or something.
 void GUI::registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen)
 {
-	if(screen == SUB_SCREEN) {
+	if (screen == SUB_SCREEN) {
 		onOverlayChanged(SUB_SCREEN, true);
 		overlayWidgetSub = w;
 	} else {
@@ -117,16 +118,16 @@ void GUI::registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen)
 // Remove the overlay widget
 void GUI::unregisterOverlayWidget(u8 screen)
 {
-	if(screen == SUB_SCREEN) {
+	if (screen == SUB_SCREEN) {
 		onOverlayChanged(SUB_SCREEN, false);
-			if(activeWidget==overlayWidgetSub) {
-		  activeWidget = 0;
-			}
+		if (activeWidget == overlayWidgetSub) {
+			activeWidget = 0;
+		}
 		overlayWidgetSub = 0;
 	} else {
 		onOverlayChanged(MAIN_SCREEN, false);
-			if(activeWidget==overlayWidgetMain) {
-		  activeWidget = 0;
+		if (activeWidget == overlayWidgetMain) {
+			activeWidget = 0;
 		}
 		overlayWidgetMain = 0;
 	}
@@ -141,8 +142,8 @@ void GUI::setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool))
 // Event calls
 void GUI::penDown(u16 x, u16 y, u8 screen)
 {
-	Widget *w = getWidgetAt(x,y,screen);
-	if(w!=0) {
+	Widget *w = getWidgetAt(x, y, screen);
+	if (w != 0) {
 		activeWidget = w;
 		activeWidgetTouchX = x;
 		activeWidgetTouchY = y;
@@ -153,17 +154,18 @@ void GUI::penDown(u16 x, u16 y, u8 screen)
 
 void GUI::penUp(u16 x, u16 y, u8 screen)
 {
-	if(activeWidget && activeWidget->is_visible()) {
+	if (activeWidget && activeWidget->is_visible()) {
 		Widget *w = activeWidget;
 		activeWidget = 0;
-        if(activeWidgetTouchScreen != screen)
-            w->penUp(activeWidgetTouchX, activeWidgetTouchY);
-        else
-            w->penUp(x, y);
+		if (activeWidgetTouchScreen != screen)
+			w->penUp(activeWidgetTouchX, activeWidgetTouchY);
+		else
+			w->penUp(x, y);
 	}
 }
 
-void GUI::penMove(u16 x, u16 y, u8 screen) {
+void GUI::penMove(u16 x, u16 y, u8 screen)
+{
 	// Check if the pen moved off the active widget
 	/*
 	if((activeWidget!=0)&&(activeWidget->is_visible()==true)) {
@@ -181,11 +183,11 @@ void GUI::penMove(u16 x, u16 y, u8 screen) {
 	if(w!=0) {
 		w->penMove(x, y);
 	}*/
-	if(activeWidget) {
-	    if(activeWidgetTouchScreen != screen)
+	if (activeWidget) {
+		if (activeWidgetTouchScreen != screen)
 			return;
 		activeWidgetTouchX = x;
-    	activeWidgetTouchY = y;
+		activeWidgetTouchY = y;
 		activeWidget->penMove(x, y);
 	}
 }
@@ -193,8 +195,8 @@ void GUI::penMove(u16 x, u16 y, u8 screen) {
 void GUI::buttonPress(u16 buttons)
 {
 	Widget *w = getWidgetForButtons(buttons);
-	if(w!=0) {
-		if(w->is_visible()==true) {
+	if (w != 0) {
+		if (w->is_visible() == true) {
 			w->buttonPress(buttons);
 		}
 	}
@@ -203,8 +205,8 @@ void GUI::buttonPress(u16 buttons)
 void GUI::buttonRelease(u16 buttons)
 {
 	Widget *w = getWidgetForButtons(buttons);
-	if(w!=0) {
-		if(w->is_visible()==true) {
+	if (w != 0) {
+		if (w->is_visible() == true) {
 			w->buttonRelease(buttons);
 		}
 	}
@@ -219,15 +221,14 @@ void GUI::draw(void)
 
 void GUI::drawMainScreen(void)
 {
-	std::vector<Widget*>::reverse_iterator w_it;
+	std::vector<Widget *>::reverse_iterator w_it;
 
-	for(w_it=widgets_main.rbegin();w_it!=widgets_main.rend();++w_it)
-	{
-		if((*w_it)->is_visible() && !(*w_it)->is_occluded())
+	for (w_it = widgets_main.rbegin(); w_it != widgets_main.rend(); ++w_it) {
+		if ((*w_it)->is_visible() && !(*w_it)->is_occluded())
 			(*w_it)->pleaseDraw();
 	}
 
-	if(overlayWidgetMain!=0)
+	if (overlayWidgetMain != 0)
 		overlayWidgetMain->pleaseDraw();
 }
 
@@ -235,61 +236,68 @@ void GUI::drawSubScreen(void)
 {
 	u8 visible = 0;
 
-	std::vector<Widget*>::reverse_iterator w_it;
+	std::vector<Widget *>::reverse_iterator w_it;
 
-	for(w_it=widgets_sub.rbegin();w_it!=widgets_sub.rend();++w_it)
-	{
-		if((*w_it)->is_visible() && !(*w_it)->is_occluded() ) {
+	for (w_it = widgets_sub.rbegin(); w_it != widgets_sub.rend(); ++w_it) {
+		if ((*w_it)->is_visible() && !(*w_it)->is_occluded()) {
 			(*w_it)->pleaseDraw();
 			visible++;
 		}
 	}
 
-	if(overlayWidgetSub!=0)
+	if (overlayWidgetSub != 0)
 		overlayWidgetSub->pleaseDraw();
 }
 
 // Show/Hide all elements
 void GUI::showAll(void)
 {
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_main.rbegin(); w_it!=widgets_main.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_main.rbegin();
+	     w_it != widgets_main.rend(); ++w_it) {
 		(*w_it)->show();
 	}
 
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_sub.rbegin(); w_it!=widgets_sub.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_sub.rbegin();
+	     w_it != widgets_sub.rend(); ++w_it) {
 		(*w_it)->show();
 	}
 }
 
 void GUI::hideAll(void)
 {
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_main.rbegin(); w_it!=widgets_main.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_main.rbegin();
+	     w_it != widgets_main.rend(); ++w_it) {
 		(*w_it)->hide();
 	}
 
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_sub.rbegin(); w_it!=widgets_sub.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_sub.rbegin();
+	     w_it != widgets_sub.rend(); ++w_it) {
 		(*w_it)->hide();
 	}
 }
 
 void GUI::occludeAll(void)
 {
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_main.rbegin(); w_it!=widgets_main.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_main.rbegin();
+	     w_it != widgets_main.rend(); ++w_it) {
 		(*w_it)->occlude();
 	}
 
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_sub.rbegin(); w_it!=widgets_sub.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_sub.rbegin();
+	     w_it != widgets_sub.rend(); ++w_it) {
 		(*w_it)->occlude();
 	}
 }
 
 void GUI::revealAll(void)
 {
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_main.rbegin(); w_it!=widgets_main.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_main.rbegin();
+	     w_it != widgets_main.rend(); ++w_it) {
 		(*w_it)->reveal();
 	}
 
-	for(std::vector<Widget*>::reverse_iterator w_it=widgets_sub.rbegin(); w_it!=widgets_sub.rend(); ++w_it) {
+	for (std::vector<Widget *>::reverse_iterator w_it = widgets_sub.rbegin();
+	     w_it != widgets_sub.rend(); ++w_it) {
 		(*w_it)->reveal();
 	}
 }
@@ -298,57 +306,60 @@ void GUI::revealAll(void)
 
 // Find the widget that got hit
 // Does notreturn invisible widgets
-Widget *GUI::getWidgetAt(u16 x, u16 y, u8 screen) {
+Widget *GUI::getWidgetAt(u16 x, u16 y, u8 screen)
+{
 
 	u16 wx, wy, ww, wh;
 
 	// Do we have an overlay?
-	if((screen == MAIN_SCREEN)&&(overlayWidgetMain!=0)) {
+	if ((screen == MAIN_SCREEN) && (overlayWidgetMain != 0)) {
 		return overlayWidgetMain;
 	}
 
-	if((screen == SUB_SCREEN)&&(overlayWidgetSub!=0)) {
+	if ((screen == SUB_SCREEN) && (overlayWidgetSub != 0)) {
 		return overlayWidgetSub;
 	}
 
 	// Else follow the normal procedure
 	bool found = false;
-	std::vector<Widget*>::iterator w_it, end_it;
-	if(screen == MAIN_SCREEN) {
+	std::vector<Widget *>::iterator w_it, end_it;
+	if (screen == MAIN_SCREEN) {
 		w_it = widgets_main.begin();
 		end_it = widgets_main.end();
 	} else {
 		w_it = widgets_sub.begin();
 		end_it = widgets_sub.end();
 	}
-	while((w_it!=end_it) && (!found)) {
+	while ((w_it != end_it) && (!found)) {
 		(*w_it)->getPos(&wx, &wy, &ww, &wh);
-		if((x>wx)&&(x<wx+ww)&&(y>wy)&&(y<wy+wh)&&((*w_it)->is_visible()==true)) {
+		if ((x > wx) && (x < wx + ww) && (y > wy) && (y < wy + wh) &&
+		    ((*w_it)->is_visible() == true)) {
 			found = true;
 		} else {
 			w_it++;
 		}
 	}
-	if(!found) {
+	if (!found) {
 		return 0;
 	} else {
 		return *w_it;
 	}
 }
 
-Widget *GUI::getWidgetForButtons(u16 buttons) {
+Widget *GUI::getWidgetForButtons(u16 buttons)
+{
 
-	if((overlayWidgetMain!=0)&&(overlayShortcuts&buttons)) {
+	if ((overlayWidgetMain != 0) && (overlayShortcuts & buttons)) {
 		return overlayWidgetMain;
 	}
-	if((overlayWidgetSub!=0)&&(overlayShortcuts&buttons)) {
+	if ((overlayWidgetSub != 0) && (overlayShortcuts & buttons)) {
 		return overlayWidgetSub;
 	}
 
-	Widget *w=0;
+	Widget *w = 0;
 	u8 i;
-	for(i=0;i<14;++i) {
-		if(buttons & BIT(i)) {
+	for (i = 0; i < 14; ++i) {
+		if (buttons & BIT(i)) {
 			w = shortcuts[i];
 		}
 	}

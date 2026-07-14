@@ -25,34 +25,37 @@ Should be n+4 x n+4 pixels in size.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class BitButton: public Widget {
-	public:
-		BitButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, const u8 *_bitmap,
-			  u8 _bmpwidth=13, u8 _bmpheight=13, u8 _bmpx=2, u8 _bmpy=2, bool _visible=true);
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 x, u16 y);
-		void penUp(u16 x, u16 y);
-		void buttonPress(u16 button);
-		
-	private:
-		void (*onPush)(void);
-		bool penIsDown;
-		
-		void draw(u8 down);
-		
-		const u8 *bitmap;
-		u8 bmpwidth, bmpheight, bmpx, bmpy;
+class BitButton : public Widget
+{
+public:
+	BitButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	          const u8 *_bitmap, u8 _bmpwidth = 13, u8 _bmpheight = 13,
+	          u8 _bmpx = 2, u8 _bmpy = 2, bool _visible = true);
+
+	// Callback registration
+	void registerPushCallback(void (*onPush_)(void));
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 x, u16 y);
+	void penUp(u16 x, u16 y);
+	void buttonPress(u16 button);
+
+private:
+	void (*onPush)(void);
+	bool penIsDown;
+
+	void draw(u8 down);
+
+	const u8 *bitmap;
+	u8 bmpwidth, bmpheight, bmpx, bmpy;
 };
 
-};
+}; // namespace tobkit
 
 #endif

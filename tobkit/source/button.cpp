@@ -15,8 +15,8 @@ limitations under the License.
 ======================================================================*/
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tobkit/button.h"
 
@@ -24,77 +24,93 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Button::Button(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible)
-	:Widget(_x, _y, _width, _height, _screen, _visible),
-	 penIsDown(false), caption(0)
+Button::Button(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+               bool _visible)
+    : Widget(_x, _y, _width, _height, _screen, _visible), penIsDown(false),
+      caption(0)
 {
 	onPush = 0;
 }
 
 Button::~Button()
 {
-	if (caption) ntxm_free(caption);
+	if (caption)
+		ntxm_free(caption);
 }
 
-void Button::registerPushCallback(void (*onPush_)(void)) {
+void Button::registerPushCallback(void (*onPush_)(void))
+{
 	onPush = onPush_;
 }
-		
+
 // Drawing request
-void Button::pleaseDraw(void) {
+void Button::pleaseDraw(void)
+{
 	draw(penIsDown);
 }
-		
+
 // Event calls
 void Button::penDown(u16 x, u16 y)
 {
-	if (!enabled) return;
+	if (!enabled)
+		return;
 	penIsDown = true;
 	draw(1);
 }
 
 void Button::penUp(u16 x, u16 y)
 {
-	if (!enabled) return;
+	if (!enabled)
+		return;
 	penIsDown = false;
 	draw(0);
-	if(onPush) {
+	if (onPush) {
 		onPush();
 	}
 }
 
-void Button::penMove(u16 x, u16 y) {
-
+void Button::penMove(u16 x, u16 y)
+{
 }
 
-void Button::buttonPress(u16 button) {
-	if(onPush) {
+void Button::buttonPress(u16 button)
+{
+	if (onPush) {
 		onPush();
 	}
 }
 
-void Button::setCaption(const char *_caption) {
-	if (caption) ntxm_free(caption);
-	caption = (char*)ntxm_cmalloc(strlen(_caption)+1);
+void Button::setCaption(const char *_caption)
+{
+	if (caption)
+		ntxm_free(caption);
+	caption = (char *)ntxm_cmalloc(strlen(_caption) + 1);
 	strcpy(caption, _caption);
 }
 
 /* ===================== PRIVATE ===================== */
 
-void Button::draw(u8 down) {
-	if(!isExposed()) return;
-	
-	if(enabled)
-	{
-		if(down) {
-			drawGradient(theme->col_dark_ctrl_pressed, theme->col_light_ctrl_pressed, 1, 1, width - 2, height - 2);
+void Button::draw(u8 down)
+{
+	if (!isExposed())
+		return;
+
+	if (enabled) {
+		if (down) {
+			drawGradient(theme->col_dark_ctrl_pressed,
+			             theme->col_light_ctrl_pressed, 1, 1, width - 2,
+			             height - 2);
 		} else {
-			drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1, width - 2, height - 2);
+			drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1,
+			             width - 2, height - 2);
 		}
 	} else {
-		drawGradient(theme->col_light_ctrl_disabled, theme->col_dark_ctrl_disabled, 1, 1, width - 2, height - 2);
+		drawGradient(theme->col_light_ctrl_disabled,
+		             theme->col_dark_ctrl_disabled, 1, 1, width - 2,
+		             height - 2);
 	}
 	drawBorder(theme->col_outline);
-	
-	drawString(caption, (width-getStringWidth(caption))/2, height/2-5, down ? theme->col_text_bt_pressed : theme->col_text_bt);
+
+	drawString(caption, (width - getStringWidth(caption)) / 2, height / 2 - 5,
+	           down ? theme->col_text_bt_pressed : theme->col_text_bt);
 }

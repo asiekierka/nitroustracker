@@ -33,65 +33,67 @@
 
 #define SETTINGS_FILENAME_LEN 255
 
-enum Handedness {LEFT_HANDED, RIGHT_HANDED};
+enum Handedness { LEFT_HANDED, RIGHT_HANDED };
 
-class Settings {
-	public:
-		Settings(char *launch_path=NULL, bool use_fat=true);
-		void read(void);
+class Settings
+{
+public:
+	Settings(char *launch_path = NULL, bool use_fat = true);
+	void read(void);
 
-		Handedness getHandedness(void);
-		void setHandedness(Handedness handedness_);
+	Handedness getHandedness(void);
+	void setHandedness(Handedness handedness_);
 
-		bool getSamplePreview(void);
-		void setSamplePreview(bool sample_preview_);
+	bool getSamplePreview(void);
+	void setSamplePreview(bool sample_preview_);
 
-		bool getStereoOutput(void);
-		void setStereoOutput(bool stereo_output_);
+	bool getStereoOutput(void);
+	void setStereoOutput(bool stereo_output_);
 
-		bool getFreq47kHz(void);
-		void setFreq47kHz(bool freq_47khz_);
+	bool getFreq47kHz(void);
+	void setFreq47kHz(bool freq_47khz_);
 
-		u8 getLinesPerBeat(void);
-		void setLinesPerBeat(u8 lines_per_beat_);
+	u8 getLinesPerBeat(void);
+	void setLinesPerBeat(u8 lines_per_beat_);
 
-		tobkit::Theme *getTheme(void);
-		void setTheme(tobkit::Theme *theme_);
+	tobkit::Theme *getTheme(void);
+	void setTheme(tobkit::Theme *theme_);
 
-		char *getSongPath(void);
-		void setSongPath(const char* songpath_);
+	char *getSongPath(void);
+	void setSongPath(const char *songpath_);
 
-		char *getSamplePath(void);
-		void setSamplePath(const char* samplepath_);
+	char *getSamplePath(void);
+	void setSamplePath(const char *samplepath_);
 
-		char *getThemePath(void);
-		void setThemePath(const char* themepath_);
+	char *getThemePath(void);
+	void setThemePath(const char *themepath_);
 
-		bool writeIfChanged(void);
+	bool writeIfChanged(void);
 
-	private:
-		bool write(void);
+private:
+	bool write(void);
 
-		void handednessToString(char *str);
-		Handedness stringToHandedness(char *str);
+	void handednessToString(char *str);
+	Handedness stringToHandedness(char *str);
 
-		void boolToString(bool b, char *str);
-		bool stringToBool(char *str);
+	void boolToString(bool b, char *str);
+	bool stringToBool(char *str);
 
-		bool getConfigValue(char *config, const char *attribute, char *value, size_t maxlen, const char *defvalue);
+	bool getConfigValue(char *config, const char *attribute, char *value,
+	                    size_t maxlen, const char *defvalue);
 
-		Handedness handedness;
-		bool sample_preview;
-		bool stereo_output;
-		bool freq_47khz;
-		u8 lines_per_beat;
-		tobkit::Theme *theme;
-		char configpath[SETTINGS_FILENAME_LEN + 1];
-		char songpath[SETTINGS_FILENAME_LEN + 1];
-		char samplepath[SETTINGS_FILENAME_LEN + 1];
-		char themepath[SETTINGS_FILENAME_LEN + 1];
+	Handedness handedness;
+	bool sample_preview;
+	bool stereo_output;
+	bool freq_47khz;
+	u8 lines_per_beat;
+	tobkit::Theme *theme;
+	char configpath[SETTINGS_FILENAME_LEN + 1];
+	char songpath[SETTINGS_FILENAME_LEN + 1];
+	char samplepath[SETTINGS_FILENAME_LEN + 1];
+	char themepath[SETTINGS_FILENAME_LEN + 1];
 
-        bool fat, changed;
+	bool fat, changed;
 };
 
 #endif

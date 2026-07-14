@@ -19,33 +19,36 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
 /**
  * @brief 2bpp gradient icon pixmap.
  */
-class GradientIcon: public Widget {
-	public:
-		GradientIcon(u16 _x, u16 _y, u16 _width, u16 _height, const u32* _image, Screen *_screen, bool _visible=true);
-	
-		~GradientIcon();
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));	
-		
-		// Event calls
-		void penDown(u16 x, u16 y);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-	private:
-		void draw(void);
-		
-		void (*onPush)(void);
-		const u32 *image;
+class GradientIcon : public Widget
+{
+public:
+	GradientIcon(u16 _x, u16 _y, u16 _width, u16 _height, const u32 *_image,
+	             Screen *_screen, bool _visible = true);
+
+	~GradientIcon();
+
+	// Callback registration
+	void registerPushCallback(void (*onPush_)(void));
+
+	// Event calls
+	void penDown(u16 x, u16 y);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+private:
+	void draw(void);
+
+	void (*onPush)(void);
+	const u32 *image;
 };
 
-};
+}; // namespace tobkit
 
 #endif

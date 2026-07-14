@@ -26,85 +26,86 @@
 #define PATTERNVIEW_H
 
 #include "fxkeyboard.h"
-#include "tobkit/widget.h"
 #include "ntxm/song.h"
+#include "tobkit/widget.h"
 
 #include "state.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-#define PV_BORDER_WIDTH	10
-#define PV_CELL_HEIGHT	8
-#define PV_CHAR_WIDTH	4
-#define PV_CHAR_HEIGHT	8
+#define PV_BORDER_WIDTH 10
+#define PV_CELL_HEIGHT 8
+#define PV_CHAR_WIDTH 4
+#define PV_CHAR_HEIGHT 8
 #define PV_CELL_NOTE_X (1)
-#define PV_CELL_NOTE_WIDTH (PV_CHAR_WIDTH*3)
-#define PV_CELL_INST_X (PV_CELL_NOTE_X+PV_CELL_NOTE_WIDTH+1)
-#define PV_CELL_INST_WIDTH (PV_CHAR_WIDTH*2)
-#define PV_CELL_VOL_X (PV_CELL_INST_X+PV_CELL_INST_WIDTH+1)
-#define PV_CELL_VOL_WIDTH (PV_CHAR_WIDTH*2)
-#define PV_CELL_FX_X (PV_CELL_VOL_X+PV_CELL_VOL_WIDTH+1)
-#define PV_CELL_FX_WIDTH (PV_CHAR_WIDTH*3)
+#define PV_CELL_NOTE_WIDTH (PV_CHAR_WIDTH * 3)
+#define PV_CELL_INST_X (PV_CELL_NOTE_X + PV_CELL_NOTE_WIDTH + 1)
+#define PV_CELL_INST_WIDTH (PV_CHAR_WIDTH * 2)
+#define PV_CELL_VOL_X (PV_CELL_INST_X + PV_CELL_INST_WIDTH + 1)
+#define PV_CELL_VOL_WIDTH (PV_CHAR_WIDTH * 2)
+#define PV_CELL_FX_X (PV_CELL_VOL_X + PV_CELL_VOL_WIDTH + 1)
+#define PV_CELL_FX_WIDTH (PV_CHAR_WIDTH * 3)
 #define PV_CELL_WIDTH PV_CELL_FX_X
-#define PV_CELL_WIDTH_FX (PV_CELL_FX_X+PV_CELL_FX_WIDTH+1)
+#define PV_CELL_WIDTH_FX (PV_CELL_FX_X + PV_CELL_FX_WIDTH + 1)
 
-#define MUTE_REL_X	9
-#define MUTE_X(i)		(PV_BORDER_WIDTH+(i)*getCellWidth()+MUTE_REL_X)
-#define MUTE_Y		1
-#define MUTE_WIDTH	10
-#define MUTE_HEIGHT	9
+#define MUTE_REL_X 9
+#define MUTE_X(i) (PV_BORDER_WIDTH + (i) * getCellWidth() + MUTE_REL_X)
+#define MUTE_Y 1
+#define MUTE_WIDTH 10
+#define MUTE_HEIGHT 9
 
-#define SOLO_REL_X	20
-#define SOLO_X(i)		(PV_BORDER_WIDTH+(i)*getCellWidth()+SOLO_REL_X)
-#define SOLO_Y		MUTE_Y
-#define SOLO_WIDTH	MUTE_WIDTH
-#define SOLO_HEIGHT	MUTE_HEIGHT
+#define SOLO_REL_X 20
+#define SOLO_X(i) (PV_BORDER_WIDTH + (i) * getCellWidth() + SOLO_REL_X)
+#define SOLO_Y MUTE_Y
+#define SOLO_WIDTH MUTE_WIDTH
+#define SOLO_HEIGHT MUTE_HEIGHT
 
-#define C0	0
-#define C1	1
-#define C2	2
-#define C3	3
-#define C4	4
-#define C5	5
-#define C6	6
-#define C7	7
-#define C8	8
-#define C9	9
-#define A	10
-#define B	11
-#define C	12
-#define D	13
-#define E	14
-#define F	15
-#define G	16
-#define H	17
+#define C0 0
+#define C1 1
+#define C2 2
+#define C3 3
+#define C4 4
+#define C5 5
+#define C6 6
+#define C7 7
+#define C8 8
+#define C9 9
+#define A 10
+#define B 11
+#define C 12
+#define D 13
+#define E 14
+#define F 15
+#define G 16
+#define H 17
 
-#define L	21
-#define M	22
-#define P	25
-#define R	27
-#define S	28
-#define U	30
-#define V 	31
+#define L 21
+#define M 22
+#define P 25
+#define R 27
+#define S 28
+#define U 30
+#define V 31
 
-#define DOT	36
-#define MINUS	37
-#define SHARP	38
-#define SPACE	39
+#define DOT 36
+#define MINUS 37
+#define SHARP 38
+#define SPACE 39
 
-#define VSLIDEUP 		41
-#define VSLIDEDOWN 		MINUS
-#define FVSLIDEDOWN 	43
-#define FVSLIDEUP 		42
-#define SETPANPOS		P
-#define PANSLIDELEFT 	44
-#define PANSLIDERIGHT 	45
-#define NOTEPORTA		M
-#define SETVIBRATOSPD	S
-#define SETVIBRATO		V
+#define VSLIDEUP 41
+#define VSLIDEDOWN MINUS
+#define FVSLIDEDOWN 43
+#define FVSLIDEUP 42
+#define SETPANPOS P
+#define PANSLIDELEFT 44
+#define PANSLIDERIGHT 45
+#define NOTEPORTA M
+#define SETVIBRATOSPD S
+#define SETVIBRATO V
 
-const u8 notes_chars[] =   {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
-const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
+const u8 notes_chars[] = {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
+const u8 notes_signs[] = {0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0};
 
 #define PV_COMPONENT_NOTE 0
 #define PV_COMPONENT_INSTRUMENT 1
@@ -119,93 +120,98 @@ const u8 notes_signs[] =   {0 , 1 , 0 , 1 , 0 , 0 , 1 , 0 , 1 , 0 , 1 ,  0};
 // add possibility to select a rectangle of cells (draw selected cells in a special color)
 // add cut+copy+paste buttons and functionality
 
-class PatternView: public Widget {
-	public:
-		// Constructor sets base variables
-		PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, State *_state);
+class PatternView : public Widget
+{
+public:
+	// Constructor sets base variables
+	PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	            State *_state);
 
-		// Drawing request
-		void pleaseDraw(void);
+	// Drawing request
+	void pleaseDraw(void);
 
-		void setSize(u16 _width, u16 _height);
+	void setSize(u16 _width, u16 _height);
 
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-		void penMove(u16 px, u16 py);
-		void buttonPress(u16 button);
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
+	void penMove(u16 px, u16 py);
+	void buttonPress(u16 button);
 
-		void updateSelection(void);
+	void updateSelection(void);
 
-		// Fills the parameters with the selection coordinates. Returns true if no selection exists.
-		bool getSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2, u16 *sel_y2);
+	// Fills the parameters with the selection coordinates. Returns true if no selection exists.
+	bool getSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2, u16 *sel_y2);
 
-		// Sets the selection to the given coordinates
-		void setSelection(u16 sel_x1, u16 sel_y1, u16 sel_x2, u16 sel_y2);
+	// Sets the selection to the given coordinates
+	void setSelection(u16 sel_x1, u16 sel_y1, u16 sel_x2, u16 sel_y2);
 
-		void clearSelection(void);
+	void clearSelection(void);
 
-		void setSong(Song *s);
-		void setLinesPerBeat(u16 lpb);
+	void setSong(Song *s);
+	void setLinesPerBeat(u16 lpb);
 
-		void registerMuteCallback(void (*onMute_)(bool *channels_muted));
+	void registerMuteCallback(void (*onMute_)(bool *channels_muted));
 
-		void muteAll(void);
-		void unmuteAll(void);
+	void muteAll(void);
+	void unmuteAll(void);
 
-		// Returns the solo-ed channel, or -1 if no channel is solo
-		s16 soloChannel(void);
+	// Returns the solo-ed channel, or -1 if no channel is solo
+	s16 soloChannel(void);
 
-		bool isMuted(u16 channel);
-		void unmute(u16 channel);
-		void toggleEffectsVisibility(bool on);
+	bool isMuted(u16 channel);
+	void unmute(u16 channel);
+	void toggleEffectsVisibility(bool on);
 
-		void setTheme(Theme *theme_, u16 bgcolor_) {
-			theme = theme_;
-			bgcolor = bgcolor_;
-			col_notes = theme_->col_pv_notes;
-			col_instr = theme_->col_pv_instr;
-			col_volume = theme_->col_pv_volume;
-			col_effect = theme_->col_pv_effect;
-			col_effect_param = theme_->col_pv_effect_param;
-			col_notes_dark = theme_->col_pv_notes_dark;
-			col_instr_dark = theme_->col_pv_instr_dark;
-			col_volume_dark = theme_->col_pv_volume_dark;
-			col_effect_dark = theme_->col_pv_effect_dark;
-			col_effect_param_dark = theme_->col_pv_effect_param_dark;
-		}
-		void recalcHscroll(void);
+	void setTheme(Theme *theme_, u16 bgcolor_)
+	{
+		theme = theme_;
+		bgcolor = bgcolor_;
+		col_notes = theme_->col_pv_notes;
+		col_instr = theme_->col_pv_instr;
+		col_volume = theme_->col_pv_volume;
+		col_effect = theme_->col_pv_effect;
+		col_effect_param = theme_->col_pv_effect_param;
+		col_notes_dark = theme_->col_pv_notes_dark;
+		col_instr_dark = theme_->col_pv_instr_dark;
+		col_volume_dark = theme_->col_pv_volume_dark;
+		col_effect_dark = theme_->col_pv_effect_dark;
+		col_effect_param_dark = theme_->col_pv_effect_param_dark;
+	}
+	void recalcHscroll(void);
 
-		inline bool isPerComponentNav() { return componentnav; }
-		inline void setPerComponentNav(bool value) { componentnav = value; }
+	inline bool isPerComponentNav() { return componentnav; }
+	inline void setPerComponentNav(bool value) { componentnav = value; }
 
-		inline int getComponentNavOffset() { return componentpos; }
-		inline void setComponentNavOffset(int value) { componentpos = value; }
+	inline int getComponentNavOffset() { return componentpos; }
+	inline void setComponentNavOffset(int value) { componentpos = value; }
 
-		inline int getMaxComponentNavOffset() {
-		    return effects_visible ? PV_COMPONENT_EFFECT_PARAM : PV_COMPONENT_VOLUME;
-		}
+	inline int getMaxComponentNavOffset()
+	{
+		return effects_visible ? PV_COMPONENT_EFFECT_PARAM
+		                       : PV_COMPONENT_VOLUME;
+	}
 
-	private:
-		void draw(void);
+private:
+	void draw(void);
 
+	inline void drawHexByte(u8 byte, u16 cx, u16 cy, u16 col)
+	{
+		//drawSmallChar(byte/0x10, cx  , cy, col);
+		//drawSmallChar(byte%0x10, cx+1, cy, col);
+		drawSmallChar(byte / 0x10, cx, cy, col);
+		drawSmallChar(byte % 0x10, cx + PV_CHAR_WIDTH, cy, col);
+	}
 
-		inline void drawHexByte(u8 byte, u16 cx, u16 cy, u16 col)
-		{
-			//drawSmallChar(byte/0x10, cx  , cy, col);
-			//drawSmallChar(byte%0x10, cx+1, cy, col);
-			drawSmallChar(byte/0x10, cx               , cy, col);
-			drawSmallChar(byte%0x10, cx+PV_CHAR_WIDTH, cy, col);
-		}
-
-		inline void drawCell(u16 cellx, u16 celly, u16 px, u16 py, u8 dark)
-		{
-			u16 notecol = (dark&0x1)?col_notes_dark:col_notes;
-			u16 instrcol = (dark&0x2)?col_instr_dark:col_instr;
-			u16 volumecol = (dark&0x4)?col_volume_dark:col_volume;
-			u16 effectcol = (dark&0x8)?col_effect_dark:col_effect;
-			u16 effectparamcol = (dark&0x10)?col_effect_param_dark:col_effect_param;
-			/*
+	inline void drawCell(u16 cellx, u16 celly, u16 px, u16 py, u8 dark)
+	{
+		u16 notecol = (dark & 0x1) ? col_notes_dark : col_notes;
+		u16 instrcol = (dark & 0x2) ? col_instr_dark : col_instr;
+		u16 volumecol = (dark & 0x4) ? col_volume_dark : col_volume;
+		u16 effectcol = (dark & 0x8) ? col_effect_dark : col_effect;
+		u16 effectparamcol =
+		    (dark & 0x10) ? col_effect_param_dark : col_effect_param;
+		/*
 			typedef struct {
 				u8 note;
 				u8 instrument;
@@ -215,142 +221,149 @@ class PatternView: public Widget {
 			} Cell;
 			*/
 
-			Cell *cell = &(pattern[cellx][celly]);
+		Cell *cell = &(pattern[cellx][celly]);
 
-			u16 realx = PV_BORDER_WIDTH+px*getCellWidth();
-			u16 realy = 2+py*PV_CELL_HEIGHT;
+		u16 realx = PV_BORDER_WIDTH + px * getCellWidth();
+		u16 realy = 2 + py * PV_CELL_HEIGHT;
 
-			// Check for empty note or stop-note
-			if(cell->note == STOP_NOTE) {
-				drawSmallChar(DOT,   realx+PV_CELL_NOTE_X,                 realy, notecol);
-				drawSmallChar(MINUS, realx+PV_CELL_NOTE_X+PV_CHAR_WIDTH,   realy, notecol);
-				drawSmallChar(DOT,   realx+PV_CELL_NOTE_X+2*PV_CHAR_WIDTH, realy, notecol);
-			} else if(cell->note != EMPTY_NOTE) {
-				// Note
-				drawSmallChar(notes_chars[cell->note%12], realx+PV_CELL_NOTE_X, realy, notecol);
-				if(notes_signs[cell->note%12]) {
-					drawSmallChar(SHARP, realx+PV_CELL_NOTE_X+PV_CHAR_WIDTH, realy, notecol);
-				} else {
-					drawSmallChar(MINUS, realx+PV_CELL_NOTE_X+PV_CHAR_WIDTH, realy, notecol);
-				}
-				drawSmallChar(cell->note/12, realx+PV_CELL_NOTE_X+2*PV_CHAR_WIDTH, realy, notecol);
-			}
-
-			// Instrument
-			if(cell->instrument != NO_INSTRUMENT)
-				drawHexByte(cell->instrument+1, realx+PV_CELL_INST_X, realy, instrcol); // Adding one because FT2 indices start with 1
-
-			u8 vol = cell->volume;
-			if (vol >= 0x10 && vol <= 0x5F)
-			{
-				drawHexByte(vol - 0x10, realx+PV_CELL_VOL_X, realy, volumecol);
-			}
-			else
-			{
-			    u8 eff = 0;
-    			if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
-    			    eff = VSLIDEDOWN;
-    			else if ((vol >= 0x70) && (vol <= 0x7F)) // Volume slide up
-    				eff = VSLIDEUP;
-    			else if ((vol >= 0x80) && (vol <= 0x8F)) // Fine volume slide down
-    				eff = FVSLIDEDOWN;
-    			else if ((vol >= 0x90) && (vol <= 0x9F)) // Fine volume slide up
-    				eff = FVSLIDEUP;
-    			else if ((vol >= 0xA0) && (vol <= 0xAF)) // Set vibrato speed (calls vibrato)
-    				eff = SETVIBRATOSPD;
-    			else if ((vol >= 0xB0) && (vol <= 0xBF)) // Vibrato
-    				eff = SETVIBRATO;
-    			else if ((vol >= 0xC0) && (vol <= 0xCF)) // Set panning
-    				eff = SETPANPOS;
-    			else if ((vol >= 0xD0) && (vol <= 0xDF)) // Panning slide left
-    				eff = PANSLIDELEFT;
-    			else if ((vol >= 0xE0) && (vol <= 0xEF)) // Panning slide right
-    				eff = PANSLIDERIGHT;
-    			else if (vol >= 0xF0) // Tone porta
-    				eff = NOTEPORTA;
-
-    			if(eff != 0) {
-    			    drawSmallChar(eff, realx + 5 * PV_CHAR_WIDTH + 2, realy, effectcol);
-    				drawSmallChar(vol & 0x0F, realx + 6 * PV_CHAR_WIDTH + 2, realy, effectparamcol);
-  		        }
-			}
-
-			if(effects_visible) {
-				// Effect and effect parameter
-				if (cell->effect != NO_EFFECT)
-					drawSmallChar(cell->effect, realx+PV_CELL_FX_X, realy, effectcol);
-
-				if (cell->effect_param != 0x00 || cell->effect != NO_EFFECT)
-					drawHexByte(cell->effect_param, realx+PV_CELL_FX_X+PV_CHAR_WIDTH, realy, effectparamcol);
-			}
-		}
-
-		void updateFromState(void);
-
-		inline u16 getCellWidth(void)
-		{
-			if (effects_visible)
-			    return PV_CELL_WIDTH_FX;
-			else
-			    return PV_CELL_WIDTH;
-		}
-
-		inline u16 getEffectiveWidth(void)
-		{
-			return PV_BORDER_WIDTH + getNumVisibleChannels() * getCellWidth();
-		}
-
-		inline u16 getNumVisibleChannels(void)
-		{
-			u16 cw = (width-PV_BORDER_WIDTH) / getCellWidth();
-			if(cw < song->getChannels()) {
-				return cw;
+		// Check for empty note or stop-note
+		if (cell->note == STOP_NOTE) {
+			drawSmallChar(DOT, realx + PV_CELL_NOTE_X, realy, notecol);
+			drawSmallChar(MINUS, realx + PV_CELL_NOTE_X + PV_CHAR_WIDTH, realy,
+			              notecol);
+			drawSmallChar(DOT, realx + PV_CELL_NOTE_X + 2 * PV_CHAR_WIDTH,
+			              realy, notecol);
+		} else if (cell->note != EMPTY_NOTE) {
+			// Note
+			drawSmallChar(notes_chars[cell->note % 12], realx + PV_CELL_NOTE_X,
+			              realy, notecol);
+			if (notes_signs[cell->note % 12]) {
+				drawSmallChar(SHARP, realx + PV_CELL_NOTE_X + PV_CHAR_WIDTH,
+				              realy, notecol);
 			} else {
-				return song->getChannels();
+				drawSmallChar(MINUS, realx + PV_CELL_NOTE_X + PV_CHAR_WIDTH,
+				              realy, notecol);
+			}
+			drawSmallChar(cell->note / 12,
+			              realx + PV_CELL_NOTE_X + 2 * PV_CHAR_WIDTH, realy,
+			              notecol);
+		}
+
+		// Instrument
+		if (cell->instrument != NO_INSTRUMENT)
+			drawHexByte(
+			    cell->instrument + 1, realx + PV_CELL_INST_X, realy,
+			    instrcol); // Adding one because FT2 indices start with 1
+
+		u8 vol = cell->volume;
+		if (vol >= 0x10 && vol <= 0x5F) {
+			drawHexByte(vol - 0x10, realx + PV_CELL_VOL_X, realy, volumecol);
+		} else {
+			u8 eff = 0;
+			if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
+				eff = VSLIDEDOWN;
+			else if ((vol >= 0x70) && (vol <= 0x7F)) // Volume slide up
+				eff = VSLIDEUP;
+			else if ((vol >= 0x80) && (vol <= 0x8F)) // Fine volume slide down
+				eff = FVSLIDEDOWN;
+			else if ((vol >= 0x90) && (vol <= 0x9F)) // Fine volume slide up
+				eff = FVSLIDEUP;
+			else if ((vol >= 0xA0) &&
+			         (vol <= 0xAF)) // Set vibrato speed (calls vibrato)
+				eff = SETVIBRATOSPD;
+			else if ((vol >= 0xB0) && (vol <= 0xBF)) // Vibrato
+				eff = SETVIBRATO;
+			else if ((vol >= 0xC0) && (vol <= 0xCF)) // Set panning
+				eff = SETPANPOS;
+			else if ((vol >= 0xD0) && (vol <= 0xDF)) // Panning slide left
+				eff = PANSLIDELEFT;
+			else if ((vol >= 0xE0) && (vol <= 0xEF)) // Panning slide right
+				eff = PANSLIDERIGHT;
+			else if (vol >= 0xF0) // Tone porta
+				eff = NOTEPORTA;
+
+			if (eff != 0) {
+				drawSmallChar(eff, realx + 5 * PV_CHAR_WIDTH + 2, realy,
+				              effectcol);
+				drawSmallChar(vol & 0x0F, realx + 6 * PV_CHAR_WIDTH + 2, realy,
+				              effectparamcol);
 			}
 		}
 
-		inline u16 getNumVisibleRows(void)
-		{
-			return height / PV_CELL_HEIGHT;
+		if (effects_visible) {
+			// Effect and effect parameter
+			if (cell->effect != NO_EFFECT)
+				drawSmallChar(cell->effect, realx + PV_CELL_FX_X, realy,
+				              effectcol);
+
+			if (cell->effect_param != 0x00 || cell->effect != NO_EFFECT)
+				drawHexByte(cell->effect_param,
+				            realx + PV_CELL_FX_X + PV_CHAR_WIDTH, realy,
+				            effectparamcol);
 		}
+	}
 
-		inline u16 getCursorBarPos(void)
-		{
-			return getNumVisibleRows()/2-1;
+	void updateFromState(void);
+
+	inline u16 getCellWidth(void)
+	{
+		if (effects_visible)
+			return PV_CELL_WIDTH_FX;
+		else
+			return PV_CELL_WIDTH;
+	}
+
+	inline u16 getEffectiveWidth(void)
+	{
+		return PV_BORDER_WIDTH + getNumVisibleChannels() * getCellWidth();
+	}
+
+	inline u16 getNumVisibleChannels(void)
+	{
+		u16 cw = (width - PV_BORDER_WIDTH) / getCellWidth();
+		if (cw < song->getChannels()) {
+			return cw;
+		} else {
+			return song->getChannels();
 		}
+	}
 
-		void callMuteCallback(void);
+	inline u16 getNumVisibleRows(void) { return height / PV_CELL_HEIGHT; }
 
-		void (*onMute)(bool *channels_muted);
+	inline u16 getCursorBarPos(void) { return getNumVisibleRows() / 2 - 1; }
 
-		bool pickCell(u16 px, u16 py, u16 *cx, u16 *cy);
+	void callMuteCallback(void);
 
-		Cell **pattern;
-		Song *song;
-		State *state;
+	void (*onMute)(bool *channels_muted);
 
-		u16 col_notes, col_instr, col_volume, col_effect, col_effect_param,
-			col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark, col_effect_param_dark;
+	bool pickCell(u16 px, u16 py, u16 *cx, u16 *cy);
 
-		u8 hscrollpos;
-		u16 lines_per_beat;
+	Cell **pattern;
+	Song *song;
+	State *state;
 
-		bool selection_exists, pen_down;
-		bool effects_visible;
+	u16 col_notes, col_instr, col_volume, col_effect, col_effect_param,
+	    col_notes_dark, col_instr_dark, col_volume_dark, col_effect_dark,
+	    col_effect_param_dark;
 
-		u16 cell_width;
-		u16 px, py;
-		u16 sel_start_x, sel_end_x, sel_start_y, sel_end_y;
-		u16 sel_x, sel_y, sel_w, sel_h;
+	u8 hscrollpos;
+	u16 lines_per_beat;
 
-		bool solo_channels[MAX_CHANNELS];
-		bool mute_channels[MAX_CHANNELS];
+	bool selection_exists, pen_down;
+	bool effects_visible;
 
-		u8 componentpos;
-		bool componentnav;
+	u16 cell_width;
+	u16 px, py;
+	u16 sel_start_x, sel_end_x, sel_start_y, sel_end_y;
+	u16 sel_x, sel_y, sel_w, sel_h;
+
+	bool solo_channels[MAX_CHANNELS];
+	bool mute_channels[MAX_CHANNELS];
+
+	u8 componentpos;
+	bool componentnav;
 };
 
-};
+}; // namespace tobkit
 
 #endif

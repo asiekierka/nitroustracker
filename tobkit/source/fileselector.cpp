@@ -17,15 +17,15 @@ limitations under the License.
 #include <limits.h>
 #include <unistd.h>
 
-#include <sys/types.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
-#include <algorithm>
 
 #include "tobkit/fileselector.h"
 
@@ -33,18 +33,20 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-FileSelector::FileSelector(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool visible)
-	:ListBox(_x, _y, _width, _height, _screen, 0, false, visible),
-	current_directory("/"), active_filterset(""), filelist_refresh(true),
-	ignore_draws(false), parent_requested_draw(false)
+FileSelector::FileSelector(u16 _x, u16 _y, u16 _width, u16 _height,
+                           Screen *_screen, bool visible)
+    : ListBox(_x, _y, _width, _height, _screen, 0, false, visible),
+      current_directory("/"), active_filterset(""), filelist_refresh(true),
+      ignore_draws(false), parent_requested_draw(false)
 {
 	onFileSelect = 0;
-	onDirChange  = 0;
+	onDirChange = 0;
 }
 
 // Drawing request
-void FileSelector::pleaseDraw(void) {
-	if(filelist_refresh) {
+void FileSelector::pleaseDraw(void)
+{
+	if (filelist_refresh) {
 		read_directory();
 		filelist_refresh = false;
 	}
@@ -52,7 +54,8 @@ void FileSelector::pleaseDraw(void) {
 }
 
 // File list invalidation request
-void FileSelector::invalidateFileList(void) {
+void FileSelector::invalidateFileList(void)
+{
 	filelist_refresh = true;
 }
 
@@ -66,46 +69,48 @@ void FileSelector::penDown(u16 px, u16 py)
 	ignore_draws = false;
 
 	// Don't do anything if the scrollthingy is touched!
-	u8 relx = px-x;
-	if(relx>=width-SCROLLBAR_WIDTH) {
+	u8 relx = px - x;
+	if (relx >= width - SCROLLBAR_WIDTH) {
 		touched_entry = false;
 	}
 
 	// Quit if an out of range element was tapped
-	if(activeelement>=elements.size()) touched_entry = false;
+	if (activeelement >= elements.size())
+		touched_entry = false;
 
-	if(touched_entry) {
+	if (touched_entry) {
 		// If it is a dir, enter it
-		if((filelist.at(activeelement).is_dir == true)&&(filelist.at(activeelement).name != "..")) {
+		if ((filelist.at(activeelement).is_dir == true) &&
+		    (filelist.at(activeelement).name != "..")) {
 			//printf("element %u\n",activeelement);
 			current_directory += filelist.at(activeelement).name + "/";
 			//printf("newdir: %s\n",current_directory.c_str());
 			activeelement = 0;
 
-			if(onDirChange != NULL) {
+			if (onDirChange != NULL) {
 				onDirChange(current_directory.c_str());
 			}
 
 			invalidateFileList();
 
-		// If it is "..", go down a directory
-		} else if(filelist.at(activeelement).name == "..") {
+			// If it is "..", go down a directory
+		} else if (filelist.at(activeelement).name == "..") {
 			std::string name = current_directory;
-			auto slashpos = name.find_last_of("/", name.length()-2);
-			if(slashpos != std::string::npos) {
-				name.erase(slashpos, name.length()-slashpos-1);
+			auto slashpos = name.find_last_of("/", name.length() - 2);
+			if (slashpos != std::string::npos) {
+				name.erase(slashpos, name.length() - slashpos - 1);
 				current_directory = name;
 				//printf("%s\n",current_directory.c_str());
 				activeelement = 0;
 
-				if(onDirChange != NULL) {
+				if (onDirChange != NULL) {
 					onDirChange(current_directory.c_str());
 				}
 
 				invalidateFileList();
 			}
-		// If it is a file, call the callback
-		} else if(onFileSelect != 0) {
+			// If it is a file, call the callback
+		} else if (onFileSelect != 0) {
 			onFileSelect(filelist.at(activeelement));
 		}
 	}
@@ -117,20 +122,24 @@ void FileSelector::penDown(u16 px, u16 py)
 }
 
 // Sets the file select callback
-void FileSelector::registerFileSelectCallback(void (*onFileSelect_)(File)) {
+void FileSelector::registerFileSelectCallback(void (*onFileSelect_)(File))
+{
 	onFileSelect = onFileSelect_;
 }
 
 // Sets the dir change callback
-void FileSelector::registerDirChangeCallback(void (*onDirChange_)(const char *newdir)) {
+void FileSelector::registerDirChangeCallback(
+    void (*onDirChange_)(const char *newdir))
+{
 	onDirChange = onDirChange_;
 }
 
 // Defines a filter rule, selects it if it's the first rule, updates view
-void FileSelector::addFilter(std::string filtername, std::vector<std::string> extensions)
+void FileSelector::addFilter(std::string filtername,
+                             std::vector<std::string> extensions)
 {
 	filters[filtername] = extensions;
-	if(filters.size()==1) {
+	if (filters.size() == 1) {
 		active_filterset = filtername;
 	}
 
@@ -148,8 +157,8 @@ void FileSelector::selectFilter(std::string filtername)
 // Get pointer to the selcted file, 0 is no file selected
 File *FileSelector::getSelectedFile(void)
 {
-	if(activeelement < filelist.size()) {
-		if(filelist.at(activeelement).name != "..") {
+	if (activeelement < filelist.size()) {
+		if (filelist.at(activeelement).name != "..") {
 			return &(filelist.at(activeelement));
 		} else {
 			return 0;
@@ -160,14 +169,16 @@ File *FileSelector::getSelectedFile(void)
 }
 
 // Get current dir
-std::string FileSelector::getDir(void) {
+std::string FileSelector::getDir(void)
+{
 	return current_directory;
 }
 
 // Set current dir
 void FileSelector::setDir(std::string dir)
 {
-	if (!dir.ends_with("/")) dir += "/";
+	if (!dir.ends_with("/"))
+		dir += "/";
 	current_directory = dir;
 }
 
@@ -175,7 +186,7 @@ void FileSelector::setDir(std::string dir)
 
 void FileSelector::draw(void)
 {
-	if(!ignore_draws) {
+	if (!ignore_draws) {
 		ListBox::draw();
 	} else {
 		parent_requested_draw = true;
@@ -187,7 +198,7 @@ void FileSelector::draw(void)
 std::string stringtolowercase(std::string str)
 {
 	std::string outstr = str;
-	for(u8 i=0;i<str.size();++i) {
+	for (u8 i = 0; i < str.size(); ++i) {
 		outstr[i] = tolower(outstr[i]);
 	}
 	return outstr;
@@ -195,9 +206,9 @@ std::string stringtolowercase(std::string str)
 
 inline bool compare_filenames(File f1, File f2)
 {
-	if(f1.order != f2.order) {
+	if (f1.order != f2.order) {
 		return f1.order < f2.order;
-	} else if(strcasecmp(f1.name.c_str(),f2.name.c_str())<0) {
+	} else if (strcasecmp(f1.name.c_str(), f2.name.c_str()) < 0) {
 		return true;
 	} else {
 		return false;
@@ -213,7 +224,7 @@ void FileSelector::read_directory(void)
 	// Go though dir and collect files
 	filelist.clear();
 
-	if( chdir(current_directory.c_str()) == -1 ) {
+	if (chdir(current_directory.c_str()) == -1) {
 		printf("cwd to %s failed\n", current_directory.c_str());
 		return;
 	}
@@ -221,25 +232,23 @@ void FileSelector::read_directory(void)
 	DIR *dir;
 	// struct stat filestats;
 
-	if((dir = opendir(current_directory.c_str())) == NULL)
-	{
+	if ((dir = opendir(current_directory.c_str())) == NULL) {
 		printf("Dir read error!\n");
 		return;
 	}
 
 	struct dirent *direntry = readdir(dir);
 
-	char filename[PATH_MAX+1];
-	while(direntry != NULL)
-	{
-		if(direntry->d_name[0] != '.') { // Hidden and boring files
+	char filename[PATH_MAX + 1];
+	while (direntry != NULL) {
+		if (direntry->d_name[0] != '.') { // Hidden and boring files
 			File newfile;
 			newfile.name = direntry->d_name;
 			newfile.name_with_path = current_directory + direntry->d_name;
 			newfile.is_dir = (direntry->d_type == DT_DIR);
 			newfile.order = newfile.is_dir ? 1 : 2;
 
-            /* if(!newfile.is_dir) {
+			/* if(!newfile.is_dir) {
                 int stat_res = stat(newfile.name_with_path.c_str(), &filestats);
                 if(stat_res != -1) {
         			newfile.size = filestats.st_size;
@@ -252,25 +261,28 @@ void FileSelector::read_directory(void)
 
 	closedir(dir);
 	// Apply filter if there is one
-	if(active_filterset != "") {
+	if (active_filterset != "") {
 		std::vector<File> newfilelist;
 		std::vector<File>::const_iterator fileit;
 		std::string extension;
-		for(fileit=filelist.begin();fileit!=filelist.end();++fileit) {
-			if(fileit->is_dir == true)
-			{
+		for (fileit = filelist.begin(); fileit != filelist.end(); ++fileit) {
+			if (fileit->is_dir == true) {
 				// Don't filter dirs
 				newfilelist.push_back(*fileit);
 			} else {
 				u32 extensionsize;
 				auto lastdot = fileit->name.find_last_of(".");
-				if(lastdot != std::string::npos) {
-					extensionsize = fileit->name.size() - fileit->name.find_last_of(".") - 1;
+				if (lastdot != std::string::npos) {
+					extensionsize = fileit->name.size() -
+					                fileit->name.find_last_of(".") - 1;
 				} else {
 					extensionsize = 0;
 				}
-				extension = stringtolowercase(fileit->name.substr(fileit->name.size()-extensionsize,extensionsize));
-				if(find(filters[active_filterset].begin(), filters[active_filterset].end(),extension) != filters[active_filterset].end()) {
+				extension = stringtolowercase(fileit->name.substr(
+				    fileit->name.size() - extensionsize, extensionsize));
+				if (find(filters[active_filterset].begin(),
+				         filters[active_filterset].end(),
+				         extension) != filters[active_filterset].end()) {
 					newfilelist.push_back(*fileit);
 				}
 			}
@@ -280,7 +292,7 @@ void FileSelector::read_directory(void)
 	}
 
 	// Add ".."
-	if(current_directory != "/" && !current_directory.ends_with(":/")) {
+	if (current_directory != "/" && !current_directory.ends_with(":/")) {
 		File dotdot;
 		dotdot.name = "..";
 		dotdot.is_dir = true;
@@ -298,12 +310,12 @@ void FileSelector::read_directory(void)
 
 	filename[sizeof(filename) - 1] = 0;
 	std::string newentry;
-	for(int i=0;i<filelist.size();++i) {
+	for (int i = 0; i < filelist.size(); ++i) {
 		newentry = filelist.at(i).name;
-		if(filelist.at(i).is_dir == true) {
+		if (filelist.at(i).is_dir == true) {
 			newentry = "[" + newentry + "]";
 		}
-		strncpy(filename, newentry.c_str(), sizeof(filename)-1);
+		strncpy(filename, newentry.c_str(), sizeof(filename) - 1);
 		elements.push_back(filename);
 	}
 }

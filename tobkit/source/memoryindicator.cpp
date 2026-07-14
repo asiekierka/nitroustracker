@@ -20,12 +20,14 @@ limitations under the License.
 
 using namespace tobkit;
 
-#define clamp(v, vmin, vmax) (((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
+#define clamp(v, vmin, vmax)                                                   \
+	(((v) < (vmin)) ? (vmin) : ((v > (vmax)) ? (vmax) : (v)))
 
 /* ===================== PUBLIC ===================== */
 
-MemoryIndicator::MemoryIndicator(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible)
-	:Widget(_x, _y, _width, _height, _screen, _visible)
+MemoryIndicator::MemoryIndicator(u16 _x, u16 _y, u16 _width, u16 _height,
+                                 Screen *_screen, bool _visible)
+    : Widget(_x, _y, _width, _height, _screen, _visible)
 {
 	total_ram = ntxm_getFreeMem(); // only estimate!
 }
@@ -42,7 +44,6 @@ void MemoryIndicator::pleaseDraw(void)
 
 /* ===================== PRIVATE ===================== */
 
-
 void MemoryIndicator::draw(void)
 {
 	if (!isExposed())
@@ -50,22 +51,25 @@ void MemoryIndicator::draw(void)
 
 	u32 free_ram = ntxm_getFreeMem();
 	u32 used_ram = total_ram - free_ram;
-	
-	int boxwidth = clamp((width - 2) * used_ram / total_ram, 0, (u32) (width - 2));
+
+	int boxwidth =
+	    clamp((width - 2) * used_ram / total_ram, 0, (u32)(width - 2));
 	int percentfull = clamp(100 * used_ram / total_ram, 0, 100);
-	
+
 	// Color depends on percentage of used RAM
 	u16 col;
-	if(percentfull < 62)
+	if (percentfull < 62)
 		col = theme->col_mem_ok;
-	else if(percentfull < 78)
-		col = interpolateColor(theme->col_mem_warn, theme->col_mem_ok, (percentfull - 62) << 8);
-	else if(percentfull < 94)
-		col = interpolateColor(theme->col_mem_alert, theme->col_mem_warn, (percentfull - 78) << 8);
+	else if (percentfull < 78)
+		col = interpolateColor(theme->col_mem_warn, theme->col_mem_ok,
+		                       (percentfull - 62) << 8);
+	else if (percentfull < 94)
+		col = interpolateColor(theme->col_mem_alert, theme->col_mem_warn,
+		                       (percentfull - 78) << 8);
 	else
 		col = theme->col_mem_alert;
 
 	drawBorder(theme->col_outline);
-	drawFullBox(1, 1, width-2, height-2, theme->col_light_bg);
-	drawFullBox(1, 1, boxwidth, height-2, col);
+	drawFullBox(1, 1, width - 2, height - 2, theme->col_light_bg);
+	drawFullBox(1, 1, boxwidth, height - 2, col);
 }

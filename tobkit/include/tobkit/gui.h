@@ -25,80 +25,86 @@ Calls touched widget
 #ifndef GUI_H
 #define GUI_H
 
-#include <vector>
-#include <map>
-#include "widget.h"
 #include "theme.h"
+#include "widget.h"
+#include <map>
+#include <vector>
 
-namespace tobkit {
+namespace tobkit
+{
 
 static constexpr u32 MAIN_SCREEN = 0;
 static constexpr u32 SUB_SCREEN = 1;
 
-class GUI {
-	public:
-		GUI();
+class GUI
+{
+public:
+	GUI();
 
-		// Sets the theme - mandatory!
-		void setTheme(Theme *theme_, u16 bgcolor_);
+	// Sets the theme - mandatory!
+	void setTheme(Theme *theme_, u16 bgcolor_);
 
-		// Adds a widget and specifies which button it listens to
-		// Touches on widget's area are redirected to the widget
-		void registerWidget(Widget *w, u16 listeningButtons=0, u8 screen = SUB_SCREEN);
+	// Adds a widget and specifies which button it listens to
+	// Touches on widget's area are redirected to the widget
+	void registerWidget(Widget *w, u16 listeningButtons = 0,
+	                    u8 screen = SUB_SCREEN);
 
-		// Removes a widget from the GUI
-		void unregisterWidget(Widget *w);
+	// Removes a widget from the GUI
+	void unregisterWidget(Widget *w);
 
-		// Registers a widget that is in top of all other widgets and has input
-		// priority, like a popup-window or something.
-		void registerOverlayWidget(Widget *w, u16 listeningButtons, u8 screen = SUB_SCREEN);
+	// Registers a widget that is in top of all other widgets and has input
+	// priority, like a popup-window or something.
+	void registerOverlayWidget(Widget *w, u16 listeningButtons,
+	                           u8 screen = SUB_SCREEN);
 
-		// Event handler for when an overlay widget is about to draw. (so we can clean up widgets underneath)
-		void setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool));
+	// Event handler for when an overlay widget is about to draw. (so we can clean up widgets underneath)
+	void setOnOverlayChanged(void (*_onOverlayChanged)(u8, bool));
 
-		// Remove the overlay widget
-		void unregisterOverlayWidget(u8 screen = SUB_SCREEN);
+	// Remove the overlay widget
+	void unregisterOverlayWidget(u8 screen = SUB_SCREEN);
 
-		// Event calls
-		void penDown(u16 x, u16 y, u8 screen = SUB_SCREEN);
-		void penUp(u16 x, u16 y, u8 screen = SUB_SCREEN); // Remove the coordinates here!
-		void penMove(u16 x, u16 y, u8 screen = SUB_SCREEN);
-		void buttonPress(u16 buttons);
-		void buttonRelease(u16 buttons);
+	// Event calls
+	void penDown(u16 x, u16 y, u8 screen = SUB_SCREEN);
+	void penUp(u16 x, u16 y,
+	           u8 screen = SUB_SCREEN); // Remove the coordinates here!
+	void penMove(u16 x, u16 y, u8 screen = SUB_SCREEN);
+	void buttonPress(u16 buttons);
+	void buttonRelease(u16 buttons);
 
-		// Draw requests
-		void draw(void);
-		void drawMainScreen(void);
-		void drawSubScreen(void);
+	// Draw requests
+	void draw(void);
+	void drawMainScreen(void);
+	void drawSubScreen(void);
 
-		// Show/Hide all elements
-		void showAll(void);
-		void hideAll(void);
+	// Show/Hide all elements
+	void showAll(void);
+	void hideAll(void);
 
-		void occludeAll(void);
-		void revealAll(void);
+	void occludeAll(void);
+	void revealAll(void);
 
-		inline std::vector<Widget*> getWidgets(u8 screen = SUB_SCREEN) {
-			return screen == SUB_SCREEN ? widgets_sub : widgets_main;
-		};
+	inline std::vector<Widget *> getWidgets(u8 screen = SUB_SCREEN)
+	{
+		return screen == SUB_SCREEN ? widgets_sub : widgets_main;
+	};
 
-	private:
-		std::vector<Widget*> widgets_main, widgets_sub;
-		std::vector<Widget*> shortcuts;
-		Widget *activeWidget;
-		void (*onOverlayChanged)(u8, bool);
-		Widget *overlayWidgetMain, *overlayWidgetSub;
-		Theme *theme;
-		u16 bgcolor;
-		u16 overlayShortcuts;
-		u16 activeWidgetTouchX, activeWidgetTouchY;
-		u8 activeWidgetTouchScreen;
+private:
+	std::vector<Widget *> widgets_main, widgets_sub;
+	std::vector<Widget *> shortcuts;
+	Widget *activeWidget;
+	void (*onOverlayChanged)(u8, bool);
+	Widget *overlayWidgetMain, *overlayWidgetSub;
+	Theme *theme;
+	u16 bgcolor;
+	u16 overlayShortcuts;
+	u16 activeWidgetTouchX, activeWidgetTouchY;
+	u8 activeWidgetTouchScreen;
 
-		// Find the widget that got hit
-		Widget *getWidgetAt(u16 x, u16 y, u8 screen);
-		Widget *getWidgetForButtons(u16 buttons);
+	// Find the widget that got hit
+	Widget *getWidgetAt(u16 x, u16 y, u8 screen);
+	Widget *getWidgetForButtons(u16 buttons);
 };
 
-};
+}; // namespace tobkit
 
 #endif

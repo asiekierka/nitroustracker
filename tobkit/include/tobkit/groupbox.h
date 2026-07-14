@@ -19,24 +19,26 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
-
-class GroupBox: public Widget
+namespace tobkit
 {
-	public:
-		GroupBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible=true);
-		~GroupBox();
-		
-		void pleaseDraw(void);
-		
-		void setText(const char *text);
-		
-	private:
-		char *text;
-		
-		void draw(void);
+
+class GroupBox : public Widget
+{
+public:
+	GroupBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	         bool _visible = true);
+	~GroupBox();
+
+	void pleaseDraw(void);
+
+	void setText(const char *text);
+
+private:
+	char *text;
+
+	void draw(void);
 };
 
-};
+}; // namespace tobkit
 
 #endif

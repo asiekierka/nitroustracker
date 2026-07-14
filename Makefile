@@ -61,7 +61,7 @@ ROM_NOMIDI	:= $(NAME).nds
 # Targets
 # -------
 
-.PHONY: all clean arm9d arm9 arm9l arm7d arm7 arm7l libntxm tobkit tobkit-debug libdsmi sdimage
+.PHONY: all clean arm9d arm9 arm9l arm7d arm7 arm7l libntxm tobkit tobkit-debug libdsmi sdimage format
 
 all: $(ROM) $(ROM_DEBUG) $(ROM_NOMIDI)
 
@@ -76,11 +76,11 @@ clean:
 	$(V)$(MAKE) -C tobkit clean DEBUG=true
 	$(V)$(MAKE) -C tobkit clean DEBUG=false
 	$(V)$(MAKE) -C dsmi/ds/libdsmi -f Makefile.blocks clean
-	$(V)$(MAKE) -C libntxm/libntxm -f Makefile.blocks clean
+	$(V)$(MAKE) -C libntxm/libntxm clean
 	$(V)$(RM) $(ROM) $(ROM_DEBUG) $(ROM_NOMIDI) build $(SDIMAGE)
 
 libntxm:
-	@make -C libntxm/libntxm -f Makefile.blocks
+	@make -C libntxm/libntxm
 
 tobkit:
 	@make -C tobkit
@@ -153,3 +153,6 @@ $(ROM_NOMIDI): arm9l arm7l
 sdimage:
 	@echo "  MKFATIMG $(SDIMAGE) $(SDROOT)"
 	$(V)$(BLOCKSDS)/tools/mkfatimg/mkfatimg -t $(SDROOT) $(SDIMAGE) 0
+
+format:
+	@find common/source n3ds/source nds/arm7/source nds/arm9/source sdl/include sdl/source tobkit/include tobkit/source -iname '*.h' -o -iname '*.cpp' -o -iname '*.c' | xargs clang-format -i

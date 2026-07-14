@@ -25,9 +25,9 @@
 #include "patternview.h"
 #include "tools.h"
 
-#include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 using namespace tobkit;
 
@@ -36,15 +36,14 @@ using namespace tobkit;
 #define PV_CURSORBAR_Y ((screen->getHeight() - 16) >> 1)
 
 // Constructor sets base variables
-PatternView::PatternView(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, State *_state)
-	:Widget(_x, _y, _width, _height, _screen),
-	onMute(0), pattern(0), song(0), state(_state),
-	hscrollpos(0), lines_per_beat(8), selection_exists(false), pen_down(false),
-	effects_visible(true),
-	componentpos(0), componentnav(false)
+PatternView::PatternView(u16 _x, u16 _y, u16 _width, u16 _height,
+                         Screen *_screen, State *_state)
+    : Widget(_x, _y, _width, _height, _screen), onMute(0), pattern(0), song(0),
+      state(_state), hscrollpos(0), lines_per_beat(8), selection_exists(false),
+      pen_down(false), effects_visible(true), componentpos(0),
+      componentnav(false)
 {
-	for(int i=0;i<MAX_CHANNELS;++i)
-	{
+	for (int i = 0; i < MAX_CHANNELS; ++i) {
 		mute_channels[i] = false;
 		solo_channels[i] = false;
 	}
@@ -64,9 +63,10 @@ void PatternView::setSize(u16 _width, u16 _height)
 	height = _height;
 
 	// ensure the highlighted channel remians visible
-	while ((state->channel-hscrollpos)*getCellWidth() >= getEffectiveWidth()) {
-        hscrollpos++;
-    }
+	while ((state->channel - hscrollpos) * getCellWidth() >=
+	       getEffectiveWidth()) {
+		hscrollpos++;
+	}
 }
 
 // Event calls
@@ -75,11 +75,12 @@ void PatternView::penDown(u16 px, u16 py)
 	pen_down = true;
 
 	// Selection
-	if(py > y + MUTE_Y + MUTE_HEIGHT) // To avoid selecting stuff when pressing the mute/solo buttons
+	if (py >
+	    y + MUTE_Y +
+	        MUTE_HEIGHT) // To avoid selecting stuff when pressing the mute/solo buttons
 	{
 		selection_exists = pickCell(px, py, &sel_start_x, &sel_start_y);
-		if(selection_exists == true)
-		{
+		if (selection_exists == true) {
 			sel_x = sel_start_x;
 			sel_y = sel_start_y;
 			sel_w = sel_h = 1;
@@ -87,24 +88,22 @@ void PatternView::penDown(u16 px, u16 py)
 	}
 
 	// Mute / Solo buttons
-	u16 realx = px - (x+PV_BORDER_WIDTH);
+	u16 realx = px - (x + PV_BORDER_WIDTH);
 	s32 cellx = realx / getCellWidth() + hscrollpos;
 	u16 rel_cell_x = realx % getCellWidth();
 
 	// Mute
-	if( ( soloChannel() == -1 ) && // No muting when a channel is solo
-		( py >= y + MUTE_Y) && ( py <= y + MUTE_Y + MUTE_HEIGHT ) &&
-		( rel_cell_x >= MUTE_REL_X ) && ( rel_cell_x <= MUTE_REL_X + MUTE_WIDTH ) )
-	{
+	if ((soloChannel() == -1) && // No muting when a channel is solo
+	    (py >= y + MUTE_Y) && (py <= y + MUTE_Y + MUTE_HEIGHT) &&
+	    (rel_cell_x >= MUTE_REL_X) && (rel_cell_x <= MUTE_REL_X + MUTE_WIDTH)) {
 		mute_channels[cellx] = !mute_channels[cellx];
 
 		callMuteCallback();
 	}
 
 	// Solo
-	if( ( py >= y + SOLO_Y) && ( py <= y + SOLO_Y + SOLO_HEIGHT ) &&
-		( rel_cell_x >= SOLO_REL_X ) && ( rel_cell_x <= SOLO_REL_X + SOLO_WIDTH ) )
-	{
+	if ((py >= y + SOLO_Y) && (py <= y + SOLO_Y + SOLO_HEIGHT) &&
+	    (rel_cell_x >= SOLO_REL_X) && (rel_cell_x <= SOLO_REL_X + SOLO_WIDTH)) {
 		solo_channels[cellx] = !solo_channels[cellx];
 
 		callMuteCallback();
@@ -121,21 +120,22 @@ void PatternView::penMove(u16 px, u16 py)
 	this->px = px;
 	this->py = py;
 
-	if(py > y + MUTE_Y + MUTE_HEIGHT) updateSelection();
+	if (py > y + MUTE_Y + MUTE_HEIGHT)
+		updateSelection();
 }
 
 void PatternView::buttonPress(u16 button)
 {
-
 }
 
 void PatternView::updateSelection(void)
 {
-	if(pen_down == false) return;
+	if (pen_down == false)
+		return;
 
-	if( pickCell(px, py, &sel_end_x, &sel_end_y) == true ) {
+	if (pickCell(px, py, &sel_end_x, &sel_end_y) == true) {
 
-		if(sel_end_x > sel_start_x) {
+		if (sel_end_x > sel_start_x) {
 			sel_x = sel_start_x;
 			sel_w = sel_end_x - sel_start_x + 1;
 		} else {
@@ -143,7 +143,7 @@ void PatternView::updateSelection(void)
 			sel_w = sel_start_x - sel_end_x + 1;
 		}
 
-		if(sel_end_y > sel_start_y) {
+		if (sel_end_y > sel_start_y) {
 			sel_y = sel_start_y;
 			sel_h = sel_end_y - sel_start_y + 1;
 		} else {
@@ -153,13 +153,15 @@ void PatternView::updateSelection(void)
 	}
 }
 
-bool PatternView::getSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2, u16 *sel_y2)
+bool PatternView::getSelection(u16 *sel_x1, u16 *sel_y1, u16 *sel_x2,
+                               u16 *sel_y2)
 {
-	if(selection_exists == false) return false;
+	if (selection_exists == false)
+		return false;
 	*sel_x1 = sel_x;
-	*sel_x2 = sel_x+sel_w-1;
+	*sel_x2 = sel_x + sel_w - 1;
 	*sel_y1 = sel_y;
-	*sel_y2 = sel_y+sel_h-1;
+	*sel_y2 = sel_y + sel_h - 1;
 	return true;
 }
 
@@ -198,8 +200,7 @@ void PatternView::registerMuteCallback(void (*onMute_)(bool *channels_muted))
 
 void PatternView::muteAll(void)
 {
-	for(int chn=0; chn<MAX_CHANNELS; ++chn)
-	{
+	for (int chn = 0; chn < MAX_CHANNELS; ++chn) {
 		mute_channels[chn] = true;
 		solo_channels[chn] = false;
 	}
@@ -208,8 +209,7 @@ void PatternView::muteAll(void)
 
 void PatternView::unmuteAll(void)
 {
-	for(int chn=0; chn<MAX_CHANNELS; ++chn)
-	{
+	for (int chn = 0; chn < MAX_CHANNELS; ++chn) {
 		mute_channels[chn] = false;
 		solo_channels[chn] = false;
 	}
@@ -218,9 +218,8 @@ void PatternView::unmuteAll(void)
 
 s16 PatternView::soloChannel(void)
 {
-	for(u8 c=0;c<MAX_CHANNELS;++c)
-	{
-		if(solo_channels[c] == true)
+	for (u8 c = 0; c < MAX_CHANNELS; ++c) {
+		if (solo_channels[c] == true)
 			return c;
 	}
 	return -1;
@@ -239,7 +238,7 @@ void PatternView::unmute(u16 channel)
 
 void PatternView::toggleEffectsVisibility(bool on)
 {
-  effects_visible = on;
+	effects_visible = on;
 }
 
 // if the cursor would be beyond the max visible chn
@@ -247,8 +246,7 @@ void PatternView::recalcHscroll(void)
 {
 	u8 rel_cursor_x = state->channel - hscrollpos;
 
-	if (effects_visible && rel_cursor_x > getNumVisibleChannels())
-	{
+	if (effects_visible && rel_cursor_x > getNumVisibleChannels()) {
 		hscrollpos = state->channel - getNumVisibleChannels();
 	}
 }
@@ -259,124 +257,161 @@ void PatternView::recalcHscroll(void)
 // the whole screen.
 void PatternView::draw(void)
 {
-	s32 sel_screen_x1 = -1, sel_screen_x2 = -1, sel_screen_y1 = -1, sel_screen_y2 = -1;
+	s32 sel_screen_x1 = -1, sel_screen_x2 = -1, sel_screen_y1 = -1,
+	    sel_screen_y2 = -1;
 	bool selection_visible = false;
 
 	screen->clear(theme->col_pv_bg);
 
 	// Selection
-	if(selection_exists == true) {
+	if (selection_exists == true) {
 
 		// Calculate dimensions in screen coords
 		sel_screen_x1 = PV_BORDER_WIDTH + (sel_x - hscrollpos) * getCellWidth();
 		sel_screen_x2 = sel_screen_x1 + sel_w * getCellWidth();
-		sel_screen_y1 = (sel_y - state->getCursorRow() + getCursorBarPos()) * PV_CELL_HEIGHT;
+		sel_screen_y1 = (sel_y - state->getCursorRow() + getCursorBarPos()) *
+		                PV_CELL_HEIGHT;
 		sel_screen_y2 = sel_screen_y1 + sel_h * PV_CELL_HEIGHT;
 
 		// Does an intersection with the screen exist?
-		if	(!(	(sel_screen_x1 >= getEffectiveWidth()) ||
-				(sel_screen_x2 <= 0) ||
-				(sel_screen_y1 >= height) ||
-				(sel_screen_y2 <= 0) ) ) {
+		if (!((sel_screen_x1 >= getEffectiveWidth()) || (sel_screen_x2 <= 0) ||
+		      (sel_screen_y1 >= height) || (sel_screen_y2 <= 0))) {
 
 			// Clamp to screen
-			if (sel_screen_x1 < 0) sel_screen_x1 = 0;
-			else if (sel_screen_x2 > getEffectiveWidth()) sel_screen_x2 = getEffectiveWidth();
-			if (sel_screen_y1 < 0) sel_screen_y1 = 0;
-			else if (sel_screen_y2 > height) sel_screen_y2 = height;
+			if (sel_screen_x1 < 0)
+				sel_screen_x1 = 0;
+			else if (sel_screen_x2 > getEffectiveWidth())
+				sel_screen_x2 = getEffectiveWidth();
+			if (sel_screen_y1 < 0)
+				sel_screen_y1 = 0;
+			else if (sel_screen_y2 > height)
+				sel_screen_y2 = height;
 
 			// Draw
-			drawFullBox(sel_screen_x1, sel_screen_y1, sel_screen_x2 - sel_screen_x1,
-				    sel_screen_y2 - sel_screen_y1, theme->col_pv_cb_sel_highlight);
+			drawFullBox(
+			    sel_screen_x1, sel_screen_y1, sel_screen_x2 - sel_screen_x1,
+			    sel_screen_y2 - sel_screen_y1, theme->col_pv_cb_sel_highlight);
 
 			selection_visible = true;
 		}
 	}
 
-	s16 firstrow = state->getCursorRow()-getCursorBarPos();
+	s16 firstrow = state->getCursorRow() - getCursorBarPos();
 	s16 realrow;
 
 	// H-Lines
 	u16 linescol;
-	if(state->recording == true) {
+	if (state->recording == true) {
 		linescol = theme->col_pv_lines_record;
 	} else {
 		linescol = theme->col_pv_lines;
 	}
 
 	u16 ptnlen = song->getPatternLength(song->getPotEntry(state->potpos));
-	for(u16 i=0; i<getNumVisibleRows(); ++i) {
-		realrow = firstrow+i;
+	for (u16 i = 0; i < getNumVisibleRows(); ++i) {
+		realrow = firstrow + i;
 
-		if((realrow>=0)&&(realrow<=ptnlen)) {
-			if(realrow%lines_per_beat==0) {
-				drawHLine(0, PV_CELL_HEIGHT*i, getEffectiveWidth(), linescol);
+		if ((realrow >= 0) && (realrow <= ptnlen)) {
+			if (realrow % lines_per_beat == 0) {
+				drawHLine(0, PV_CELL_HEIGHT * i, getEffectiveWidth(), linescol);
 			} else {
-				drawHLine(PV_BORDER_WIDTH, PV_CELL_HEIGHT*i,
-					 getEffectiveWidth()-PV_BORDER_WIDTH, theme->col_pv_sublines);
+				drawHLine(PV_BORDER_WIDTH, PV_CELL_HEIGHT * i,
+				          getEffectiveWidth() - PV_BORDER_WIDTH,
+				          theme->col_pv_sublines);
 			}
 		}
 	}
 
 	// V-Lines
-	for(u16 i=0;i<=getNumVisibleChannels();++i) {
-		drawVLine(PV_BORDER_WIDTH-1+i*getCellWidth(), 0, height, linescol);
+	for (u16 i = 0; i <= getNumVisibleChannels(); ++i) {
+		drawVLine(PV_BORDER_WIDTH - 1 + i * getCellWidth(), 0, height,
+		          linescol);
 	}
 
 	// Cursor bar (highlight)
-	drawGradient(theme->col_pv_cb_col1, theme->col_pv_cb_col2, 0, PV_CURSORBAR_Y, getEffectiveWidth(), PV_CELL_HEIGHT);
-	if(selection_visible) {
+	drawGradient(theme->col_pv_cb_col1, theme->col_pv_cb_col2, 0,
+	             PV_CURSORBAR_Y, getEffectiveWidth(), PV_CELL_HEIGHT);
+	if (selection_visible) {
 		// Cursor bar (highlighted component)
-		if (	(sel_screen_y1 <= PV_CURSORBAR_Y + 1)
-			&&	(sel_screen_y2 >= PV_CURSORBAR_Y + 1 + PV_CELL_HEIGHT-1)) {
-				drawFullBox(sel_screen_x1, PV_CURSORBAR_Y+1, sel_screen_x2 - sel_screen_x1, PV_CELL_HEIGHT-1, theme->col_pv_cb_sel_highlight);
+		if ((sel_screen_y1 <= PV_CURSORBAR_Y + 1) &&
+		    (sel_screen_y2 >= PV_CURSORBAR_Y + 1 + PV_CELL_HEIGHT - 1)) {
+			drawFullBox(sel_screen_x1, PV_CURSORBAR_Y + 1,
+			            sel_screen_x2 - sel_screen_x1, PV_CELL_HEIGHT - 1,
+			            theme->col_pv_cb_sel_highlight);
 		}
 	}
 
 	// Playback box
-	int playback_box_y = PV_CURSORBAR_Y + (state->getPlaybackRow()-state->getCursorRow())*PV_CELL_HEIGHT;
+	int playback_box_y =
+	    PV_CURSORBAR_Y +
+	    (state->getPlaybackRow() - state->getCursorRow()) * PV_CELL_HEIGHT;
 	if (playback_box_y >= 0 && playback_box_y < 192) {
-		drawBox(0, playback_box_y, getEffectiveWidth(), PV_CELL_HEIGHT+1, theme->col_pv_pb);
+		drawBox(0, playback_box_y, getEffectiveWidth(), PV_CELL_HEIGHT + 1,
+		        theme->col_pv_pb);
 	}
 
 	// Cursor
 	int cursorX = 0;
 	int cursorWidth = getCellWidth();
-	if(componentnav) {
-	    // Per-component navigation
-		if(componentpos >= PV_COMPONENT_EFFECT && !effects_visible) componentpos = PV_COMPONENT_VOLUME;
-		switch(componentpos) {
-		case PV_COMPONENT_NOTE:         cursorX = PV_CELL_NOTE_X; cursorWidth = PV_CELL_NOTE_WIDTH; break;
-		case PV_COMPONENT_INSTRUMENT:   cursorX = PV_CELL_INST_X; cursorWidth = PV_CELL_INST_WIDTH; break;
-		case PV_COMPONENT_VOLUME:       cursorX = PV_CELL_VOL_X;  cursorWidth = PV_CELL_VOL_WIDTH; break;
-		case PV_COMPONENT_EFFECT:       cursorX = PV_CELL_FX_X;   cursorWidth = PV_CHAR_WIDTH; break;
-		case PV_COMPONENT_EFFECT_PARAM: cursorX = PV_CELL_FX_X+PV_CHAR_WIDTH;   cursorWidth = 2*PV_CHAR_WIDTH; break;
+	if (componentnav) {
+		// Per-component navigation
+		if (componentpos >= PV_COMPONENT_EFFECT && !effects_visible)
+			componentpos = PV_COMPONENT_VOLUME;
+		switch (componentpos) {
+		case PV_COMPONENT_NOTE:
+			cursorX = PV_CELL_NOTE_X;
+			cursorWidth = PV_CELL_NOTE_WIDTH;
+			break;
+		case PV_COMPONENT_INSTRUMENT:
+			cursorX = PV_CELL_INST_X;
+			cursorWidth = PV_CELL_INST_WIDTH;
+			break;
+		case PV_COMPONENT_VOLUME:
+			cursorX = PV_CELL_VOL_X;
+			cursorWidth = PV_CELL_VOL_WIDTH;
+			break;
+		case PV_COMPONENT_EFFECT:
+			cursorX = PV_CELL_FX_X;
+			cursorWidth = PV_CHAR_WIDTH;
+			break;
+		case PV_COMPONENT_EFFECT_PARAM:
+			cursorX = PV_CELL_FX_X + PV_CHAR_WIDTH;
+			cursorWidth = 2 * PV_CHAR_WIDTH;
+			break;
 		}
-		cursorX -= 1; cursorWidth += 2;
+		cursorX -= 1;
+		cursorWidth += 2;
 	}
-	drawBox(PV_BORDER_WIDTH-1+(state->channel-hscrollpos)*getCellWidth()+cursorX, PV_CURSORBAR_Y, cursorWidth+1, PV_CELL_HEIGHT+1, theme->col_pv_pb_cell);
-	drawGradient(theme->col_pv_cb_col1_highlight, theme->col_pv_cb_col2_highlight, PV_BORDER_WIDTH+(state->channel-hscrollpos)*getCellWidth()+cursorX,
-				 PV_CURSORBAR_Y+1, cursorWidth-1, PV_CELL_HEIGHT-1);
+	drawBox(PV_BORDER_WIDTH - 1 +
+	            (state->channel - hscrollpos) * getCellWidth() + cursorX,
+	        PV_CURSORBAR_Y, cursorWidth + 1, PV_CELL_HEIGHT + 1,
+	        theme->col_pv_pb_cell);
+	drawGradient(theme->col_pv_cb_col1_highlight,
+	             theme->col_pv_cb_col2_highlight,
+	             PV_BORDER_WIDTH +
+	                 (state->channel - hscrollpos) * getCellWidth() + cursorX,
+	             PV_CURSORBAR_Y + 1, cursorWidth - 1, PV_CELL_HEIGHT - 1);
 
 	// Numbers on the left
-	for(u16 i=0; i<getNumVisibleRows(); ++i) {
-		realrow = firstrow+i;
-		if((realrow>=0)&&(realrow<ptnlen)) {
-			drawHexByte(realrow, 1, i*PV_CELL_HEIGHT+2, realrow % lines_per_beat == 0 ? theme->col_pv_left_numbers_highlight : theme->col_pv_left_numbers);
+	for (u16 i = 0; i < getNumVisibleRows(); ++i) {
+		realrow = firstrow + i;
+		if ((realrow >= 0) && (realrow < ptnlen)) {
+			drawHexByte(realrow, 1, i * PV_CELL_HEIGHT + 2,
+			            realrow % lines_per_beat == 0
+			                ? theme->col_pv_left_numbers_highlight
+			                : theme->col_pv_left_numbers);
 		}
 	}
 
 	// Pattern data
 	int highlight_row = getNumVisibleRows() / 2 - 1;
 
-	for(u16 i=0;i<getNumVisibleChannels();++i)
-	{
-		for(u16 j=0;j<getNumVisibleRows();++j)
-		{
-			realrow = firstrow+j;
-			if((realrow>=0)&&(realrow<ptnlen))
-			{
-				drawCell(hscrollpos+i, realrow, i, j, (j == highlight_row) ? -1 : 0);
+	for (u16 i = 0; i < getNumVisibleChannels(); ++i) {
+		for (u16 j = 0; j < getNumVisibleRows(); ++j) {
+			realrow = firstrow + j;
+			if ((realrow >= 0) && (realrow < ptnlen)) {
+				drawCell(hscrollpos + i, realrow, i, j,
+				         (j == highlight_row) ? -1 : 0);
 			}
 		}
 	}
@@ -384,54 +419,52 @@ void PatternView::draw(void)
 	// Channel indices
 	char numberstr[2];
 	numberstr[1] = 0;
-	for(u16 i=0;i<getNumVisibleChannels();++i)
-	{
-	    u8 ch = (u8) (hscrollpos+i);
-		drawFullBox(PV_BORDER_WIDTH+i*getCellWidth()+1, 1, getCellWidth()-2, 11, theme->col_pv_bg);
+	for (u16 i = 0; i < getNumVisibleChannels(); ++i) {
+		u8 ch = (u8)(hscrollpos + i);
+		drawFullBox(PV_BORDER_WIDTH + i * getCellWidth() + 1, 1,
+		            getCellWidth() - 2, 11, theme->col_pv_bg);
 		numberstr[0] = ch >= 10 ? ('a' + ch - 10) : ('0' + ch);
-		drawString(numberstr, PV_BORDER_WIDTH+i*getCellWidth()+1, 1, theme->col_pv_chn, 255);
+		drawString(numberstr, PV_BORDER_WIDTH + i * getCellWidth() + 1, 1,
+		           theme->col_pv_chn, 255);
 	}
 
 	// Mute / Solo buttons
 	u16 mute_col1, mute_col2, solo_col1, solo_col2, text_col;
 
-	for(u8 i=0;i<getNumVisibleChannels();++i)
-	{
-		u8 chn = hscrollpos+i;
+	for (u8 i = 0; i < getNumVisibleChannels(); ++i) {
+		u8 chn = hscrollpos + i;
 
-		if( soloChannel() == -1 )
-		{
-			if(mute_channels[chn] == true)
-			{
+		if (soloChannel() == -1) {
+			if (mute_channels[chn] == true) {
 				mute_col1 = theme->col_pv_mutesolo_col1_highlight;
 				mute_col2 = theme->col_pv_mutesolo_col2_highlight;
 				text_col = theme->col_pv_mutesolo_text_highlight;
-			}
-			else
-			{
+			} else {
 				mute_col1 = theme->col_pv_mutesolo_col1;
 				mute_col2 = theme->col_pv_mutesolo_col2;
 				text_col = theme->col_pv_mutesolo_text;
 			}
-			drawGradient(mute_col1, mute_col2, MUTE_X(i), MUTE_Y, MUTE_WIDTH, MUTE_HEIGHT);
-			drawString("m", PV_BORDER_WIDTH+i*getCellWidth()+MUTE_REL_X+1, 0, text_col, 255);
+			drawGradient(mute_col1, mute_col2, MUTE_X(i), MUTE_Y, MUTE_WIDTH,
+			             MUTE_HEIGHT);
+			drawString("m",
+			           PV_BORDER_WIDTH + i * getCellWidth() + MUTE_REL_X + 1, 0,
+			           text_col, 255);
 		}
 
-		if(solo_channels[chn] == true)
-		{
+		if (solo_channels[chn] == true) {
 			solo_col1 = theme->col_pv_mutesolo_col1_highlight;
 			solo_col2 = theme->col_pv_mutesolo_col2_highlight;
 			text_col = theme->col_pv_mutesolo_text_highlight;
-		}
-		else
-		{
+		} else {
 			solo_col1 = theme->col_pv_mutesolo_col1;
 			solo_col2 = theme->col_pv_mutesolo_col2;
 			text_col = theme->col_pv_mutesolo_text;
 		}
 
-		drawGradient(solo_col1, solo_col2, SOLO_X(i), SOLO_Y, SOLO_WIDTH, SOLO_HEIGHT);
-		drawString("s", PV_BORDER_WIDTH+i*getCellWidth()+SOLO_REL_X+2, 0, text_col, 255);
+		drawGradient(solo_col1, solo_col2, SOLO_X(i), SOLO_Y, SOLO_WIDTH,
+		             SOLO_HEIGHT);
+		drawString("s", PV_BORDER_WIDTH + i * getCellWidth() + SOLO_REL_X + 2,
+		           0, text_col, 255);
 	}
 }
 
@@ -442,30 +475,33 @@ void PatternView::updateFromState(void)
 	pattern = song->getPattern(song->getPotEntry(state->potpos));
 
 	// Horizontal scroll position
-	if(state->channel<hscrollpos) {
+	if (state->channel < hscrollpos) {
 		hscrollpos--;
 	}
 
-	if(state->channel==hscrollpos+getNumVisibleChannels()) {
+	if (state->channel == hscrollpos + getNumVisibleChannels()) {
 		hscrollpos++;
 	}
 
 	// Scroll back if number of patterns has decreased and the cursor was at the end
-	if((hscrollpos+getNumVisibleChannels() > song->getChannels())&&(hscrollpos>0)) {
+	if ((hscrollpos + getNumVisibleChannels() > song->getChannels()) &&
+	    (hscrollpos > 0)) {
 		hscrollpos = song->getChannels() - getNumVisibleChannels();
 	}
 }
 
 bool PatternView::pickCell(u16 px, u16 py, u16 *cx, u16 *cy)
 {
-	if( (px < x+PV_BORDER_WIDTH) || (px > x+getEffectiveWidth()-1) ) {
+	if ((px < x + PV_BORDER_WIDTH) || (px > x + getEffectiveWidth() - 1)) {
 		return false;
 	} else {
-		u16 realx = px - (x+PV_BORDER_WIDTH);
+		u16 realx = px - (x + PV_BORDER_WIDTH);
 		u16 realy = py - y - 1;
 		s32 cellx = realx / getCellWidth() + hscrollpos;
-		s32 celly = realy / PV_CELL_HEIGHT - getCursorBarPos() + state->getCursorRow();
-		if((celly < 0) || (celly >= song->getPatternLength(song->getPotEntry(state->potpos)))) {
+		s32 celly =
+		    realy / PV_CELL_HEIGHT - getCursorBarPos() + state->getCursorRow();
+		if ((celly < 0) || (celly >= song->getPatternLength(
+		                                 song->getPotEntry(state->potpos)))) {
 			return false;
 		}
 		*cx = cellx;
@@ -477,22 +513,17 @@ bool PatternView::pickCell(u16 px, u16 py, u16 *cx, u16 *cy)
 
 void PatternView::callMuteCallback(void)
 {
-	if(onMute == 0)
+	if (onMute == 0)
 		return;
 
 	bool muted_channels[MAX_CHANNELS];
 
-	if( soloChannel() != -1 )
-	{
-		for(u8 chn=0; chn<MAX_CHANNELS; ++chn)
-		{
+	if (soloChannel() != -1) {
+		for (u8 chn = 0; chn < MAX_CHANNELS; ++chn) {
 			muted_channels[chn] = !solo_channels[chn];
 		}
-	}
-	else
-	{
-		for(u8 chn=0; chn<MAX_CHANNELS; ++chn)
-		{
+	} else {
+		for (u8 chn = 0; chn < MAX_CHANNELS; ++chn) {
 			muted_channels[chn] = mute_channels[chn];
 		}
 	}

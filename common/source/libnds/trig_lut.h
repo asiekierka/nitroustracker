@@ -98,7 +98,7 @@ extern "C" {
 #define degreesToAngle(degrees) ((degrees) * DEGREES_IN_CIRCLE / 360)
 
 /// Converts an angle in the format used by libnds in the 360 degree format.
-#define angleToDegrees(angle)   ((angle) * 360 / DEGREES_IN_CIRCLE)
+#define angleToDegrees(angle) ((angle) * 360 / DEGREES_IN_CIRCLE)
 
 /// Fixed point sine.
 ///

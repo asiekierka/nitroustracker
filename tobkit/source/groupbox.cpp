@@ -23,8 +23,9 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-GroupBox::GroupBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible)
-	:Widget(_x, _y, _width, _height, _screen, _visible)
+GroupBox::GroupBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+                   bool _visible)
+    : Widget(_x, _y, _width, _height, _screen, _visible)
 {
 	text = NULL;
 }
@@ -37,7 +38,7 @@ GroupBox::~GroupBox()
 
 void GroupBox::pleaseDraw(void)
 {
-	if(isExposed())
+	if (isExposed())
 		draw();
 }
 
@@ -56,14 +57,15 @@ void GroupBox::draw(void)
 	drawBox(0, 4, width, height, theme->col_lighter_bg);
 	if (text == NULL)
 		return;
-	
+
 	u16 strwidth = getStringWidth(text);
 	int x = 10;
-	if (x+4+strwidth > width) {
-		x = width-strwidth-4;
-		if (x < 0) x = 0;
+	if (x + 4 + strwidth > width) {
+		x = width - strwidth - 4;
+		if (x < 0)
+			x = 0;
 	}
 
-	drawFullBox(x, 0, strwidth+2, 10, theme->col_light_bg);
-	drawString(text, x+1, 0, theme->col_text, width - x - 2);
+	drawFullBox(x, 0, strwidth + 2, 10, theme->col_light_bg);
+	drawString(text, x + 1, 0, theme->col_text, width - x - 2);
 }

@@ -13,22 +13,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <nds.h>
-#include <fat.h>
 #include "platform.h"
+#include <fat.h>
+#include <nds.h>
 
 #define FRONT_BUFFER 0
-#define BACK_BUFFER	 1
+#define BACK_BUFFER 1
 static u8 active_buffer = FRONT_BUFFER;
 
 static u16 *main_vram_front, *main_vram_back, *sub_vram;
 Screen *main_screen, *sub_screen;
 
-bool PlatformInitFilesystem(void) {
-    return fatInitDefault();
+bool PlatformInitFilesystem(void)
+{
+	return fatInitDefault();
 }
 
-bool PlatformInit(int argc, char *argv[]) {
+bool PlatformInit(int argc, char *argv[])
+{
 	// Hide everything
 #ifndef DEBUG
 	setBrightness(3, 16);
@@ -43,10 +45,11 @@ bool PlatformInit(int argc, char *argv[]) {
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG2_ACTIVE);
 
 	// Sub screen: Keyboard tiles, Typewriter tiles and ERB
-	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D);
+	videoSetModeSub(MODE_5_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE |
+	                DISPLAY_BG2_ACTIVE | DISPLAY_SPR_ACTIVE | DISPLAY_SPR_1D);
 
 	vramSetPrimaryBanks(VRAM_A_MAIN_BG_0x06000000, VRAM_B_MAIN_BG_0x06020000,
-	   VRAM_C_SUB_BG_0x06200000 , VRAM_D_SUB_SPRITE);
+	                    VRAM_C_SUB_BG_0x06200000, VRAM_D_SUB_SPRITE);
 
 	// SUB_BG0 for Piano Tiles
 	videoBgEnableSub(0);
@@ -80,11 +83,12 @@ bool PlatformInit(int argc, char *argv[]) {
 	// Create a window the same size as the sample display. (so we can occclude loop handles, etc)
 	windowEnableSub(WINDOW_0);
 
-	bgWindowEnable(sub_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
-	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
-	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0|WINDOW_OUT));
+	bgWindowEnable(sub_bg, (WINDOW)(WINDOW_0 | WINDOW_OUT));
+	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0 | WINDOW_OUT));
+	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0 | WINDOW_OUT));
 
-	windowSetBoundsSub(WINDOW_0, 5, 24, 5+129, 23+61); // sampledisplay x1,y1,x2,y2
+	windowSetBoundsSub(WINDOW_0, 5, 24, 5 + 129,
+	                   23 + 61); // sampledisplay x1,y1,x2,y2
 	oamWindowEnable(&oamSub, WINDOW_0);
 
 	// Special effects
@@ -102,86 +106,96 @@ bool PlatformInit(int argc, char *argv[]) {
 
 	bgUpdate();
 
-    // Initialize VRAM pointers
-	main_vram_front = (u16*)BG_BMP_RAM(2);
-	main_vram_back = (u16*)BG_BMP_RAM(8);
-	sub_vram  = (u16*)BG_BMP_RAM_SUB(2);
+	// Initialize VRAM pointers
+	main_vram_front = (u16 *)BG_BMP_RAM(2);
+	main_vram_back = (u16 *)BG_BMP_RAM(8);
+	sub_vram = (u16 *)BG_BMP_RAM_SUB(2);
 
 	main_screen = new Screen(main_vram_back, 256, 192, 256);
 	sub_screen = new Screen(sub_vram, 256, 192, 256);
 
 	// Clear tile mem
-	dmaFillWords(0, BG_BMP_RAM_SUB(0), 32*1024);
+	dmaFillWords(0, BG_BMP_RAM_SUB(0), 32 * 1024);
 
 	return true;
 }
 
-void PlatformExit(void) {
-
+void PlatformExit(void)
+{
 }
 
-void PlatformFlipMainScreen(void) {
+void PlatformFlipMainScreen(void)
+{
 	// Flip buffers
 	active_buffer = !active_buffer;
 
-	if(active_buffer == FRONT_BUFFER) {
-	    bgSetMapBase(2, 2);
-		main_vram_front = (u16*)BG_BMP_RAM(2);
-		main_vram_back = (u16*)BG_BMP_RAM(8);
+	if (active_buffer == FRONT_BUFFER) {
+		bgSetMapBase(2, 2);
+		main_vram_front = (u16 *)BG_BMP_RAM(2);
+		main_vram_back = (u16 *)BG_BMP_RAM(8);
 	} else {
-	    bgSetMapBase(2, 8);
-		main_vram_front = (u16*)BG_BMP_RAM(8);
-		main_vram_back = (u16*)BG_BMP_RAM(2);
+		bgSetMapBase(2, 8);
+		main_vram_front = (u16 *)BG_BMP_RAM(8);
+		main_vram_back = (u16 *)BG_BMP_RAM(2);
 	}
 	main_screen->pixels = main_vram_back;
 }
 
-void PlatformClearMainScreen(tobkit_pixel_t color) {
+void PlatformClearMainScreen(tobkit_pixel_t color)
+{
 	main_screen->pixels = main_vram_front;
 	main_screen->clear(color);
 	main_screen->pixels = main_vram_back;
 	main_screen->clear(color);
 }
 
-void PlatformClearSubScreen(tobkit_pixel_t color) {
+void PlatformClearSubScreen(tobkit_pixel_t color)
+{
 	sub_screen->clear(color);
 }
 
-bool PlatformWaitVBlank(void) {
-    cothread_yield_irq(IRQ_VBLANK);
+bool PlatformWaitVBlank(void)
+{
+	cothread_yield_irq(IRQ_VBLANK);
 	return true;
 }
 
-void PlatformVideoFadeIn(void) {
-	for(int i=-16; i <= 0; ++i)
-	{
-	    setBrightness(3, i);
+void PlatformVideoFadeIn(void)
+{
+	for (int i = -16; i <= 0; ++i) {
+		setBrightness(3, i);
 		PlatformWaitVBlank();
 	}
 }
 
-bool PlatformVideoAreScreensSwapped(void) {
+bool PlatformVideoAreScreensSwapped(void)
+{
 	return !(REG_POWERCNT & POWER_SWAP_LCDS);
 }
 
-bool PlatformVideoSwapScreens(void) {
-    lcdSwap();
+bool PlatformVideoSwapScreens(void)
+{
+	lcdSwap();
 	return true;
 }
 
-PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP, PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
-PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B, PlatformKey_X = KEY_X, PlatformKey_Y = KEY_Y, PlatformKey_L = KEY_L, PlatformKey_R = KEY_R;
-PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT, PlatformKey_TOUCH = KEY_TOUCH;
+PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP,
+                PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
+PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B,
+                PlatformKey_X = KEY_X, PlatformKey_Y = KEY_Y,
+                PlatformKey_L = KEY_L, PlatformKey_R = KEY_R;
+PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT,
+                PlatformKey_TOUCH = KEY_TOUCH;
 PlatformKeyMask PlatformKeysHeld, PlatformKeysDown, PlatformKeysUp;
 u16 PlatformTouchX, PlatformTouchY;
 u8 PlatformTouchScreen = TOUCH_SCREEN_BOTTOM;
 
-static PlatformKeyMask keys_that_are_repeated = KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
+static PlatformKeyMask keys_that_are_repeated =
+    KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
 
 void PlatformSetInputLayout(Handedness handedness)
 {
-	if(handedness == LEFT_HANDED)
-	{
+	if (handedness == LEFT_HANDED) {
 		PlatformKey_UP = KEY_X;
 		PlatformKey_DOWN = KEY_B;
 		PlatformKey_LEFT = KEY_Y;
@@ -193,9 +207,7 @@ void PlatformSetInputLayout(Handedness handedness)
 		PlatformKey_X = KEY_UP;
 		PlatformKey_Y = KEY_LEFT;
 		keys_that_are_repeated = KEY_A | KEY_B | KEY_X | KEY_Y;
-	}
-	else
-	{
+	} else {
 		PlatformKey_UP = KEY_UP;
 		PlatformKey_DOWN = KEY_DOWN;
 		PlatformKey_LEFT = KEY_LEFT;
@@ -210,18 +222,20 @@ void PlatformSetInputLayout(Handedness handedness)
 	}
 }
 
-void PlatformInputUpdate(void) {
-    scanKeys();
+void PlatformInputUpdate(void)
+{
+	scanKeys();
 	PlatformKeysDown = keysDown() | (keysDownRepeat() & keys_that_are_repeated);
-    PlatformKeysUp = keysUp();
+	PlatformKeysUp = keysUp();
 	PlatformKeysHeld = keysHeld();
 
-    touchPosition touch;
-    touchRead(&touch);
-    PlatformTouchX = touch.px;
-    PlatformTouchY = touch.py;
+	touchPosition touch;
+	touchRead(&touch);
+	PlatformTouchX = touch.px;
+	PlatformTouchY = touch.py;
 }
 
-void PlatformInputSetRepeat(int delay, int rate_delay) {
+void PlatformInputSetRepeat(int delay, int rate_delay)
+{
 	keysSetRepeat(delay, rate_delay);
 }

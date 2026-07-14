@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "tobkit/numberbox.h"
 
@@ -23,39 +23,49 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-NumberBox::NumberBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u8 _value, u8 _min, u8 _max, u8 _digits, bool _wraparound)
-	:Widget(_x, _y, _width, _height, _screen),
-	value(_value), min(_min), max(_max), digits(_digits), btnstate(0), wraparound(_wraparound)
+NumberBox::NumberBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+                     u8 _value, u8 _min, u8 _max, u8 _digits, bool _wraparound)
+    : Widget(_x, _y, _width, _height, _screen), value(_value), min(_min),
+      max(_max), digits(_digits), btnstate(0), wraparound(_wraparound)
 {
 	onChange = 0;
-}	
+}
 
 // Drawing request
-void NumberBox::pleaseDraw(void) {
+void NumberBox::pleaseDraw(void)
+{
 	draw();
 }
 
 // Event calls
-void NumberBox::penDown(u16 px, u16 py) {
-	
+void NumberBox::penDown(u16 px, u16 py)
+{
+
 	u8 oldvalue = value;
-	
-	if((px>x)&&(px<x+width)&&(py>y)&&(py<y+9)) {
+
+	if ((px > x) && (px < x + width) && (py > y) && (py < y + 9)) {
 		btnstate = 1;
-		if(value<max) value++; else if (wraparound) value = min;
-	} else if((px>x)&&(px<x+width)&&(py>y+9)&&(py<y+18)) {
+		if (value < max)
+			value++;
+		else if (wraparound)
+			value = min;
+	} else if ((px > x) && (px < x + width) && (py > y + 9) && (py < y + 18)) {
 		btnstate = 2;
-		if(value>min) value--; else if (wraparound) value = max;
+		if (value > min)
+			value--;
+		else if (wraparound)
+			value = max;
 	}
-	
-	if(value!=oldvalue) {
+
+	if (value != oldvalue) {
 		onChange(value);
 		draw();
 	}
 }
 
-void NumberBox::penUp(u16 px, u16 py) {
-	
+void NumberBox::penUp(u16 px, u16 py)
+{
+
 	btnstate = 0;
 	draw();
 }
@@ -63,25 +73,25 @@ void NumberBox::penUp(u16 px, u16 py) {
 void NumberBox::setValue(u8 val)
 {
 	s32 oldval = value;
-	
-	if(val > max)
+
+	if (val > max)
 		value = max;
 	else if (val < min)
 		value = min;
 	else
 		value = val;
 
-	if(oldval != value)
-	{
-		if(onChange!=0)
+	if (oldval != value) {
+		if (onChange != 0)
 			onChange(val);
-		if(isExposed())
+		if (isExposed())
 			draw();
 	}
 }
 
 // Callback registration
-void NumberBox::registerChangeCallback(void (*onChange_)(u8)) {
+void NumberBox::registerChangeCallback(void (*onChange_)(u8))
+{
 	onChange = onChange_;
 }
 
@@ -90,50 +100,49 @@ void NumberBox::registerChangeCallback(void (*onChange_)(u8)) {
 void NumberBox::draw(void)
 {
 	// Upper Button
-	if(btnstate==1) {
+	if (btnstate == 1) {
 		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 1, 8, 8);
 	} else {
 		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 1, 1, 8, 8);
 	}
-	
+
 	// This draws the up-arrow
-	int_fast8_t i,j;
-	for(j=0;j<3;j++) {
-		for(i=-j;i<=j;++i) {
-			drawPixel(4+i, j+3, theme->col_text_bt);
+	int_fast8_t i, j;
+	for (j = 0; j < 3; j++) {
+		for (i = -j; i <= j; ++i) {
+			drawPixel(4 + i, j + 3, theme->col_text_bt);
 		}
 	}
-	
+
 	drawBox(0, 0, 9, 9, theme->col_outline);
-	
+
 	// Lower Button
-	if(btnstate==2) {
+	if (btnstate == 2) {
 		drawGradient(theme->col_dark_ctrl, theme->col_light_ctrl, 1, 8, 8, 8);
 	} else {
 		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 1, 8, 8, 8);
 	}
-	
+
 	// This draws the down-arrow
-	for(j=2;j>=0;j--) {
-		for(i=-j;i<=j;++i) {
-			drawPixel(4+i, -j+13, theme->col_text_bt);
+	for (j = 2; j >= 0; j--) {
+		for (i = -j; i <= j; ++i) {
+			drawPixel(4 + i, -j + 13, theme->col_text_bt);
 		}
 	}
-	
+
 	drawBox(0, 8, 9, 9, theme->col_outline);
-	
+
 	// Number display
-	drawFullBox(9, 1, width-9, height-1, theme->col_lighter_bg);
-	
+	drawFullBox(9, 1, width - 9, height - 1, theme->col_lighter_bg);
+
 	char numberstr[12];
 	char formatstr[] = "%_u";
 	// Set no of digits (hacky, but there's no other way)
-	formatstr[1] = digits+48;
-	
+	formatstr[1] = digits + 48;
+
 	snprintf(numberstr, sizeof(numberstr), formatstr, value);
 	drawString(numberstr, 10, 5, theme->col_text_value);
-	
+
 	// Border
 	drawBorder(theme->col_outline);
-	
 }

@@ -23,11 +23,11 @@
  */
 
 #include "settings.h"
+#include "ntxm/ntxmtools.h"
+#include "tools.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include "tools.h"
-#include "ntxm/ntxmtools.h"
 
 #if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
 #define SETTINGS_DEFAULT_DATA_DIR "/data/NitroTracker"
@@ -39,12 +39,8 @@
 /* ===================== PUBLIC ===================== */
 
 Settings::Settings(char *launch_path, bool use_fat)
-: handedness(RIGHT_HANDED),
-sample_preview(true),
-stereo_output(true),
-freq_47khz(false),
-lines_per_beat(8),
-fat(use_fat), changed(false)
+    : handedness(RIGHT_HANDED), sample_preview(true), stereo_output(true),
+      freq_47khz(false), lines_per_beat(8), fat(use_fat), changed(false)
 {
 	songpath[SETTINGS_FILENAME_LEN] = '\0';
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
@@ -54,15 +50,16 @@ fat(use_fat), changed(false)
 	configpath[0] = '\0';
 	configpath[SETTINGS_FILENAME_LEN] = '\0';
 
-	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
-	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/", launch_path != NULL ? launch_path : "");
-	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Default.nttheme", launch_path != NULL ? launch_path : "");
+	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/",
+	         launch_path != NULL ? launch_path : "");
+	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/",
+	         launch_path != NULL ? launch_path : "");
+	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Default.nttheme",
+	         launch_path != NULL ? launch_path : "");
 
-	if(fat == true)
-	{
+	if (fat == true) {
 #if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
-		if (launch_path == NULL)
-		{
+		if (launch_path == NULL) {
 			dirCreate("/data");
 			dirCreate("/data/NitroTracker");
 			dirCreate("/data/NitroTracker/Themes");
@@ -70,30 +67,30 @@ fat(use_fat), changed(false)
 #endif
 
 		snprintf(configpath, SETTINGS_FILENAME_LEN, "%s/%s",
-			launch_path != NULL ? launch_path : SETTINGS_DEFAULT_DATA_DIR,
-			SETTINGS_CONFIG_FILENAME);
+		         launch_path != NULL ? launch_path : SETTINGS_DEFAULT_DATA_DIR,
+		         SETTINGS_CONFIG_FILENAME);
 
 		// Check if the config file exists and, if not, create it
 		FILE *conf = fopen(configpath, "r");
-		if(conf == NULL)
-		{
+		if (conf == NULL) {
 			write();
-		}
-		else
-		{
+		} else {
 			char hstring[20], prevstring[20];
 
 			fseek(conf, 0, SEEK_END);
 			u32 conf_filesize = ftell(conf);
 			fseek(conf, 0, SEEK_SET);
 
-			char *confstr = (char*)ntxm_ccalloc(1, conf_filesize+1);
+			char *confstr = (char *)ntxm_ccalloc(1, conf_filesize + 1);
 			fread(confstr, conf_filesize, 1, conf);
 			fclose(conf);
 
-			getConfigValue(confstr, "Samplepath", samplepath, SETTINGS_FILENAME_LEN, NULL);
-			getConfigValue(confstr, "Songpath", songpath, SETTINGS_FILENAME_LEN, NULL);
-			getConfigValue(confstr, "Themepath", themepath, SETTINGS_FILENAME_LEN, NULL);
+			getConfigValue(confstr, "Samplepath", samplepath,
+			               SETTINGS_FILENAME_LEN, NULL);
+			getConfigValue(confstr, "Songpath", songpath, SETTINGS_FILENAME_LEN,
+			               NULL);
+			getConfigValue(confstr, "Themepath", themepath,
+			               SETTINGS_FILENAME_LEN, NULL);
 			getConfigValue(confstr, "Handedness", hstring, 20, "Right");
 			handedness = stringToHandedness(hstring);
 
@@ -110,7 +107,7 @@ fat(use_fat), changed(false)
 			lines_per_beat = strtoul(prevstring, NULL, 10);
 			if (!lines_per_beat || lines_per_beat > 64)
 				lines_per_beat = 8;
-			
+
 			ntxm_free(confstr);
 		}
 	}
@@ -136,7 +133,7 @@ bool Settings::getSamplePreview(void)
 
 void Settings::setSamplePreview(bool sample_preview_)
 {
-	sample_preview =  sample_preview_;
+	sample_preview = sample_preview_;
 	changed = true;
 }
 
@@ -147,7 +144,7 @@ bool Settings::getStereoOutput(void)
 
 void Settings::setStereoOutput(bool stereo_output_)
 {
-	stereo_output =  stereo_output_;
+	stereo_output = stereo_output_;
 	changed = true;
 }
 
@@ -158,7 +155,7 @@ bool Settings::getFreq47kHz(void)
 
 void Settings::setFreq47kHz(bool freq_47khz_)
 {
-	freq_47khz =  freq_47khz_;
+	freq_47khz = freq_47khz_;
 	changed = true;
 }
 
@@ -169,7 +166,7 @@ u8 Settings::getLinesPerBeat(void)
 
 void Settings::setLinesPerBeat(u8 lines_per_beat_)
 {
-	lines_per_beat =  lines_per_beat_;
+	lines_per_beat = lines_per_beat_;
 	changed = true;
 }
 
@@ -184,7 +181,8 @@ void Settings::setTheme(tobkit::Theme *theme_)
 	changed = true;
 }
 
-void Settings::setThemePath(const char *themepath_) {
+void Settings::setThemePath(const char *themepath_)
+{
 	strncpy(themepath, themepath_, SETTINGS_FILENAME_LEN);
 	themepath[SETTINGS_FILENAME_LEN] = '\0';
 	changed = true;
@@ -195,17 +193,15 @@ char *Settings::getThemePath(void)
 	return themepath;
 }
 
-
 char *Settings::getSongPath(void)
 {
-    if(!dirExists(songpath)) {
-        strncpy(songpath, "/", SETTINGS_FILENAME_LEN);
-    }
-    return songpath;
+	if (!dirExists(songpath)) {
+		strncpy(songpath, "/", SETTINGS_FILENAME_LEN);
+	}
+	return songpath;
 }
 
-
-void Settings::setSongPath(const char* songpath_)
+void Settings::setSongPath(const char *songpath_)
 {
 	strncpy(songpath, songpath_, SETTINGS_FILENAME_LEN);
 	songpath[SETTINGS_FILENAME_LEN] = '\0';
@@ -214,19 +210,18 @@ void Settings::setSongPath(const char* songpath_)
 
 char *Settings::getSamplePath(void)
 {
-    if(!dirExists(samplepath)) {
-        strncpy(samplepath, "/", SETTINGS_FILENAME_LEN);
-    }
+	if (!dirExists(samplepath)) {
+		strncpy(samplepath, "/", SETTINGS_FILENAME_LEN);
+	}
 	return samplepath;
 }
 
-void Settings::setSamplePath(const char* samplepath_)
+void Settings::setSamplePath(const char *samplepath_)
 {
 	strncpy(samplepath, samplepath_, SETTINGS_FILENAME_LEN);
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
 	changed = true;
 }
-
 
 bool Settings::writeIfChanged(void)
 {
@@ -244,8 +239,7 @@ bool Settings::write(void)
 		return false;
 
 	FILE *conf = fopen(configpath, "w");
-	if(conf == NULL)
-	{
+	if (conf == NULL) {
 		debugprintf("error opening config for writing\n");
 		return false;
 	}
@@ -255,23 +249,27 @@ bool Settings::write(void)
 	boolToString(sample_preview, prevstring);
 	boolToString(stereo_output, stereostring);
 	boolToString(freq_47khz, freqstring);
-	fprintf(conf, "Samplepath = %s\nSongpath = %s\nThemepath = %s\nHandedness = %s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = %s\nLines Per Beat = %d\n",
-			samplepath, songpath, themepath, hstring, prevstring, stereostring, freqstring, lines_per_beat);
+	fprintf(conf,
+	        "Samplepath = %s\nSongpath = %s\nThemepath = %s\nHandedness = "
+	        "%s\nSample Preview = %s\nStereo Output = %s\n47kHz Output = "
+	        "%s\nLines Per Beat = %d\n",
+	        samplepath, songpath, themepath, hstring, prevstring, stereostring,
+	        freqstring, lines_per_beat);
 	fclose(conf);
 	return true;
 }
 
 void Settings::handednessToString(char *str)
 {
-	if(handedness == LEFT_HANDED)
+	if (handedness == LEFT_HANDED)
 		strcpy(str, "Left");
-	else if(handedness == RIGHT_HANDED)
+	else if (handedness == RIGHT_HANDED)
 		strcpy(str, "Right");
 }
 
 Handedness Settings::stringToHandedness(char *str)
 {
-	if(strcasecmp(str, "Left") == 0)
+	if (strcasecmp(str, "Left") == 0)
 		return LEFT_HANDED;
 	else
 		return RIGHT_HANDED;
@@ -279,7 +277,7 @@ Handedness Settings::stringToHandedness(char *str)
 
 void Settings::boolToString(bool b, char *str)
 {
-	if(b == true)
+	if (b == true)
 		strcpy(str, "True");
 	else
 		strcpy(str, "False");
@@ -287,23 +285,24 @@ void Settings::boolToString(bool b, char *str)
 
 bool Settings::stringToBool(char *str)
 {
-	if(strcasecmp(str, "True") == 0)
+	if (strcasecmp(str, "True") == 0)
 		return true;
 	else
 		return false;
 }
 
-static bool setDefaultConfigValue(char *value, const char *defvalue, size_t maxlen)
+static bool setDefaultConfigValue(char *value, const char *defvalue,
+                                  size_t maxlen)
 {
-	if (defvalue != NULL)
-	{
+	if (defvalue != NULL) {
 		strncpy(value, defvalue, maxlen);
 		value[maxlen - 1] = 0;
 	}
 	return false;
 }
 
-bool Settings::getConfigValue(char *config, const char *attribute, char *value, size_t maxlen, const char *defvalue)
+bool Settings::getConfigValue(char *config, const char *attribute, char *value,
+                              size_t maxlen, const char *defvalue)
 {
 	// Oh goodness, this is going to be some badass C code
 	char *attrptr = 0;
@@ -312,31 +311,31 @@ bool Settings::getConfigValue(char *config, const char *attribute, char *value, 
 
 	// Find the attribute string
 	attrptr = strstr(config, attribute);
-	if(attrptr == NULL)
+	if (attrptr == NULL)
 		return setDefaultConfigValue(value, defvalue, maxlen);
 
 	// Find the '=' sign after that
 	valstart = strchr(attrptr, '=');
-	if(valstart == NULL)
+	if (valstart == NULL)
 		return setDefaultConfigValue(value, defvalue, maxlen);
 
 	// Skip forward to the next non-space character
 	valstart++;
-	while(*valstart == ' ')
+	while (*valstart == ' ')
 		valstart++;
 
 	// Find the end of the line
 	valend = strchr(attrptr, '\n');
-	if(valend == NULL)
+	if (valend == NULL)
 		return setDefaultConfigValue(value, defvalue, maxlen);
 
 	// Skip backward to the last non-space character
 	valend--;
-	while(*valend == ' ')
+	while (*valend == ' ')
 		valend--;
 
 	size_t vallen = valend - valstart + 1;
-	size_t len = std::min(maxlen-1, vallen);
+	size_t len = std::min(maxlen - 1, vallen);
 	strncpy(value, valstart, len);
 	value[len] = 0;
 

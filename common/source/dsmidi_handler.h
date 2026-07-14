@@ -18,25 +18,26 @@
 
 #include "ntxm/song.h"
 
-class DSMIDIHandler {
-    public:
-        DSMIDIHandler() { }
-        ~DSMIDIHandler() { }
+class DSMIDIHandler
+{
+public:
+	DSMIDIHandler() {}
+	~DSMIDIHandler() {}
 
-        bool connect();
-        void disconnect();
-        void tick();
-        void stop();
-        void noteStroke(bool on, int channel, int note);
-        void rowUpdate(Song *song, int row, int potpos);
+	bool connect();
+	void disconnect();
+	void tick();
+	void stop();
+	void noteStroke(bool on, int channel, int note);
+	void rowUpdate(Song *song, int row, int potpos);
 
-		bool dsmi_connected = false;
-		bool dsmi_send = true;
-		bool dsmi_recv = true;
+	bool dsmi_connected = false;
+	bool dsmi_send = true;
+	bool dsmi_recv = true;
 
-    private:
-        u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+private:
+	u8 dsmw_lastnotes[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	u8 dsmw_lastchannels[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 };
 
 #endif

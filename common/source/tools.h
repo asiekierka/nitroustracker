@@ -25,15 +25,17 @@
 #ifndef _TOOLS_H_
 #define _TOOLS_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <algorithm>
 #include "ntxm/ntxmtools.h"
+#include <algorithm>
+#include <stdio.h>
+#include <stdlib.h>
 
 // A collection of utilities for everyday coding
 #define debugprintf ntxm_dprintf
 #if !defined(NT_PLATFORM_NDS)
-#define sassert(...) {}
+#define sassert(...)                                                           \
+	{                                                                          \
+	}
 #endif
 
 #define ceil_f32toint(n) (((n) + ((1 << 12) - 1)) >> 12)

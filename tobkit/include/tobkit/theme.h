@@ -14,16 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-  // Themes
+// Themes
 
 #ifndef THEME_H
 #define THEME_H
 
-#include "../../common/source/tools.h" 
+#include "../../common/source/tools.h"
 
 #define NUM_COLORS 123
 
-namespace tobkit {
+namespace tobkit
+{
 
 struct ColorScheme {
 	union {
@@ -158,17 +159,19 @@ struct ColorScheme {
 	ColorScheme();
 };
 
-class Theme : public ColorScheme {
+class Theme : public ColorScheme
+{
 public:
-	Theme(char* themepath = NULL, bool use_fat = true);
+	Theme(char *themepath = NULL, bool use_fat = true);
 	void read(void);
-	bool loadTheme(const char* themefile);
+	bool loadTheme(const char *themefile);
 	void loadDefault(void);
+
 private:
-	bool stringToRGB15(char* str, u16* col);
-	void RGB15ToString(u16 col, char* str);
-	bool parseTheme(FILE *theme, u16* theme_cols);
+	bool stringToRGB15(char *str, u16 *col);
+	void RGB15ToString(u16 col, char *str);
+	bool parseTheme(FILE *theme, u16 *theme_cols);
 };
 
-};
+}; // namespace tobkit
 #endif

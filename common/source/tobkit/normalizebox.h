@@ -25,52 +25,54 @@
 #ifndef _NORMALIZEBOX_H_
 #define _NORMALIZEBOX_H_
 
-#include "tobkit/widget.h"
 #include "tobkit/button.h"
+#include "tobkit/gui.h"
 #include "tobkit/label.h"
 #include "tobkit/numberslider.h"
-#include "tobkit/gui.h"
+#include "tobkit/widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-#define NORMALIZEBOX_WIDTH		150
-#define NORMALIZEBOX_HEIGHT		60
+#define NORMALIZEBOX_WIDTH 150
+#define NORMALIZEBOX_HEIGHT 60
 
-class NormalizeBox: public Widget {
-	public:
-		// Constructor sets base variables
-		NormalizeBox(Screen *_screen, void (*_onOk)(void), void (*_onAuto)(void), void (*_onCancel)(void));
-		~NormalizeBox(void);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penMove(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-		
-		s16 getValue(void);
-		
-		void show(void);
-		void reveal(void);
-		void setTheme(Theme *theme_, u16 bgcolor_);
-		
-	private:
-		void draw(void);
-		
-		void (*onOk)(void);
-		void (*onAuto)(void);
-		void (*onCancel)(void);
-		
-		GUI gui;
-		const char *title;
-		Label *labelpercent;
-		Button *buttonok, *buttonauto, *buttoncancel;
-		NumberSlider *nspercent;
-	
+class NormalizeBox : public Widget
+{
+public:
+	// Constructor sets base variables
+	NormalizeBox(Screen *_screen, void (*_onOk)(void), void (*_onAuto)(void),
+	             void (*_onCancel)(void));
+	~NormalizeBox(void);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penMove(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
+
+	s16 getValue(void);
+
+	void show(void);
+	void reveal(void);
+	void setTheme(Theme *theme_, u16 bgcolor_);
+
+private:
+	void draw(void);
+
+	void (*onOk)(void);
+	void (*onAuto)(void);
+	void (*onCancel)(void);
+
+	GUI gui;
+	const char *title;
+	Label *labelpercent;
+	Button *buttonok, *buttonauto, *buttoncancel;
+	NumberSlider *nspercent;
 };
 
-};
+}; // namespace tobkit
 
 #endif

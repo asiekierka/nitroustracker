@@ -13,41 +13,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "platform.h"
+#include "display_manager.h"
 #include <SDL3/SDL.h>
 #include <cstdlib>
 #include <unistd.h>
-#include "platform.h"
-#include "display_manager.h"
 
 static DisplayManager *display;
 
-bool PlatformInitFilesystem(void) {
-    return true;
+bool PlatformInitFilesystem(void)
+{
+	return true;
 }
 
-bool PlatformInit(int argc, char *argv[]) {
-    int width = 0;
-    int height = 0;
-    float scale = 0.0f;
-    bool multiWindow = false;
+bool PlatformInit(int argc, char *argv[])
+{
+	int width = 0;
+	int height = 0;
+	float scale = 0.0f;
+	bool multiWindow = false;
 
-    int c;
-    while ((c = getopt(argc, argv, "H:MS:W:")) >= 0) {
-        switch (c) {
-        case 'W':
-            width = atoi(optarg);
-            break;
-        case 'H':
-            height = atoi(optarg);
-            break;
-        case 'S':
-            scale = atof(optarg);
-            break;
-        case 'M':
-	       	multiWindow = true;
-	        break;
-        }
-    }
+	int c;
+	while ((c = getopt(argc, argv, "H:MS:W:")) >= 0) {
+		switch (c) {
+		case 'W': width = atoi(optarg); break;
+		case 'H': height = atoi(optarg); break;
+		case 'S': scale = atof(optarg); break;
+		case 'M': multiWindow = true; break;
+		}
+	}
 
 	SDL_SetAppMetadata("NitrousTracker", VERSION, "pl.asie.nitroustracker");
 
@@ -62,24 +56,29 @@ bool PlatformInit(int argc, char *argv[]) {
 	return true;
 }
 
-void PlatformExit(void) {
+void PlatformExit(void)
+{
 	delete display;
 
 	SDL_Quit();
 }
 
-void PlatformFlipMainScreen(void) {
+void PlatformFlipMainScreen(void)
+{
 }
 
-void PlatformClearMainScreen(tobkit_pixel_t color) {
+void PlatformClearMainScreen(tobkit_pixel_t color)
+{
 	main_screen->clear(color);
 }
 
-void PlatformClearSubScreen(tobkit_pixel_t color) {
+void PlatformClearSubScreen(tobkit_pixel_t color)
+{
 	sub_screen->clear(color);
 }
 
-bool PlatformWaitVBlank(void) {
+bool PlatformWaitVBlank(void)
+{
 	display->draw();
 
 	PlatformKeysDown = 0;
@@ -89,20 +88,21 @@ bool PlatformWaitVBlank(void) {
 	while (SDL_PollEvent(&event)) {
 		// TODO: multi-window simultaneous touches are not handled
 		switch (event.type) {
-			case SDL_EVENT_MOUSE_BUTTON_DOWN:
-				PlatformKeysDown |= PlatformKey_TOUCH;
-				display->convertTouchCoords(event.button.windowID, event.button.x, event.button.y);
-				break;
-			case SDL_EVENT_MOUSE_MOTION:
-				display->convertTouchCoords(event.motion.windowID, event.motion.x, event.motion.y);
-				break;
-			case SDL_EVENT_MOUSE_BUTTON_UP:
-				PlatformKeysUp |= PlatformKey_TOUCH;
-				PlatformTouchX = 0;
-				PlatformTouchY = 0;
-				break;
-			case SDL_EVENT_QUIT:
-				return false;
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			PlatformKeysDown |= PlatformKey_TOUCH;
+			display->convertTouchCoords(event.button.windowID, event.button.x,
+			                            event.button.y);
+			break;
+		case SDL_EVENT_MOUSE_MOTION:
+			display->convertTouchCoords(event.motion.windowID, event.motion.x,
+			                            event.motion.y);
+			break;
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			PlatformKeysUp |= PlatformKey_TOUCH;
+			PlatformTouchX = 0;
+			PlatformTouchY = 0;
+			break;
+		case SDL_EVENT_QUIT: return false;
 		}
 	}
 
@@ -112,31 +112,37 @@ bool PlatformWaitVBlank(void) {
 	return true;
 }
 
-void PlatformVideoFadeIn(void) {
-
+void PlatformVideoFadeIn(void)
+{
 }
 
-bool PlatformVideoAreScreensSwapped(void) {
-    return display->getScreensSwapped();
+bool PlatformVideoAreScreensSwapped(void)
+{
+	return display->getScreensSwapped();
 }
 
-bool PlatformVideoSwapScreens(void) {
+bool PlatformVideoSwapScreens(void)
+{
 	return display->swapScreens();
 }
 
-PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP, PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
-PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B, PlatformKey_X = KEY_X, PlatformKey_Y = KEY_Y, PlatformKey_L = KEY_L, PlatformKey_R = KEY_R;
-PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT, PlatformKey_TOUCH = KEY_TOUCH;
+PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP,
+                PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
+PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B,
+                PlatformKey_X = KEY_X, PlatformKey_Y = KEY_Y,
+                PlatformKey_L = KEY_L, PlatformKey_R = KEY_R;
+PlatformKeyMask PlatformKey_START = KEY_START, PlatformKey_SELECT = KEY_SELECT,
+                PlatformKey_TOUCH = KEY_TOUCH;
 PlatformKeyMask PlatformKeysHeld = 0, PlatformKeysDown = 0, PlatformKeysUp = 0;
 u16 PlatformTouchX, PlatformTouchY;
 u8 PlatformTouchScreen;
 
-static PlatformKeyMask keys_that_are_repeated = KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
+static PlatformKeyMask keys_that_are_repeated =
+    KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT;
 
 void PlatformSetInputLayout(Handedness handedness)
 {
-	if(handedness == LEFT_HANDED)
-	{
+	if (handedness == LEFT_HANDED) {
 		PlatformKey_UP = KEY_X;
 		PlatformKey_DOWN = KEY_B;
 		PlatformKey_LEFT = KEY_Y;
@@ -148,9 +154,7 @@ void PlatformSetInputLayout(Handedness handedness)
 		PlatformKey_X = KEY_UP;
 		PlatformKey_Y = KEY_LEFT;
 		keys_that_are_repeated = KEY_A | KEY_B | KEY_X | KEY_Y;
-	}
-	else
-	{
+	} else {
 		PlatformKey_UP = KEY_UP;
 		PlatformKey_DOWN = KEY_DOWN;
 		PlatformKey_LEFT = KEY_LEFT;
@@ -165,8 +169,10 @@ void PlatformSetInputLayout(Handedness handedness)
 	}
 }
 
-void PlatformInputUpdate(void) {
+void PlatformInputUpdate(void)
+{
 }
 
-void PlatformInputSetRepeat(int delay, int rate_delay) {
+void PlatformInputSetRepeat(int delay, int rate_delay)
+{
 }

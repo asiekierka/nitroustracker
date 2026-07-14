@@ -22,26 +22,28 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-Pixmap::Pixmap(u16 _x, u16 _y, u16 _width, u16 _height, const u16* _image, Screen *_screen, bool _visible)
-	:Widget(_x, _y, _width, _height, _screen, _visible),
-	onPush(0), image(_image)
+Pixmap::Pixmap(u16 _x, u16 _y, u16 _width, u16 _height, const u16 *_image,
+               Screen *_screen, bool _visible)
+    : Widget(_x, _y, _width, _height, _screen, _visible), onPush(0),
+      image(_image)
 {
-	
 }
-	
+
 Pixmap::~Pixmap()
 {
-	
 }
 
 // Callback registration
-void Pixmap::registerPushCallback(void (*onPush_)(void)) {
+void Pixmap::registerPushCallback(void (*onPush_)(void))
+{
 	onPush = onPush_;
 }
 
 // Event calls
-void Pixmap::penDown(u16 x, u16 y) {
-	if(onPush) onPush();
+void Pixmap::penDown(u16 x, u16 y)
+{
+	if (onPush)
+		onPush();
 }
 
 // Drawing request
@@ -54,10 +56,10 @@ void Pixmap::pleaseDraw(void)
 
 void Pixmap::draw(void)
 {
-	for(u16 j=0; j<height; ++j) {
-		for(u16 i=0; i<width; ++i) {
-			if(image[width*j+i] & RGB5A1_ALPHA_BIT)
-				drawPixel(i, j, image[width*j+i]);
+	for (u16 j = 0; j < height; ++j) {
+		for (u16 i = 0; i < width; ++i) {
+			if (image[width * j + i] & RGB5A1_ALPHA_BIT)
+				drawPixel(i, j, image[width * j + i]);
 		}
 	}
 }

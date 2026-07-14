@@ -14,34 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
-#include "tobkit/checkbox.h"
 #include "haken_raw.h"
+#include "tobkit/checkbox.h"
 
 using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-CheckBox::CheckBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible, bool checked,
-		  bool albino)
-	:Widget(_x, _y, _width, _height, _screen, _visible),
-	label(0), checked(checked), albino(albino), onToggle(0)
+CheckBox::CheckBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+                   bool _visible, bool checked, bool albino)
+    : Widget(_x, _y, _width, _height, _screen, _visible), label(0),
+      checked(checked), albino(albino), onToggle(0)
 {
-	
 }
 
 CheckBox::~CheckBox()
 {
-	if (label) ntxm_free(label);
+	if (label)
+		ntxm_free(label);
 }
 
 void CheckBox::setCaption(const char *_label)
 {
-	if (label) ntxm_free(label);
-	label = (char*) ntxm_cmalloc(sizeof(_label) + 1);
+	if (label)
+		ntxm_free(label);
+	label = (char *)ntxm_cmalloc(sizeof(_label) + 1);
 	strcpy(label, _label);
 }
 
@@ -60,14 +61,14 @@ void CheckBox::pleaseDraw(void)
 // Event calls
 void CheckBox::penDown(u16 px, u16 py)
 {
-	if(!enabled)
+	if (!enabled)
 		return;
-	
+
 	checked = !checked;
-	
-	if(onToggle != 0)
+
+	if (onToggle != 0)
 		onToggle(checked);
-	
+
 	draw();
 }
 
@@ -80,29 +81,30 @@ void CheckBox::registerToggleCallback(void (*onToggle_)(bool))
 
 void CheckBox::draw(void)
 {
-	if(!isExposed())
+	if (!isExposed())
 		return;
-	
+
 	// Draw the box
-	if(enabled)
-		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl ,2, 4, 7, 7);
+	if (enabled)
+		drawGradient(theme->col_light_ctrl, theme->col_dark_ctrl, 2, 4, 7, 7);
 	else
-		drawGradient(theme->col_light_ctrl_disabled, theme->col_dark_ctrl_disabled,2, 4, 7, 7);
-	
+		drawGradient(theme->col_light_ctrl_disabled,
+		             theme->col_dark_ctrl_disabled, 2, 4, 7, 7);
+
 	drawBox(1, 3, 9, 9, theme->col_outline);
-	
+
 	// Clear up
-	if(!albino)
+	if (!albino)
 		drawFullBox(0, 0, 11, 3, theme->col_light_bg);
 	else
 		drawFullBox(0, 0, 11, 3, theme->col_bg);
-	
+
 	// Checked or not
-	if(checked == true)
+	if (checked == true)
 		drawMonochromeIcon(1, 0, 10, 10, haken_raw, theme->col_checkmark);
-	
+
 	// Text
-	if(!albino)
+	if (!albino)
 		drawString(label, 13, 2, theme->col_text);
 	else
 		drawString(label, 13, 2, theme->col_text_light);

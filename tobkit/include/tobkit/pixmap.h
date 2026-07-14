@@ -19,30 +19,33 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class Pixmap: public Widget {
-	public:
-		Pixmap(u16 _x, u16 _y, u16 _width, u16 _height, const u16* _image, Screen *_screen, bool _visible=true);
-	
-		~Pixmap();
-		
-		// Callback registration
-		void registerPushCallback(void (*onPush_)(void));	
-		
-		// Event calls
-		void penDown(u16 x, u16 y);
-		
-		// Drawing request
-		void pleaseDraw(void);
-		
-	private:
-		void draw(void);
-		
-		void (*onPush)(void);
-		const u16 *image;
+class Pixmap : public Widget
+{
+public:
+	Pixmap(u16 _x, u16 _y, u16 _width, u16 _height, const u16 *_image,
+	       Screen *_screen, bool _visible = true);
+
+	~Pixmap();
+
+	// Callback registration
+	void registerPushCallback(void (*onPush_)(void));
+
+	// Event calls
+	void penDown(u16 x, u16 y);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+private:
+	void draw(void);
+
+	void (*onPush)(void);
+	const u16 *image;
 };
 
-};
+}; // namespace tobkit
 
 #endif

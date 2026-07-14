@@ -19,65 +19,72 @@ limitations under the License.
 
 #include <limits.h>
 
-#include "theme.h"
 #include "platform.h"
+#include "theme.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class Screen {
-	public:
-		Screen(tobkit_pixel_t *_pixels, int _width, int _height, int _pitch);
-		~Screen(void) {}
+class Screen
+{
+public:
+	Screen(tobkit_pixel_t *_pixels, int _width, int _height, int _pitch);
+	~Screen(void) {}
 
-        void clear(tobkit_pixel_t col);
-        void setSize(int _width, int _height, int _pitch);
+	void clear(tobkit_pixel_t col);
+	void setSize(int _width, int _height, int _pitch);
 
-        inline int getWidth(void) const { return width; }
-        inline int getHeight(void) const { return height; }
-        inline int getPitch(void) const {
+	inline int getWidth(void) const { return width; }
+	inline int getHeight(void) const { return height; }
+	inline int getPitch(void) const
+	{
 #if defined(TOBKIT_CONSTANT_PITCH)
-            return TOBKIT_CONSTANT_PITCH;
+		return TOBKIT_CONSTANT_PITCH;
 #else
-            return pitch;
+		return pitch;
 #endif
-        }
+	}
 
-		inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col) {
+	inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col)
+	{
 #if defined(NT_PLATFORM_3DS)
-            *(pixels+getPitch()*tx+getPitch()-1-ty) = col;
+		*(pixels + getPitch() * tx + getPitch() - 1 - ty) = col;
 #else
-            *(pixels+getPitch()*ty+tx) = col;
+		*(pixels + getPitch() * ty + tx) = col;
 #endif
-        }
+	}
 
-        inline void fillRow(u32 tx, u32 ty, u32 bw, u32 col) {
+	inline void fillRow(u32 tx, u32 ty, u32 bw, u32 col)
+	{
 #if defined(NT_PLATFORM_NDS)
-    		dmaFillHalfWords(col, pixels+getPitch()*ty+tx, bw*2);
+		dmaFillHalfWords(col, pixels + getPitch() * ty + tx, bw * 2);
 #else
-            for (u32 i = 0; i < bw; i++)
-                drawPixel(tx+i, ty, col);
+		for (u32 i = 0; i < bw; i++)
+			drawPixel(tx + i, ty, col);
 #endif
-        }
+	}
 
-        inline void fillColumn(u32 tx, u32 ty, u32 bh, u32 col) {
+	inline void fillColumn(u32 tx, u32 ty, u32 bh, u32 col)
+	{
 #if defined(NT_PLATFORM_3DS)
-			u32 offset = ty+bh;
-			if (!(offset & 1)) {
-				u32 colcol = col * 0x10001;
-				__ndsabi_wordset4(pixels+getPitch()*tx+getPitch()-offset, bh*2, colcol);
-				return;
-			}
+		u32 offset = ty + bh;
+		if (!(offset & 1)) {
+			u32 colcol = col * 0x10001;
+			__ndsabi_wordset4(pixels + getPitch() * tx + getPitch() - offset,
+			                  bh * 2, colcol);
+			return;
+		}
 #endif
-            for (u32 i = 0; i < bh; i++)
-                drawPixel(tx, ty+i, col);
-        }
+		for (u32 i = 0; i < bh; i++)
+			drawPixel(tx, ty + i, col);
+	}
 
-        tobkit_pixel_t *pixels;
+	tobkit_pixel_t *pixels;
 
-    private:
-        int width, height, pitch;
+private:
+	int width, height, pitch;
 };
 
-};
+}; // namespace tobkit
 
 #endif

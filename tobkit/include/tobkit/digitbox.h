@@ -19,38 +19,42 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
-class DigitBox: public Widget {
-	public:
-		DigitBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, u8 _value=0, u8 _min=0, u8 _max=255, u8 _digits=2);
-	
-		// Drawing request
-		void pleaseDraw(void);
-		
-		// Event calls
-		void penDown(u16 px, u16 py);
-		void penUp(u16 px, u16 py);
-		void penMove(u16 px, u16 py);
+class DigitBox : public Widget
+{
+public:
+	DigitBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	         u8 _value = 0, u8 _min = 0, u8 _max = 255, u8 _digits = 2);
 
-		void setValue(u8 val);
-		u8 getValue(void);
+	// Drawing request
+	void pleaseDraw(void);
 
-		void setSingleDigit(bool single_digit_mode);
-		
-		// Callback registration
-		void registerChangeCallback(void (*onChange_)(u8));
-	private:
-		void draw(void);
-		
-		void (*onChange)(u8);
-		
-		u8 value;
-		u8 min, max, digits;
-		u8 btnstate;
-		u8 lasty, lastx;
+	// Event calls
+	void penDown(u16 px, u16 py);
+	void penUp(u16 px, u16 py);
+	void penMove(u16 px, u16 py);
+
+	void setValue(u8 val);
+	u8 getValue(void);
+
+	void setSingleDigit(bool single_digit_mode);
+
+	// Callback registration
+	void registerChangeCallback(void (*onChange_)(u8));
+
+private:
+	void draw(void);
+
+	void (*onChange)(u8);
+
+	u8 value;
+	u8 min, max, digits;
+	u8 btnstate;
+	u8 lasty, lastx;
 };
 
-};
+}; // namespace tobkit
 
 #endif

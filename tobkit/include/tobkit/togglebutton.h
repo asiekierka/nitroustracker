@@ -19,45 +19,48 @@ limitations under the License.
 
 #include "widget.h"
 
-namespace tobkit {
+namespace tobkit
+{
 
 /* A button that can be toggled on and off, like a switch. It can have a caption and an icon. */
-class ToggleButton: public Widget {
-	public:
-		ToggleButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen, bool _visible=true, bool _is_record=false);
-		~ToggleButton();
+class ToggleButton : public Widget
+{
+public:
+	ToggleButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	             bool _visible = true, bool _is_record = false);
+	~ToggleButton();
 
-		// Callback registration
-		void registerToggleCallback(void (*onToggle_)(bool));
+	// Callback registration
+	void registerToggleCallback(void (*onToggle_)(bool));
 
-		// Drawing request
-		void pleaseDraw(void);
+	// Drawing request
+	void pleaseDraw(void);
 
-		// Event calls
-		void penDown(u16 x, u16 y);
-		void penUp(u16 x, u16 y);
-		void buttonPress(u16 button);
+	// Event calls
+	void penDown(u16 x, u16 y);
+	void penUp(u16 x, u16 y);
+	void buttonPress(u16 button);
 
-		void setCaption(const char *_caption);
-		void setBitmap(const u8 *_bmp, int width=13, int height=13);
+	void setCaption(const char *_caption);
+	void setBitmap(const u8 *_bmp, int width = 13, int height = 13);
 
-		void setState(bool _on);
-		bool getState(void);
+	void setState(bool _on);
+	bool getState(void);
 
-	private:
-		void draw(void);
+private:
+	void draw(void);
 
-		void (*onToggle)(bool);
+	void (*onToggle)(bool);
 
-		char *caption;
-		const u8 *bitmap;
-		bool penIsDown;
-		bool on;
-		bool has_bitmap;
-		bool is_record;
-		u8 bmpwidth, bmpheight;
+	char *caption;
+	const u8 *bitmap;
+	bool penIsDown;
+	bool on;
+	bool has_bitmap;
+	bool is_record;
+	u8 bmpwidth, bmpheight;
 };
 
-};
+}; // namespace tobkit
 
 #endif
