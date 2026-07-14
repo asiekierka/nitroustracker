@@ -85,6 +85,11 @@ int main(int argc, char ** argv) {
 #else
 	irqEnable(IRQ_VBLANK | IRQ_VCOUNT);
 #endif
+
+	// timer 0 - sub-millisecond ticker
+	// timer 1 - millisecond ticker
+	// timer 2 - unused
+	// timer 3 - DS RTC
 	initClockIRQTimer(3);
 
 	// Create ntxm player
@@ -93,9 +98,6 @@ int main(int argc, char ** argv) {
 	// Initialize NTXM update timer
 	irqSet(IRQ_TIMER0, ntxmTimerHandler);
 	irqEnable(IRQ_TIMER0);
-
-	TIMER0_DATA = TIMER_FREQ_64(ntxm7->getPlayTimerFrequency());
-	TIMER0_CR = TIMER_ENABLE | TIMER_IRQ_REQ | TIMER_DIV_64;
 
 	setPowerButtonCB(powerButtonHandler);
 
