@@ -4491,7 +4491,8 @@ void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup)
             pv_changed = true;
    		}
 	}
-	else if(buttons & PlatformKey_START)
+
+	if(buttons & PlatformKey_START)
 	{
 #ifdef DEBUG
 		debugprintf("\x1b[2J");
