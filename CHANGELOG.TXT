@@ -13,6 +13,7 @@ New features:
 Improvements:
 
 - [#152] inconsistent sample preview looping behaviour
+- 24/32-bit wav samples now load faster
 - fx keyboard now supports pen sliding (prayerie)
 - loop points are now retained when disabling and re-enabling sample loop
 - multiple minor ui/ux tweaks (prayerie)
