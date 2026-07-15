@@ -1936,7 +1936,7 @@ u32 calcFileSize(const char *path)
 	return 0;
 }
 
-void stopPreviewWav(void)
+static void stopPreviewWav(void)
 {
 	// Stop and delete previously playing preview sample
 	if (state->preview_sample)
@@ -4730,7 +4730,6 @@ void VblankHandler(void)
 		gui->penUp(PlatformTouchX, PlatformTouchY, touchScreen);
 		lastx = -255;
 		lasty = -255;
-		stopPreviewWav();
 	}
 
 	if ((PlatformKeysHeld & PlatformKey_TOUCH) &&

@@ -12,7 +12,7 @@ New features:
 
 Improvements:
 
-- [#152] sample preview is now stopped on pen up
+- [#152] inconsistent sample preview looping behaviour
 - fx keyboard now supports pen sliding (prayerie)
 - loop points are now retained when disabling and re-enabling sample loop
 - multiple minor ui/ux tweaks (prayerie)
