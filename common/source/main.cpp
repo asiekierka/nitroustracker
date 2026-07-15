@@ -1936,6 +1936,17 @@ u32 calcFileSize(const char *path)
 	return 0;
 }
 
+void stopPreviewWav(void)
+{
+	// Stop and delete previously playing preview sample
+	if (state->preview_sample)
+		CommandStopSample(0);
+
+	// Wait until previously playing preview sample is deleted
+	while (state->preview_sample)
+		PlatformWaitVBlank();
+}
+
 void previewWav(void)
 {
 	if (mb != NULL)
@@ -1951,15 +1962,8 @@ void previewWav(void)
 		return;
 	}
 
+	stopPreviewWav();
 	updateMemoryState(false);
-
-	// Stop and delete previously playing preview sample
-	if (state->preview_sample)
-		CommandStopSample(0);
-
-	// Wait until previously playing preview sample is deleted
-	while (state->preview_sample)
-		PlatformWaitVBlank();
 
 	// Play it
 	state->preview_sample = smp;
@@ -4726,6 +4730,7 @@ void VblankHandler(void)
 		gui->penUp(PlatformTouchX, PlatformTouchY, touchScreen);
 		lastx = -255;
 		lasty = -255;
+		stopPreviewWav();
 	}
 
 	if ((PlatformKeysHeld & PlatformKey_TOUCH) &&
