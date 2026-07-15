@@ -57,7 +57,7 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height,
       scrollthingywidth(width - 2 * SCROLLBUTTON_HEIGHT - ZOOM_BUTTONS_MARGIN +
                         2),
       pen_x_on_scrollthingy(0), zoom_level(0), scrollpos(0),
-      offset_guide_pos(0), snap_to_zero_crossings(true), draw_mode(false)
+      offset_guide_pos(-1), snap_to_zero_crossings(true), draw_mode(false)
 {
 #ifdef NT_PLATFORM_NDS
 	gfxLine =
@@ -73,7 +73,7 @@ SampleDisplay::SampleDisplay(u16 _x, u16 _y, u16 _width, u16 _height,
 		bool top = i > 17;
 		bool right = i % 2 == 1;
 
-		oamSet(&oamSub, i, width + 8, top ? y : DRAW_HEIGHT + 18,
+		oamSet(&oamSub, i, x + width + 8, top ? y : SAMPLE_DRAW_HEIGHT + 18,
 		       0, // priority 0
 		       1, // pallette index 1
 		       SpriteSize_8x8, SpriteColorFormat_16Color, gfxLoopHandle, -1,
@@ -143,10 +143,10 @@ void SampleDisplay::penDown(u16 px, u16 py)
 		    smp->getLoopLength()); //(smp->getLoopStart() + smp->getLoopLength()) * (width-2) / smp->getNSamples();
 
 		if (isInRect(
-		        px - x, py - y,
+		        px - x - 1, py - y - 1,
 		        std::max((s32)0, (s32)loop_start_pos - (s32)LOOP_TRIANGLE_SIZE),
-		        DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE,
-		        loop_start_pos + LOOP_TRIANGLE_SIZE, DRAW_HEIGHT + 2)) {
+		        SAMPLE_DRAW_HEIGHT - LOOP_TRIANGLE_SIZE,
+		        loop_start_pos + LOOP_TRIANGLE_SIZE, SAMPLE_DRAW_HEIGHT)) {
 			pen_on_loop_start_point = true;
 			loop_touch_offset = px - x - 1 - loop_start_pos;
 		} else if (isInRect(px - x, py - y,
@@ -160,7 +160,7 @@ void SampleDisplay::penDown(u16 px, u16 py)
 
 		// Else: Stylus on the sample.
 		else if (active) {
-			selstart = selend = pixelToSample(px - x);
+			selstart = selend = pixelToSample(px - x - 1);
 			selection_exists = false;
 			draw();
 		}
@@ -259,7 +259,7 @@ void SampleDisplay::penMove(u16 px, u16 py)
 			if (px < x + 1)
 				selend = pixelToSample(0);
 			else if (px - x < width - 1)
-				selend = pixelToSample(px - x);
+				selend = pixelToSample(px - x - 1);
 			else
 				selend = pixelToSample(width - 2);
 
@@ -267,18 +267,18 @@ void SampleDisplay::penMove(u16 px, u16 py)
 				selection_exists = true;
 		} else if (draw_mode) {
 			int draw_x = ntxm_clamp(px - x - 1, 0, width - 2);
-			int draw_y = ntxm_clamp(py - y - 1, 0, DRAW_HEIGHT - 1);
+			int draw_y = ntxm_clamp(py - y - 1, 0, SAMPLE_DRAW_HEIGHT - 1);
 
 			u32 sx1 = pixelToSample(draw_last_x);
 			u32 sx2 = pixelToSample(draw_x);
 
 			s16 sy1, sy2;
 			if (smp->is16bit()) {
-				sy1 = 65535 * (DRAW_HEIGHT / 2 - draw_last_y) / DRAW_HEIGHT;
-				sy2 = 65535 * (DRAW_HEIGHT / 2 - draw_y) / DRAW_HEIGHT;
+				sy1 = 65535 * (SAMPLE_DRAW_HEIGHT / 2 - draw_last_y) / SAMPLE_DRAW_HEIGHT;
+				sy2 = 65535 * (SAMPLE_DRAW_HEIGHT / 2 - draw_y) / SAMPLE_DRAW_HEIGHT;
 			} else {
-				sy1 = 255 * (DRAW_HEIGHT / 2 - draw_last_y) / DRAW_HEIGHT;
-				sy2 = 255 * (DRAW_HEIGHT / 2 - draw_y) / DRAW_HEIGHT;
+				sy1 = 255 * (SAMPLE_DRAW_HEIGHT / 2 - draw_last_y) / SAMPLE_DRAW_HEIGHT;
+				sy2 = 255 * (SAMPLE_DRAW_HEIGHT / 2 - draw_y) / SAMPLE_DRAW_HEIGHT;
 			}
 
 			smp->drawLine(sx1, sy1, sx2, sy2);
@@ -400,7 +400,7 @@ void SampleDisplay::hideLoopPoints(void)
 	}
 }
 
-void SampleDisplay::setOffsetGuide(u32 newpos)
+void SampleDisplay::setOffsetGuide(s32 newpos)
 {
 	offset_guide_pos = newpos;
 }
@@ -445,6 +445,10 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 {
 	pos = ntxm_clamp(pos, 0, smp->getNSamples() - 1);
 
+	int radius_div = (width - 2) << zoom_level;
+	// 4 pixels in each direction
+	int radius = div32((smp->getNSamples() + radius_div - 1) * 4, radius_div);
+
 	if (smp->is16bit()) {
 		s16 *data = (s16 *)smp->getData();
 		u32 n_samples = smp->getNSamples();
@@ -452,7 +456,7 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 		s16 lastsample_left, lastsample_right;
 		lastsample_left = lastsample_right = data[pos];
 
-		for (int i = 1; i < SNAP_TO_ZERO_CROSSING_RADIUS; ++i) {
+		for (int i = 1; i < radius; ++i) {
 			// Seek left
 			if ((pos > i) &&
 			    (((data[pos - i] >= 0) && (lastsample_left <= 0)) ||
@@ -477,7 +481,7 @@ long SampleDisplay::find_zero_crossing_near(long pos)
 		s8 lastsample_left, lastsample_right;
 		lastsample_left = lastsample_right = data[pos];
 
-		for (int i = 1; i < SNAP_TO_ZERO_CROSSING_RADIUS; ++i) {
+		for (int i = 1; i < radius; ++i) {
 			// Seek left
 			if ((pos > i) &&
 			    (((data[pos - i] >= 0) && (lastsample_left <= 0)) ||
@@ -506,11 +510,11 @@ void SampleDisplay::drawLoopHandles(void)
 	    smp == 0 ? 0
 	             : sampleToPixel(smp->getLoopStart() + smp->getLoopLength());
 
-	oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos - 2;
-	oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos - 2 + 8 - 1;
+	oamSub.oamMemory[SPR_LOOPHANDLE_1_L].x = loop_start_pos + x - 6;
+	oamSub.oamMemory[SPR_LOOPHANDLE_1_R].x = loop_start_pos + x - 6 + 8 - 1;
 
-	oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos - 3;
-	oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos - 3 + 8 - 1;
+	oamSub.oamMemory[SPR_LOOPHANDLE_2_L].x = loop_end_pos + x - 6;
+	oamSub.oamMemory[SPR_LOOPHANDLE_2_R].x = loop_end_pos + x - 6 + 8 - 1;
 
 	bool draw_loop_end = loop_points_visible && (loop_end_pos <= width + 8);
 	bool draw_loop_start = loop_points_visible && (loop_start_pos <= width + 8);
@@ -518,12 +522,12 @@ void SampleDisplay::drawLoopHandles(void)
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_1_L, !draw_loop_start);
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_1_R, !draw_loop_start);
 	oamSub.oamMemory[SPR_LOOPLINE_1].x =
-	    draw_loop_start ? loop_start_pos - 2 - 1 : width + 1;
+	    draw_loop_start ? loop_start_pos + x - 6 - 1 : x + width + 1;
 
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_L, !draw_loop_end);
 	oamSetHidden(&oamSub, SPR_LOOPHANDLE_2_R, !draw_loop_end);
 	oamSub.oamMemory[SPR_LOOPLINE_2].x =
-	    draw_loop_end ? loop_end_pos - 2 - 2 : width + 1;
+	    draw_loop_end ? loop_end_pos + x - 6 - 1 : x + width + 1;
 #else
 	draw();
 #endif
@@ -554,22 +558,22 @@ void SampleDisplay::draw(void)
 	//
 	// Selection
 	//
-	s32 selleft = 0;
-	s32 selright = 0;
+	s32 selleft = -1;
+	s32 selright = -1;
 	bool draw_selection = selection_exists;
 
 	if (draw_selection) {
 		selleft = sampleToPixel(std::min(selstart, selend));
 		selright = sampleToPixel(std::max(selstart, selend));
 
-		if (selleft < 1)
-			selleft = 1;
-		else if (selleft > (width - 1))
+		if (selleft < 0)
+			selleft = 0;
+		else if (selleft > (width - 2))
 			draw_selection = false;
 
-		if (selright > width - 1)
-			selright = width - 1;
-		else if (selright < 1)
+		if (selright > width - 2)
+			selright = width - 2;
+		else if (selright < 0)
 			draw_selection = false;
 	}
 
@@ -612,7 +616,7 @@ void SampleDisplay::draw(void)
 	// This draws the left-arrow
 	for (j = 2; j >= 0; j--) {
 		for (p = -j; p <= j; ++p) {
-			drawPixel(x + j + 3, height - SCROLLBAR_WIDTH + 4 + p,
+			drawPixel(j + 3, height - SCROLLBAR_WIDTH + 4 + p,
 			          theme->col_icon_bt);
 		}
 	}
@@ -686,9 +690,9 @@ void SampleDisplay::draw(void)
 	// Sample
 	//
 
-	/* u16 colortable[DRAW_HEIGHT+2];
-	u16 colortable_selected[DRAW_HEIGHT+2];
-	for(s32 i=0; i<DRAW_HEIGHT+2; i++) {
+	/* u16 colortable[SAMPLE_DRAW_HEIGHT+2];
+	u16 colortable_selected[SAMPLE_DRAW_HEIGHT+2];
+	for(s32 i=0; i<SAMPLE_DRAW_HEIGHT+2; i++) {
 		// colortable[i] = interpolateColor(theme->col_light_ctrl, theme->col_dark_ctrl, i<<4);
 		colortable[i] = theme->col_smp_waveform;
 		// colortable_selected[i] = ((colortable[i] >> 2) & 0x1CE7) | 0x8000;
@@ -702,8 +706,9 @@ void SampleDisplay::draw(void)
 	u32 renderwindow =
 	    (u32)std::max(1, std::min(100, (int)ceil_f32toint(step)));
 
-	u16 middle = (DRAW_HEIGHT + 2) / 2; //-1;
-	u16 top = (DRAW_HEIGHT + 2);
+	u16 bottom = 0;
+	u16 middle = (SAMPLE_DRAW_HEIGHT / 2);
+	u16 top = SAMPLE_DRAW_HEIGHT - 1;
 
 	s32 lastmax = 0, lastmin = 0;
 
@@ -714,7 +719,7 @@ void SampleDisplay::draw(void)
 		s16 *data;
 		s16 *base = (s16 *)smp->getData() + pixelToSample(0);
 
-		for (s32 i = 1; i < s32(width - 1); ++i) {
+		for (s32 i = 0; i < s32(width - 2);) {
 			bool draw_selection_here =
 			    (draw_selection && i >= selleft && i < selright);
 			bool draw_offset_line_here = offsetpos == i;
@@ -741,10 +746,10 @@ void SampleDisplay::draw(void)
 				data++;
 			}
 
-			s32 maxy = div32((DRAW_HEIGHT + 2) * maxsmp, 2 * 32767);
-			s32 miny = div32((DRAW_HEIGHT + 2) * minsmp, 2 * 32767);
+			s32 maxy = div32(SAMPLE_DRAW_HEIGHT * maxsmp, 2 * 32767);
+			s32 miny = div32(SAMPLE_DRAW_HEIGHT * minsmp, 2 * 32767);
 
-			if (i > 1) {
+			if (i > 0) {
 				if (lastmin > maxy)
 					maxy = lastmin;
 				if (lastmax < miny)
@@ -759,15 +764,20 @@ void SampleDisplay::draw(void)
 			if (miny > maxy) {
 				miny = middle;
 				maxy = middle;
+			} else {
+				if (maxy > top) maxy = top;
+				if (miny < bottom) miny = bottom;
 			}
+
+			i++;
 
 			s16 j;
 			for (j = 0; j < miny; ++j)
-				drawPixel(i, top - j, bg_current);
+				drawPixel(i, 1 + top - j, bg_current);
 			for (; j <= maxy; ++j)
-				drawPixel(i, top - j, colortable_current); /* [top-j]; */
-			for (; j < top; ++j)
-				drawPixel(i, top - j, bg_current);
+				drawPixel(i, 1 + top - j, colortable_current); /* [top-j]; */
+			for (; j <= top; ++j)
+				drawPixel(i, 1 + top - j, bg_current);
 
 			pos += step;
 		}
@@ -777,7 +787,7 @@ void SampleDisplay::draw(void)
 		s8 *data;
 		s8 *base = (s8 *)smp->getData() + pixelToSample(0);
 
-		for (s32 i = 1; i < s32(width - 1); ++i) {
+		for (s32 i = 0; i < s32(width - 2);) {
 			bool draw_selection_here =
 			    (draw_selection && i >= selleft && i < selright);
 			bool draw_offset_line_here = offsetpos == i;
@@ -803,10 +813,10 @@ void SampleDisplay::draw(void)
 				data++;
 			}
 
-			s8 maxy = div32((DRAW_HEIGHT + 2) * maxsmp, 2 * 127);
-			s8 miny = div32((DRAW_HEIGHT + 2) * minsmp, 2 * 127);
+			s32 maxy = div32(SAMPLE_DRAW_HEIGHT * maxsmp, 2 * 127);
+			s32 miny = div32(SAMPLE_DRAW_HEIGHT * minsmp, 2 * 127);
 
-			if (i > 1) {
+			if (i > 0) {
 				if (lastmin > maxy)
 					maxy = lastmin;
 				if (lastmax < miny)
@@ -821,15 +831,20 @@ void SampleDisplay::draw(void)
 			if (miny > maxy) {
 				miny = middle;
 				maxy = middle;
+			} else {
+				if (maxy > top) maxy = top;
+				if (miny < bottom) miny = bottom;
 			}
+
+			i++;
 
 			s16 j;
 			for (j = 0; j < miny; ++j)
-				drawPixel(i, top - j, bg_current);
+				drawPixel(i, 1 + top - j, bg_current);
 			for (; j <= maxy; ++j)
-				drawPixel(i, top - j, colortable_current); /* [top-j]; */
-			for (; j < top; ++j)
-				drawPixel(i, top - j, bg_current);
+				drawPixel(i, 1 + top - j, colortable_current); /* [top-j]; */
+			for (; j <= top; ++j)
+				drawPixel(i, 1 + top - j, bg_current);
 
 			pos += step;
 		}
@@ -847,47 +862,49 @@ void SampleDisplay::draw(void)
 		// Loop Start
 
 		if ((loop_start_pos >= 0) && (loop_start_pos <= width - 2)) {
+			loop_start_pos++;
+
 			// Line
-			drawVLine(loop_start_pos, 1, DRAW_HEIGHT, theme->col_loop);
+			drawVLine(loop_start_pos, 1, SAMPLE_DRAW_HEIGHT, theme->col_loop);
 
 			// Left Triangle
 			if (loop_start_pos > 1 + LOOP_TRIANGLE_SIZE) {
 				drawHLine(loop_start_pos - 2,
-				          DRAW_HEIGHT + 1 - LOOP_TRIANGLE_SIZE, 2,
+				          SAMPLE_DRAW_HEIGHT + 1 - LOOP_TRIANGLE_SIZE, 2,
 				          theme->col_outline);
 
 				for (u8 i = 0; i < LOOP_TRIANGLE_SIZE - 2; ++i) {
 					drawHLine(loop_start_pos - i - 2,
-					          DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i, i + 2,
+					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i, i + 2,
 					          theme->col_loop);
 					drawPixel(loop_start_pos - i - 3,
-					          DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
+					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
 					          theme->col_outline);
 				}
 
-				drawHLine(loop_start_pos - LOOP_TRIANGLE_SIZE + 1, DRAW_HEIGHT,
+				drawHLine(loop_start_pos - LOOP_TRIANGLE_SIZE + 1, SAMPLE_DRAW_HEIGHT,
 				          LOOP_TRIANGLE_SIZE - 1, theme->col_loop);
-				drawPixel(loop_start_pos - LOOP_TRIANGLE_SIZE, DRAW_HEIGHT,
+				drawPixel(loop_start_pos - LOOP_TRIANGLE_SIZE, SAMPLE_DRAW_HEIGHT,
 				          theme->col_outline);
 			}
 
 			// Right Triangle
 			if (loop_start_pos < width - 2 - LOOP_TRIANGLE_SIZE) {
 				drawHLine(loop_start_pos + 1,
-				          DRAW_HEIGHT + 1 - LOOP_TRIANGLE_SIZE, 2,
+				          SAMPLE_DRAW_HEIGHT + 1 - LOOP_TRIANGLE_SIZE, 2,
 				          theme->col_outline);
 				for (u8 i = 0; i < LOOP_TRIANGLE_SIZE - 2; ++i) {
 					drawHLine(loop_start_pos + 1,
-					          DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i, 2 + i,
+					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i, 2 + i,
 					          theme->col_loop);
 					drawPixel(loop_start_pos + 3 + i,
-					          DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
+					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
 					          theme->col_outline);
 				}
 				drawHLine(loop_start_pos + 1,
-				          DRAW_HEIGHT - LOOP_TRIANGLE_SIZE + LOOP_TRIANGLE_SIZE,
+				          SAMPLE_DRAW_HEIGHT - LOOP_TRIANGLE_SIZE + LOOP_TRIANGLE_SIZE,
 				          LOOP_TRIANGLE_SIZE - 1, theme->col_loop);
-				drawPixel(loop_start_pos + LOOP_TRIANGLE_SIZE, DRAW_HEIGHT,
+				drawPixel(loop_start_pos + LOOP_TRIANGLE_SIZE, SAMPLE_DRAW_HEIGHT,
 				          theme->col_outline);
 			}
 		}
@@ -895,8 +912,10 @@ void SampleDisplay::draw(void)
 		// Loop End
 
 		if ((loop_end_pos >= 0) && (loop_end_pos <= width - 2)) {
+			loop_end_pos++;
+
 			// Line
-			drawVLine(loop_end_pos, 1, DRAW_HEIGHT, theme->col_loop);
+			drawVLine(loop_end_pos, 1, SAMPLE_DRAW_HEIGHT, theme->col_loop);
 
 			// Left Triangle
 			if (loop_end_pos > 1 + LOOP_TRIANGLE_SIZE) {
@@ -1010,8 +1029,8 @@ u32 SampleDisplay::pixelToSample(s32 pixel)
 
 s32 SampleDisplay::sampleToPixel(u32 sample)
 {
-	if (smp->getNSamples() - scrollpos == 0)
-		return 0;
+	if (sample >= smp->getNSamples())
+		return width - 2;
 
 	return s32(sample * (s64(width - 2) << zoom_level) / smp->getNSamples() -
 	           scrollpos);

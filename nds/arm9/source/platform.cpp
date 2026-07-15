@@ -87,7 +87,7 @@ bool PlatformInit(int argc, char *argv[])
 	bgWindowEnable(piano_bg, (WINDOW)(WINDOW_0 | WINDOW_OUT));
 	bgWindowEnable(typewriter_bg, (WINDOW)(WINDOW_0 | WINDOW_OUT));
 
-	windowSetBoundsSub(WINDOW_0, 5, 24, 5 + 129,
+	windowSetBoundsSub(WINDOW_0, 5, 24, 5 + 131,
 	                   23 + 61); // sampledisplay x1,y1,x2,y2
 	oamWindowEnable(&oamSub, WINDOW_0);
 

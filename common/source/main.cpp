@@ -4561,7 +4561,7 @@ void move_to_top(void)
 
 void updateSampleOffsetGuide(void)
 {
-	sampledisplay->setOffsetGuide(0);
+	sampledisplay->setOffsetGuide(-1);
 
 	if (fxkb->is_visible()) {
 		Cell targetcell = song->getPattern(song->getPotEntry(

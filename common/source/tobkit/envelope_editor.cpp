@@ -532,7 +532,7 @@ void EnvelopeEditor::draw(void)
 	// This draws the left-arrow
 	for (j = 2; j >= 0; j--) {
 		for (p = -j; p <= j; ++p) {
-			drawPixel(x + j + 3, height - SCROLLBAR_WIDTH + 4 + p,
+			drawPixel(j + 3, height - SCROLLBAR_WIDTH + 4 + p,
 			          theme->col_icon_bt);
 		}
 	}

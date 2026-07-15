@@ -44,8 +44,8 @@ namespace tobkit
 #define SCROLLPIXELS                                                           \
 	25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH 15
-#define DRAW_HEIGHT                                                            \
-	(height - SCROLLBUTTON_HEIGHT - 3) // height of the visible window
+#define SAMPLE_DRAW_HEIGHT                                                            \
+	(height - SCROLLBUTTON_HEIGHT - 1) // height of the visible window
 
 #define SPR_LOOPHANDLE_1_L 16
 #define SPR_LOOPHANDLE_1_R 17
@@ -87,7 +87,7 @@ public:
 	void showLoopPoints(void);
 	void hideLoopPoints(void);
 
-	void setOffsetGuide(u32 newpos);
+	void setOffsetGuide(s32 newpos);
 
 	void setSnapToZeroCrossing(bool snap);
 
@@ -135,7 +135,7 @@ private:
 	u8 zoom_level;
 	u64 scrollpos;
 
-	u32 offset_guide_pos;
+	s32 offset_guide_pos;
 
 	bool snap_to_zero_crossings;
 
