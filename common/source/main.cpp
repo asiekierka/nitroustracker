@@ -2480,8 +2480,8 @@ void switchScreens();
 
 void showTypewriter(TypewriterState state)
 {
-	// TODO: Migrate to new TobKit to eliminate such ugliness
 #if defined(NT_PLATFORM_NDS)
+	// TODO: Migrate to new TobKit to eliminate such ugliness
 #define SUB_BG1_X0 (*(vu16 *)0x04001014)
 #define SUB_BG1_Y0 (*(vu16 *)0x04001016)
 
@@ -2554,6 +2554,7 @@ void showTypewriter(TypewriterState state)
 	if (unswitch) {
 		switchScreens();
 	}
+	redrawSubScreen();
 #else
 	if (state.cancelCallback) {
 		state.cancelCallback();
