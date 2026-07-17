@@ -9,6 +9,7 @@ New features:
     FT2-compatible players as well.
 - support for editing note components with buttons only, by using A / A + D-Pad
 - support for editing panning envelopes
+- support for previewing samples while the song is playing
 - updated BlocksDS to 1.22.0
 - [#65] .mod import support
 

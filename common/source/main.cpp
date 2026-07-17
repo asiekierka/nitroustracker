@@ -60,6 +60,7 @@ using namespace tobkit;
 #include <ntxm/instrument.h>
 #include <ntxm/mod_transport.h>
 #include <ntxm/ntxmtools.h>
+#include <ntxm/player.h>
 #include <ntxm/sample.h>
 #include <ntxm/song.h>
 #include <ntxm/wav.h>
@@ -1957,7 +1958,7 @@ static void stopPreviewWav(void)
 {
 	// Stop and delete previously playing preview sample
 	if (state->preview_sample)
-		CommandStopSample(0);
+		CommandStopNoteAuto(NTXM_TAG_SAMPLE);
 
 	// Wait until previously playing preview sample is deleted
 	while (state->preview_sample)
@@ -1985,7 +1986,7 @@ void previewWav(void)
 	// Play it
 	state->preview_sample = smp;
 	ntxm_flush_dcache();
-	CommandPlaySample(smp, 4 * 12, MAX_VOLUME, 0);
+	CommandPlaySample(smp, 4 * 12, MAX_VOLUME, NTXM_TAG_NONE);
 
 	// When the sample has finished playing, the arm7 sends a signal,
 	// so the arm9 can delete the sample
@@ -2017,9 +2018,6 @@ void handleFileChange(File file)
 		// Preview WAV files
 		if (slen > 4 && (strcasecmp(&str[slen - 4], ".wav") == 0) &&
 		    (settings->getSamplePreview() == true)) {
-			// Pause song playback if ongoing
-			if (state->playing)
-				pausePlay();
 
 			if (preview_smp_path != NULL) {
 				ntxm_free(preview_smp_path);
@@ -2052,7 +2050,8 @@ void handleDirChange(const char *newdir)
 void handlePreviewSampleFinished(void)
 {
 	debugprintf("Sample finished\n");
-	delete state->preview_sample;
+	if (state->preview_sample)
+		delete state->preview_sample;
 	state->preview_sample = 0;
 
 	// FIXME: this is still inside an IRQ, so may freeze
