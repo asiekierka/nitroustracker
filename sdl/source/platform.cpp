@@ -16,10 +16,13 @@
 #include "platform.h"
 #include "display_manager.h"
 #include <SDL3/SDL.h>
+#include <cstdint>
 #include <cstdlib>
 #include <unistd.h>
+#include <unordered_map>
 
 static DisplayManager *display;
+static std::unordered_map<SDL_Keycode, uint32_t> sdl_key_map;
 
 bool PlatformInitFilesystem(void)
 {
@@ -42,6 +45,11 @@ bool PlatformInit(int argc, char *argv[])
 		case 'M': multiWindow = true; break;
 		}
 	}
+
+	sdl_key_map[SDLK_UP] = KEY_UP;
+	sdl_key_map[SDLK_LEFT] = KEY_LEFT;
+	sdl_key_map[SDLK_RIGHT] = KEY_RIGHT;
+	sdl_key_map[SDLK_DOWN] = KEY_DOWN;
 
 	SDL_SetAppMetadata("NitrousTracker", VERSION, "pl.asie.nitroustracker");
 
@@ -88,6 +96,10 @@ bool PlatformWaitVBlank(void)
 	while (SDL_PollEvent(&event)) {
 		// TODO: multi-window simultaneous touches are not handled
 		switch (event.type) {
+		case SDL_EVENT_KEY_DOWN:
+			PlatformKeysDown |= sdl_key_map[event.key.key];
+			break;
+		case SDL_EVENT_KEY_UP: PlatformKeysUp |= sdl_key_map[event.key.key]; break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			PlatformKeysDown |= PlatformKey_TOUCH;
 			display->convertTouchCoords(event.button.windowID, event.button.x,
