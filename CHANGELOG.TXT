@@ -1,3 +1,10 @@
+-- NitrousTracker v0.6.5 (2026-07-17)
+
+Fixes:
+
+- fix off by one sample read error in ping pong loops
+- fix potential song timing issues
+
 -- NitrousTracker v0.6.4 (2026-06-21)
 
 New features:
