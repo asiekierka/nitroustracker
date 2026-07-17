@@ -258,7 +258,7 @@ private:
 		u8 vol = cell->volume;
 		if (vol >= 0x10 && vol <= 0x5F) {
 			drawHexByte(vol - 0x10, realx + PV_CELL_VOL_X, realy, volumecol);
-		} else {
+		} else if (vol >= 0x60) {
 			u8 eff = 0;
 			if ((vol >= 0x60) && (vol <= 0x6F)) // Volume slide down
 				eff = VSLIDEDOWN;
@@ -283,10 +283,9 @@ private:
 				eff = NOTEPORTA;
 
 			if (eff != 0) {
-				drawSmallChar(eff, realx + 5 * PV_CHAR_WIDTH + 2, realy,
-				              effectcol);
-				drawSmallChar(vol & 0x0F, realx + 6 * PV_CHAR_WIDTH + 2, realy,
-				              effectparamcol);
+				drawSmallChar(eff, realx + PV_CELL_VOL_X, realy, effectcol);
+				drawSmallChar(vol & 0x0F, realx + PV_CELL_VOL_X + PV_CHAR_WIDTH,
+				              realy, volumecol);
 			}
 		}
 

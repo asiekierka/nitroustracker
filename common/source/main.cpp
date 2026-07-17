@@ -2208,11 +2208,15 @@ void handleInPlaceTranspose(s32 direction, bool wide)
 		changed = true;
 		break;
 	case PV_COMPONENT_VOLUME:
-		cell.volume = (cell.volume + transpose_amount) & 0x7F;
+		cell.volume = cell.volume + transpose_amount;
 		changed = true;
 		break;
 	case PV_COMPONENT_EFFECT:
-		cell.effect = (cell.effect + transpose_amount) & 0xF;
+		cell.effect = cell.effect + transpose_amount;
+		if (cell.effect >= 128)
+			cell.effect = 35;
+		else if (cell.effect >= 36)
+			cell.effect = 0;
 		changed = true;
 		break;
 	case PV_COMPONENT_EFFECT_PARAM:
