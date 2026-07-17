@@ -4116,7 +4116,7 @@ void setupGUI(bool dldi_enabled)
 
 		insttabbox->registerTabChangeCallback(instTabBoxChange);
 
-		volenvedit = new EnvelopeEditor(5, 24, tabbox_width - 9,
+		volenvedit = new EnvelopeEditor(5, 24, tabbox_width - 8,
 		                                volenvedit_height, sub_screen,
 		                                MAX_ENV_X, MAX_ENV_Y, MAX_ENV_POINTS);
 		volenvedit->registerPointsChangeCallback(volEnvPointsChanged);
