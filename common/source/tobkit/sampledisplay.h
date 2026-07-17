@@ -44,7 +44,7 @@ namespace tobkit
 #define SCROLLPIXELS                                                           \
 	25 // Scroll that many pixels when a scroll button is pressed
 #define MIN_SCROLLTHINGY_WIDTH 15
-#define SAMPLE_DRAW_HEIGHT                                                            \
+#define SAMPLE_DRAW_HEIGHT                                                     \
 	(height - SCROLLBUTTON_HEIGHT - 1) // height of the visible window
 
 #define SPR_LOOPHANDLE_1_L 16

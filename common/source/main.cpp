@@ -93,6 +93,10 @@ using namespace tobkit;
 
 #include "icon_new_folder_raw.h"
 
+#include "instedit_panenv_raw.h"
+#include "instedit_vibrato_raw.h"
+#include "instedit_volenv_raw.h"
+
 #include "nitrotracker_logo_raw.h"
 
 #include "sampleedit_all_raw.h"
@@ -197,6 +201,7 @@ EnvelopeEditor *volenvedit;
 Button *btnaddenvpoint, *btndelenvpoint, *btnenvdrawmode, *btnenvsetsuspoint;
 ToggleButton *tbmapsamples;
 CheckBox *cbvolenvenabled, *cbsusenabled;
+TabBox *insttabbox;
 // </Instrument Gui>
 
 // <Settings Gui>
@@ -260,6 +265,7 @@ char *preview_smp_path = NULL;
 
 bool multisamp_from_mapsamp = false;
 bool mod_loading = false;
+bool pan_env_visible = false;
 
 // TODO: Make own class for tracker control and remove forward declarations
 void handleButtons(u16 buttons, u16 buttonsheld, u16 buttonsup);
@@ -683,14 +689,32 @@ void volEnvSetInst(Instrument *inst)
 	if (inst == NULL) {
 		volenvedit->setZoomAndPos(0, 0);
 		volenvedit->setPoints(0, 0, 0);
+		cbvolenvenabled->setChecked(false);
+		cbsusenabled->setChecked(false);
 	} else {
 		u16 *xs, *ys;
-		u16 n = inst->getVolumeEnvelope(&xs, &ys);
-		bool s = inst->getVolumeEnvelopeSustainFlag();
-		u8 susp = inst->getVolumeEnvelopeSustainPoint();
+		u16 n;
+		bool s;
+		u8 susp;
+		if (pan_env_visible) {
+			n = inst->getPanningEnvelope(&xs, &ys);
+			s = inst->getPanningEnvelopeSustainFlag();
+			susp = inst->getPanningEnvelopeSustainPoint();
+		} else {
+			n = inst->getVolumeEnvelope(&xs, &ys);
+			s = inst->getVolumeEnvelopeSustainFlag();
+			susp = inst->getVolumeEnvelopeSustainPoint();
+		}
 		volenvedit->setZoomAndPos(2, 0);
 		volenvedit->setPoints(xs, ys, n);
 		volenvedit->setEditorSustainParams(s, susp);
+		if (pan_env_visible) {
+			cbvolenvenabled->setChecked(inst->getPanEnvEnabled());
+			cbsusenabled->setChecked(inst->getPanningEnvelopeSustainFlag());
+		} else {
+			cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
+			cbsusenabled->setChecked(inst->getVolumeEnvelopeSustainFlag());
+		}
 	}
 	btnenvdrawmode->set_enabled(inst != NULL);
 	btnaddenvpoint->set_enabled(inst != NULL);
@@ -720,8 +744,6 @@ void handleInstChange(const u16 newinst, const bool reset = true)
 		handleSampleChange(
 		    state
 		        ->sample); // preserve current sample so user can load new smp into slot >0 on null inst
-
-	cbvolenvenabled->setChecked(inst != NULL && inst->getVolEnvEnabled());
 }
 
 void handleInstChangeReset(u16 newinst)
@@ -793,11 +815,6 @@ void setSong(Song *newsong)
 	updateSampleList(inst);
 	handleSampleChange(0);
 	volEnvSetInst(inst);
-
-	if (inst != 0) {
-		cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
-		cbsusenabled->setChecked(inst->getVolumeEnvelopeSustainFlag());
-	}
 
 	updateLabelChannels();
 	updateLabelSongLen();
@@ -2680,8 +2697,6 @@ void handleRecordSampleOK(void)
 
 	volEnvSetInst(inst);
 
-	cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
-
 	handleSampleChange(state->sample);
 	setHasUnsavedChanges(true);
 	redrawSubScreen();
@@ -3274,7 +3289,19 @@ void sample_reverse(void)
 	setHasUnsavedChanges(true);
 }
 
-void sampleTabBoxChage(u8 tab)
+void instTabBoxChange(u8 tab)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+
+	if (tab == 1)
+		pan_env_visible = true;
+	else if (tab == 0)
+		pan_env_visible = false;
+
+	volEnvSetInst(inst);
+}
+
+void sampleTabBoxChange(u8 tab)
 {
 	if ((tab == 0) or (tab == 1))
 		sampledisplay->setActive();
@@ -3470,7 +3497,7 @@ void addEnvPoint(void)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
 	if (inst != NULL)
-		volenvedit->addPoint();
+		volenvedit->addPoint(pan_env_visible ? 1 : 0);
 }
 
 void delEnvPoint(void)
@@ -3483,8 +3510,13 @@ void delEnvPoint(void)
 void toggleVolEnvEnabled(bool is_enabled)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
-	if (inst != NULL)
-		inst->setVolEnvEnabled(is_enabled);
+	if (inst != NULL) {
+		if (pan_env_visible) {
+			inst->setPanEnvEnabled(is_enabled);
+		} else {
+			inst->setVolEnvEnabled(is_enabled);
+		}
+	}
 }
 
 void handleMuteChannelsChanged(bool *muted_channels)
@@ -3530,9 +3562,13 @@ void volEnvPointsChanged(void)
 	u16 *xs, *ys;
 	u8 n_points = volenvedit->getPoints(&xs, &ys);
 
-	inst->setVolumeEnvelopePoints(xs, ys, n_points);
-
-	toggleVolEnvEnabled(inst->getVolEnvEnabled());
+	if (pan_env_visible) {
+		inst->setPanningEnvelopePoints(xs, ys, n_points);
+		toggleVolEnvEnabled(inst->getPanEnvEnabled());
+	} else {
+		inst->setVolumeEnvelopePoints(xs, ys, n_points);
+		toggleVolEnvEnabled(inst->getVolEnvEnabled());
+	}
 	volenvedit->pleaseDraw();
 
 	ntxm_flush_dcache();
@@ -3563,11 +3599,19 @@ void envSetSustainPoint(void)
 		return;
 
 	u16 active_point = volenvedit->getActivePoint();
+	bool s;
+	u8 susp;
 
-	inst->setVolumeEnvelopeSustainPoint((u8)active_point);
+	if (pan_env_visible) {
+		inst->setPanningEnvelopeSustainPoint((u8)active_point);
+		s = inst->getPanningEnvelopeSustainFlag();
+		susp = inst->getPanningEnvelopeSustainPoint();
+	} else {
+		inst->setVolumeEnvelopeSustainPoint((u8)active_point);
+		s = inst->getVolumeEnvelopeSustainFlag();
+		susp = inst->getVolumeEnvelopeSustainPoint();
+	}
 
-	bool s = inst->getVolumeEnvelopeSustainFlag();
-	u8 susp = inst->getVolumeEnvelopeSustainPoint();
 	volenvedit->setEditorSustainParams(s, susp);
 	volenvedit->pleaseDraw();
 
@@ -3890,7 +3934,7 @@ void setupGUI(bool dldi_enabled)
 	sampletabbox->addTab(sampleedit_loop_icon_raw, 3);
 
 	//sampletabbox->addTab(sampleedit_chip_icon);
-	sampletabbox->registerTabChangeCallback(sampleTabBoxChage);
+	sampletabbox->registerTabChangeCallback(sampleTabBoxChange);
 
 	// <Sample editing>
 	{
@@ -4057,60 +4101,83 @@ void setupGUI(bool dldi_enabled)
 
 	// <Instruments Gui>
 	{
+		int insttabbox_height = 53;
 		int volenvedit_height = tabbox_height - 79;
-		int volenvedit_y = 24 + volenvedit_height;
+		int insttabbox_y = 23 + volenvedit_height + 2;
+
+		insttabbox =
+		    new TabBox(3, insttabbox_y, tabbox_width - 6, insttabbox_height,
+		               sub_screen, TABBOX_ORIENTATION_LEFT, 11);
+		insttabbox->setTheme(settings->getTheme(),
+		                     settings->getTheme()->col_smp_bg);
+		insttabbox->addTab(instedit_volenv_raw, 0);
+		insttabbox->addTab(instedit_panenv_raw, 1);
+		// insttabbox->addTab(instedit_vibrato_raw, 2);
+
+		insttabbox->registerTabChangeCallback(instTabBoxChange);
 
 		volenvedit = new EnvelopeEditor(5, 24, tabbox_width - 9,
 		                                volenvedit_height, sub_screen,
 		                                MAX_ENV_X, MAX_ENV_Y, MAX_ENV_POINTS);
 		volenvedit->registerPointsChangeCallback(volEnvPointsChanged);
 		volenvedit->registerDrawFinishCallback(volEnvDrawFinish);
+		// </Instruments Gui>
 
+		// <Volume Envelope Gui>
 		cbvolenvenabled =
-		    new CheckBox(6, volenvedit_y + 1, 60, 10, sub_screen, true, false);
+		    new CheckBox(18, insttabbox_y + 1, 60, 10, sub_screen, true, false);
 		cbvolenvenabled->setCaption("env on");
 		cbvolenvenabled->registerToggleCallback(toggleVolEnvEnabled);
 
-		btnaddenvpoint = new Button(tabbox_width - 4 - 30 - 2 - 30,
-		                            volenvedit_y + 4, 30, 10, sub_screen);
+		btnaddenvpoint = new Button(tabbox_width - 5 - 30 - 2 - 28,
+		                            insttabbox_y + 4, 28, 10, sub_screen);
 		btnaddenvpoint->setCaption("add");
 		btnaddenvpoint->registerPushCallback(addEnvPoint);
 
-		btndelenvpoint = new Button(tabbox_width - 4 - 30, volenvedit_y + 4, 30,
+		btndelenvpoint = new Button(tabbox_width - 5 - 30, insttabbox_y + 4, 28,
 		                            10, sub_screen);
 		btndelenvpoint->setCaption("del");
 		btndelenvpoint->registerPushCallback(delEnvPoint);
 
-		btnenvdrawmode = new Button(6, volenvedit_y + 16, 60, 10, sub_screen);
+		btnenvdrawmode = new Button(18, insttabbox_y + 16, 60, 10, sub_screen);
 		btnenvdrawmode->setCaption("draw env");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
 
 		btnenvsetsuspoint =
-		    new Button(6, volenvedit_y + 26, 60, 10, sub_screen);
+		    new Button(18, insttabbox_y + 26, 60, 10, sub_screen);
 		btnenvsetsuspoint->setCaption("set sus");
 		btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
 
-		cbsusenabled =
-		    new CheckBox(6, volenvedit_y + 36, 60, 10, sub_screen, true, false);
+		cbsusenabled = new CheckBox(18, insttabbox_y + 36, 60, 10, sub_screen,
+		                            true, false);
 		cbsusenabled->setCaption("sus on");
 		cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
 
-		tbmapsamples = new ToggleButton(72, volenvedit_y + 37,
-		                                tabbox_width - 4 - 72, 12, sub_screen);
+		tbmapsamples = new ToggleButton(72, insttabbox_y + 37,
+		                                tabbox_width - 6 - 72, 12, sub_screen);
 		tbmapsamples->setCaption("map samp.");
 		tbmapsamples->registerToggleCallback(handleToggleMapSamples);
 		tbmapsamples->disable();
 
-		tabbox->registerWidget(btnaddenvpoint, 0, 3);
-		tabbox->registerWidget(btndelenvpoint, 0, 3);
-		tabbox->registerWidget(btnenvdrawmode, 0, 3);
-		tabbox->registerWidget(btnenvsetsuspoint, 0, 3);
-		tabbox->registerWidget(cbsusenabled, 0, 3);
-		tabbox->registerWidget(cbvolenvenabled, 0, 3);
-		tabbox->registerWidget(volenvedit, 0, 3);
-		tabbox->registerWidget(tbmapsamples, 0, 3);
+		insttabbox->registerWidget(btnaddenvpoint, 0, 0);
+		insttabbox->registerWidget(btndelenvpoint, 0, 0);
+		insttabbox->registerWidget(btnenvdrawmode, 0, 0);
+		insttabbox->registerWidget(btnenvsetsuspoint, 0, 0);
+		insttabbox->registerWidget(cbsusenabled, 0, 0);
+		insttabbox->registerWidget(cbvolenvenabled, 0, 0);
+		insttabbox->registerWidget(tbmapsamples, 0, 0);
+
+		insttabbox->registerWidget(btnaddenvpoint, 0, 1);
+		insttabbox->registerWidget(btndelenvpoint, 0, 1);
+		insttabbox->registerWidget(btnenvdrawmode, 0, 1);
+		insttabbox->registerWidget(btnenvsetsuspoint, 0, 1);
+		insttabbox->registerWidget(cbsusenabled, 0, 1);
+		insttabbox->registerWidget(cbvolenvenabled, 0, 1);
 	}
-	// </Instruments Gui>
+	// </Volume Envelope Gui>
+
+	tabbox->registerWidget(volenvedit, 0, 3);
+	tabbox->registerWidget(insttabbox, 0, 3);
 
 	// <Settings Gui>
 	{

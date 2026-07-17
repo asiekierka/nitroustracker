@@ -8,7 +8,7 @@
 #define LIBNDS_ASMINC_H__
 
 #if !__ASSEMBLER__
-# error "This header file is only for use in assembly files!"
+#error "This header file is only for use in assembly files!"
 #endif
 
 // clang-format off

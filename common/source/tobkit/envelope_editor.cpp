@@ -309,7 +309,7 @@ u16 EnvelopeEditor::getActivePoint(void)
 	return active_point;
 }
 
-void EnvelopeEditor::addPoint(void)
+void EnvelopeEditor::addPoint(int shift)
 {
 	if (n_points == max_points)
 		return;
@@ -324,7 +324,7 @@ void EnvelopeEditor::addPoint(void)
 	if (n_points == 1) // First point added
 	{
 		points_x[active_point] = 0;
-		points_y[active_point] = points_max_y;
+		points_y[active_point] = points_max_y >> shift;
 	}
 	// Add the point between this point and the next one
 	else if (active_point < n_points - 2) {

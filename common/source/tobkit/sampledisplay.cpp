@@ -274,11 +274,15 @@ void SampleDisplay::penMove(u16 px, u16 py)
 
 			s16 sy1, sy2;
 			if (smp->is16bit()) {
-				sy1 = 65535 * (SAMPLE_DRAW_HEIGHT / 2 - draw_last_y) / SAMPLE_DRAW_HEIGHT;
-				sy2 = 65535 * (SAMPLE_DRAW_HEIGHT / 2 - draw_y) / SAMPLE_DRAW_HEIGHT;
+				sy1 = 65535 * (SAMPLE_DRAW_HEIGHT / 2 - draw_last_y) /
+				      SAMPLE_DRAW_HEIGHT;
+				sy2 = 65535 * (SAMPLE_DRAW_HEIGHT / 2 - draw_y) /
+				      SAMPLE_DRAW_HEIGHT;
 			} else {
-				sy1 = 255 * (SAMPLE_DRAW_HEIGHT / 2 - draw_last_y) / SAMPLE_DRAW_HEIGHT;
-				sy2 = 255 * (SAMPLE_DRAW_HEIGHT / 2 - draw_y) / SAMPLE_DRAW_HEIGHT;
+				sy1 = 255 * (SAMPLE_DRAW_HEIGHT / 2 - draw_last_y) /
+				      SAMPLE_DRAW_HEIGHT;
+				sy2 = 255 * (SAMPLE_DRAW_HEIGHT / 2 - draw_y) /
+				      SAMPLE_DRAW_HEIGHT;
 			}
 
 			smp->drawLine(sx1, sy1, sx2, sy2);
@@ -765,8 +769,10 @@ void SampleDisplay::draw(void)
 				miny = middle;
 				maxy = middle;
 			} else {
-				if (maxy > top) maxy = top;
-				if (miny < bottom) miny = bottom;
+				if (maxy > top)
+					maxy = top;
+				if (miny < bottom)
+					miny = bottom;
 			}
 
 			i++;
@@ -832,8 +838,10 @@ void SampleDisplay::draw(void)
 				miny = middle;
 				maxy = middle;
 			} else {
-				if (maxy > top) maxy = top;
-				if (miny < bottom) miny = bottom;
+				if (maxy > top)
+					maxy = top;
+				if (miny < bottom)
+					miny = bottom;
 			}
 
 			i++;
@@ -875,17 +883,18 @@ void SampleDisplay::draw(void)
 
 				for (u8 i = 0; i < LOOP_TRIANGLE_SIZE - 2; ++i) {
 					drawHLine(loop_start_pos - i - 2,
-					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i, i + 2,
-					          theme->col_loop);
+					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
+					          i + 2, theme->col_loop);
 					drawPixel(loop_start_pos - i - 3,
 					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
 					          theme->col_outline);
 				}
 
-				drawHLine(loop_start_pos - LOOP_TRIANGLE_SIZE + 1, SAMPLE_DRAW_HEIGHT,
-				          LOOP_TRIANGLE_SIZE - 1, theme->col_loop);
-				drawPixel(loop_start_pos - LOOP_TRIANGLE_SIZE, SAMPLE_DRAW_HEIGHT,
-				          theme->col_outline);
+				drawHLine(loop_start_pos - LOOP_TRIANGLE_SIZE + 1,
+				          SAMPLE_DRAW_HEIGHT, LOOP_TRIANGLE_SIZE - 1,
+				          theme->col_loop);
+				drawPixel(loop_start_pos - LOOP_TRIANGLE_SIZE,
+				          SAMPLE_DRAW_HEIGHT, theme->col_outline);
 			}
 
 			// Right Triangle
@@ -895,17 +904,18 @@ void SampleDisplay::draw(void)
 				          theme->col_outline);
 				for (u8 i = 0; i < LOOP_TRIANGLE_SIZE - 2; ++i) {
 					drawHLine(loop_start_pos + 1,
-					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i, 2 + i,
-					          theme->col_loop);
+					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
+					          2 + i, theme->col_loop);
 					drawPixel(loop_start_pos + 3 + i,
 					          SAMPLE_DRAW_HEIGHT + 2 - LOOP_TRIANGLE_SIZE + i,
 					          theme->col_outline);
 				}
 				drawHLine(loop_start_pos + 1,
-				          SAMPLE_DRAW_HEIGHT - LOOP_TRIANGLE_SIZE + LOOP_TRIANGLE_SIZE,
+				          SAMPLE_DRAW_HEIGHT - LOOP_TRIANGLE_SIZE +
+				              LOOP_TRIANGLE_SIZE,
 				          LOOP_TRIANGLE_SIZE - 1, theme->col_loop);
-				drawPixel(loop_start_pos + LOOP_TRIANGLE_SIZE, SAMPLE_DRAW_HEIGHT,
-				          theme->col_outline);
+				drawPixel(loop_start_pos + LOOP_TRIANGLE_SIZE,
+				          SAMPLE_DRAW_HEIGHT, theme->col_outline);
 			}
 		}
 

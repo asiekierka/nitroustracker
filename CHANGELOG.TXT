@@ -8,6 +8,8 @@ New features:
     quirks are adjusted for on load - resaving such songs should make them play more accurately in
     FT2-compatible players as well.
 - support for editing note components with buttons only, by using A / A + D-Pad
+- support for editing panning envelopes
+- updated BlocksDS to 1.22.0
 - [#65] .mod import support
 
 Improvements:

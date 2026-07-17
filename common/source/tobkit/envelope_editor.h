@@ -87,7 +87,7 @@ public:
 	        ys); // Returns the number of points and arrays to their x and y coords
 	u16 getActivePoint(void);
 
-	void addPoint(void);
+	void addPoint(int shift = 0);
 	void delPoint(void);
 	void toggleSustain(bool is_enabled);
 	void setEditorSustainParams(bool sus, u8 suspoint);
