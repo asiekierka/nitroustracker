@@ -9,12 +9,18 @@ BLOCKSDSEXT	?= /opt/blocksds/external
 # ===========
 
 NAME		:= nitroustracker
-export VERSION		?= 0.7.0
+export VERSION		?= 0.7.0b1
 export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 GAME_TITLE	:= NitrousTracker
-GAME_AUTHOR	:= v$(VERSION)
+GAME_VERSION	:= v$(VERSION)
+
 GAME_ICON	:= assets/icon.bmp
+GAME_ICON_DEBUG	:= assets/icon.debug.bmp
+
+GAME_FULL_TITLE       := $(GAME_TITLE);$(GAME_VERSION)
+GAME_FULL_TITLE_MIDI  := $(GAME_TITLE);$(GAME_VERSION);(compatible with MIDI)
+GAME_FULL_TITLE_DEBUG := $(GAME_TITLE);$(GAME_VERSION);(debug build)
 
 # DLDI and internal SD slot of DSi
 # --------------------------------
@@ -122,25 +128,18 @@ $(ROM): $(NITROFAT_IMG)
 $(ROM_DEBUG): $(NITROFAT_IMG)
 endif
 
-# Combine the title strings
-ifeq ($(strip $(GAME_SUBTITLE)),)
-    GAME_FULL_TITLE := $(GAME_TITLE);$(GAME_AUTHOR)
-else
-    GAME_FULL_TITLE := $(GAME_TITLE);$(GAME_SUBTITLE);$(GAME_AUTHOR)
-endif
-
 $(ROM): arm9 arm7
 	@echo "  NDSTOOL $@"
 	$(V)$(BLOCKSDS)/tools/ndstool/ndstool -c $@ \
 		-7 build/arm7.elf -9 build/arm9.elf \
-		-b $(GAME_ICON) "$(GAME_FULL_TITLE)" \
+		-b $(GAME_ICON) "$(GAME_FULL_TITLE_MIDI)" \
 		$(NDSTOOL_FAT)
 
 $(ROM_DEBUG): arm9d arm7d
 	@echo "  NDSTOOL $@"
 	$(V)$(BLOCKSDS)/tools/ndstool/ndstool -c $@ \
 		-7 build/arm7d.elf -9 build/arm9d.elf \
-		-b $(GAME_ICON) "$(GAME_FULL_TITLE)" \
+		-b $(GAME_ICON_DEBUG) "$(GAME_FULL_TITLE_DEBUG)" \
 		$(NDSTOOL_FAT)
 
 $(ROM_NOMIDI): arm9l arm7l
