@@ -848,6 +848,9 @@ void setSong(Song *newsong)
 
 	mod_loading = false;
 	setHasUnsavedChanges(false);
+
+	ntxm_flush_dcache();
+
 	drawMainScreen();
 }
 
