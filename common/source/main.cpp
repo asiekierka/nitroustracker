@@ -1369,7 +1369,7 @@ void stop(void)
 
 	// Also stop a previewing sample, if there is one.
 	if (state->preview_sample)
-		CommandStopSample(0);
+		CommandStopNoteAuto(NTXM_TAG_SAMPLE);
 
 	state->playing = false;
 
