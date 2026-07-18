@@ -3640,6 +3640,7 @@ void sampleDrawToggle(bool on)
 	sampledisplay->setDrawMode(on);
 }
 
+__attribute__((optimize("-Os")))
 void setupGUI(bool dldi_enabled)
 {
 	int piano_width = (sub_screen->getWidth() - 32) & ~0xF;
