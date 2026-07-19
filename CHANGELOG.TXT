@@ -3,7 +3,8 @@
 New features:
 
 - native 3DS port!
-  - bigger screens, more RAM, higher quality software audio mixer
+  - pros: bigger screens, more channels supported (16 -> 32), more sample RAM
+  - cons: slightly higher audio latency
 - playback engine migrated to a port of the FastTracker 2 play routine!
   - much better playback accuracy and near-complete effect support
   - note: this may require tweaks to old songs which depended on NitroTracker play routine quirks. some
