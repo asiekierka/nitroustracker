@@ -24,7 +24,7 @@ DEFINES		:= -DPICOLIBC_INTEGER_PRINTF_SCANF -DNT_PLATFORM_NDS
 # ---------
 
 ifeq ($(DEBUG),true)
-LIBS		:= -lntxm7d -ldswifi7 -lnds7 -lstdc++ -lc
+LIBS		:= -lntxm7d -ldswifi7d -lnds7 -lstdc++ -lc
 else
 LIBS		:= -lntxm7 -ldswifi7 -lnds7 -lstdc++ -lc
 endif
