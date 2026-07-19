@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+ReflowComments: false
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForIndentation
+ColumnLimit: 80
+BreakBeforeBraces: Linux
+AlignArrayOfStructures: Left
+AllowShortIfStatementsOnASingleLine: false
+BreakAfterOpenBracketBracedList: true
+BreakBeforeCloseBracketBracedList: true
+IndentCaseLabels: false
+IndentAccessModifiers: false
+AccessModifierOffset: -4
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
