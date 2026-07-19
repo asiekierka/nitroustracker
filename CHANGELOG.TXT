@@ -1,26 +1,40 @@
--- NitrousTracker v0.7.0 (DEV)
+-- NitrousTracker v0.7.0 beta 1 (2026-07-19)
 
 New features:
 
-- native 3DS port - bigger screens, more RAM, higher quality software audio mixer
-- ported over FastTracker 2 play routine - much better playback accuracy and near-complete effect support
+- native 3DS port!
+  - bigger screens, more RAM, higher quality software audio mixer
+- playback engine migrated to a port of the FastTracker 2 play routine!
+  - much better playback accuracy and near-complete effect support
   - note: this may require tweaks to old songs which depended on NitroTracker play routine quirks. some
     quirks are adjusted for on load - resaving such songs should make them play more accurately in
     FT2-compatible players as well.
-- support for editing note components with buttons only, by using A / A + D-Pad
-- support for editing panning envelopes
-- support for previewing samples while the song is playing
-- updated BlocksDS to 1.22.0
-- [#65] .mod import support
+- added support for inputting most effects
+- added support for configuring panning envelopes
+- added support for editing note components with buttons only - use A / A + D-Pad
+- added support for previewing samples while the song is playing
+- [#65] added support for importing .mod files
+- updated BlocksDS to 1.22.1
 
 Improvements:
 
-- [#152] inconsistent sample preview looping behaviour
 - 24/32-bit wav samples now load faster
 - fx keyboard now supports pen sliding (prayerie)
 - loop points are now retained when disabling and re-enabling sample loop
-- multiple minor ui/ux tweaks (prayerie)
+- NDS: debug build now shows wifi debug messages
+- numerous minor ui/ux tweaks (prayerie)
 - sample snapping to zero crossing now respects zoom level
+
+Fixes:
+
+- [#152] fixed inconsistent sample preview looping behaviour
+
+-- NitrousTracker v0.6.5 (2026-07-17)
+
+Fixes:
+
+- fix off by one sample read error in ping pong loops
+- fix potential song timing issues
 
 -- NitrousTracker v0.6.4 (2026-06-21)
 
