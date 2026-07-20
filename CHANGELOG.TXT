@@ -21,6 +21,7 @@ Improvements:
 
 - 24/32-bit wav samples now load faster
 - fx keyboard now supports pen sliding (prayerie)
+- greatly improved bpm/timing accuracy
 - loop points are now retained when disabling and re-enabling sample loop
 - NDS: debug build now shows wifi debug messages
 - numerous minor ui/ux tweaks (prayerie)
