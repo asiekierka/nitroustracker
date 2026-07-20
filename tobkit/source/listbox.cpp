@@ -315,6 +315,12 @@ void ListBox::draw(void)
 		             width - SCROLLBAR_WIDTH - 1, ROW_HEIGHT - 1);
 	}
 
+	// Pad bottom
+	u16 row_end_y = ROW_HEIGHT * rows_displayed;
+	if (row_end_y < height) {
+		drawFullBox(1, row_end_y, width - SCROLLBAR_WIDTH - 1, height - row_end_y, theme->col_list_1);
+	}
+
 	// Vertical number separator line
 	if (show_numbers) {
 		drawVLine(COUNTER_WIDTH, 1, height - 2, theme->col_list_sep_vertical);
