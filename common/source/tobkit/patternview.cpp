@@ -345,7 +345,7 @@ void PatternView::draw(void)
 	int playback_box_y =
 	    PV_CURSORBAR_Y +
 	    (state->getPlaybackRow() - state->getCursorRow()) * PV_CELL_HEIGHT;
-	if (playback_box_y >= 0 && playback_box_y < 192) {
+	if (playback_box_y >= 0 && playback_box_y < screen->getHeight()) {
 		drawBox(0, playback_box_y, getEffectiveWidth(), PV_CELL_HEIGHT + 1,
 		        theme->col_pv_pb);
 	}
