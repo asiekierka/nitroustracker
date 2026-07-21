@@ -53,6 +53,7 @@ nitroustracker_sources = [
   'tobkit/source/theme.cpp',
   'tobkit/source/themeselectorbox.cpp',
   'tobkit/source/togglebutton.cpp',
+  'tobkit/source/twotabbox.cpp',
   'tobkit/source/typewriter.cpp',
   'tobkit/source/typewriter_hit.c',
   'tobkit/source/widget.cpp',

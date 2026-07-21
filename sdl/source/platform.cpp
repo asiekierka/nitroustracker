@@ -99,7 +99,9 @@ bool PlatformWaitVBlank(void)
 		case SDL_EVENT_KEY_DOWN:
 			PlatformKeysDown |= sdl_key_map[event.key.key];
 			break;
-		case SDL_EVENT_KEY_UP: PlatformKeysUp |= sdl_key_map[event.key.key]; break;
+		case SDL_EVENT_KEY_UP:
+			PlatformKeysUp |= sdl_key_map[event.key.key];
+			break;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			PlatformKeysDown |= PlatformKey_TOUCH;
 			display->convertTouchCoords(event.button.windowID, event.button.x,

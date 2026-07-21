@@ -147,7 +147,10 @@ Piano *kb;
 FXKeyboard *fxkb;
 ListBox *lbinstruments, *lbsamples;
 u16 lbinstruments_height, lbsamples_height;
-TabBox *tabbox;
+TwoTabBox *tabbox;
+u8 tab_song = 0xFF, tab_file = 0xFF, tab_instrument = 0xFF, tab_sample = 0xFF,
+   tab_settings = 0xFF;
+u8 subtab_ins_vol = 0xFF, subtab_ins_pan = 0xFF, subtab_ins_vib = 0xFF;
 GradientIcon *pixmaplogo;
 // </Misc GUI>
 
@@ -202,7 +205,6 @@ EnvelopeEditor *volenvedit;
 Button *btnaddenvpoint, *btndelenvpoint, *btnenvdrawmode, *btnenvsetsuspoint;
 ToggleButton *tbmapsamples;
 CheckBox *cbvolenvenabled, *cbsusenabled;
-TabBox *insttabbox;
 // </Instrument Gui>
 
 // <Settings Gui>
@@ -336,9 +338,10 @@ void setHasUnsavedChanges(bool unsaved)
 
 	state->unsaved_changes = has_unsaved;
 
-	if (!tabbox || tabbox->getCount() != 5)
+	if (tab_file == 0xFF)
 		return;
-	tabbox->setIcon(1, has_unsaved ? icon_disk_unsaved_raw : icon_disk_raw);
+	tabbox->setIcon(tab_file,
+	                has_unsaved ? icon_disk_unsaved_raw : icon_disk_raw);
 }
 
 static void handleNoteAdvanceRow(void)
@@ -3296,16 +3299,18 @@ void sample_reverse(void)
 	setHasUnsavedChanges(true);
 }
 
-void instTabBoxChange(u8 tab)
+void tabBoxChange(u8 tab, u8 subtab)
 {
-	Instrument *inst = song->getInstrument(state->instrument);
+	if (tab == tab_instrument) {
+		Instrument *inst = song->getInstrument(state->instrument);
 
-	if (tab == 1)
-		pan_env_visible = true;
-	else if (tab == 0)
-		pan_env_visible = false;
+		if (subtab == subtab_ins_pan)
+			pan_env_visible = true;
+		else if (subtab == subtab_ins_vol)
+			pan_env_visible = false;
 
-	volEnvSetInst(inst);
+		volEnvSetInst(inst);
+	}
 }
 
 void sampleTabBoxChange(u8 tab)
@@ -3643,8 +3648,7 @@ void sampleDrawToggle(bool on)
 	sampledisplay->setDrawMode(on);
 }
 
-__attribute__((optimize("-Os")))
-void setupGUI(bool dldi_enabled)
+__attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 {
 	int piano_width = (sub_screen->getWidth() - 32) & ~0xF;
 	int piano_height = 40;
@@ -3689,16 +3693,20 @@ void setupGUI(bool dldi_enabled)
 	int tabbox_endx = (140 * sub_screen->getWidth()) >> 8;
 	int tabbox_width = tabbox_endx - 1;
 	int tabbox_height = piano_y - 1;
-	tabbox = new TabBox(1, 1, tabbox_width, tabbox_height, sub_screen,
-	                    TABBOX_ORIENTATION_TOP, 16);
+	tabbox =
+	    new TwoTabBox(1, 1, tabbox_width, tabbox_height, sub_screen, 16, 11);
 	tabbox->setTheme(settings->getTheme(), settings->getTheme()->col_bg);
 	// Note that setHasUnsavedChanges depends on this count and order of tabs.
-	tabbox->addTab(icon_song_raw, 0);
+	tab_song = tabbox->addTab(icon_song_raw);
 	if (dldi_enabled)
-		tabbox->addTab(icon_disk_raw, 1);
-	tabbox->addTab(icon_sample_raw, 2);
-	tabbox->addTab(icon_trumpet_raw, 3);
-	tabbox->addTab(icon_wrench_raw, 4);
+		tab_file = tabbox->addTab(icon_disk_raw);
+	tab_sample = tabbox->addTab(icon_sample_raw);
+	tab_instrument = tabbox->addTab(icon_trumpet_raw);
+	subtab_ins_vol = tabbox->addSubTab(instedit_volenv_raw);
+	subtab_ins_pan = tabbox->addSubTab(instedit_panenv_raw);
+	subtab_ins_vib = tabbox->addSubTab(instedit_vibrato_raw);
+	tab_settings = tabbox->addTab(icon_wrench_raw);
+	tabbox->registerTabChangeCallback(tabBoxChange);
 
 	// <Disk OP GUI>
 	{
@@ -3781,21 +3789,21 @@ void setupGUI(bool dldi_enabled)
 	}
 
 	if (dldi_enabled) {
-		tabbox->registerWidget(fileselector, 0, 1);
-		tabbox->registerWidget(rbsong, 0, 1);
-		tabbox->registerWidget(rbsample, 0, 1);
-		//tabbox->registerWidget(rbinst, 0, 1);
+		tabbox->registerWidget(fileselector, 0, tab_file);
+		tabbox->registerWidget(rbsong, 0, tab_file);
+		tabbox->registerWidget(rbsample, 0, tab_file);
+		//tabbox->registerWidget(rbinst, 0, tab_file);
 #ifdef SHOW_RAM_USAGE
-		tabbox->registerWidget(memoryiindicator_disk, 0, 1);
-		tabbox->registerWidget(labelramusage_disk, 0, 1);
+		tabbox->registerWidget(memoryiindicator_disk, 0, tab_file);
+		tabbox->registerWidget(labelramusage_disk, 0, tab_file);
 #endif
-		tabbox->registerWidget(cbsamplepreview, 0, 1);
-		tabbox->registerWidget(buttondelfile, 0, 1);
-		tabbox->registerWidget(buttonsave, 0, 1);
-		tabbox->registerWidget(buttonload, 0, 1);
-		tabbox->registerWidget(labelFilename, 0, 1);
-		tabbox->registerWidget(buttonchangefilename, 0, 1);
-		tabbox->registerWidget(buttonnewfolder, 0, 1);
+		tabbox->registerWidget(cbsamplepreview, 0, tab_file);
+		tabbox->registerWidget(buttondelfile, 0, tab_file);
+		tabbox->registerWidget(buttonsave, 0, tab_file);
+		tabbox->registerWidget(buttonload, 0, tab_file);
+		tabbox->registerWidget(labelFilename, 0, tab_file);
+		tabbox->registerWidget(buttonchangefilename, 0, tab_file);
+		tabbox->registerWidget(buttonnewfolder, 0, tab_file);
 	}
 	// </Disk OP GUI>
 
@@ -3894,31 +3902,31 @@ void setupGUI(bool dldi_enabled)
 		    new MemoryIndicator(87, 90, tabbox_width - 2 - 87, 8, sub_screen);
 #endif
 
-		tabbox->registerWidget(lbpot, 0, 0);
-		tabbox->registerWidget(buttonpotup, 0, 0);
-		tabbox->registerWidget(buttonpotdown, 0, 0);
-		tabbox->registerWidget(buttonins, 0, 0);
-		tabbox->registerWidget(buttondel, 0, 0);
-		tabbox->registerWidget(buttoncloneptn, 0, 0);
-		tabbox->registerWidget(tbqueuelock, 0, 0);
-		tabbox->registerWidget(tbpotloop, 0, 0);
-		tabbox->registerWidget(nsptnlen, 0, 0);
-		tabbox->registerWidget(labelptnlen, 0, 0);
-		tabbox->registerWidget(labelchannels, 0, 0);
-		tabbox->registerWidget(buttonmorechannels, 0, 0);
-		tabbox->registerWidget(buttonlesschannels, 0, 0);
-		tabbox->registerWidget(labeltempo, 0, 0);
-		tabbox->registerWidget(labelbpm, 0, 0);
-		tabbox->registerWidget(labelrestartpos, 0, 0);
-		tabbox->registerWidget(nbtempo, 0, 0);
-		tabbox->registerWidget(nsbpm, 0, 0);
-		tabbox->registerWidget(nsrestartpos, 0, 0);
-		tabbox->registerWidget(labelsongname, 0, 0);
-		tabbox->registerWidget(buttonrenamesong, 0, 0);
-		tabbox->registerWidget(buttonzap, 0, 0);
+		tabbox->registerWidget(lbpot, 0, tab_song);
+		tabbox->registerWidget(buttonpotup, 0, tab_song);
+		tabbox->registerWidget(buttonpotdown, 0, tab_song);
+		tabbox->registerWidget(buttonins, 0, tab_song);
+		tabbox->registerWidget(buttondel, 0, tab_song);
+		tabbox->registerWidget(buttoncloneptn, 0, tab_song);
+		tabbox->registerWidget(tbqueuelock, 0, tab_song);
+		tabbox->registerWidget(tbpotloop, 0, tab_song);
+		tabbox->registerWidget(nsptnlen, 0, tab_song);
+		tabbox->registerWidget(labelptnlen, 0, tab_song);
+		tabbox->registerWidget(labelchannels, 0, tab_song);
+		tabbox->registerWidget(buttonmorechannels, 0, tab_song);
+		tabbox->registerWidget(buttonlesschannels, 0, tab_song);
+		tabbox->registerWidget(labeltempo, 0, tab_song);
+		tabbox->registerWidget(labelbpm, 0, tab_song);
+		tabbox->registerWidget(labelrestartpos, 0, tab_song);
+		tabbox->registerWidget(nbtempo, 0, tab_song);
+		tabbox->registerWidget(nsbpm, 0, tab_song);
+		tabbox->registerWidget(nsrestartpos, 0, tab_song);
+		tabbox->registerWidget(labelsongname, 0, tab_song);
+		tabbox->registerWidget(buttonrenamesong, 0, tab_song);
+		tabbox->registerWidget(buttonzap, 0, tab_song);
 #ifdef SHOW_RAM_USAGE
-		tabbox->registerWidget(memoryiindicator, 0, 0);
-		tabbox->registerWidget(labelramusage, 0, 0);
+		tabbox->registerWidget(memoryiindicator, 0, tab_song);
+		tabbox->registerWidget(labelramusage, 0, tab_song);
 #endif
 	}
 	// </Song gui>
@@ -4103,8 +4111,8 @@ void setupGUI(bool dldi_enabled)
 	}
 	// </Looping>
 
-	tabbox->registerWidget(sampledisplay, 0, 2);
-	tabbox->registerWidget(sampletabbox, 0, 2);
+	tabbox->registerWidget(sampledisplay, 0, tab_sample);
+	tabbox->registerWidget(sampletabbox, 0, tab_sample);
 	// </Sample Gui>
 
 	// <Instruments Gui>
@@ -4112,17 +4120,6 @@ void setupGUI(bool dldi_enabled)
 		int insttabbox_height = 53;
 		int volenvedit_height = tabbox_height - 79;
 		int insttabbox_y = 23 + volenvedit_height + 2;
-
-		insttabbox =
-		    new TabBox(3, insttabbox_y, tabbox_width - 6, insttabbox_height,
-		               sub_screen, TABBOX_ORIENTATION_LEFT, 11);
-		insttabbox->setTheme(settings->getTheme(),
-		                     settings->getTheme()->col_smp_bg);
-		insttabbox->addTab(instedit_volenv_raw, 0);
-		insttabbox->addTab(instedit_panenv_raw, 1);
-		// insttabbox->addTab(instedit_vibrato_raw, 2);
-
-		insttabbox->registerTabChangeCallback(instTabBoxChange);
 
 		volenvedit = new EnvelopeEditor(5, 24, tabbox_width - 8,
 		                                volenvedit_height, sub_screen,
@@ -4133,59 +4130,60 @@ void setupGUI(bool dldi_enabled)
 
 		// <Volume Envelope Gui>
 		cbvolenvenabled =
-		    new CheckBox(18, insttabbox_y + 1, 60, 10, sub_screen, true, false);
+		    new CheckBox(4, insttabbox_y, 60, 10, sub_screen, true, false);
 		cbvolenvenabled->setCaption("env on");
 		cbvolenvenabled->registerToggleCallback(toggleVolEnvEnabled);
 
-		btnaddenvpoint = new Button(tabbox_width - 5 - 30 - 2 - 28,
-		                            insttabbox_y + 4, 28, 10, sub_screen);
-		btnaddenvpoint->setCaption("add");
-		btnaddenvpoint->registerPushCallback(addEnvPoint);
-
-		btndelenvpoint = new Button(tabbox_width - 5 - 30, insttabbox_y + 4, 28,
+		btndelenvpoint = new Button(tabbox_width - 3 - 12, insttabbox_y + 2, 12,
 		                            10, sub_screen);
-		btndelenvpoint->setCaption("del");
+		btndelenvpoint->setCaption("-");
 		btndelenvpoint->registerPushCallback(delEnvPoint);
 
-		btnenvdrawmode = new Button(18, insttabbox_y + 16, 60, 10, sub_screen);
-		btnenvdrawmode->setCaption("draw env");
+		btnaddenvpoint = new Button(tabbox_width - 3 - 12 - 3 - 12,
+		                            insttabbox_y + 2, 12, 10, sub_screen);
+		btnaddenvpoint->setCaption("+");
+		btnaddenvpoint->registerPushCallback(addEnvPoint);
+
+		btnenvdrawmode = new Button(tabbox_width - 3 - 12 - 3 - 12 - 3 - 40,
+		                            insttabbox_y + 2, 40, 10, sub_screen);
+		btnenvdrawmode->setCaption("draw");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
 
 		btnenvsetsuspoint =
-		    new Button(18, insttabbox_y + 26, 60, 10, sub_screen);
-		btnenvsetsuspoint->setCaption("set sus");
+		    new Button(4 + 38 + 1, insttabbox_y + 16, 30, 10, sub_screen);
+		btnenvsetsuspoint->setCaption("set");
 		btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
 
-		cbsusenabled = new CheckBox(18, insttabbox_y + 36, 60, 10, sub_screen,
-		                            true, false);
-		cbsusenabled->setCaption("sus on");
+		cbsusenabled =
+		    new CheckBox(4, insttabbox_y + 14, 38, 10, sub_screen, true, false);
+		cbsusenabled->setCaption("sus");
 		cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
 
-		tbmapsamples = new ToggleButton(72, insttabbox_y + 37,
-		                                tabbox_width - 6 - 72, 12, sub_screen);
-		tbmapsamples->setCaption("map samp.");
+		tbmapsamples = new ToggleButton(tabbox_width - 3 - 79,
+		                                tabbox_height - 11, 80, 11, sub_screen);
+		tbmapsamples->setCaption("map samples");
 		tbmapsamples->registerToggleCallback(handleToggleMapSamples);
 		tbmapsamples->disable();
 
-		insttabbox->registerWidget(btnaddenvpoint, 0, 0);
-		insttabbox->registerWidget(btndelenvpoint, 0, 0);
-		insttabbox->registerWidget(btnenvdrawmode, 0, 0);
-		insttabbox->registerWidget(btnenvsetsuspoint, 0, 0);
-		insttabbox->registerWidget(cbsusenabled, 0, 0);
-		insttabbox->registerWidget(cbvolenvenabled, 0, 0);
-		insttabbox->registerWidget(tbmapsamples, 0, 0);
+		tabbox->registerWidget(btnaddenvpoint, 0, subtab_ins_vol);
+		tabbox->registerWidget(btndelenvpoint, 0, subtab_ins_vol);
+		tabbox->registerWidget(btnenvdrawmode, 0, subtab_ins_vol);
+		tabbox->registerWidget(btnenvsetsuspoint, 0, subtab_ins_vol);
+		tabbox->registerWidget(cbsusenabled, 0, subtab_ins_vol);
+		tabbox->registerWidget(cbvolenvenabled, 0, subtab_ins_vol);
+		tabbox->registerWidget(volenvedit, 0, subtab_ins_vol);
 
-		insttabbox->registerWidget(btnaddenvpoint, 0, 1);
-		insttabbox->registerWidget(btndelenvpoint, 0, 1);
-		insttabbox->registerWidget(btnenvdrawmode, 0, 1);
-		insttabbox->registerWidget(btnenvsetsuspoint, 0, 1);
-		insttabbox->registerWidget(cbsusenabled, 0, 1);
-		insttabbox->registerWidget(cbvolenvenabled, 0, 1);
+		tabbox->registerWidget(btnaddenvpoint, 0, subtab_ins_pan);
+		tabbox->registerWidget(btndelenvpoint, 0, subtab_ins_pan);
+		tabbox->registerWidget(btnenvdrawmode, 0, subtab_ins_pan);
+		tabbox->registerWidget(btnenvsetsuspoint, 0, subtab_ins_pan);
+		tabbox->registerWidget(cbsusenabled, 0, subtab_ins_pan);
+		tabbox->registerWidget(cbvolenvenabled, 0, subtab_ins_pan);
+		tabbox->registerWidget(volenvedit, 0, subtab_ins_pan);
 	}
 	// </Volume Envelope Gui>
 
-	tabbox->registerWidget(volenvedit, 0, 3);
-	tabbox->registerWidget(insttabbox, 0, 3);
+	tabbox->registerWidget(tbmapsamples, 0, tab_instrument);
 
 	// <Settings Gui>
 	{
@@ -4269,34 +4267,34 @@ void setupGUI(bool dldi_enabled)
 		cbdsmwsend->registerToggleCallback(handleDsmiSendToggled);
 		cbdsmwrecv->registerToggleCallback(handleDsmiRecvToggled);
 #endif
-		tabbox->registerWidget(rblefthanded, 0, 4);
-		tabbox->registerWidget(rbrighthanded, 0, 4);
+		tabbox->registerWidget(rblefthanded, 0, tab_settings);
+		tabbox->registerWidget(rbrighthanded, 0, tab_settings);
 #if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
-		tabbox->registerWidget(cbdsmwsend, 0, 4);
-		tabbox->registerWidget(cbdsmwrecv, 0, 4);
-		tabbox->registerWidget(btndsmwtoggleconnect, 0, 4);
-		tabbox->registerWidget(gbdsmw, 0, 4);
+		tabbox->registerWidget(cbdsmwsend, 0, tab_settings);
+		tabbox->registerWidget(cbdsmwrecv, 0, tab_settings);
+		tabbox->registerWidget(btndsmwtoggleconnect, 0, tab_settings);
+		tabbox->registerWidget(gbdsmw, 0, tab_settings);
 #endif
-		tabbox->registerWidget(btnconfigsave, 0, 4);
-		tabbox->registerWidget(gbhandedness, 0, 4);
+		tabbox->registerWidget(btnconfigsave, 0, tab_settings);
+		tabbox->registerWidget(gbhandedness, 0, tab_settings);
 		if (dldi_enabled)
-			tabbox->registerWidget(bttheme, 0, 4);
+			tabbox->registerWidget(bttheme, 0, tab_settings);
 
 		if (dldi_enabled)
-			tabbox->registerWidget(gbtheme, 0, 4);
-		tabbox->registerWidget(rboutputmono, 0, 4);
-		tabbox->registerWidget(rboutputstereo, 0, 4);
-		tabbox->registerWidget(gboutput, 0, 4);
-		tabbox->registerWidget(nblinesbeat, 0, 4);
-		tabbox->registerWidget(gblinesbeat, 0, 4);
+			tabbox->registerWidget(gbtheme, 0, tab_settings);
+		tabbox->registerWidget(rboutputmono, 0, tab_settings);
+		tabbox->registerWidget(rboutputstereo, 0, tab_settings);
+		tabbox->registerWidget(gboutput, 0, tab_settings);
+		tabbox->registerWidget(nblinesbeat, 0, tab_settings);
+		tabbox->registerWidget(gblinesbeat, 0, tab_settings);
 #ifdef NT_PLATFORM_NDS
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
 		{
-			tabbox->registerWidget(rbfreq32, 0, 4);
-			tabbox->registerWidget(rbfreq47, 0, 4);
-			tabbox->registerWidget(gbfreq, 0, 4);
+			tabbox->registerWidget(rbfreq32, 0, tab_settings);
+			tabbox->registerWidget(rbfreq47, 0, tab_settings);
+			tabbox->registerWidget(gbfreq, 0, tab_settings);
 		}
 #endif
 	}

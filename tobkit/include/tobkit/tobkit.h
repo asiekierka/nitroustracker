@@ -37,6 +37,7 @@ limitations under the License.
 #include "tabbox.h"
 #include "theme.h"
 #include "togglebutton.h"
+#include "twotabbox.h"
 #include "typewriter.h"
 #include "widget.h"
 

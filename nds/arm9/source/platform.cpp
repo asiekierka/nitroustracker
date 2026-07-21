@@ -101,7 +101,8 @@ bool PlatformInit(int argc, char *argv[])
 #endif
 
 	// Setup text
-	PrintConsole *console = consoleInit(NULL, 0, BgType_Text4bpp, BgSize_T_256x256, 4, 0, true, true);
+	PrintConsole *console = consoleInit(NULL, 0, BgType_Text4bpp,
+	                                    BgSize_T_256x256, 4, 0, true, true);
 #ifdef DEBUG
 	consoleArm7Setup(console, 1024);
 #endif
