@@ -89,7 +89,7 @@ public:
 
 	void addPoint(int shift = 0);
 	void delPoint(void);
-	void toggleSustain(bool is_enabled);
+	void setSustain(bool is_enabled);
 	void setEditorSustainParams(bool sus, u8 suspoint);
 	void clear(void);
 

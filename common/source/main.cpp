@@ -3636,8 +3636,8 @@ void envToggleSustainEnabled(bool is_enabled)
 
 	Instrument *inst = song->getInstrument(state->instrument);
 	if (inst != NULL) {
-		inst->toggleVolumeEnvelopeSustain(is_enabled);
-		volenvedit->toggleSustain(is_enabled);
+		inst->setVolumeEnvelopeSustain(is_enabled);
+		volenvedit->setSustain(is_enabled);
 		volenvedit->pleaseDraw();
 	}
 	setHasUnsavedChanges(true);
@@ -4149,15 +4149,15 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		btnenvdrawmode->setCaption("draw");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
 
-		btnenvsetsuspoint =
-		    new Button(4 + 38 + 1, insttabbox_y + 16, 30, 10, sub_screen);
-		btnenvsetsuspoint->setCaption("set");
-		btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
-
 		cbsusenabled =
-		    new CheckBox(4, insttabbox_y + 14, 38, 10, sub_screen, true, false);
+		    new CheckBox(4, insttabbox_y + 13, 38, 10, sub_screen, true, false);
 		cbsusenabled->setCaption("sus");
 		cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
+
+		btnenvsetsuspoint =
+		    new Button(4 + 38 + 1, insttabbox_y + 15, 30, 10, sub_screen);
+		btnenvsetsuspoint->setCaption("set");
+		btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
 
 		tbmapsamples = new ToggleButton(tabbox_width - 3 - 79,
 		                                tabbox_height - 11, 80, 11, sub_screen);

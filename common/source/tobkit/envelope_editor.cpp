@@ -367,7 +367,7 @@ void EnvelopeEditor::delPoint(void)
 	}
 }
 
-void EnvelopeEditor::toggleSustain(bool is_enabled)
+void EnvelopeEditor::setSustain(bool is_enabled)
 {
 	sustain = is_enabled;
 }
