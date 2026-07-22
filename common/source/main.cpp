@@ -203,8 +203,10 @@ ToggleButton *buttonsmpdraw;
 // <Instrument Gui>
 EnvelopeEditor *volenvedit;
 Button *btnaddenvpoint, *btndelenvpoint, *btnenvdrawmode, *btnenvsetsuspoint;
+Button *btnenvsetloopstart, *btnenvsetloopend;
+Label *labelenvloopto;
 ToggleButton *tbmapsamples;
-CheckBox *cbvolenvenabled, *cbsusenabled;
+CheckBox *cbvolenvenabled, *cbsusenabled, *cbenvloopenabled;
 // </Instrument Gui>
 
 // <Settings Gui>
@@ -687,6 +689,42 @@ void handleOverlayWidgetChange(u8 screen, bool visible)
 #endif
 }
 
+void envSyncSustain(Instrument *inst)
+{
+	bool s;
+	u8 susp;
+
+	if (pan_env_visible) {
+		s = inst->getPanningEnvelopeSustainFlag();
+		susp = inst->getPanningEnvelopeSustainPoint();
+	} else {
+		s = inst->getVolumeEnvelopeSustainFlag();
+		susp = inst->getVolumeEnvelopeSustainPoint();
+	}
+
+	cbsusenabled->setChecked(s);
+	volenvedit->setEditorSustainParams(s, susp);
+}
+
+void envSyncLoop(Instrument *inst)
+{
+	bool enabled;
+	u8 start, end;
+
+	if (pan_env_visible) {
+		enabled = inst->getPanningEnvelopeLoopFlag();
+		start = inst->getPanningEnvelopeLoopStartPoint();
+		end = inst->getPanningEnvelopeLoopEndPoint();
+	} else {
+		enabled = inst->getVolumeEnvelopeLoopFlag();
+		start = inst->getVolumeEnvelopeLoopStartPoint();
+		end = inst->getVolumeEnvelopeLoopEndPoint();
+	}
+
+	cbenvloopenabled->setChecked(enabled);
+	volenvedit->setEditorLoopParams(enabled, start, end);
+}
+
 void volEnvSetInst(Instrument *inst)
 {
 	bool had_unsaved = state->unsaved_changes;
@@ -695,37 +733,35 @@ void volEnvSetInst(Instrument *inst)
 		volenvedit->setPoints(0, 0, 0);
 		cbvolenvenabled->setChecked(false);
 		cbsusenabled->setChecked(false);
+		cbenvloopenabled->setChecked(false);
 	} else {
 		u16 *xs, *ys;
 		u16 n;
-		bool s;
-		u8 susp;
 		if (pan_env_visible) {
 			n = inst->getPanningEnvelope(&xs, &ys);
-			s = inst->getPanningEnvelopeSustainFlag();
-			susp = inst->getPanningEnvelopeSustainPoint();
+			cbvolenvenabled->setChecked(inst->getPanEnvEnabled());
+			cbsusenabled->setChecked(inst->getPanningEnvelopeSustainFlag());
+			cbenvloopenabled->setChecked(inst->getPanningEnvelopeLoopFlag());
 		} else {
 			n = inst->getVolumeEnvelope(&xs, &ys);
-			s = inst->getVolumeEnvelopeSustainFlag();
-			susp = inst->getVolumeEnvelopeSustainPoint();
+			cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
+			cbsusenabled->setChecked(inst->getVolumeEnvelopeSustainFlag());
+			cbenvloopenabled->setChecked(inst->getVolumeEnvelopeLoopFlag());
 		}
 		volenvedit->setZoomAndPos(2, 0);
 		volenvedit->setPoints(xs, ys, n);
-		volenvedit->setEditorSustainParams(s, susp);
-		if (pan_env_visible) {
-			cbvolenvenabled->setChecked(inst->getPanEnvEnabled());
-			cbsusenabled->setChecked(inst->getPanningEnvelopeSustainFlag());
-		} else {
-			cbvolenvenabled->setChecked(inst->getVolEnvEnabled());
-			cbsusenabled->setChecked(inst->getVolumeEnvelopeSustainFlag());
-		}
+		envSyncSustain(inst);
+		envSyncLoop(inst);
 	}
 	btnenvdrawmode->set_enabled(inst != NULL);
 	btnaddenvpoint->set_enabled(inst != NULL);
 	btndelenvpoint->set_enabled(inst != NULL);
 	btnenvsetsuspoint->set_enabled(inst != NULL);
+	btnenvsetloopstart->set_enabled(inst != NULL);
+	btnenvsetloopend->set_enabled(inst != NULL);
 	cbvolenvenabled->set_enabled(inst != NULL);
 	cbsusenabled->set_enabled(inst != NULL);
+	cbenvloopenabled->set_enabled(inst != NULL);
 	tbmapsamples->set_enabled(inst != NULL);
 	volenvedit->pleaseDraw();
 	if (!had_unsaved)
@@ -3604,22 +3640,6 @@ void envStartDrawMode(void)
 	volenvedit->startDrawMode();
 }
 
-void envSyncSustain(Instrument *inst)
-{
-	bool s;
-	u8 susp;
-
-	if (pan_env_visible) {
-		s = inst->getPanningEnvelopeSustainFlag();
-		susp = inst->getPanningEnvelopeSustainPoint();
-	} else {
-		s = inst->getVolumeEnvelopeSustainFlag();
-		susp = inst->getVolumeEnvelopeSustainPoint();
-	}
-
-	volenvedit->setEditorSustainParams(s, susp);
-}
-
 void envSetSustainPoint(void)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
@@ -3628,8 +3648,10 @@ void envSetSustainPoint(void)
 
 	u16 active_point = volenvedit->getActivePoint();
 	if (pan_env_visible) {
+		inst->setPanningEnvelopeSustain(true);
 		inst->setPanningEnvelopeSustainPoint((u8)active_point);
 	} else {
+		inst->setVolumeEnvelopeSustain(true);
 		inst->setVolumeEnvelopeSustainPoint((u8)active_point);
 	}
 	envSyncSustain(inst);
@@ -3649,6 +3671,82 @@ void envToggleSustainEnabled(bool is_enabled)
 		inst->setVolumeEnvelopeSustain(is_enabled);
 	}
 	envSyncSustain(inst);
+	volenvedit->pleaseDraw();
+	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
+}
+
+void envToggleLoopEnabled(bool is_enabled)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+	if (pan_env_visible) {
+		inst->setPanningEnvelopeLoop(is_enabled);
+	} else {
+		inst->setVolumeEnvelopeLoop(is_enabled);
+	}
+	envSyncLoop(inst);
+	volenvedit->pleaseDraw();
+	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
+}
+
+void envSetLoopStartPoint(void)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+
+	u16 active_point = volenvedit->getActivePoint();
+	if (pan_env_visible) {
+		inst->setPanningEnvelopeLoop(true);
+		if (active_point > inst->getPanningEnvelopeLoopEndPoint()) {
+			inst->setPanningEnvelopeLoopStartPoint(inst->getPanningEnvelopeLoopEndPoint());
+			inst->setPanningEnvelopeLoopEndPoint((u8)active_point);
+		} else {
+			inst->setPanningEnvelopeLoopStartPoint((u8)active_point);
+		}
+	} else {
+		inst->setVolumeEnvelopeLoop(true);
+		if (active_point > inst->getVolumeEnvelopeLoopEndPoint()) {
+			inst->setVolumeEnvelopeLoopStartPoint(inst->getVolumeEnvelopeLoopEndPoint());
+			inst->setVolumeEnvelopeLoopEndPoint((u8)active_point);
+		} else {
+			inst->setVolumeEnvelopeLoopStartPoint((u8)active_point);
+		}
+	}
+	envSyncLoop(inst);
+	volenvedit->pleaseDraw();
+	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
+}
+
+void envSetLoopEndPoint(void)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+
+	u16 active_point = volenvedit->getActivePoint();
+	if (pan_env_visible) {
+		inst->setPanningEnvelopeLoop(true);
+		if (active_point < inst->getPanningEnvelopeLoopStartPoint()) {
+			inst->setPanningEnvelopeLoopEndPoint(inst->getPanningEnvelopeLoopStartPoint());
+			inst->setPanningEnvelopeLoopStartPoint((u8)active_point);
+		} else {
+			inst->setPanningEnvelopeLoopEndPoint((u8)active_point);
+		}
+	} else {
+		inst->setVolumeEnvelopeLoop(true);
+		if (active_point < inst->getVolumeEnvelopeLoopStartPoint()) {
+			inst->setVolumeEnvelopeLoopEndPoint(inst->getVolumeEnvelopeLoopStartPoint());
+			inst->setVolumeEnvelopeLoopStartPoint((u8)active_point);
+		} else {
+			inst->setVolumeEnvelopeLoopEndPoint((u8)active_point);
+		}
+	}
+	envSyncLoop(inst);
 	volenvedit->pleaseDraw();
 	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
@@ -4155,20 +4253,39 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		btnaddenvpoint->setCaption("+");
 		btnaddenvpoint->registerPushCallback(addEnvPoint);
 
-		btnenvdrawmode = new Button(tabbox_width - 3 - 12 - 3 - 12 - 3 - 40,
-		                            insttabbox_y + 2, 40, 10, sub_screen);
+		btnenvdrawmode = new Button(tabbox_width - 3 - 12 - 3 - 12 - 3 - 41,
+		                            insttabbox_y + 2, 41, 10, sub_screen);
 		btnenvdrawmode->setCaption("draw");
 		btnenvdrawmode->registerPushCallback(envStartDrawMode);
 
 		cbsusenabled =
-		    new CheckBox(4, insttabbox_y + 13, 38, 10, sub_screen, true, false);
-		cbsusenabled->setCaption("sus");
+		    new CheckBox(4, insttabbox_y + 13, 60, 10, sub_screen, true, false);
+		cbsusenabled->setCaption("sustain");
 		cbsusenabled->registerToggleCallback(envToggleSustainEnabled);
 
 		btnenvsetsuspoint =
-		    new Button(4 + 38 + 1, insttabbox_y + 15, 30, 10, sub_screen);
+		    new Button(4 + 60 + 1, insttabbox_y + 15, 26, 10, sub_screen);
 		btnenvsetsuspoint->setCaption("set");
 		btnenvsetsuspoint->registerPushCallback(envSetSustainPoint);
+
+		cbenvloopenabled =
+		    new CheckBox(4, insttabbox_y + 26, 60, 10, sub_screen, true, false);
+		cbenvloopenabled->setCaption("looping");
+		cbenvloopenabled->registerToggleCallback(envToggleLoopEnabled);
+
+		btnenvsetloopstart =
+		    new Button(4 + 60 + 1, insttabbox_y + 28, 26, 10, sub_screen);
+		btnenvsetloopstart->setCaption("set");
+		btnenvsetloopstart->registerPushCallback(envSetLoopStartPoint);
+
+		labelenvloopto =
+		    new Label(4 + 60 + 1 + 26 + 4, insttabbox_y + 28, 12, 10, sub_screen, false);
+		labelenvloopto->setCaption("to");
+
+		btnenvsetloopend =
+		    new Button(4 + 60 + 1 + 26 + 4 + 12 + 3, insttabbox_y + 28, 26, 10, sub_screen);
+		btnenvsetloopend->setCaption("set");
+		btnenvsetloopend->registerPushCallback(envSetLoopEndPoint);
 
 		tbmapsamples = new ToggleButton(tabbox_width - 3 - 79,
 		                                tabbox_height - 11, 80, 11, sub_screen);
@@ -4176,21 +4293,19 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		tbmapsamples->registerToggleCallback(handleToggleMapSamples);
 		tbmapsamples->disable();
 
-		tabbox->registerWidget(btnaddenvpoint, 0, subtab_ins_vol);
-		tabbox->registerWidget(btndelenvpoint, 0, subtab_ins_vol);
-		tabbox->registerWidget(btnenvdrawmode, 0, subtab_ins_vol);
-		tabbox->registerWidget(btnenvsetsuspoint, 0, subtab_ins_vol);
-		tabbox->registerWidget(cbsusenabled, 0, subtab_ins_vol);
-		tabbox->registerWidget(cbvolenvenabled, 0, subtab_ins_vol);
-		tabbox->registerWidget(volenvedit, 0, subtab_ins_vol);
-
-		tabbox->registerWidget(btnaddenvpoint, 0, subtab_ins_pan);
-		tabbox->registerWidget(btndelenvpoint, 0, subtab_ins_pan);
-		tabbox->registerWidget(btnenvdrawmode, 0, subtab_ins_pan);
-		tabbox->registerWidget(btnenvsetsuspoint, 0, subtab_ins_pan);
-		tabbox->registerWidget(cbsusenabled, 0, subtab_ins_pan);
-		tabbox->registerWidget(cbvolenvenabled, 0, subtab_ins_pan);
-		tabbox->registerWidget(volenvedit, 0, subtab_ins_pan);
+		for (int i = subtab_ins_vol; i <= subtab_ins_pan; i++) {
+			tabbox->registerWidget(btnaddenvpoint, 0, i);
+			tabbox->registerWidget(btndelenvpoint, 0, i);
+			tabbox->registerWidget(btnenvdrawmode, 0, i);
+			tabbox->registerWidget(btnenvsetsuspoint, 0, i);
+			tabbox->registerWidget(btnenvsetloopstart, 0, i);
+			tabbox->registerWidget(btnenvsetloopend, 0, i);
+			tabbox->registerWidget(labelenvloopto, 0, i);
+			tabbox->registerWidget(cbsusenabled, 0, i);
+			tabbox->registerWidget(cbvolenvenabled, 0, i);
+			tabbox->registerWidget(cbenvloopenabled, 0, i);
+			tabbox->registerWidget(volenvedit, 0, i);
+		}
 	}
 	// </Volume Envelope Gui>
 

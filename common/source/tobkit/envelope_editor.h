@@ -89,8 +89,8 @@ public:
 
 	void addPoint(int shift = 0);
 	void delPoint(void);
-	void setSustain(bool is_enabled);
 	void setEditorSustainParams(bool sus, u8 suspoint);
+	void setEditorLoopParams(bool enabled, u8 start_point, u8 end_point);
 	void clear(void);
 
 	void setZoomAndPos(int _zoom, int _pos);
@@ -135,6 +135,9 @@ private:
 	u16 active_point;
 	bool sustain;
 	u8 sustain_point_index;
+	bool loop;
+	u8 loop_start_index;
+	u8 loop_end_index;
 
 	u8 zoom_level;
 	u8 buttonstate;

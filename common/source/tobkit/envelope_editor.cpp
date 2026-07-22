@@ -367,15 +367,17 @@ void EnvelopeEditor::delPoint(void)
 	}
 }
 
-void EnvelopeEditor::setSustain(bool is_enabled)
-{
-	sustain = is_enabled;
-}
-
 void EnvelopeEditor::setEditorSustainParams(bool sus, u8 sus_point)
 {
 	sustain = sus;
 	sustain_point_index = sus_point;
+}
+
+void EnvelopeEditor::setEditorLoopParams(bool enabled, u8 start_point, u8 end_point)
+{
+	loop = enabled;
+	loop_start_index = start_point;
+	loop_end_index = end_point;
 }
 
 void EnvelopeEditor::clear(void)
