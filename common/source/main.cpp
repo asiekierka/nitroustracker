@@ -207,6 +207,7 @@ Button *btnenvsetloopstart, *btnenvsetloopend;
 Label *labelenvloopto;
 ToggleButton *tbmapsamples;
 CheckBox *cbvolenvenabled, *cbsusenabled, *cbenvloopenabled;
+
 // </Instrument Gui>
 
 // <Settings Gui>
@@ -4241,7 +4242,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		volenvedit->registerDrawFinishCallback(volEnvDrawFinish);
 		// </Instruments Gui>
 
-		// <Volume Envelope Gui>
+		// <Envelope Gui>
 		cbvolenvenabled =
 		    new CheckBox(4, insttabbox_y, 60, 10, sub_screen, true, false);
 		cbvolenvenabled->setCaption("env on");
@@ -4310,8 +4311,11 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 			tabbox->registerWidget(cbenvloopenabled, 0, i);
 			tabbox->registerWidget(volenvedit, 0, i);
 		}
+		// </Envelope Gui>
+
+		// <Vibrato Gui>
+		// </Vibrato Gui>
 	}
-	// </Volume Envelope Gui>
 
 	tabbox->registerWidget(tbmapsamples, 0, tab_instrument);
 

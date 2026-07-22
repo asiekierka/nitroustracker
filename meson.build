@@ -120,7 +120,11 @@ icon_pngs = [
   'common/bitmaps/sampleedit_record.png',
   'common/bitmaps/sampleedit_reverse.png',
   'common/bitmaps/sampleedit_trim.png',
-  'common/bitmaps/sampleedit_wave_icon.png'
+  'common/bitmaps/sampleedit_wave_icon.png',
+  'common/bitmaps/vibrato_saw.png',
+  'common/bitmaps/vibrato_saw2.png',
+  'common/bitmaps/vibrato_sine.png',
+  'common/bitmaps/vibrato_square.png'
 ]
 
 sdl3_dep = dependency('sdl3', required: true)
