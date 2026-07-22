@@ -3604,6 +3604,22 @@ void envStartDrawMode(void)
 	volenvedit->startDrawMode();
 }
 
+void envSyncSustain(Instrument *inst)
+{
+	bool s;
+	u8 susp;
+
+	if (pan_env_visible) {
+		s = inst->getPanningEnvelopeSustainFlag();
+		susp = inst->getPanningEnvelopeSustainPoint();
+	} else {
+		s = inst->getVolumeEnvelopeSustainFlag();
+		susp = inst->getVolumeEnvelopeSustainPoint();
+	}
+
+	volenvedit->setEditorSustainParams(s, susp);
+}
+
 void envSetSustainPoint(void)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
@@ -3611,35 +3627,30 @@ void envSetSustainPoint(void)
 		return;
 
 	u16 active_point = volenvedit->getActivePoint();
-	bool s;
-	u8 susp;
-
 	if (pan_env_visible) {
 		inst->setPanningEnvelopeSustainPoint((u8)active_point);
-		s = inst->getPanningEnvelopeSustainFlag();
-		susp = inst->getPanningEnvelopeSustainPoint();
 	} else {
 		inst->setVolumeEnvelopeSustainPoint((u8)active_point);
-		s = inst->getVolumeEnvelopeSustainFlag();
-		susp = inst->getVolumeEnvelopeSustainPoint();
 	}
-
-	volenvedit->setEditorSustainParams(s, susp);
+	envSyncSustain(inst);
 	volenvedit->pleaseDraw();
-
 	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
 
 void envToggleSustainEnabled(bool is_enabled)
 {
-
 	Instrument *inst = song->getInstrument(state->instrument);
-	if (inst != NULL) {
+	if (inst == 0)
+		return;
+	if (pan_env_visible) {
+		inst->setPanningEnvelopeSustain(is_enabled);
+	} else {
 		inst->setVolumeEnvelopeSustain(is_enabled);
-		volenvedit->setSustain(is_enabled);
-		volenvedit->pleaseDraw();
 	}
+	envSyncSustain(inst);
+	volenvedit->pleaseDraw();
+	ntxm_flush_dcache();
 	setHasUnsavedChanges(true);
 }
 
