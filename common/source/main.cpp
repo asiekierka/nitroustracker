@@ -151,6 +151,8 @@ TwoTabBox *tabbox;
 u8 tab_song = 0xFF, tab_file = 0xFF, tab_instrument = 0xFF, tab_sample = 0xFF,
    tab_settings = 0xFF;
 u8 subtab_ins_vol = 0xFF, subtab_ins_pan = 0xFF, subtab_ins_vib = 0xFF;
+u8 subtab_smp_wave = 0xFF, subtab_smp_draw = 0xFF, subtab_smp_control = 0xFF;
+u8 subtab_smp_loop = 0xFF;
 GradientIcon *pixmaplogo;
 // </Misc GUI>
 
@@ -181,7 +183,6 @@ MemoryIndicator *memoryiindicator;
 RecordBox *recordbox;
 NormalizeBox *normalizeBox;
 SampleDisplay *sampledisplay;
-TabBox *sampletabbox;
 
 Label *labelsamplevolume, *labelrelnote, *labelfinetune, *labelpanning;
 NumberSlider *nssamplevolume, *nsfinetune, *nspanning;
@@ -3347,36 +3348,30 @@ void tabBoxChange(u8 tab, u8 subtab)
 			pan_env_visible = false;
 
 		volEnvSetInst(inst);
-	}
-}
-
-void sampleTabBoxChange(u8 tab)
-{
-	if ((tab == 0) or (tab == 1))
-		sampledisplay->setActive();
-	else
-		sampledisplay->setInactive();
-
-	if (tab != 1) {
-		sampledisplay->setDrawMode(false);
-		buttonsmpdraw->setState(false);
-	}
-
-	if (tab == 2) {
-		Instrument *inst = song->getInstrument(state->instrument);
-		if (inst == NULL) {
-			sampledisplay->hideLoopPoints();
-			return;
-		}
-		Sample *sample = inst->getSample(state->sample);
-		if (sample == NULL) {
-			sampledisplay->hideLoopPoints();
-			return;
-		}
-		if (sample->getLoop() == 0)
-			sampledisplay->hideLoopPoints();
+	} else if (tab == tab_sample) {
+		if ((subtab == subtab_smp_wave) || (subtab == subtab_smp_draw))
+			sampledisplay->setActive();
 		else
-			sampledisplay->showLoopPoints();
+			sampledisplay->setInactive();
+
+		if (subtab != subtab_smp_draw) {
+			sampledisplay->setDrawMode(false);
+			buttonsmpdraw->setState(false);
+		}
+
+		if (subtab == subtab_smp_control) {
+			Instrument *inst = song->getInstrument(state->instrument);
+			if (inst == NULL) {
+				sampledisplay->hideLoopPoints();
+				return;
+			}
+			Sample *sample = inst->getSample(state->sample);
+			if (sample == NULL || sample->getLoop() == 0) {
+				sampledisplay->hideLoopPoints();
+			} else {
+				sampledisplay->showLoopPoints();
+			}
+		}
 	}
 }
 
@@ -3815,6 +3810,10 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 	if (dldi_enabled)
 		tab_file = tabbox->addTab(icon_disk_raw);
 	tab_sample = tabbox->addTab(icon_sample_raw);
+	subtab_smp_wave = tabbox->addSubTab(sampleedit_wave_icon_raw);
+	subtab_smp_draw = tabbox->addSubTab(sampleedit_draw_small_raw);
+	subtab_smp_control = tabbox->addSubTab(sampleedit_control_icon_raw);
+	subtab_smp_loop = tabbox->addSubTab(sampleedit_loop_icon_raw);
 	tab_instrument = tabbox->addTab(icon_trumpet_raw);
 	subtab_ins_vol = tabbox->addSubTab(instedit_volenv_raw);
 	subtab_ins_pan = tabbox->addSubTab(instedit_panenv_raw);
@@ -4053,23 +4052,10 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 	                                  sampledisplay_height, sub_screen);
 	sampledisplay->setActive();
 
-	sampletabbox =
-	    new TabBox(3, sampletabbox_y, tabbox_width - 6, sampletabbox_height,
-	               sub_screen, TABBOX_ORIENTATION_LEFT, 11);
-	sampletabbox->setTheme(settings->getTheme(),
-	                       settings->getTheme()->col_smp_bg);
-	sampletabbox->addTab(sampleedit_wave_icon_raw, 0);
-	sampletabbox->addTab(sampleedit_draw_small_raw, 1);
-	sampletabbox->addTab(sampleedit_control_icon_raw, 2);
-	sampletabbox->addTab(sampleedit_loop_icon_raw, 3);
-
-	//sampletabbox->addTab(sampleedit_chip_icon);
-	sampletabbox->registerTabChangeCallback(sampleTabBoxChange);
-
 	// <Sample editing>
 	{
 		labelsampleedit_record =
-		    new Label(18, sampletabbox_y + 5, 21, 30, sub_screen, true);
+		    new Label(18, sampletabbox_y + 1, 21, 30, sub_screen, true);
 		labelsampleedit_record->setCaption("rec");
 
 		buttonrecord = new BitButton(20, sampletabbox_y + 16, 17, 17,
@@ -4077,7 +4063,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		buttonrecord->registerPushCallback(handleRecordSample);
 
 		labelsampleedit_select =
-		    new Label(38, sampletabbox_y + 5, 39, 30, sub_screen, true);
+		    new Label(38, sampletabbox_y + 1, 39, 30, sub_screen, true);
 		labelsampleedit_select->setCaption("select");
 
 		buttonsmpselall = new BitButton(40, sampletabbox_y + 16, 17, 17,
@@ -4089,7 +4075,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		buttonsmpselnone->registerPushCallback(sample_clear_selection);
 
 		labelsampleedit_edit =
-		    new Label(76, sampletabbox_y + 5, 57, 48, sub_screen, true);
+		    new Label(76, sampletabbox_y + 1, 57, 48, sub_screen, true);
 		labelsampleedit_edit->setCaption("edit");
 
 		buttonsmpfadein = new BitButton(78, sampletabbox_y + 16, 17, 17,
@@ -4117,18 +4103,18 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		                  sampleedit_normalize_raw);
 		buttonsmpnormalize->registerPushCallback(sample_show_normalize_window);
 
-		sampletabbox->registerWidget(buttonrecord, 0, 0);
-		sampletabbox->registerWidget(buttonsmpselall, 0, 0);
-		sampletabbox->registerWidget(buttonsmpselnone, 0, 0);
-		sampletabbox->registerWidget(buttonsmpseldel, 0, 0);
-		sampletabbox->registerWidget(buttonsmptrim, 0, 0);
-		sampletabbox->registerWidget(buttonsmpfadein, 0, 0);
-		sampletabbox->registerWidget(buttonsmpfadeout, 0, 0);
-		sampletabbox->registerWidget(buttonsmpreverse, 0, 0);
-		sampletabbox->registerWidget(buttonsmpnormalize, 0, 0);
-		sampletabbox->registerWidget(labelsampleedit_edit, 0, 0);
-		sampletabbox->registerWidget(labelsampleedit_select, 0, 0);
-		sampletabbox->registerWidget(labelsampleedit_record, 0, 0);
+		tabbox->registerWidget(buttonrecord, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpselall, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpselnone, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpseldel, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmptrim, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpfadein, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpfadeout, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpreverse, 0, subtab_smp_wave);
+		tabbox->registerWidget(buttonsmpnormalize, 0, subtab_smp_wave);
+		tabbox->registerWidget(labelsampleedit_edit, 0, subtab_smp_wave);
+		tabbox->registerWidget(labelsampleedit_select, 0, subtab_smp_wave);
+		tabbox->registerWidget(labelsampleedit_record, 0, subtab_smp_wave);
 	}
 	// </Sample editing>
 
@@ -4139,7 +4125,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		buttonsmpdraw->setBitmap(sampleedit_draw_raw);
 		buttonsmpdraw->registerToggleCallback(sampleDrawToggle);
 
-		sampletabbox->registerWidget(buttonsmpdraw, 0, 1);
+		tabbox->registerWidget(buttonsmpdraw, 0, subtab_smp_draw);
 	}
 	// </Drawing and Generating>
 
@@ -4178,14 +4164,14 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		                              sub_screen, 0, -128, 127);
 		nsfinetune->registerChangeCallback(handleSampleFineTuneChange);
 
-		sampletabbox->registerWidget(nssamplevolume, 0, 2);
-		sampletabbox->registerWidget(nspanning, 0, 2);
-		sampletabbox->registerWidget(nsrelnote, 0, 2);
-		sampletabbox->registerWidget(nsfinetune, 0, 2);
-		sampletabbox->registerWidget(labelfinetune, 0, 2);
-		sampletabbox->registerWidget(labelrelnote, 0, 2);
-		sampletabbox->registerWidget(labelsamplevolume, 0, 2);
-		sampletabbox->registerWidget(labelpanning, 0, 2);
+		tabbox->registerWidget(nssamplevolume, 0, subtab_smp_control);
+		tabbox->registerWidget(nspanning, 0, subtab_smp_control);
+		tabbox->registerWidget(nsrelnote, 0, subtab_smp_control);
+		tabbox->registerWidget(nsfinetune, 0, subtab_smp_control);
+		tabbox->registerWidget(labelfinetune, 0, subtab_smp_control);
+		tabbox->registerWidget(labelrelnote, 0, subtab_smp_control);
+		tabbox->registerWidget(labelsamplevolume, 0, subtab_smp_control);
+		tabbox->registerWidget(labelpanning, 0, subtab_smp_control);
 	}
 	// </Sample settings>
 
@@ -4217,16 +4203,15 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		cbsnapto0xing->setCaption("snap");
 		cbsnapto0xing->registerToggleCallback(handleSnapTo0XingToggled);
 
-		sampletabbox->registerWidget(rbloop_none, 0, 3);
-		sampletabbox->registerWidget(rbloop_forward, 0, 3);
-		sampletabbox->registerWidget(rbloop_pingpong, 0, 3);
-		sampletabbox->registerWidget(gbsampleloop, 0, 3);
-		sampletabbox->registerWidget(cbsnapto0xing, 0, 3);
+		tabbox->registerWidget(rbloop_none, 0, subtab_smp_loop);
+		tabbox->registerWidget(rbloop_forward, 0, subtab_smp_loop);
+		tabbox->registerWidget(rbloop_pingpong, 0, subtab_smp_loop);
+		tabbox->registerWidget(gbsampleloop, 0, subtab_smp_loop);
+		tabbox->registerWidget(cbsnapto0xing, 0, subtab_smp_loop);
 	}
 	// </Looping>
 
 	tabbox->registerWidget(sampledisplay, 0, tab_sample);
-	tabbox->registerWidget(sampletabbox, 0, tab_sample);
 	// </Sample Gui>
 
 	// <Instruments Gui>
