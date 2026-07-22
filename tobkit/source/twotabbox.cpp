@@ -109,7 +109,7 @@ void TwoTabBox::penDown(u16 px, u16 py)
 		tab_hit = (px - x - 3) / size_top;
 	} else if ((py - y) >= (height - size_bottom) &&
 	           subtab_count_per_tab.at(currenttab) > 0) {
-		tab_hit = ((px - x - 3) / size_bottom);
+		tab_hit = ((px - x - 3) / (size_bottom + 1));
 		if (tab_hit < subtab_count_per_tab.at(currenttab)) {
 			tab_hit += firstSubtab(currenttab);
 		} else {
@@ -235,8 +235,8 @@ void TwoTabBox::drawIcon(u8 tabidx)
 
 	u8 size_icon = (subtab ? sub_icon_size : icon_size);
 	u8 size_border = size_icon + 2;
-	u8 size_full = size_border;
-	int bottom = height - size_full;
+	u8 size_full = size_border + (subtab ? 1 : 0);
+	int bottom = height - size_border - 1;
 
 	u8 offset = selected ? 0 : 3;
 	u16 col = theme->col_tab_outline;
@@ -246,8 +246,8 @@ void TwoTabBox::drawIcon(u8 tabidx)
 	            selected ? theme->col_selected_tab : theme->col_unselected_tab);
 	drawVLine(2 + size_full * tabidx, subtab ? bottom : 1 + offset,
 	          size_border - offset, col);
-	drawHLine(3 + size_full * tabidx, subtab ? height - 1 - offset : 0 + offset,
-	          size_border - 1, col);
+	drawHLine(3 + size_full * tabidx, subtab ? height - 2 - offset : 0 + offset,
+	          size_border - (subtab ? 0 : 1), col);
 	drawVLine(2 + size_full * (tabidx + 1), subtab ? bottom : 1 + offset,
 	          size_border - offset, col);
 	if (!selected)
