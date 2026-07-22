@@ -373,7 +373,8 @@ void EnvelopeEditor::setEditorSustainParams(bool sus, u8 sus_point)
 	sustain_point_index = sus_point;
 }
 
-void EnvelopeEditor::setEditorLoopParams(bool enabled, u8 start_point, u8 end_point)
+void EnvelopeEditor::setEditorLoopParams(bool enabled, u8 start_point,
+                                         u8 end_point)
 {
 	loop = enabled;
 	loop_start_index = start_point;
@@ -437,9 +438,6 @@ void EnvelopeEditor::draw(void)
 
 	if (n_points > 0) {
 		realToDisp(points_x[0], points_y[0], &last_point_x, &last_point_y);
-
-		if ((last_point_x >= MIN_X) && (last_point_x <= MAX_X))
-			drawPoint(last_point_x, last_point_y, 0 == active_point);
 	}
 
 	for (u8 idx = 1; idx < n_points; ++idx) {
@@ -480,12 +478,10 @@ void EnvelopeEditor::draw(void)
 
 			if ((last_point_x >= MIN_X) && (last_point_x <= MAX_X)) {
 				// Display unclipped points
-				drawPoint(last_point_x, last_point_y, idx - 1 == active_point);
-
-				// Draw sustain point
-				if (sustain && idx == (sustain_point_index + 1))
-					drawVLine(last_point_x, last_point_y,
-					          MAX_Y - last_point_y + 1, theme->col_env_sustain);
+				drawPoint(last_point_x, last_point_y, idx - 1 == active_point,
+				          (sustain && idx == (sustain_point_index + 1)),
+				          (loop && (idx == (loop_start_index + 1) ||
+				                    idx == (loop_end_index + 1))));
 			}
 		}
 		last_point_x = point_x;
@@ -493,7 +489,10 @@ void EnvelopeEditor::draw(void)
 	}
 
 	if ((n_points > 0) && (point_x >= MIN_X) && (point_x <= MAX_X))
-		drawPoint(point_x, point_y, n_points - 1 == active_point);
+		drawPoint(point_x, point_y, n_points - 1 == active_point,
+		          (sustain && n_points == (sustain_point_index + 1)),
+		          (loop && (n_points == (loop_start_index + 1) ||
+		                    n_points == (loop_end_index + 1))));
 
 	//
 	// Scrollbar
@@ -637,7 +636,8 @@ void EnvelopeEditor::calcScrollThingy(void)
 		scrollthingyheight = MIN_SCROLLTHINGY_WIDTH;
 }
 
-void EnvelopeEditor::drawPoint(u16 x, u16 y, bool active)
+void EnvelopeEditor::drawPoint(u16 x, u16 y, bool active, bool sustain,
+                               bool loop)
 {
 	drawFullBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH,
 	            POINT_HEIGHT, theme->col_env_pt);
@@ -648,6 +648,12 @@ void EnvelopeEditor::drawPoint(u16 x, u16 y, bool active)
 	else
 		drawBox(x + POINT_X_OFFSET, y + POINT_Y_OFFSET, POINT_WIDTH,
 		        POINT_HEIGHT, theme->col_env_pt_border_active);
+
+	if (sustain)
+		drawVLine(x, y, height - SCROLLBAR_WIDTH - y + 1,
+		          theme->col_env_sustain);
+	else if (loop)
+		drawVLine(x, y, height - SCROLLBAR_WIDTH - y + 1, theme->col_env_line);
 }
 
 void EnvelopeEditor::scroll(s32 newscrollpos)

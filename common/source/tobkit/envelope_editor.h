@@ -104,7 +104,7 @@ private:
 	void zoomOut(void);
 
 	void calcScrollThingy(void);
-	void drawPoint(u16 x, u16 y, bool active);
+	void drawPoint(u16 x, u16 y, bool active, bool sustain, bool loop);
 
 	void scroll(s32 newscrollpos);
 

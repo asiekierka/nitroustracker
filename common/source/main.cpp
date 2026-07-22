@@ -3702,7 +3702,8 @@ void envSetLoopStartPoint(void)
 	if (pan_env_visible) {
 		inst->setPanningEnvelopeLoop(true);
 		if (active_point > inst->getPanningEnvelopeLoopEndPoint()) {
-			inst->setPanningEnvelopeLoopStartPoint(inst->getPanningEnvelopeLoopEndPoint());
+			inst->setPanningEnvelopeLoopStartPoint(
+			    inst->getPanningEnvelopeLoopEndPoint());
 			inst->setPanningEnvelopeLoopEndPoint((u8)active_point);
 		} else {
 			inst->setPanningEnvelopeLoopStartPoint((u8)active_point);
@@ -3710,7 +3711,8 @@ void envSetLoopStartPoint(void)
 	} else {
 		inst->setVolumeEnvelopeLoop(true);
 		if (active_point > inst->getVolumeEnvelopeLoopEndPoint()) {
-			inst->setVolumeEnvelopeLoopStartPoint(inst->getVolumeEnvelopeLoopEndPoint());
+			inst->setVolumeEnvelopeLoopStartPoint(
+			    inst->getVolumeEnvelopeLoopEndPoint());
 			inst->setVolumeEnvelopeLoopEndPoint((u8)active_point);
 		} else {
 			inst->setVolumeEnvelopeLoopStartPoint((u8)active_point);
@@ -3732,7 +3734,8 @@ void envSetLoopEndPoint(void)
 	if (pan_env_visible) {
 		inst->setPanningEnvelopeLoop(true);
 		if (active_point < inst->getPanningEnvelopeLoopStartPoint()) {
-			inst->setPanningEnvelopeLoopEndPoint(inst->getPanningEnvelopeLoopStartPoint());
+			inst->setPanningEnvelopeLoopEndPoint(
+			    inst->getPanningEnvelopeLoopStartPoint());
 			inst->setPanningEnvelopeLoopStartPoint((u8)active_point);
 		} else {
 			inst->setPanningEnvelopeLoopEndPoint((u8)active_point);
@@ -3740,7 +3743,8 @@ void envSetLoopEndPoint(void)
 	} else {
 		inst->setVolumeEnvelopeLoop(true);
 		if (active_point < inst->getVolumeEnvelopeLoopStartPoint()) {
-			inst->setVolumeEnvelopeLoopEndPoint(inst->getVolumeEnvelopeLoopStartPoint());
+			inst->setVolumeEnvelopeLoopEndPoint(
+			    inst->getVolumeEnvelopeLoopStartPoint());
 			inst->setVolumeEnvelopeLoopStartPoint((u8)active_point);
 		} else {
 			inst->setVolumeEnvelopeLoopEndPoint((u8)active_point);
@@ -4278,12 +4282,12 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		btnenvsetloopstart->setCaption("set");
 		btnenvsetloopstart->registerPushCallback(envSetLoopStartPoint);
 
-		labelenvloopto =
-		    new Label(4 + 60 + 1 + 26 + 4, insttabbox_y + 28, 12, 10, sub_screen, false);
+		labelenvloopto = new Label(4 + 60 + 1 + 26 + 4, insttabbox_y + 28, 12,
+		                           10, sub_screen, false);
 		labelenvloopto->setCaption("to");
 
-		btnenvsetloopend =
-		    new Button(4 + 60 + 1 + 26 + 4 + 12 + 3, insttabbox_y + 28, 26, 10, sub_screen);
+		btnenvsetloopend = new Button(4 + 60 + 1 + 26 + 4 + 12 + 3,
+		                              insttabbox_y + 28, 26, 10, sub_screen);
 		btnenvsetloopend->setCaption("set");
 		btnenvsetloopend->registerPushCallback(envSetLoopEndPoint);
 
