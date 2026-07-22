@@ -226,8 +226,8 @@ void TwoTabBox::drawIcon(u8 tabidx)
 	if (tabidx >= 0x80) {
 		selected = tabidx == currentsubtab;
 		subtab = true;
-		tabidx &= 0x7F;
-		icon = subtab_icons.at(tabidx);
+		icon = subtab_icons.at(tabidx & 0x7F);
+		tabidx -= firstSubtab(currenttab);
 	} else {
 		selected = tabidx == currenttab;
 		icon = tab_icons.at(tabidx);
