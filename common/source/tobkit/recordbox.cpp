@@ -252,10 +252,12 @@ void RecordBox::stopRecording()
 	}
 
 	// Get pointer to sound data and shrink it beautiful
-	u32 newsize =
+	s32 newsize =
 	    size -
 	    RECORDBOX_CROP_SAMPLES_END *
 	        2; // Crop the end because it contains the clicking of the button
+	if (newsize < 0)
+		newsize = 0;
 #ifdef NT_PLATFORM_3DS
 	u16 *sample_data = (u16 *)ntxm_cmalloc(newsize);
 	memcpy(sample_data, sound_data, newsize);
