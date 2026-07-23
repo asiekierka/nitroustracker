@@ -2375,7 +2375,6 @@ void handleThemeApply(void)
 
 void handleThemeButton(void)
 {
-	pausePlay();
 	strncpy(last_themepath, settings->getThemePath(), SETTINGS_FILENAME_LEN);
 	fbtheme = new tobkit::ThemeSelectorBox(sub_screen, handleThemeChosen,
 	                                       handleThemeApply, handleThemeReset,
