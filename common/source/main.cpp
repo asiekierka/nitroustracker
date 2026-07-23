@@ -900,6 +900,8 @@ void setSong(Song *newsong)
 	tbqueuelock->setState(false);
 	tbpotloop->setState(false);
 
+	handleToggleMapSamples(false);
+
 	numberboxadd->setValue(state->add);
 	numberboxoctave->setValue(state->basenote / 12);
 
@@ -3542,10 +3544,6 @@ void handleLerp(void)
 
 void handleToggleMapSamples(bool is_active)
 {
-	Instrument *inst = song->getInstrument(state->instrument);
-	if (inst == NULL)
-		return;
-
 	if (is_active) {
 		if (tbmultisample->getState() == false) {
 			setMultisamplesEnabled(true);
