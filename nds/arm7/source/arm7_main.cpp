@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 
 	// timer 0 - sub-millisecond ticker
 	// timer 1 - millisecond ticker
-	// timer 2 - unused
+	// timer 2 - microphone timer
 	// timer 3 - DS RTC
 	initClockIRQTimer(3);
 
