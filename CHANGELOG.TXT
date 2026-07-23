@@ -11,8 +11,9 @@ New features:
     quirks are adjusted for on load - resaving such songs should make them play more accurately in
     FT2-compatible players as well.
 - added support for inputting most effects
-- added support for configuring panning envelopes
-- added support for configuring envelope loops
+- added support for configuring instrument panning envelopes
+- added support for configuring instrument envelope loops
+- added support for configuring instrument vibrato
 - added support for editing note components with buttons only - use A / A + D-Pad
 - added support for previewing samples while the song is playing
 - [#65] added support for importing .mod files
@@ -21,6 +22,7 @@ New features:
 Improvements:
 
 - 24/32-bit wav samples now load faster
+- browsing themes no longer pauses playback
 - fx keyboard now supports pen sliding (prayerie)
 - greatly improved bpm/timing accuracy
 - loop points are now retained when disabling and re-enabling sample loop
