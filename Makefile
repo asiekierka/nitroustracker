@@ -9,7 +9,7 @@ BLOCKSDSEXT	?= /opt/blocksds/external
 # ===========
 
 NAME		:= nitroustracker
-export VERSION		?= 0.7.0b1
+export VERSION		?= 0.7.0b2
 export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 GAME_TITLE	:= NitrousTracker
