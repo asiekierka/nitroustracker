@@ -116,6 +116,11 @@ using namespace tobkit;
 #include "sampleedit_trim_raw.h"
 #include "sampleedit_wave_icon_raw.h"
 
+#include "vibrato_saw2_raw.h"
+#include "vibrato_saw_raw.h"
+#include "vibrato_sine_raw.h"
+#include "vibrato_square_raw.h"
+
 #include "action.h"
 #include "cell_array.h"
 
@@ -200,15 +205,20 @@ CheckBox *cbsnapto0xing;
 ToggleButton *buttonsmpdraw;
 // </Sample Gui>
 
-// <Instrument Gui>
+// <Instruments Gui>
 EnvelopeEditor *volenvedit;
 Button *btnaddenvpoint, *btndelenvpoint, *btnenvdrawmode, *btnenvsetsuspoint;
 Button *btnenvsetloopstart, *btnenvsetloopend;
 Label *labelenvloopto;
 ToggleButton *tbmapsamples;
 CheckBox *cbvolenvenabled, *cbsusenabled, *cbenvloopenabled;
-
-// </Instrument Gui>
+GroupBox *gbvibrato;
+Label *labelvibspeed, *labelvibdepth, *labelvibsweep, *labelvibtype,
+    *labelvolfadeout;
+NumberSlider *nsvibspeed, *nsvibdepth, *nsvibsweep, *nsvolfadeout;
+RadioButton *rbvibtypesine, *rbvibtypesquare, *rbvibtypesaw, *rbvibtypesaw2;
+RadioButton::RadioButtonGroup *rbgvibtype;
+// </Instruments Gui>
 
 // <Settings Gui>
 RadioButton::RadioButtonGroup *rbghandedness;
@@ -735,6 +745,11 @@ void volEnvSetInst(Instrument *inst)
 		cbvolenvenabled->setChecked(false);
 		cbsusenabled->setChecked(false);
 		cbenvloopenabled->setChecked(false);
+		rbgvibtype->setActive(0);
+		nsvibsweep->setValue(0);
+		nsvibdepth->setValue(0);
+		nsvibspeed->setValue(0);
+		nsvolfadeout->setValue(0);
 	} else {
 		u16 *xs, *ys;
 		u16 n;
@@ -753,6 +768,11 @@ void volEnvSetInst(Instrument *inst)
 		volenvedit->setPoints(xs, ys, n);
 		envSyncSustain(inst);
 		envSyncLoop(inst);
+		rbgvibtype->setActive(inst->getVibratoType() & 3);
+		nsvibsweep->setValue(inst->getVibratoSweep());
+		nsvibdepth->setValue(inst->getVibratoDepth());
+		nsvibspeed->setValue(inst->getVibratoRate());
+		nsvolfadeout->setValue(inst->getFadeOutVolume());
 	}
 	btnenvdrawmode->set_enabled(inst != NULL);
 	btnaddenvpoint->set_enabled(inst != NULL);
@@ -764,6 +784,14 @@ void volEnvSetInst(Instrument *inst)
 	cbsusenabled->set_enabled(inst != NULL);
 	cbenvloopenabled->set_enabled(inst != NULL);
 	tbmapsamples->set_enabled(inst != NULL);
+	rbvibtypesaw->set_enabled(inst != NULL);
+	rbvibtypesaw2->set_enabled(inst != NULL);
+	rbvibtypesine->set_enabled(inst != NULL);
+	rbvibtypesquare->set_enabled(inst != NULL);
+	nsvibsweep->set_enabled(inst != NULL);
+	nsvibdepth->set_enabled(inst != NULL);
+	nsvibspeed->set_enabled(inst != NULL);
+	nsvolfadeout->set_enabled(inst != NULL);
 	volenvedit->pleaseDraw();
 	if (!had_unsaved)
 		setHasUnsavedChanges(false);
@@ -3446,7 +3474,7 @@ void setMultisamplesEnabled(bool show)
 		if (lbsamples->getY() <
 		    (lbinstruments->getY() + lbinstruments_height)) {
 			lbinstruments->resize(lbinstruments->getWidth(),
-			                      lbinstruments_height - lbsamples_height);
+			                      lbinstruments_height - lbsamples_height + 1);
 			lbsamples->show();
 			buttonrenamesample->show();
 		}
@@ -3594,6 +3622,51 @@ void handleSampleLoopChanged(u8 val)
 	else
 		sampledisplay->showLoopPoints();
 
+	ntxm_flush_dcache();
+}
+
+void handleVibratoTypeChanged(u8 val)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+	inst->setVibratoType(val & 3);
+	ntxm_flush_dcache();
+}
+
+void handleVibratoSweepChanged(s32 val)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+	inst->setVibratoSweep(val);
+	ntxm_flush_dcache();
+}
+
+void handleVibratoDepthChanged(s32 val)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+	inst->setVibratoDepth(val);
+	ntxm_flush_dcache();
+}
+
+void handleVibratoSpeedChanged(s32 val)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+	inst->setVibratoRate(val);
+	ntxm_flush_dcache();
+}
+
+void handleVolumeFadeoutChanged(s32 val)
+{
+	Instrument *inst = song->getInstrument(state->instrument);
+	if (inst == 0)
+		return;
+	inst->setFadeOutVolume(val);
 	ntxm_flush_dcache();
 }
 
@@ -4231,7 +4304,6 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 
 	// <Instruments Gui>
 	{
-		int insttabbox_height = 53;
 		int volenvedit_height = tabbox_height - 79;
 		int insttabbox_y = 23 + volenvedit_height + 2;
 
@@ -4314,6 +4386,82 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		// </Envelope Gui>
 
 		// <Vibrato Gui>
+		labelvolfadeout = new Label(10, 25 + 5, 46, 10, sub_screen, false);
+		labelvolfadeout->setCaption("fadeout");
+		nsvolfadeout = new NumberSlider(10 + 46, 25, 35, 17, sub_screen, 0, 0,
+		                                0xFFF, true, false);
+
+		int vibrato_y = tabbox->getY() + tabbox_height - 20 - 68;
+		gbvibrato =
+		    new GroupBox(4, vibrato_y - 1, tabbox_width - 6, 69, sub_screen);
+		gbvibrato->setText("vibrato");
+
+		labelvibspeed =
+		    new Label(47 - 37, vibrato_y + 10 + 5, 37, 10, sub_screen, false);
+		labelvibspeed->setCaption("speed");
+
+		labelvibdepth = new Label(47 - 35, vibrato_y + 10 + 5 + 20, 35, 10,
+		                          sub_screen, false);
+		labelvibdepth->setCaption("depth");
+
+		labelvibsweep = new Label(47 - 39, vibrato_y + 10 + 5 + 20 + 20, 39, 10,
+		                          sub_screen, false);
+		labelvibsweep->setCaption("sweep");
+
+		nsvibspeed = new NumberSlider(47, vibrato_y + 10, 25, 17, sub_screen, 0,
+		                              0, 0x3F, true, true);
+		nsvibdepth = new NumberSlider(47, vibrato_y + 10 + 20, 25, 17,
+		                              sub_screen, 0, 0, 0xF, true, false);
+		nsvibsweep = new NumberSlider(47, vibrato_y + 10 + 20 + 20, 25, 17,
+		                              sub_screen, 0, 0, 0xFF, true, true);
+
+		int rbvibtype_x = tabbox_endx - 33;
+		int rbvibtype_h = 15;
+		rbgvibtype = new RadioButton::RadioButtonGroup();
+
+		labelvibtype = new Label(rbvibtype_x - 30, vibrato_y + 10 + 5, 30, 10,
+		                         sub_screen, false);
+		labelvibtype->setCaption("type");
+
+		rbvibtypesine = new RadioButton(rbvibtype_x, vibrato_y + 11, 30,
+		                                rbvibtype_h, sub_screen, rbgvibtype);
+		rbvibtypesquare =
+		    new RadioButton(rbvibtype_x, vibrato_y + 11 + rbvibtype_h, 30,
+		                    rbvibtype_h, sub_screen, rbgvibtype);
+		rbvibtypesaw =
+		    new RadioButton(rbvibtype_x, vibrato_y + 11 + rbvibtype_h * 2, 30,
+		                    rbvibtype_h, sub_screen, rbgvibtype);
+		rbvibtypesaw2 =
+		    new RadioButton(rbvibtype_x, vibrato_y + 11 + rbvibtype_h * 3, 30,
+		                    rbvibtype_h, sub_screen, rbgvibtype);
+
+		rbvibtypesine->setIcon(vibrato_sine_raw, 11);
+		rbvibtypesquare->setIcon(vibrato_square_raw, 11);
+		rbvibtypesaw->setIcon(vibrato_saw_raw, 11);
+		rbvibtypesaw2->setIcon(vibrato_saw2_raw, 11);
+
+		rbvibtypesine->setActive(true);
+
+		rbgvibtype->registerChangeCallback(handleVibratoTypeChanged);
+		nsvibsweep->registerChangeCallback(handleVibratoSweepChanged);
+		nsvibdepth->registerChangeCallback(handleVibratoDepthChanged);
+		nsvibspeed->registerChangeCallback(handleVibratoSpeedChanged);
+		nsvolfadeout->registerChangeCallback(handleVolumeFadeoutChanged);
+
+		tabbox->registerWidget(nsvolfadeout, 0, subtab_ins_vib);
+		tabbox->registerWidget(nsvibspeed, 0, subtab_ins_vib);
+		tabbox->registerWidget(nsvibdepth, 0, subtab_ins_vib);
+		tabbox->registerWidget(nsvibsweep, 0, subtab_ins_vib);
+		tabbox->registerWidget(rbvibtypesine, 0, subtab_ins_vib);
+		tabbox->registerWidget(rbvibtypesquare, 0, subtab_ins_vib);
+		tabbox->registerWidget(rbvibtypesaw, 0, subtab_ins_vib);
+		tabbox->registerWidget(rbvibtypesaw2, 0, subtab_ins_vib);
+		tabbox->registerWidget(labelvolfadeout, 0, subtab_ins_vib);
+		tabbox->registerWidget(labelvibtype, 0, subtab_ins_vib);
+		tabbox->registerWidget(labelvibspeed, 0, subtab_ins_vib);
+		tabbox->registerWidget(labelvibdepth, 0, subtab_ins_vib);
+		tabbox->registerWidget(labelvibsweep, 0, subtab_ins_vib);
+		tabbox->registerWidget(gbvibrato, 0, subtab_ins_vib);
 		// </Vibrato Gui>
 	}
 

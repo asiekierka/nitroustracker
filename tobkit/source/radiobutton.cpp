@@ -23,7 +23,7 @@ using namespace tobkit;
 RadioButton::RadioButton(u16 _x, u16 _y, u16 _width, u16 _height,
                          Screen *_screen, RadioButtonGroup *_rbg, bool _visible)
     : Widget(_x, _y, _width, _height, _screen, _visible), rbg(_rbg),
-      active(false)
+      active(false), icon_size(0)
 {
 	rbg->add(this);
 }
@@ -45,6 +45,15 @@ void RadioButton::penDown(u16 px, u16 py)
 void RadioButton::setCaption(const char *caption)
 {
 	label = caption;
+	icon_size = 0;
+	if (isExposed())
+		draw();
+}
+
+void RadioButton::setIcon(const u8 *icon, u8 size)
+{
+	label = icon;
+	icon_size = size;
 	if (isExposed())
 		draw();
 }
@@ -90,6 +99,11 @@ void RadioButton::draw(void)
 		drawFullBox(4, 4, 3, 3, theme->col_checkmark);
 	}
 
-	// Text
-	drawString(label, 13, 0, theme->col_text);
+	// Caption
+	if (icon_size) {
+		drawMonochromeIcon(13, 0, icon_size, icon_size, (const u8 *)label,
+		                   theme->col_outline);
+	} else {
+		drawString((const char *)label, 13, 0, theme->col_text);
+	}
 }

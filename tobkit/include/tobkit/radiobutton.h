@@ -52,6 +52,7 @@ public:
 	void penDown(u16 px, u16 py);
 
 	void setCaption(const char *caption);
+	void setIcon(const u8 *icon, u8 size);
 	void setActive(bool _active);
 	bool getActive(void);
 
@@ -60,7 +61,8 @@ private:
 
 	RadioButtonGroup *rbg;
 	bool active;
-	const char *label;
+	u8 icon_size;
+	const void *label;
 };
 
 }; // namespace tobkit

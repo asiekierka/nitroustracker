@@ -89,9 +89,10 @@ void NumberSlider::penMove(u16 px, u16 py)
 	if (!enabled)
 		return;
 
+	int divisor = max >= 0x200 ? 4 : 8;
 	s16 dy = lasty - py;
 	if (abs(dy) > 1) {
-		int inc = dy * dy / 8;
+		int inc = dy * dy / divisor;
 		if (inc == 0)
 			inc = 1;
 		if (dy < 0)
