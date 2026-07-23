@@ -226,7 +226,9 @@ void RecordBox::stopRecording()
 	}
 	
 	// Get pointer to sound data and shrink it beautiful
-	u32 newsize = size - RECORDBOX_CROP_SAMPLES_END*2; // Crop the end because it contains the clicking of the button
+	s32 newsize = size - RECORDBOX_CROP_SAMPLES_END*2; // Crop the end because it contains the clicking of the button
+	if (newsize < 0)
+		newsize = 0;
 	sound_data = (u16*)ntxm_crealloc(sound_data, newsize);
 	
 	//Cut the first few samples
