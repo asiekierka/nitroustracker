@@ -41,7 +41,7 @@ void lowercase(char *str)
 	}
 }
 
-static const char prohibited_chars[] = "+.,;=[]/*:<>|\\\"\?";
+static const char prohibited_chars[] = "+,;=[]/*:<>|\\\"\?";
 
 void filterFilenameCharacters(char *text)
 {
