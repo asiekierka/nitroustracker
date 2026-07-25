@@ -171,7 +171,7 @@ GradientIcon *pixmaplogo;
 // </Misc GUI>
 
 // <Disk op gui>
-Label *labelitem, *labelFilename, *labelramusage_disk;
+Label *labelitem, *labelFilename;
 RadioButton *rbsong, *rbsample, *rbinst;
 RadioButton::RadioButtonGroup *rbgdiskop;
 Button *buttonsave, *buttonload, *buttondelfile, *buttonchangefilename;
@@ -985,6 +985,34 @@ bool loadSample(const char *filename_with_path)
 	return true;
 }
 
+const char *loadInstrument(const char *filename_with_path)
+{
+	const char *filename = strrchr(filename_with_path, '/') + 1;
+	debugprintf("file: %s %s\n", filename_with_path, filename);
+
+	bool load_success;
+	Instrument *newins;
+	FormatTransportError err = xm_transport.loadInstrument(filename_with_path, &newins);
+	if (err != FormatTransportError::SUCCESS) {
+		return xm_transport.getError(err);
+	}
+
+	u8 instidx = lbinstruments->getidx();
+	u8 smpidx = state->sample;
+
+	Instrument *oldins = song->getInstrument(instidx);
+	if (oldins)
+		delete oldins;
+	song->setInstrument(instidx, newins);
+
+	lbinstruments->set(state->instrument, newins->getName());
+
+	handleInstChange(instidx, true);
+	ntxm_flush_dcache();
+	setHasUnsavedChanges(true);
+	return nullptr;
+}
+
 void showSlowLoadOperation(std::function<const char *(void)> loadOp)
 {
 	// This IRQ approach occasionally causes a libc mutex deadlock.
@@ -1104,7 +1132,10 @@ void handleLoad(void)
 			mb->pleaseDraw();
 		} else
 			loadSong();
-
+	} else if (!strcasecmp(fn + strlen(fn) - 3, ".xi")) {
+		showSlowLoadOperation([file]() {
+		    return loadInstrument(file->name_with_path.c_str());
+		});
 	} else if (!strcasecmp(fn + strlen(fn) - 4, ".wav")) {
 		showSlowLoadOperation([file]() {
 			bool success = loadSample(file->name_with_path.c_str());
@@ -1152,6 +1183,15 @@ void saveFile(void)
 					smp->saveAsWav(filename_tmp);
 					saved = true;
 				}
+			}
+		}
+	} else if (rbinst->getActive() == true) // Save the sample
+	{
+		if (song != 0) {
+			auto inst = song->getInstrument(state->instrument);
+			if (inst != 0) {
+				err = xm_transport.saveInstrument(filename_tmp, inst);
+				saved = true;
 			}
 		}
 	}
@@ -3932,24 +3972,21 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		rbgdiskop = new RadioButton::RadioButtonGroup();
 
 		rbsong = new RadioButton(2, 21, 36, 14, sub_screen, rbgdiskop);
-
 		rbsong->setCaption("sng");
 
-		rbsample = new RadioButton(2, 36, 36, 14, sub_screen, rbgdiskop);
-
+		rbsample = new RadioButton(2, 35, 36, 14, sub_screen, rbgdiskop);
 		rbsample->setCaption("smp");
 
-		//rbinst   = new RadioButton(2, 51, 36, 14, sub_screen, "ins", rbgdiskop);
+		rbinst = new RadioButton(2, 49, 36, 14, sub_screen, rbgdiskop);
+		rbinst->setCaption("inst");
+
 		rbgdiskop->setActive(0);
 
 		rbgdiskop->registerChangeCallback(handleDiskOPChangeFileType);
 
 #ifdef SHOW_RAM_USAGE
 		memoryiindicator_disk =
-		    new MemoryIndicator(3, 51, 34, 8, sub_screen, true);
-
-		labelramusage_disk = new Label(8, 59, 34, 10, sub_screen, false);
-		labelramusage_disk->setCaption("ram");
+		    new MemoryIndicator(3, 49 + 14, 34, 8, sub_screen, true);
 #endif
 
 		cbsamplepreview = new CheckBox(4, 70, 34, 14, sub_screen, false, true);
@@ -3988,10 +4025,9 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		tabbox->registerWidget(fileselector, 0, tab_file);
 		tabbox->registerWidget(rbsong, 0, tab_file);
 		tabbox->registerWidget(rbsample, 0, tab_file);
-		//tabbox->registerWidget(rbinst, 0, tab_file);
+		tabbox->registerWidget(rbinst, 0, tab_file);
 #ifdef SHOW_RAM_USAGE
 		tabbox->registerWidget(memoryiindicator_disk, 0, tab_file);
-		tabbox->registerWidget(labelramusage_disk, 0, tab_file);
 #endif
 		tabbox->registerWidget(cbsamplepreview, 0, tab_file);
 		tabbox->registerWidget(buttondelfile, 0, tab_file);
