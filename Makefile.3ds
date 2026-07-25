@@ -222,6 +222,8 @@ $(OFILES_SOURCES) : $(HFILES)
 
 $(OUTPUT).elf : $(OFILES) libntxm
 
+$(OFILES): libntxm
+
 libntxm :
 	@make -C $(TOPDIR)/libntxm/libntxm -f Makefile.3ds
 
