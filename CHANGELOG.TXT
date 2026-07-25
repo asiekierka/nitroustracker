@@ -18,7 +18,8 @@ New features:
 - added support for editing note components with buttons only - use A / A + D-Pad
 - added support for previewing samples while the song is playing
 - [#65] added support for importing .mod files
-- updated BlocksDS to 1.22.2
+- 3DS: open the NitrousTracker manual directly from the program
+- NDS: updated BlocksDS to 1.22.2
 
 Improvements:
 

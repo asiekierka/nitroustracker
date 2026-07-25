@@ -316,6 +316,20 @@ void clearSubScreen(void)
 	PlatformClearSubScreen(settings->getTheme()->col_bg);
 }
 
+void openManualWebsite(void)
+{
+    if (mb != 0) deleteMessageBox();
+#ifdef NT_PLATFORM_3DS
+    char *webBuffer = (char*) ntxm_umalloc(1024);
+    if (webBuffer) {
+        // 3DS does not support Let's Encrypt SSL certificates
+        strcpy(webBuffer, "http://docs.asie.pl/nitroustracker");
+        aptLaunchSystemApplet(APPID_WEB, webBuffer, 1024, 0);
+        ntxm_free(webBuffer);
+    }
+#endif
+}
+
 void drawSampleNumbers(void)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
@@ -3098,8 +3112,15 @@ void showAboutBox(void)
 {
 	char msg[256];
 	snprintf(msg, 256, "NitrousTracker " VERSION " (" GIT_HASH ")");
+#ifdef NT_PLATFORM_3DS
+	mb = new MessageBox(sub_screen, msg, 3,
+							"manual", openManualWebsite,
+							 "track on!", deleteMessageBox,
+		                    "exit", showExitBox);
+#else
 	mb = new MessageBox(sub_screen, msg, 2, "track on!", deleteMessageBox,
 	                    "exit", showExitBox);
+#endif
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->reveal();
 }

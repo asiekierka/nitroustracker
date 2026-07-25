@@ -47,12 +47,15 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 
 	// Calculate width
 	width = 10;
+	u32 max_width = 0;
 	char *str;
 	// void (*onPush)(void);
 	for (u8 i = 0; i < n_buttons; ++i) {
 		str = va_arg(marker, char *);
 		/* onPush = */ va_arg(marker, void (*)(void));
-		width += getStringWidth(str) + 14;
+		u32 str_width = getStringWidth(str);
+		max_width = std::max(str_width, max_width);
+		width += str_width + 14;
 	}
 	va_end(marker);
 
@@ -62,21 +65,25 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 
 	int fixedbuttonwidth = 0;
 	if (width < minwidth) {
-		width = minwidth;
 		if (n_buttons > 0) {
+			fixedbuttonwidth = max_width + 6;
+		}
+		width = (fixedbuttonwidth + 10) * n_buttons + 10;
+		if (width < minwidth) {
+			width = minwidth;
 			fixedbuttonwidth = (width - 10) / n_buttons - 10;
 		}
-	} else if (width > 256) {
-		width = 256;
+	} else if (width > screen->getWidth()) {
+		width = screen->getWidth();
 	}
 
 	// Set x
 	x = (screen->getWidth() - width) / 2;
 
 	if (n_buttons > 0) {
-		u8 xpos = x + 10;
+		u16 xpos = x + 10;
 		buttons = (Button **)ntxm_cmalloc(sizeof(Button *) * n_buttons);
-		u8 buttonwidth;
+		u16 buttonwidth;
 
 		va_start(marker, n_buttons);
 
@@ -164,7 +171,7 @@ void MessageBox::draw(void)
 	drawHLine(0, 16, width, theme->col_outline);
 	drawFullBox(0, 17, width, MB_HEIGHT - 17, theme->col_light_bg);
 	drawBorder(theme->col_outline);
-	u8 labelx = (width - getStringWidth(msg)) / 2;
+	u16 labelx = (width - getStringWidth(msg)) / 2;
 	drawString(msg, labelx, 3, theme->col_messagebox_title_text, width);
 	gui.draw();
 }
