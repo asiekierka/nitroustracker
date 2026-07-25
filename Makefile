@@ -4,6 +4,7 @@
 
 BLOCKSDS	?= /opt/blocksds/core
 BLOCKSDSEXT	?= /opt/blocksds/external
+WONDERFUL_TOOLCHAIN	?= /opt/wonderful
 
 # User config
 # ===========
@@ -22,18 +23,10 @@ GAME_FULL_TITLE       := $(GAME_TITLE);$(GAME_VERSION)
 GAME_FULL_TITLE_MIDI  := $(GAME_TITLE);$(GAME_VERSION);(compatible with MIDI)
 GAME_FULL_TITLE_DEBUG := $(GAME_TITLE);$(GAME_VERSION);(debug build)
 
-# DLDI and internal SD slot of DSi
-# --------------------------------
-
-# Root folder of the SD image
-SDROOT		:= sdroot
-# Name of the generated image it "DSi-1.sd" for no$gba in DSi mode
-SDIMAGE		:= image.bin
-
 # Source code paths
 # -----------------
 
-NITROFATDIR	:=
+NITROFSDIR	:=
 
 # Tools
 # -----
@@ -67,7 +60,7 @@ ROM_NOMIDI	:= $(NAME).nds
 # Targets
 # -------
 
-.PHONY: all clean arm9d arm9 arm9l arm7d arm7 arm7l libntxm tobkit tobkit-debug libdsmi sdimage format
+.PHONY: all clean arm9d arm9 arm9l arm7d arm7 arm7l libntxm tobkit tobkit-debug libdsmi format
 
 all: $(ROM) $(ROM_DEBUG) $(ROM_NOMIDI)
 
@@ -83,7 +76,7 @@ clean:
 	$(V)$(MAKE) -C tobkit clean DEBUG=false
 	$(V)$(MAKE) -C dsmi/ds/libdsmi -f Makefile.blocks clean
 	$(V)$(MAKE) -C libntxm/libntxm clean
-	$(V)$(RM) $(ROM) $(ROM_DEBUG) $(ROM_NOMIDI) build $(SDIMAGE)
+	$(V)$(RM) $(ROM) $(ROM_DEBUG) $(ROM_NOMIDI) build
 
 libntxm:
 	@make -C libntxm/libntxm
@@ -115,17 +108,14 @@ arm7: libntxm
 arm7l: libntxm
 	$(V)+$(MAKE) -f Makefile.arm7 --no-print-directory DEBUG=false
 
-ifneq ($(strip $(NITROFATDIR)),)
+ifneq ($(strip $(NITROFSDIR)),)
 # Additional arguments for ndstool
-NDSTOOL_FAT	:= -F $(NITROFAT_IMG)
-
-$(NITROFAT_IMG): $(NITROFATDIR)
-	@echo "  MKFATIMG $@ $(NITROFATDIR)"
-	$(V)$(BLOCKSDS)/tools/mkfatimg/mkfatimg -t $(NITROFATDIR) $@ 0
+NDSTOOL_FAT	:= -d $(NITROFSDIR)
 
 # Make the NDS ROM depend on the filesystem image only if it is needed
-$(ROM): $(NITROFAT_IMG)
-$(ROM_DEBUG): $(NITROFAT_IMG)
+$(ROM): $(NITROFSDIR)
+$(ROM_DEBUG): $(NITROFSDIR)
+$(ROM_NOMIDI): $(NITROFSDIR)
 endif
 
 $(ROM): arm9 arm7
@@ -148,10 +138,6 @@ $(ROM_NOMIDI): arm9l arm7l
 		-7 build/arm7l.elf -9 build/arm9l.elf \
 		-b $(GAME_ICON) "$(GAME_FULL_TITLE)" \
 		$(NDSTOOL_FAT)
-
-sdimage:
-	@echo "  MKFATIMG $(SDIMAGE) $(SDROOT)"
-	$(V)$(BLOCKSDS)/tools/mkfatimg/mkfatimg -t $(SDROOT) $(SDIMAGE) 0
 
 format:
 	@find common/source n3ds/source nds/arm7/source nds/arm9/source sdl/include sdl/source tobkit/include tobkit/source -iname '*.h' -o -iname '*.cpp' -o -iname '*.c' | xargs clang-format -i
