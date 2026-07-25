@@ -22,7 +22,7 @@ using namespace tobkit;
 
 TabBox::TabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
                u8 _orientation, u8 _icon_size, bool _visible)
-    : Widget(_x, _y, _width, _height, _screen, _visible),
+    : ContainerWidget(_x, _y, _width, _height, _screen, _visible),
       orientation(_orientation), icon_size(_icon_size), currentgui(0)
 {
 	onTabChange = 0;
@@ -93,27 +93,8 @@ void TabBox::penDown(u16 px, u16 py)
 			}
 		}
 	} else {
-		// If its in the box
-		guis.at(currentgui).penDown(px, py);
+		ContainerWidget::penDown(px, py);
 	}
-}
-
-void TabBox::penUp(u16 px, u16 py)
-{
-	guis.at(currentgui).penUp(px, py);
-}
-
-void TabBox::penMove(u16 px, u16 py)
-{
-	// If it's on the tabs
-
-	// If its in the box
-	guis.at(currentgui).penMove(px, py);
-}
-
-void TabBox::buttonPress(u16 buttons)
-{
-	guis.at(currentgui).buttonPress(buttons);
 }
 
 // Callback registration
@@ -129,28 +110,9 @@ void TabBox::pleaseDraw(void)
 	updateVisibilities();
 }
 
-void TabBox::show(void)
+GUI *TabBox::currentGui(void)
 {
-	Widget::show();
-	guis.at(currentgui).showAll();
-}
-
-void TabBox::hide(void)
-{
-	Widget::hide();
-	guis.at(currentgui).hideAll();
-}
-
-void TabBox::occlude(void)
-{
-	Widget::occlude();
-	guis.at(currentgui).occludeAll();
-}
-
-void TabBox::reveal(void)
-{
-	Widget::reveal();
-	guis.at(currentgui).revealAll();
+	return &guis.at(currentgui);
 }
 
 int TabBox::getCount(void)

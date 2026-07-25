@@ -18,7 +18,7 @@ limitations under the License.
 #define TABBOX_H
 
 #include "gui.h"
-#include "widget.h"
+#include "containerwidget.h"
 
 #include <vector>
 
@@ -28,7 +28,7 @@ namespace tobkit
 static constexpr u32 TABBOX_ORIENTATION_TOP = 0;
 static constexpr u32 TABBOX_ORIENTATION_LEFT = 1;
 
-class TabBox : public Widget
+class TabBox : public ContainerWidget
 {
 public:
 	TabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
@@ -43,9 +43,6 @@ public:
 
 	// Event calls
 	void penDown(u16 px, u16 py);
-	void penUp(u16 px, u16 py);
-	void penMove(u16 px, u16 py);
-	void buttonPress(u16 buttons);
 
 	// Callback registration
 	void registerTabChangeCallback(void (*onTabChange_)(u8 tab));
@@ -53,14 +50,12 @@ public:
 	// Drawing request
 	void pleaseDraw(void);
 
-	void show(void);
-	void hide(void);
-	void occlude(void);
-	void reveal(void);
-
 	int getCount(void);
 	void setTheme(Theme *theme_, u16 bgcolor_);
 	void setIcon(u8 guiidx, const u8 *icon);
+
+protected:
+	GUI *currentGui(void) override;
 
 private:
 	u8 findGuiIdx(u8 tabidx);

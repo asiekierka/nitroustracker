@@ -22,7 +22,7 @@ using namespace tobkit;
 
 TwoTabBox::TwoTabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
                      u8 _icon_size, u8 _sub_icon_size, bool _visible)
-    : Widget(_x, _y, _width, _height, _screen, _visible), icon_size(_icon_size),
+    : ContainerWidget(_x, _y, _width, _height, _screen, _visible), icon_size(_icon_size),
       sub_icon_size(_sub_icon_size), currentgui(0)
 {
 	onTabChange = 0;
@@ -134,27 +134,8 @@ void TwoTabBox::penDown(u16 px, u16 py)
 			}
 		}
 	} else {
-		// If its in the box
-		guis.at(currentgui).penDown(px, py);
+		ContainerWidget::penDown(px, py);
 	}
-}
-
-void TwoTabBox::penUp(u16 px, u16 py)
-{
-	guis.at(currentgui).penUp(px, py);
-}
-
-void TwoTabBox::penMove(u16 px, u16 py)
-{
-	// If it's on the tabs
-
-	// If its in the box
-	guis.at(currentgui).penMove(px, py);
-}
-
-void TwoTabBox::buttonPress(u16 buttons)
-{
-	guis.at(currentgui).buttonPress(buttons);
 }
 
 // Callback registration
@@ -172,28 +153,9 @@ void TwoTabBox::pleaseDraw(void)
 	reveal();
 }
 
-void TwoTabBox::show(void)
+GUI *TwoTabBox::currentGui(void)
 {
-	Widget::show();
-	guis.at(currentgui).showAll();
-}
-
-void TwoTabBox::hide(void)
-{
-	Widget::hide();
-	guis.at(currentgui).hideAll();
-}
-
-void TwoTabBox::occlude(void)
-{
-	Widget::occlude();
-	guis.at(currentgui).occludeAll();
-}
-
-void TwoTabBox::reveal(void)
-{
-	Widget::reveal();
-	guis.at(currentgui).revealAll();
+	return &guis.at(currentgui);
 }
 
 void TwoTabBox::setTheme(Theme *theme_, u16 bgcolor_)

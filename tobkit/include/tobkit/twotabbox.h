@@ -18,14 +18,14 @@ limitations under the License.
 #define TWOTABBOX_H
 
 #include "gui.h"
-#include "widget.h"
+#include "containerwidget.h"
 
 #include <vector>
 
 namespace tobkit
 {
 
-class TwoTabBox : public Widget
+class TwoTabBox : public ContainerWidget
 {
 public:
 	TwoTabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
@@ -41,9 +41,6 @@ public:
 
 	// Event calls
 	void penDown(u16 px, u16 py);
-	void penUp(u16 px, u16 py);
-	void penMove(u16 px, u16 py);
-	void buttonPress(u16 buttons);
 
 	// Callback registration
 	void registerTabChangeCallback(void (*onTabChange_)(u8 tab, u8 subtab));
@@ -51,13 +48,11 @@ public:
 	// Drawing request
 	void pleaseDraw(void);
 
-	void show(void);
-	void hide(void);
-	void occlude(void);
-	void reveal(void);
-
 	void setTheme(Theme *theme_, u16 bgcolor_);
 	void setIcon(u8 tabidx, const u8 *icon);
+
+protected:
+	GUI *currentGui(void) override;
 
 private:
 	u8 firstSubtab(u8 tabidx);

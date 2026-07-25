@@ -31,6 +31,7 @@ nitroustracker_sources = [
   'tobkit/source/bitbutton.cpp',
   'tobkit/source/button.cpp',
   'tobkit/source/checkbox.cpp',
+  'tobkit/source/containerwidget.cpp',
   'tobkit/source/digitbox.cpp',
   'tobkit/source/fileselector.cpp',
   'tobkit/source/gradienticon.cpp',
