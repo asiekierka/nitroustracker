@@ -30,7 +30,7 @@ LIBS		:= -lntxm7 -ldswifi7 -lnds7 -lstdc++ -lc
 endif
 LIBDIRS		:= $(BLOCKSDS)/libs/libnds \
 		   $(BLOCKSDS)/libs/dswifi \
-		   libntxm/libntxm
+		   libntxm/libntxm/dist/nds
 
 # Build artifacts
 # -----------------

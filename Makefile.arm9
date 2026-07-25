@@ -36,7 +36,7 @@ endif
 LIBDIRS		:= $(BLOCKSDS)/libs/libnds \
 		   $(BLOCKSDS)/libs/dswifi \
 		   dsmi/ds/libdsmi \
-		   libntxm/libntxm \
+		   libntxm/libntxm/dist/nds \
 		   tobkit
 
 # Build artifacts

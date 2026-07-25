@@ -77,7 +77,7 @@ CFLAGS	+= -std=gnu23
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBNTXM := $(TOPDIR)/libntxm/libntxm
+LIBNTXM := $(TOPDIR)/libntxm/libntxm/dist/n3ds
 OUTELF  := $(TOPDIR)/$(BUILD)/nitroustracker.elf
 LIBDIRS	:= $(CTRULIB) $(LIBNTXM)
 
