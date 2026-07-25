@@ -991,7 +991,8 @@ const char *loadInstrument(const char *filename_with_path)
 	debugprintf("file: %s %s\n", filename_with_path, filename);
 
 	Instrument *newins;
-	FormatTransportError err = xm_transport.loadInstrument(filename_with_path, &newins);
+	FormatTransportError err =
+	    xm_transport.loadInstrument(filename_with_path, &newins);
 	if (err != FormatTransportError::SUCCESS) {
 		return xm_transport.getError(err);
 	}
@@ -1130,9 +1131,8 @@ void handleLoad(void)
 		} else
 			loadSong();
 	} else if (endsWithExtension(fn, ".xi")) {
-		showSlowLoadOperation([file]() {
-		    return loadInstrument(file->name_with_path.c_str());
-		});
+		showSlowLoadOperation(
+		    [file]() { return loadInstrument(file->name_with_path.c_str()); });
 	} else if (endsWithExtension(fn, ".wav")) {
 		showSlowLoadOperation([file]() {
 			bool success = loadSample(file->name_with_path.c_str());

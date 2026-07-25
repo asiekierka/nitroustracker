@@ -46,7 +46,8 @@ static const char prohibited_chars[] = "+.,;=[]/*:<>|\\\"\?";
 void filterFilenameCharacters(char *text)
 {
 	while (*text) {
-		if (*text >= 0x7F || *text < 0x20 || strchr(prohibited_chars, *text) != nullptr)
+		if (*text >= 0x7F || *text < 0x20 ||
+		    strchr(prohibited_chars, *text) != nullptr)
 			*text = '_';
 		text++;
 	}

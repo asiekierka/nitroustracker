@@ -32,8 +32,8 @@ using namespace tobkit;
 Widget::Widget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
                bool _visible, bool _occluded)
     : x(_x), y(_y), width(_width), height(_height), enabled(true),
-      do_overdraw(true), screen(_screen), visible(_visible), occluded(_occluded),
-      theme(nullptr), bgcolor(0)
+      do_overdraw(true), screen(_screen), visible(_visible),
+      occluded(_occluded), theme(nullptr), bgcolor(0)
 {
 }
 
