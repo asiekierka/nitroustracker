@@ -32,7 +32,6 @@
 #include <sys/statvfs.h>
 #include <unistd.h>
 
-// Helper for converting a string to lower case
 void lowercase(char *str)
 {
 	for (u8 i = 0; i < strlen(str); ++i) {
@@ -40,6 +39,26 @@ void lowercase(char *str)
 			str[i] += 32;
 		}
 	}
+}
+
+static const char prohibited_chars[] = "+.,;=[]/*:<>|\\\"\?";
+
+void filterFilenameCharacters(char *text)
+{
+	while (*text) {
+		if (*text >= 0x7F || *text < 0x20 || strchr(prohibited_chars, *text) != nullptr)
+			*text = '_';
+		text++;
+	}
+}
+
+bool endsWithExtension(const char *text, const char *ext)
+{
+	if (!ext)
+		return false;
+	int textlen = strlen(text);
+	int extlen = strlen(ext);
+	return textlen >= extlen && !strcasecmp(text + textlen - extlen, ext);
 }
 
 bool dirExists(const char *path)

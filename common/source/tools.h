@@ -27,8 +27,8 @@
 
 #include "ntxm/ntxmtools.h"
 #include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 // A collection of utilities for everyday coding
 #define debugprintf ntxm_dprintf
@@ -41,6 +41,8 @@
 #define ceil_f32toint(n) (((n) + ((1 << 12) - 1)) >> 12)
 
 void lowercase(char *str);
+void filterFilenameCharacters(char *text);
+bool endsWithExtension(const char *text, const char *ext);
 bool dirExists(const char *dir);
 void dirCreate(const char *dir);
 

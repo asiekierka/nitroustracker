@@ -306,17 +306,6 @@ void updateSampleOffsetGuide(void);
 
 #include "debug_helpers.h"
 
-static const char prohibited_chars[] = "+.,;=[]/*:<>|\\\"\?";
-
-static void filterFilenameCharacters(char *text)
-{
-	while (*text) {
-		if (*text >= 0x7F || *text < 0x20 || strchr(prohibited_chars, *text) != nullptr)
-			*text = '_';
-		text++;
-	}
-}
-
 void clearMainScreen(void)
 {
 	PlatformClearMainScreen(settings->getTheme()->col_bg);
@@ -680,6 +669,8 @@ void handleSampleChange(const u16 newsample)
 		const char *str = smp->getName();
 		strncpy(state->sample_filename, str, STATE_FILENAME_LEN);
 		filterFilenameCharacters(state->sample_filename);
+		if (!endsWithExtension(state->sample_filename, ".wav"))
+			strlcat(state->sample_filename, ".wav", STATE_FILENAME_LEN + 1);
 
 		if (rbsample->getActive() == true) {
 			labelFilename->setCaption(state->sample_filename);
@@ -822,6 +813,8 @@ void handleInstChange(const u16 newinst, const bool reset = true)
 		const char *str = inst->getName();
 		strncpy(state->inst_filename, str, STATE_FILENAME_LEN);
 		filterFilenameCharacters(state->inst_filename);
+		if (!endsWithExtension(state->inst_filename, ".xi"))
+			strlcat(state->inst_filename, ".xi", STATE_FILENAME_LEN + 1);
 
 		if (rbinst->getActive() == true) {
 			labelFilename->setCaption(state->inst_filename);
@@ -997,7 +990,6 @@ const char *loadInstrument(const char *filename_with_path)
 	const char *filename = strrchr(filename_with_path, '/') + 1;
 	debugprintf("file: %s %s\n", filename_with_path, filename);
 
-	bool load_success;
 	Instrument *newins;
 	FormatTransportError err = xm_transport.loadInstrument(filename_with_path, &newins);
 	if (err != FormatTransportError::SUCCESS) {
@@ -1005,7 +997,6 @@ const char *loadInstrument(const char *filename_with_path)
 	}
 
 	u8 instidx = lbinstruments->getidx();
-	u8 smpidx = state->sample;
 
 	Instrument *oldins = song->getInstrument(instidx);
 	if (oldins)
@@ -1105,7 +1096,7 @@ void loadSong(void)
 		const char *fn = file->name_with_path.c_str();
 		Song *newsong;
 		FormatTransportError err;
-		if (!strcasecmp(fn + strlen(fn) - 3, ".xm"))
+		if (endsWithExtension(fn, ".xm"))
 			err = xm_transport.load(fn, &newsong);
 		else
 			err = mod_transport.load(fn, &newsong);
@@ -1127,8 +1118,7 @@ void handleLoad(void)
 		return;
 
 	const char *fn = file->name.c_str();
-	if (!strcasecmp(fn + strlen(fn) - 3, ".xm") ||
-	    !strcasecmp(fn + strlen(fn) - 4, ".mod")) {
+	if (endsWithExtension(fn, ".xm") || endsWithExtension(fn, ".mod")) {
 		stopPlay();
 
 		if (state->unsaved_changes) {
@@ -1139,11 +1129,11 @@ void handleLoad(void)
 			mb->pleaseDraw();
 		} else
 			loadSong();
-	} else if (!strcasecmp(fn + strlen(fn) - 3, ".xi")) {
+	} else if (endsWithExtension(fn, ".xi")) {
 		showSlowLoadOperation([file]() {
 		    return loadInstrument(file->name_with_path.c_str());
 		});
-	} else if (!strcasecmp(fn + strlen(fn) - 4, ".wav")) {
+	} else if (endsWithExtension(fn, ".wav")) {
 		showSlowLoadOperation([file]() {
 			bool success = loadSample(file->name_with_path.c_str());
 			return !success ? "wav loading failed" : (const char *)NULL;
@@ -1323,26 +1313,21 @@ void handleTypewriterFilenameOk(const char *text)
 	char *name = NULL;
 	int textlen = strlen(text);
 	debugprintf("%s\n", text);
-	if (strcmp(text, "") != 0) {
-		if ((rbsong->getActive() == true) &&
-		    (textlen <= 3 || strcasecmp(text + textlen - 3, ".xm") != 0)) {
+	if (text[0]) {
+		const char *ext = nullptr;
+		if (rbsong->getActive() == true) {
+			ext = ".xm";
+		} else if (rbsample->getActive() == true) {
+			ext = ".wav";
+		} else if (rbinst->getActive() == true) {
+			ext = ".xi";
+		}
+
+		if (endsWithExtension(text, ext)) {
 			// Append extension
-			name = (char *)ntxm_cmalloc(textlen + 3 + 1);
+			name = (char *)ntxm_cmalloc(textlen + 5);
 			strcpy(name, text);
-			strcpy(name + textlen, ".xm");
-		} else if ((rbsample->getActive() == true) &&
-		           (textlen <= 4 ||
-		            strcasecmp(text + textlen - 4, ".wav") != 0)) {
-			// Append extension
-			name = (char *)ntxm_cmalloc(textlen + 4 + 1);
-			strcpy(name, text);
-			strcpy(name + textlen, ".wav");
-		} else if ((rbinst->getActive() == true) &&
-		    (textlen <= 3 || strcasecmp(text + textlen - 3, ".xi") != 0)) {
-			// Append extension
-			name = (char *)ntxm_cmalloc(textlen + 3 + 1);
-			strcpy(name, text);
-			strcpy(name + textlen, ".xi");
+			strcpy(name + textlen, ext);
 		} else {
 			// Leave as is
 			name = (char *)ntxm_cmalloc(textlen + 1);
@@ -1350,13 +1335,12 @@ void handleTypewriterFilenameOk(const char *text)
 		}
 		labelFilename->setCaption(name);
 
-		// Remember the name
 		if (rbsong->getActive() == true) {
-			strcpy(state->song_filename, name);
+			strncpy(state->song_filename, name, STATE_FILENAME_LEN);
 		} else if (rbsample->getActive() == true) {
-			strcpy(state->sample_filename, name);
+			strncpy(state->sample_filename, name, STATE_FILENAME_LEN);
 		} else if (rbinst->getActive() == true) {
-			strcpy(state->inst_filename, name);
+			strncpy(state->inst_filename, name, STATE_FILENAME_LEN);
 		}
 	}
 	deleteTypewriter();
