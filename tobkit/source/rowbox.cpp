@@ -78,8 +78,8 @@ void RowBox::setTheme(Theme *theme_, u16 bgcolor_)
 	theme = theme_;
 	bgcolor = bgcolor_;
 
-	col_even = theme->col_list_2;
-	col_odd = interpolateColor(theme->col_list_1, theme->col_list_2, 2048);
+	col_even = theme->col_light_bg;
+	col_odd = interpolateColor(0, theme->col_light_bg, 512);
 
 	gui.setTheme(theme, theme->col_light_bg);
 	int i = 0;
