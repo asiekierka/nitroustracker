@@ -17,7 +17,7 @@ New features:
 - added support for editing note components with buttons only - use A / A + D-Pad
 - added support for previewing samples while the song is playing
 - [#65] added support for importing .mod files
-- updated BlocksDS to 1.22.1
+- updated BlocksDS to 1.22.2
 
 Improvements:
 
@@ -33,6 +33,7 @@ Improvements:
 Fixes:
 
 - [#152] fixed inconsistent sample preview looping behaviour
+- fixed DSi mode frequency setting not being applied on load
 
 -- NitrousTracker v0.6.5 (2026-07-17)
 

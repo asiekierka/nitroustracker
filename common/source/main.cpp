@@ -60,6 +60,9 @@ using namespace tobkit;
 #include <ntxm/fifocommand.h>
 #include <ntxm/instrument.h>
 #include <ntxm/mod_transport.h>
+#ifndef NT_PLATFORM_NDS
+#include <ntxm/ntxmsound.h>
+#endif
 #include <ntxm/ntxmtools.h>
 #include <ntxm/player.h>
 #include <ntxm/sample.h>
@@ -237,10 +240,8 @@ CheckBox *cbdsmwsend, *cbdsmwrecv;
 Button *btndsmwtoggleconnect;
 RadioButton::RadioButtonGroup *rbgoutput;
 RadioButton *rboutputmono, *rboutputstereo;
-#ifdef NT_PLATFORM_NDS
 RadioButton::RadioButtonGroup *rbgfreq;
 RadioButton *rbfreq32, *rbfreq47;
-#endif
 NumberBox *nblinesbeat;
 Button *btnconfigsave;
 // </Settings Gui>
@@ -2942,13 +2943,15 @@ void handleOutputModeChange(u8 outputMode)
 	stopPlay();
 }
 
-#ifdef NT_PLATFORM_NDS
 void handleOutputFreqChange(u8 freq)
 {
 	settings->setFreq47kHz(freq != 0);
+#ifdef NT_PLATFORM_NDS
 	soundExtSetFrequency(freq ? 47 : 32);
-}
+#else
+	ntxm_sound_set_playback_frequency(freq ? 47605 : 32728);
 #endif
+}
 
 void adjustMainScreenWidgets(int width_delta)
 {
@@ -4525,8 +4528,8 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 			settingsvisual->addRow("lines/beat", {nblinesbeat});
 		}
 
-#ifdef NT_PLATFORM_NDS
-#if !defined(SHOW_ALL_SETTINGS)
+#if defined(NT_PLATFORM_NDS)
+#if defined(NT_PLATFORM_NDS) && !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
 		{
@@ -5154,6 +5157,8 @@ void applySettings(void)
 	bool handedness = settings->getHandedness();
 	rbghandedness->setActive(handedness == LEFT_HANDED ? 0 : 1);
 	rbgoutput->setActive(settings->getStereoOutput() ? 1 : 0);
+	if (rbgfreq)
+		rbgfreq->setActive(settings->getFreq47kHz() ? 1 : 0);
 
 	bool samplepreview = settings->getSamplePreview();
 	cbsamplepreview->setChecked(samplepreview);
