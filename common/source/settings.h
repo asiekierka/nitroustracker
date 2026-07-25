@@ -65,6 +65,9 @@ public:
 	char *getSamplePath(void);
 	void setSamplePath(const char *samplepath_);
 
+	char *getInstrumentPath(void);
+	void setInstrumentPath(const char *instpath_);
+
 	char *getThemePath(void);
 	void setThemePath(const char *themepath_);
 
@@ -91,6 +94,7 @@ private:
 	char configpath[SETTINGS_FILENAME_LEN + 1];
 	char songpath[SETTINGS_FILENAME_LEN + 1];
 	char samplepath[SETTINGS_FILENAME_LEN + 1];
+	char instpath[SETTINGS_FILENAME_LEN + 1];
 	char themepath[SETTINGS_FILENAME_LEN + 1];
 
 	bool fat, changed;

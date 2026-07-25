@@ -306,6 +306,17 @@ void updateSampleOffsetGuide(void);
 
 #include "debug_helpers.h"
 
+static const char prohibited_chars[] = "+.,;=[]/*:<>|\\\"\?";
+
+static void filterFilenameCharacters(char *text)
+{
+	while (*text) {
+		if (*text >= 0x7F || *text < 0x20 || strchr(prohibited_chars, *text) != nullptr)
+			*text = '_';
+		text++;
+	}
+}
+
 void clearMainScreen(void)
 {
 	PlatformClearMainScreen(settings->getTheme()->col_bg);
@@ -668,9 +679,10 @@ void handleSampleChange(const u16 newsample)
 	if (smp != NULL) {
 		const char *str = smp->getName();
 		strncpy(state->sample_filename, str, STATE_FILENAME_LEN);
+		filterFilenameCharacters(state->sample_filename);
 
 		if (rbsample->getActive() == true) {
-			labelFilename->setCaption(str);
+			labelFilename->setCaption(state->sample_filename);
 		}
 	}
 
@@ -678,19 +690,6 @@ void handleSampleChange(const u16 newsample)
 	updateKeyLabels();
 	if (!had_changes)
 		setHasUnsavedChanges(false);
-	/*
-	printf("Selected:");
-	if(smp->is16bit()) {
-		printf("16bit ");
-	} else {
-		printf("8bit ");
-	}
-	if(smp->getLoop() != 0) {
-		printf("looping ");
-	}
-	printf("Sample.\n");
-	printf("length: %u\n", smp->getNSamples());
-	*/
 }
 
 void handleOverlayWidgetChange(u8 screen, bool visible)
@@ -818,6 +817,16 @@ void handleInstChange(const u16 newinst, const bool reset = true)
 		handleSampleChange(
 		    state
 		        ->sample); // preserve current sample so user can load new smp into slot >0 on null inst
+
+	if (inst != NULL) {
+		const char *str = inst->getName();
+		strncpy(state->inst_filename, str, STATE_FILENAME_LEN);
+		filterFilenameCharacters(state->inst_filename);
+
+		if (rbinst->getActive() == true) {
+			labelFilename->setCaption(state->inst_filename);
+		}
+	}
 }
 
 void handleInstChangeReset(u16 newinst)
@@ -886,9 +895,7 @@ void setSong(Song *newsong)
 
 	// inst is now equal to song->getInstrument(0)
 	lbinstruments->select(0);
-	updateSampleList(inst);
-	handleSampleChange(0);
-	volEnvSetInst(inst);
+	handleInstChange(0);
 
 	updateLabelChannels();
 	updateLabelSongLen();
@@ -1261,23 +1268,30 @@ void handleSave(void)
 
 void handleDiskOPChangeFileType(u8 newidx)
 {
+	if (newidx == FILETYPE_SAMPLE) {
+		cbsamplepreview->show();
+	} else {
+		cbsamplepreview->hide();
+	}
+
 	if (newidx == FILETYPE_SONG) {
 		fileselector->setDir(settings->getSongPath());
 
 		fileselector->selectFilter("song");
-		cbsamplepreview->hide();
 
 		labelFilename->setCaption(state->song_filename);
 	} else if (newidx == FILETYPE_SAMPLE) {
 		fileselector->setDir(settings->getSamplePath());
 
 		fileselector->selectFilter("sample");
-		cbsamplepreview->show();
-		tabbox->pleaseDraw();
 
 		labelFilename->setCaption(state->sample_filename);
 	} else if (newidx == FILETYPE_INST) {
+		fileselector->setDir(settings->getInstrumentPath());
+
 		fileselector->selectFilter("instrument");
+
+		labelFilename->setCaption(state->inst_filename);
 	}
 
 	fileselector->pleaseDraw();
@@ -1323,6 +1337,12 @@ void handleTypewriterFilenameOk(const char *text)
 			name = (char *)ntxm_cmalloc(textlen + 4 + 1);
 			strcpy(name, text);
 			strcpy(name + textlen, ".wav");
+		} else if ((rbinst->getActive() == true) &&
+		    (textlen <= 3 || strcasecmp(text + textlen - 3, ".xi") != 0)) {
+			// Append extension
+			name = (char *)ntxm_cmalloc(textlen + 3 + 1);
+			strcpy(name, text);
+			strcpy(name + textlen, ".xi");
 		} else {
 			// Leave as is
 			name = (char *)ntxm_cmalloc(textlen + 1);
@@ -1335,6 +1355,8 @@ void handleTypewriterFilenameOk(const char *text)
 			strcpy(state->song_filename, name);
 		} else if (rbsample->getActive() == true) {
 			strcpy(state->sample_filename, name);
+		} else if (rbinst->getActive() == true) {
+			strcpy(state->inst_filename, name);
 		}
 	}
 	deleteTypewriter();
@@ -2131,6 +2153,8 @@ void handleFileChange(File file)
 			strncpy(state->song_filename, str, STATE_FILENAME_LEN);
 		} else if (rbsample->getActive() == true) {
 			strncpy(state->sample_filename, str, STATE_FILENAME_LEN);
+		} else if (rbinst->getActive() == true) {
+			strncpy(state->inst_filename, str, STATE_FILENAME_LEN);
 		}
 
 		// Preview WAV files
@@ -2162,6 +2186,8 @@ void handleDirChange(const char *newdir)
 		settings->setSongPath(newdir);
 	} else if (rbsample->getActive() == true) {
 		settings->setSamplePath(newdir);
+	} else if (rbinst->getActive() == true) {
+		settings->setInstrumentPath(newdir);
 	}
 }
 
@@ -3977,7 +4003,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		rbsample = new RadioButton(2, 35, 36, 14, sub_screen, rbgdiskop);
 		rbsample->setCaption("smp");
 
-		rbinst = new RadioButton(2, 49, 36, 14, sub_screen, rbgdiskop);
+		rbinst = new RadioButton(2, 49, 36, 13, sub_screen, rbgdiskop);
 		rbinst->setCaption("inst");
 
 		rbgdiskop->setActive(0);
@@ -3986,7 +4012,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 
 #ifdef SHOW_RAM_USAGE
 		memoryiindicator_disk =
-		    new MemoryIndicator(3, 49 + 14, 34, 8, sub_screen, true);
+		    new MemoryIndicator(3, 49 + 13, 34, 8, sub_screen, true);
 #endif
 
 		cbsamplepreview = new CheckBox(4, 70, 34, 14, sub_screen, false, true);
@@ -5203,6 +5229,8 @@ void applySettings(void)
 		fileselector->setDir(settings->getSongPath());
 	} else if (rbsample->getActive() == true) {
 		fileselector->setDir(settings->getSamplePath());
+	} else if (rbinst->getActive() == true) {
+		fileselector->setDir(settings->getInstrumentPath());
 	}
 
 	fileselector->pleaseDraw();

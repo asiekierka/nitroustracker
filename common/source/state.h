@@ -53,6 +53,7 @@ public:
 
 	char *song_filename;
 	char *sample_filename;
+	char *inst_filename;
 
 	Sample *preview_sample;
 

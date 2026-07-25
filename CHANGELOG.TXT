@@ -35,6 +35,7 @@ Fixes:
 
 - [#152] fixed inconsistent sample preview looping behaviour
 - fixed DSi mode frequency setting not being applied on load
+- fixed default sample/instrument filenames containing prohibited characters
 
 -- NitrousTracker v0.6.5 (2026-07-17)
 

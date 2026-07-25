@@ -31,6 +31,7 @@ State::State(void)
 {
 	song_filename = (char *)ntxm_cmalloc(STATE_FILENAME_LEN + 1);
 	sample_filename = (char *)ntxm_cmalloc(STATE_FILENAME_LEN + 1);
+	inst_filename = (char *)ntxm_cmalloc(STATE_FILENAME_LEN + 1);
 
 	reset();
 }
@@ -39,6 +40,7 @@ State::~State(void)
 {
 	ntxm_free(song_filename);
 	ntxm_free(sample_filename);
+	ntxm_free(inst_filename);
 }
 
 void State::reset(void)
@@ -46,6 +48,7 @@ void State::reset(void)
 	preview_sample = 0;
 	song_filename[0] = 0;
 	sample_filename[0] = 0;
+	inst_filename[0] = 0;
 	resetSong();
 }
 

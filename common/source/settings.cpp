@@ -44,6 +44,7 @@ Settings::Settings(char *launch_path, bool use_fat)
 {
 	songpath[SETTINGS_FILENAME_LEN] = '\0';
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
+	instpath[SETTINGS_FILENAME_LEN] = '\0';
 	themepath[SETTINGS_FILENAME_LEN] = '\0';
 
 	// might never have snprintf called
@@ -53,6 +54,8 @@ Settings::Settings(char *launch_path, bool use_fat)
 	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/",
 	         launch_path != NULL ? launch_path : "");
 	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/",
+	         launch_path != NULL ? launch_path : "");
+	snprintf(instpath, SETTINGS_FILENAME_LEN, "%s/",
 	         launch_path != NULL ? launch_path : "");
 	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Default.nttheme",
 	         launch_path != NULL ? launch_path : "");
@@ -89,6 +92,8 @@ Settings::Settings(char *launch_path, bool use_fat)
 			               SETTINGS_FILENAME_LEN, NULL);
 			getConfigValue(confstr, "Songpath", songpath, SETTINGS_FILENAME_LEN,
 			               NULL);
+			getConfigValue(confstr, "Instrumentpath", instpath,
+			               SETTINGS_FILENAME_LEN, NULL);
 			getConfigValue(confstr, "Themepath", themepath,
 			               SETTINGS_FILENAME_LEN, NULL);
 			getConfigValue(confstr, "Handedness", hstring, 20, "Right");
@@ -220,6 +225,21 @@ void Settings::setSamplePath(const char *samplepath_)
 {
 	strncpy(samplepath, samplepath_, SETTINGS_FILENAME_LEN);
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
+	changed = true;
+}
+
+char *Settings::getInstrumentPath(void)
+{
+	if (!dirExists(instpath)) {
+		strncpy(instpath, "/", SETTINGS_FILENAME_LEN);
+	}
+	return instpath;
+}
+
+void Settings::setInstrumentPath(const char *instpath_)
+{
+	strncpy(instpath, instpath_, SETTINGS_FILENAME_LEN);
+	instpath[SETTINGS_FILENAME_LEN] = '\0';
 	changed = true;
 }
 
