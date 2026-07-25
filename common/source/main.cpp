@@ -24,6 +24,7 @@
 
 // #define SHOW_ALL_SETTINGS
 
+#include "tobkit/button.h"
 #if defined(NT_PLATFORM_NDS)
 #include <fat.h>
 #include <nds.h>
@@ -116,6 +117,10 @@ using namespace tobkit;
 #include "sampleedit_trim_raw.h"
 #include "sampleedit_wave_icon_raw.h"
 
+#include "settings_icon_midi_raw.h"
+#include "settings_icon_sound_raw.h"
+#include "settings_icon_visual_raw.h"
+
 #include "vibrato_saw2_raw.h"
 #include "vibrato_saw_raw.h"
 #include "vibrato_sine_raw.h"
@@ -156,6 +161,9 @@ TwoTabBox *tabbox;
 u8 tab_song = 0xFF, tab_file = 0xFF, tab_instrument = 0xFF, tab_sample = 0xFF,
    tab_settings = 0xFF;
 u8 subtab_ins_vol = 0xFF, subtab_ins_pan = 0xFF, subtab_ins_vib = 0xFF;
+RowBox *settingsvisual, *settingssound;
+u8 subtab_settings_visual = 0xFF, subtab_settings_sound = 0xFF,
+   subtab_settings_midi = 0xFF;
 GradientIcon *pixmaplogo;
 // </Misc GUI>
 
@@ -225,18 +233,14 @@ RadioButton::RadioButtonGroup *rbghandedness;
 RadioButton *rblefthanded, *rbrighthanded;
 Button *bttheme;
 ThemeSelectorBox *fbtheme;
-GroupBox *gbhandedness, *gbdsmw, *gbtheme;
 CheckBox *cbdsmwsend, *cbdsmwrecv;
 Button *btndsmwtoggleconnect;
 RadioButton::RadioButtonGroup *rbgoutput;
 RadioButton *rboutputmono, *rboutputstereo;
-GroupBox *gboutput;
 #ifdef NT_PLATFORM_NDS
 RadioButton::RadioButtonGroup *rbgfreq;
 RadioButton *rbfreq32, *rbfreq47;
-GroupBox *gbfreq;
 #endif
-GroupBox *gblinesbeat;
 NumberBox *nblinesbeat;
 Button *btnconfigsave;
 // </Settings Gui>
@@ -3890,6 +3894,11 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 	subtab_ins_pan = tabbox->addSubTab(instedit_panenv_raw);
 	subtab_ins_vib = tabbox->addSubTab(instedit_vibrato_raw);
 	tab_settings = tabbox->addTab(icon_wrench_raw);
+	subtab_settings_visual = tabbox->addSubTab(settings_icon_visual_raw);
+	subtab_settings_sound = tabbox->addSubTab(settings_icon_sound_raw);
+#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
+	subtab_settings_midi = tabbox->addSubTab(settings_icon_midi_raw);
+#endif
 	tabbox->registerTabChangeCallback(tabBoxChange);
 
 	// <Disk OP GUI>
@@ -4466,116 +4475,107 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 
 	// <Settings Gui>
 	{
-		gbhandedness = new GroupBox(5, 23, 80, 25, sub_screen);
-		gbhandedness->setText("handedness");
+		settingsvisual =
+		    new RowBox(tabbox->getX() + 1, 23, tabbox->getWidth() - 2,
+		               tabbox->getHeight() - 40, sub_screen);
+		settingssound =
+		    new RowBox(tabbox->getX() + 1, 23, tabbox->getWidth() - 2,
+		               tabbox->getHeight() - 40, sub_screen);
 
-		rbghandedness = new RadioButton::RadioButtonGroup();
-		rblefthanded =
-		    new RadioButton(7, 35, 35, 14, sub_screen, rbghandedness);
-		rblefthanded->setCaption("left");
-		rbrighthanded =
-		    new RadioButton(42, 35, 35, 14, sub_screen, rbghandedness);
-		rbrighthanded->setCaption("right");
-		rbghandedness->setActive(1);
-		rbghandedness->registerChangeCallback(handleHandednessChange);
+		{
+			rbghandedness = new RadioButton::RadioButtonGroup();
+			rblefthanded =
+			    new RadioButton(0, 0, 40, 12, sub_screen, rbghandedness);
+			rblefthanded->setCaption("left");
+			rbrighthanded =
+			    new RadioButton(0, 0, 40, 12, sub_screen, rbghandedness);
+			rbrighthanded->setCaption("right");
+			rbghandedness->setActive(1);
+			rbghandedness->registerChangeCallback(handleHandednessChange);
 
-#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
-		gbdsmw = new GroupBox(5, 55, 80, 54, sub_screen);
-		gbdsmw->setText("dsmidi");
+			settingsvisual->addRow("handedness", {rblefthanded, rbrighthanded});
+		}
 
-		btndsmwtoggleconnect = new Button(10, 67, 71, 14, sub_screen);
-		btndsmwtoggleconnect->setCaption("connect");
+		if (dldi_enabled) {
+			bttheme = new Button(0, 0, 71, 14, sub_screen);
+			bttheme->registerPushCallback(handleThemeButton);
+			bttheme->setCaption("select...");
 
-		cbdsmwsend = new CheckBox(7, 83, 40, 14, sub_screen, true, true);
-		cbdsmwsend->setCaption("send");
+			settingsvisual->addRow("theme", {bttheme});
+		}
 
-		cbdsmwrecv = new CheckBox(7, 97, 40, 14, sub_screen, true, true);
-		cbdsmwrecv->setCaption("receive");
-		gbtheme = new GroupBox(5, 114, 80, 25, sub_screen);
-		bttheme = new Button(10, 125, 71, 14, sub_screen);
-#else
-		gbtheme = new GroupBox(5, 54, 80, 25, sub_screen);
-		bttheme = new Button(10, 64, 71, 14, sub_screen);
-#endif
-		gbtheme->setText("theme");
-		bttheme->registerPushCallback(handleThemeButton);
-		bttheme->setCaption("select...");
+		{
+			rbgoutput = new RadioButton::RadioButtonGroup();
+			rboutputmono = new RadioButton(0, 0, 36, 12, sub_screen, rbgoutput);
+			rboutputmono->setCaption("1ch");
+			rboutputstereo =
+			    new RadioButton(0, 0, 36, 12, sub_screen, rbgoutput);
+			rboutputstereo->setCaption("2ch");
+			rbgoutput->setActive(1);
+			rbgoutput->registerChangeCallback(handleOutputModeChange);
 
-		gboutput = new GroupBox(89, 23, 40, 34, sub_screen);
-		gboutput->setText("out");
+			settingssound->addRow("output", {rboutputmono, rboutputstereo});
+		}
 
-		rbgoutput = new RadioButton::RadioButtonGroup();
-		rboutputmono = new RadioButton(91, 33, 36, 14, sub_screen, rbgoutput);
-		rboutputmono->setCaption("1ch");
-		rboutputstereo = new RadioButton(91, 47, 36, 14, sub_screen, rbgoutput);
-		rboutputstereo->setCaption("2ch");
-		rbgoutput->setActive(1);
-		rbgoutput->registerChangeCallback(handleOutputModeChange);
+		{
+			nblinesbeat = new NumberBox(0, 0, 32, 17, sub_screen,
+			                            settings->getLinesPerBeat(), 1, 64);
+			nblinesbeat->registerChangeCallback(handleLinesBeatChange);
 
-		gblinesbeat = new GroupBox(89, 62, 40, 28, sub_screen);
-		gblinesbeat->setText("l/b");
-		nblinesbeat = new NumberBox(93, 72, 32, 17, sub_screen,
-		                            settings->getLinesPerBeat(), 1, 64);
-		nblinesbeat->registerChangeCallback(handleLinesBeatChange);
+			settingsvisual->addRow("lines/beat", {nblinesbeat});
+		}
 
 #ifdef NT_PLATFORM_NDS
 #if !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
 		{
-			gbfreq = new GroupBox(89, 95, 40, 34, sub_screen);
-			gbfreq->setText("freq");
-
 			rbgfreq = new RadioButton::RadioButtonGroup();
-			rbfreq32 = new RadioButton(91, 105, 36, 14, sub_screen, rbgfreq);
+			rbfreq32 = new RadioButton(0, 0, 36, 12, sub_screen, rbgfreq);
 			rbfreq32->setCaption("32k");
-			rbfreq47 = new RadioButton(91, 119, 36, 14, sub_screen, rbgfreq);
+			rbfreq47 = new RadioButton(0, 0, 36, 12, sub_screen, rbgfreq);
 			rbfreq47->setCaption("47k");
 			rbgfreq->setActive(1);
 			rbgfreq->registerChangeCallback(handleOutputFreqChange);
+
+			settingssound->addRow("frequency", {rbfreq32, rbfreq47});
 		}
 #endif
 
-		btnconfigsave = new Button(tabbox_width - 1 - 40,
-		                           tabbox_height - 1 - 14, 40, 14, sub_screen);
-		btnconfigsave->setCaption("save");
-		btnconfigsave->registerPushCallback(saveConfig);
+#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
+		// gbdsmw = new GroupBox(5, 55, 80, 54, sub_screen);
+		// gbdsmw->setText("dsmidi");
+
+		btndsmwtoggleconnect = new Button(7, 25, 71, 14, sub_screen);
+		btndsmwtoggleconnect->setCaption("connect");
+
+		cbdsmwsend = new CheckBox(7, 25 + 16, 40, 14, sub_screen, true, true);
+		cbdsmwsend->setCaption("send");
+
+		cbdsmwrecv =
+		    new CheckBox(7, 25 + 16 * 2, 40, 14, sub_screen, true, true);
+		cbdsmwrecv->setCaption("receive");
 
 #ifdef MIDI
 		btndsmwtoggleconnect->registerPushCallback(dsmiToggleConnect);
 		cbdsmwsend->registerToggleCallback(handleDsmiSendToggled);
 		cbdsmwrecv->registerToggleCallback(handleDsmiRecvToggled);
 #endif
-		tabbox->registerWidget(rblefthanded, 0, tab_settings);
-		tabbox->registerWidget(rbrighthanded, 0, tab_settings);
-#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
-		tabbox->registerWidget(cbdsmwsend, 0, tab_settings);
-		tabbox->registerWidget(cbdsmwrecv, 0, tab_settings);
-		tabbox->registerWidget(btndsmwtoggleconnect, 0, tab_settings);
-		tabbox->registerWidget(gbdsmw, 0, tab_settings);
 #endif
-		tabbox->registerWidget(btnconfigsave, 0, tab_settings);
-		tabbox->registerWidget(gbhandedness, 0, tab_settings);
-		if (dldi_enabled)
-			tabbox->registerWidget(bttheme, 0, tab_settings);
 
-		if (dldi_enabled)
-			tabbox->registerWidget(gbtheme, 0, tab_settings);
-		tabbox->registerWidget(rboutputmono, 0, tab_settings);
-		tabbox->registerWidget(rboutputstereo, 0, tab_settings);
-		tabbox->registerWidget(gboutput, 0, tab_settings);
-		tabbox->registerWidget(nblinesbeat, 0, tab_settings);
-		tabbox->registerWidget(gblinesbeat, 0, tab_settings);
-#ifdef NT_PLATFORM_NDS
-#if !defined(SHOW_ALL_SETTINGS)
-		if (isDSiMode())
+		btnconfigsave = new Button(tabbox_width - 3 - 40, tabbox_height - 11,
+		                           40, 11, sub_screen);
+		btnconfigsave->setCaption("save");
+		btnconfigsave->registerPushCallback(saveConfig);
+
+#if defined(MIDI) || defined(SHOW_ALL_SETTINGS)
+		tabbox->registerWidget(cbdsmwsend, 0, subtab_settings_midi);
+		tabbox->registerWidget(cbdsmwrecv, 0, subtab_settings_midi);
+		tabbox->registerWidget(btndsmwtoggleconnect, 0, subtab_settings_midi);
 #endif
-		{
-			tabbox->registerWidget(rbfreq32, 0, tab_settings);
-			tabbox->registerWidget(rbfreq47, 0, tab_settings);
-			tabbox->registerWidget(gbfreq, 0, tab_settings);
-		}
-#endif
+		tabbox->registerWidget(settingsvisual, 0, subtab_settings_visual);
+		tabbox->registerWidget(settingssound, 0, subtab_settings_sound);
+		tabbox->registerWidget(btnconfigsave, 0, tab_settings);
 	}
 	// </Settings Gui>
 

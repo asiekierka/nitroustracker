@@ -29,7 +29,7 @@ class ContainerWidget : public Widget
 {
 public:
 	ContainerWidget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
-	          		bool _visible = true);
+	                bool _visible = true);
 
 	// Event calls
 	virtual void penDown(u16 px, u16 py);

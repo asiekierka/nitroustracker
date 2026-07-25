@@ -20,8 +20,8 @@ using namespace tobkit;
 
 /* ===================== PUBLIC ===================== */
 
-ContainerWidget::ContainerWidget(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
-                    bool _visible)
+ContainerWidget::ContainerWidget(u16 _x, u16 _y, u16 _width, u16 _height,
+                                 Screen *_screen, bool _visible)
     : Widget(_x, _y, _width, _height, _screen, _visible)
 {
 }

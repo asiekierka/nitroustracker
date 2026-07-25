@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef TWOTABBOX_H
 #define TWOTABBOX_H
 
-#include "gui.h"
 #include "containerwidget.h"
+#include "gui.h"
 
 #include <vector>
 

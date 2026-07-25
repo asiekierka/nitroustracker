@@ -14,32 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ======================================================================*/
 
-#ifndef _TOBKIT_H_
-#define _TOBKIT_H_
+#ifndef ROWBOX_H
+#define ROWBOX_H
 
-#include "bitbutton.h"
-#include "button.h"
-#include "checkbox.h"
-#include "fileselector.h"
-#include "gradienticon.h"
-#include "groupbox.h"
+#include "containerwidget.h"
 #include "gui.h"
-#include "label.h"
-#include "listbox.h"
-#include "memoryindicator.h"
-#include "messagebox.h"
-#include "numberbox.h"
-#include "numberslider.h"
-#include "piano.h"
-#include "pixmap.h"
-#include "platform.h"
-#include "radiobutton.h"
-#include "rowbox.h"
-#include "tabbox.h"
-#include "theme.h"
-#include "togglebutton.h"
-#include "twotabbox.h"
-#include "typewriter.h"
-#include "widget.h"
+
+#include <vector>
+
+namespace tobkit
+{
+
+class RowBox : public ContainerWidget
+{
+public:
+	RowBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
+	       bool _visible = true);
+
+	// Drawing request
+	void pleaseDraw(void);
+
+	void addRow(const char *caption, std::initializer_list<Widget *> widgets);
+	void setTheme(Theme *theme_, u16 bgcolor_);
+
+protected:
+	GUI *currentGui(void) override;
+
+private:
+	std::vector<u16> row_y_offsets;
+
+	void draw(void);
+
+	GUI gui;
+	tobkit_pixel_t col_odd;
+	tobkit_pixel_t col_even;
+};
+
+}; // namespace tobkit
 
 #endif

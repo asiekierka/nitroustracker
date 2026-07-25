@@ -22,8 +22,8 @@ using namespace tobkit;
 
 TwoTabBox::TwoTabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
                      u8 _icon_size, u8 _sub_icon_size, bool _visible)
-    : ContainerWidget(_x, _y, _width, _height, _screen, _visible), icon_size(_icon_size),
-      sub_icon_size(_sub_icon_size), currentgui(0)
+    : ContainerWidget(_x, _y, _width, _height, _screen, _visible),
+      icon_size(_icon_size), sub_icon_size(_sub_icon_size), currentgui(0)
 {
 	onTabChange = 0;
 }

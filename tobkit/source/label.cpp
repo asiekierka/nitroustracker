@@ -87,7 +87,7 @@ void Label::draw(void)
 		col_bg = theme->col_bg;
 		col_text = theme->col_text_light;
 	} else {
-		col_bg = theme->col_light_bg;
+		col_bg = bgcolor;
 		col_text = theme->col_text;
 	}
 
