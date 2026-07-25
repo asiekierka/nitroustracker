@@ -1497,6 +1497,7 @@ void stop(void)
 
 	state->playing = false;
 
+#ifdef NT_PLATFORM_NDS
 	// The arm7 will get the command with a slight delay and may continue playing for
 	// some ticks. But for saving battery, we only draw the screen continuously
 	// if state->playing == true. So, by setting it to false here we might miss ticks
@@ -1504,6 +1505,7 @@ void stop(void)
 	// frames to make sure the arm7 has really stopped and redraw the pattern.
 	PlatformWaitVBlank();
 	PlatformWaitVBlank();
+#endif
 	redraw_main_requested = false;
 	drawMainScreen();
 }
