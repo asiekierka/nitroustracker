@@ -4031,15 +4031,15 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		cbsamplepreview->setCaption("pre");
 		cbsamplepreview->registerToggleCallback(handleSamplePreviewToggled);
 
-		buttonload = new Button(3, 86, 34, 14, sub_screen);
+		buttonload = new Button(3, below_fileselector_y1 - 16 * 3, 34, 14, sub_screen);
 		buttonload->setCaption("load");
 		buttonload->registerPushCallback(handleLoad);
 
-		buttonsave = new Button(3, 102, 34, 14, sub_screen);
+		buttonsave = new Button(3, below_fileselector_y1 - 16 * 2, 34, 14, sub_screen);
 		buttonsave->setCaption("save");
 		buttonsave->registerPushCallback(handleSave);
 
-		buttondelfile = new Button(3, 118, 34, 14, sub_screen);
+		buttondelfile = new Button(3, below_fileselector_y1 - 16, 34, 14, sub_screen);
 		buttondelfile->setCaption("del");
 		buttondelfile->registerPushCallback(handleDelfile);
 
