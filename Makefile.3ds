@@ -69,7 +69,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++23
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=3dsx.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lntxm -lctru -lm
+LIBS	:= -lntxm -lcitro3d -lctru -lm
 
 CFLAGS	+= -std=gnu23
 

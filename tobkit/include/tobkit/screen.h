@@ -47,7 +47,7 @@ public:
 
 	inline void drawPixel(u32 tx, u32 ty, tobkit_pixel_t col)
 	{
-#if defined(NT_PLATFORM_3DS)
+#if defined(NT_3DS_FRAMEBUFFER)
 		*(pixels + getPitch() * tx + getPitch() - 1 - ty) = col;
 #else
 		*(pixels + getPitch() * ty + tx) = col;
@@ -59,6 +59,13 @@ public:
 #if defined(NT_PLATFORM_NDS)
 		dmaFillHalfWords(col, pixels + getPitch() * ty + tx, bw * 2);
 #else
+#if defined(NT_PLATFORM_3DS)
+		if (!(tx & 1)) {
+			u32 colcol = col * 0x10001;
+			__ndsabi_wordset4(pixels + getPitch() * ty + tx, bw * 2, colcol);
+			return;
+		}
+#endif
 		for (u32 i = 0; i < bw; i++)
 			drawPixel(tx + i, ty, col);
 #endif
@@ -66,7 +73,7 @@ public:
 
 	inline void fillColumn(u32 tx, u32 ty, u32 bh, u32 col)
 	{
-#if defined(NT_PLATFORM_3DS)
+#if defined(NT_3DS_FRAMEBUFFER)
 		u32 offset = ty + bh;
 		if (!(offset & 1)) {
 			u32 colcol = col * 0x10001;

@@ -19,7 +19,11 @@ limitations under the License.
 
 #include <3ds.h>
 
+#ifdef NT_3DS_FRAMEBUFFER
 #define TOBKIT_CONSTANT_PITCH 240
+#else
+#define TOBKIT_CONSTANT_PITCH 512
+#endif
 
 // For printf() and scanf() defines
 #include "ntxm/common.h"

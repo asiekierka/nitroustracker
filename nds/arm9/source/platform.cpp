@@ -145,6 +145,10 @@ void PlatformFlipMainScreen(void)
 	main_screen->pixels = main_vram_back;
 }
 
+void PlatformDrawSubScreen(void)
+{
+}
+
 void PlatformClearMainScreen(tobkit_pixel_t color)
 {
 	main_screen->pixels = main_vram_front;

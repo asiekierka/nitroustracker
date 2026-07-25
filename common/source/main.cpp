@@ -671,7 +671,8 @@ void handleSampleChange(const u16 newsample)
 			str = inst->getName();
 		strncpy(state->sample_filename, str, STATE_FILENAME_LEN);
 		filterFilenameCharacters(state->sample_filename);
-		if (state->sample_filename[0] && !endsWithExtension(state->sample_filename, ".wav"))
+		if (state->sample_filename[0] &&
+		    !endsWithExtension(state->sample_filename, ".wav"))
 			strlcat(state->sample_filename, ".wav", STATE_FILENAME_LEN + 1);
 
 		if (rbsample->getActive() == true) {
@@ -815,7 +816,8 @@ void handleInstChange(const u16 newinst, const bool reset = true)
 		const char *str = inst->getName();
 		strncpy(state->inst_filename, str, STATE_FILENAME_LEN);
 		filterFilenameCharacters(state->inst_filename);
-		if (state->inst_filename[0] && !endsWithExtension(state->inst_filename, ".xi"))
+		if (state->inst_filename[0] &&
+		    !endsWithExtension(state->inst_filename, ".xi"))
 			strlcat(state->inst_filename, ".xi", STATE_FILENAME_LEN + 1);
 
 		if (rbinst->getActive() == true) {
@@ -1028,6 +1030,7 @@ void showSlowLoadOperation(std::function<const char *(void)> loadOp)
 	gui->registerOverlayWidget(mb, 0, SUB_SCREEN);
 	mb->show();
 	mb->pleaseDraw();
+	PlatformDrawSubScreen();
 
 	const char *res = loadOp();
 	updateMemoryState(true);

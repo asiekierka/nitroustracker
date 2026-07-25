@@ -224,7 +224,7 @@ void Widget::drawBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 ITCM_CODE
 void Widget::drawFullBox(u16 tx, u16 ty, u16 tw, u16 th, u16 col)
 {
-#if defined(NT_PLATFORM_3DS)
+#if defined(NT_3DS_FRAMEBUFFER)
 	if (th == 0)
 		return;
 

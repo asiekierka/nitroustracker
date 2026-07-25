@@ -140,6 +140,11 @@ bool PlatformVideoSwapScreens(void)
 	return display->swapScreens();
 }
 
+void PlatformDrawSubScreen(void)
+{
+	display->draw();
+}
+
 PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP,
                 PlatformKey_RIGHT = KEY_RIGHT, PlatformKey_DOWN = KEY_DOWN;
 PlatformKeyMask PlatformKey_A = KEY_A, PlatformKey_B = KEY_B,
