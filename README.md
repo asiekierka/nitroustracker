@@ -19,10 +19,10 @@ You can learn more about NitrousTracker on
 [the official documentation website](https://docs.asie.pl/nitroustracker).
 
 Source code is available on
-[GitHub](https://github.com/NitrousTracker/nitroustracker).
+[Codeberg](https://codeberg.org/NitrousTracker/nitroustracker).
 
 Issues and feature requests can be reported
-[here](https://github.com/NitrousTracker/nitroustracker/issues).
+[here](https://codeberg.org/NitrousTracker/nitroustracker/issues).
 
 ## License
 
