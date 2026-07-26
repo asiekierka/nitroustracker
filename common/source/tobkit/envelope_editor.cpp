@@ -426,8 +426,8 @@ void EnvelopeEditor::draw(void)
 	drawBorder(theme->col_outline);
 
 	if ((draw_mode == true) && (n_points == 0)) {
-		drawString("draw the envelope", 10, 20, theme->col_lighter_bg, 255);
-		drawString("with the stylus", 20, 30, theme->col_lighter_bg, 255);
+		drawString("draw the envelope", (width - 107) >> 1, (height >> 1) - 16, theme->col_lighter_bg, 255);
+		drawString("with the stylus", (width - 87) >> 1, (height >> 1) - 6, theme->col_lighter_bg, 255);
 	}
 
 	//
