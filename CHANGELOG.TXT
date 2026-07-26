@@ -16,7 +16,7 @@ New features:
 - added support for configuring instrument envelope loops
 - [#106] added support for configuring instrument vibrato
 - added support for editing note components with buttons only - use A / A + D-Pad
-- added support for previewing samples while the song is playing
+- [#273] added support for previewing samples while the song is playing
 - [#65] added support for importing .mod files
 - 3DS: open the NitrousTracker manual directly from the program
 - NDS: updated BlocksDS to 1.22.2
@@ -27,7 +27,7 @@ Improvements:
 - browsing themes no longer pauses playback
 - fx keyboard now supports pen sliding (prayerie)
 - greatly improved bpm/timing accuracy
-- loop points are now retained when disabling and re-enabling sample loop
+- [#230] loop points are now retained when disabling and re-enabling sample loop
 - NDS: debug build now shows wifi debug messages
 - numerous minor ui/ux tweaks (prayerie)
 - sample snapping to zero crossing now respects zoom level
@@ -35,6 +35,7 @@ Improvements:
 Fixes:
 
 - [#152] fixed inconsistent sample preview looping behaviour
+- [#148] fixed sustain envelope not working in certain situations
 - fixed DSi mode frequency setting not being applied on load
 - fixed default sample/instrument filenames containing prohibited characters
 - fixed file corruption when out of memory and trying to save .xm files with 8-bit samples
