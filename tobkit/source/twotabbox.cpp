@@ -24,7 +24,7 @@ TwoTabBox::TwoTabBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
                      u8 _icon_size, u8 _sub_icon_size, bool _visible)
     : ContainerWidget(_x, _y, _width, _height, _screen, _visible),
       icon_size(_icon_size), sub_icon_size(_sub_icon_size), currentgui(0),
-      currenttab(0), currentsubtab(0)
+      currenttab(0)
 {
 	onTabChange = 0;
 }
@@ -33,6 +33,7 @@ u8 TwoTabBox::addTab(const u8 *icon)
 {
 	u8 idx = subtab_count_per_tab.size();
 	subtab_count_per_tab.push_back(0);
+	currentsubtab.push_back(0);
 	tab_to_gui_idx.push_back(guis.size());
 	tab_icons.push_back(icon);
 	GUI gui;
@@ -52,6 +53,9 @@ u8 TwoTabBox::addSubTab(const u8 *icon)
 		GUI gui;
 		gui.setTheme(theme, theme->col_light_bg);
 		guis.push_back(gui);
+	}
+	if (currentsubtab[tab_idx] == 0) {
+		currentsubtab[tab_idx] = idx | 0x80;
 	}
 	subtab_to_gui_idx.push_back(guis.size() - 1);
 	return idx | 0x80;
@@ -124,14 +128,13 @@ void TwoTabBox::penDown(u16 px, u16 py)
 		if (gui_idx >= 0) {
 			currentgui = gui_idx;
 			if (tab_hit & 0x80) {
-				currentsubtab = tab_hit;
+				currentsubtab[currenttab] = tab_hit;
 			} else {
 				currenttab = tab_hit;
-				currentsubtab = firstSubtab(tab_hit);
 			}
 			pleaseDraw();
 			if (onTabChange != 0) {
-				onTabChange(currenttab, currentsubtab);
+				onTabChange(currenttab, currentsubtab[currenttab]);
 			}
 		}
 	} else {
@@ -187,7 +190,7 @@ void TwoTabBox::drawIcon(u8 tabidx)
 	bool subtab = false;
 	bool selected = false;
 	if (tabidx >= 0x80) {
-		selected = tabidx == currentsubtab;
+		selected = tabidx == currentsubtab[currenttab];
 		subtab = true;
 		icon = subtab_icons.at(tabidx & 0x7F);
 		tabidx -= firstSubtab(currenttab);

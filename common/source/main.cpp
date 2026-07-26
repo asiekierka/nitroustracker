@@ -318,15 +318,16 @@ void clearSubScreen(void)
 
 void openManualWebsite(void)
 {
-    if (mb != 0) deleteMessageBox();
+	if (mb != 0)
+		deleteMessageBox();
 #ifdef NT_PLATFORM_3DS
-    char *webBuffer = (char*) ntxm_umalloc(1024);
-    if (webBuffer) {
-        // 3DS does not support Let's Encrypt SSL certificates
-        strcpy(webBuffer, "http://docs.asie.pl/nitroustracker");
-        aptLaunchSystemApplet(APPID_WEB, webBuffer, 1024, 0);
-        ntxm_free(webBuffer);
-    }
+	char *webBuffer = (char *)ntxm_umalloc(1024);
+	if (webBuffer) {
+		// 3DS does not support Let's Encrypt SSL certificates
+		strcpy(webBuffer, "http://docs.asie.pl/nitroustracker");
+		aptLaunchSystemApplet(APPID_WEB, webBuffer, 1024, 0);
+		ntxm_free(webBuffer);
+	}
 #endif
 }
 
@@ -3113,10 +3114,8 @@ void showAboutBox(void)
 	char msg[256];
 	snprintf(msg, 256, "NitrousTracker " VERSION " (" GIT_HASH ")");
 #ifdef NT_PLATFORM_3DS
-	mb = new MessageBox(sub_screen, msg, 3,
-							"manual", openManualWebsite,
-							 "track on!", deleteMessageBox,
-		                    "exit", showExitBox);
+	mb = new MessageBox(sub_screen, msg, 3, "manual", openManualWebsite,
+	                    "track on!", deleteMessageBox, "exit", showExitBox);
 #else
 	mb = new MessageBox(sub_screen, msg, 2, "track on!", deleteMessageBox,
 	                    "exit", showExitBox);
@@ -4031,15 +4030,18 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		cbsamplepreview->setCaption("pre");
 		cbsamplepreview->registerToggleCallback(handleSamplePreviewToggled);
 
-		buttonload = new Button(3, below_fileselector_y1 - 16 * 3, 34, 14, sub_screen);
+		buttonload =
+		    new Button(3, below_fileselector_y1 - 16 * 3, 34, 14, sub_screen);
 		buttonload->setCaption("load");
 		buttonload->registerPushCallback(handleLoad);
 
-		buttonsave = new Button(3, below_fileselector_y1 - 16 * 2, 34, 14, sub_screen);
+		buttonsave =
+		    new Button(3, below_fileselector_y1 - 16 * 2, 34, 14, sub_screen);
 		buttonsave->setCaption("save");
 		buttonsave->registerPushCallback(handleSave);
 
-		buttondelfile = new Button(3, below_fileselector_y1 - 16, 34, 14, sub_screen);
+		buttondelfile =
+		    new Button(3, below_fileselector_y1 - 16, 34, 14, sub_screen);
 		buttondelfile->setCaption("del");
 		buttondelfile->registerPushCallback(handleDelfile);
 

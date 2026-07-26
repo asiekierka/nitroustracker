@@ -65,7 +65,7 @@ private:
 	u8 sub_icon_size;
 	u8 currentgui;
 	u8 currenttab;
-	u8 currentsubtab;
+	std::vector<u8> currentsubtab;
 	std::vector<u8> subtab_count_per_tab;
 	std::vector<u8> subtab_to_tab_idx;
 	std::vector<u8> subtab_to_gui_idx;
