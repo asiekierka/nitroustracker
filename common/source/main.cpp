@@ -4083,40 +4083,40 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 	{
 		int pot_y = 21;
 		int pot_height = tabbox_height - 73;
-		lbpot = new ListBox(4, pot_y, 50, pot_height, sub_screen, 1, true);
+		lbpot = new ListBox(3, pot_y, 50, pot_height, sub_screen, 1, true);
 		lbpot->set(0, " 0");
 		lbpot->registerChangeCallback(handlePotPosChangeFromUser);
-		buttonpotup = new Button(70, 47, 14, 12, sub_screen);
+		buttonpotup = new Button(69, 47, 14, 12, sub_screen);
 		buttonpotup->setCaption(">");
 		buttonpotup->registerPushCallback(handlePotInc);
-		buttonpotdown = new Button(55, 47, 14, 12, sub_screen);
+		buttonpotdown = new Button(54, 47, 14, 12, sub_screen);
 		buttonpotdown->setCaption("<");
 		buttonpotdown->registerPushCallback(handlePotDec);
-		buttonins = new Button(55, 21, 29, 12, sub_screen);
+		buttonins = new Button(54, 21, 29, 12, sub_screen);
 		buttonins->setCaption("ins");
 		buttonins->registerPushCallback(handlePotIns);
-		buttondel = new Button(55, 60, 29, 12, sub_screen);
+		buttondel = new Button(54, 60, 29, 12, sub_screen);
 		buttondel->setCaption("del");
 		buttondel->registerPushCallback(handlePotDel);
-		buttoncloneptn = new Button(55, 34, 29, 12, sub_screen);
+		buttoncloneptn = new Button(54, 34, 29, 12, sub_screen);
 		buttoncloneptn->setCaption("cln");
 		buttoncloneptn->registerPushCallback(handlePtnClone);
-		tbqueuelock = new ToggleButton(55, 74, 29, 12, sub_screen, true);
+		tbqueuelock = new ToggleButton(54, 74, 29, 12, sub_screen, true);
 		tbqueuelock->setCaption("lock");
 		tbqueuelock->registerToggleCallback(toggleQueueLock);
-		tbpotloop = new ToggleButton(55, 87, 29, 12, sub_screen, true);
+		tbpotloop = new ToggleButton(54, 87, 29, 12, sub_screen, true);
 		tbpotloop->setCaption("loop");
 		tbpotloop->registerToggleCallback(handleLoopToggle);
 
 		labelptnlen =
-		    new Label(87, 48, tabbox_width - 2 - 87, 12, sub_screen, false);
+		    new Label(86, 48, tabbox_width - 2 - 87, 12, sub_screen, false);
 		labelptnlen->setCaption("ptn len:");
 		nsptnlen =
-		    new NumberSlider(tabbox_width - 2 - 32, 60, 32, 17, sub_screen,
+		    new NumberSlider(tabbox_width - 2 - 33, 60, 32, 17, sub_screen,
 		                     DEFAULT_PATTERN_LENGTH, 1, 256, true);
 		nsptnlen->registerChangeCallback(handlePtnLengthChange);
 
-		labelchannels = new Label(87, 22, 48, 12, sub_screen, false);
+		labelchannels = new Label(86, 22, 48, 12, sub_screen, false);
 		labelchannels->setCaption("chn:  4");
 		buttonlesschannels =
 		    new Button(tabbox_width - 2 - 25, 34, 12, 12, sub_screen);
@@ -4131,29 +4131,29 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		int below_pot_y2 = below_pot_y1 + 12;
 		int below_pot_y3 = below_pot_y2 + 19;
 
-		labeltempo = new Label(4, below_pot_y1, 32, 12, sub_screen, false);
+		labeltempo = new Label(3, below_pot_y1, 32, 12, sub_screen, false);
 		labeltempo->setCaption("tmp");
-		labelbpm = new Label(38, below_pot_y1, 32, 12, sub_screen, false);
+		labelbpm = new Label(37, below_pot_y1, 32, 12, sub_screen, false);
 		labelbpm->setCaption("bpm");
 		labelrestartpos =
-		    new Label(72, below_pot_y1, 46, 12, sub_screen, false);
+		    new Label(71, below_pot_y1, 46, 12, sub_screen, false);
 		labelrestartpos->setCaption("restart");
-		nbtempo = new NumberBox(4, below_pot_y2, 32, 17, sub_screen, 1, 1, 31);
+		nbtempo = new NumberBox(3, below_pot_y2, 32, 17, sub_screen, 1, 1, 31);
 		nbtempo->registerChangeCallback(handleTempoChange);
 #ifdef DEBUG
 		nsbpm =
-		    new NumberSlider(38, below_pot_y2, 32, 17, sub_screen, 120, 1, 255);
+		    new NumberSlider(37, below_pot_y2, 32, 17, sub_screen, 120, 1, 255);
 #else
 		nsbpm = new NumberSlider(38, below_pot_y2, 32, 17, sub_screen, 120, 32,
 		                         255);
 #endif
 		nsbpm->registerChangeCallback(handleBpmChange);
-		nsrestartpos = new NumberSlider(72, below_pot_y2, 32, 17, sub_screen, 0,
+		nsrestartpos = new NumberSlider(71, below_pot_y2, 32, 17, sub_screen, 0,
 		                                0, 255, true);
 		nsrestartpos->registerChangeCallback(handleRestartPosChange);
 
 		labelsongname =
-		    new Label(4, below_pot_y3, tabbox_width - 26, 14, sub_screen, true);
+		    new Label(3, below_pot_y3, tabbox_width - 25, 14, sub_screen, true);
 		labelsongname->setCaption("unnamed");
 		labelsongname->registerPushCallback(showTypewriterForSongRename);
 
@@ -4162,7 +4162,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 		buttonrenamesong->setCaption("...");
 		buttonrenamesong->registerPushCallback(showTypewriterForSongRename);
 
-		buttonzap = new Button(107, below_pot_y2 + 1, 30, 14, sub_screen);
+		buttonzap = new Button(tabbox_width - 34, below_pot_y2 + 1, 33, 14, sub_screen);
 		buttonzap->setCaption("zap!");
 		buttonzap->registerPushCallback(handleZap);
 
