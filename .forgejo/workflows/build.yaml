@@ -14,17 +14,12 @@ jobs:
     container: skylyrac/blocksds:slim-latest
     steps:
       - name: Install dependencies
-        run: apt-get update && apt-get install -y --no-install-recommends nodejs
+        run: apt-get update -y && apt-get install -y --no-install-recommends nodejs python3 python3-pil </dev/null
 
       - name: Clone project
         uses: actions/checkout@v6
         with:
           submodules: recursive
-
-      - name: Install prerequisites
-        run: |
-          apt-get update -y
-          apt-get install -y --no-install-recommends python3 python3-pil
 
       - name: Build
         run: make VERSION=git
@@ -46,17 +41,12 @@ jobs:
     container: devkitpro/devkitarm:latest
     steps:
       - name: Install dependencies
-        run: apt-get update && apt-get install -y --no-install-recommends nodejs
+        run: apt-get update && apt-get install -y --no-install-recommends nodejs python3 python3-pil </dev/null
 
       - name: Clone project
         uses: actions/checkout@v6
         with:
           submodules: recursive
-
-      - name: Install prerequisites
-        run: |
-          apt-get update -y
-          apt-get install -y --no-install-recommends python3 python3-pil
 
       - name: Build
         run: make -f Makefile.3ds VERSION=git
@@ -67,6 +57,39 @@ jobs:
           name: NitrousTracker (3DS)
           path: |
             nitroustracker*.3dsx
+            CHANGELOG.TXT
+            licenses/
+            themes/
+            README.TXT
+
+  build-linux:
+    name: Build (Linux)
+    runs-on: docker
+    container: ubuntu:24.04
+    steps:
+      - name: Install dependencies
+        run: apt-get update -y && apt-get install -y --no-install-recommends build-essential ca-certificates cmake git ninja-build pkg-config nodejs python3 python3-pil python3-pip gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libfribidi-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev libthai-dev libusb-1.0-0-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev </dev/null
+
+      - name: Clone project
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Meson
+        run: pip install meson --break-system-packages
+
+      - name: Configure
+        run: meson setup --buildtype release -Db_lto=true build-meson
+
+      - name: Build
+        run: meson compile -C build-meson && cp build-meson/nitroustracker .
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: NitrousTracker (Linux, development build)
+          path: |
+            nitroustracker
             CHANGELOG.TXT
             licenses/
             themes/
