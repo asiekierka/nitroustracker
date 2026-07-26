@@ -37,6 +37,7 @@ Fixes:
 - [#152] fixed inconsistent sample preview looping behaviour
 - fixed DSi mode frequency setting not being applied on load
 - fixed default sample/instrument filenames containing prohibited characters
+- fixed file corruption when out of memory and trying to save .xm files with 8-bit samples
 
 -- NitrousTracker v0.6.5 (2026-07-17)
 
