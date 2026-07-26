@@ -1343,7 +1343,7 @@ void handleTypewriterFilenameOk(const char *text)
 			ext = ".xi";
 		}
 
-		if (endsWithExtension(text, ext)) {
+		if (!endsWithExtension(text, ext)) {
 			// Append extension
 			name = (char *)ntxm_cmalloc(textlen + 5);
 			strcpy(name, text);
