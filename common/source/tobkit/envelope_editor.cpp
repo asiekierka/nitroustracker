@@ -345,6 +345,12 @@ void EnvelopeEditor::addPoint(int shift)
 	if (n_points > 1)
 		active_point++;
 
+	if (active_point <= loop_end_index)
+		loop_end_index++;
+
+	if (active_point <= loop_start_index)
+		loop_start_index++;
+
 	draw();
 }
 
@@ -362,6 +368,12 @@ void EnvelopeEditor::delPoint(void)
 
 		if (onPointsChange != 0)
 			onPointsChange();
+
+		if (active_point < loop_end_index)
+			loop_end_index--;
+
+		if (active_point < loop_start_index)
+			loop_start_index--;
 
 		draw();
 	}
