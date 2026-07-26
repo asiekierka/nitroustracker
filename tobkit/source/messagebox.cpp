@@ -65,13 +65,13 @@ MessageBox::MessageBox(Screen *_screen, const char *message, u8 n_buttons, ...)
 
 	int fixedbuttonwidth = 0;
 	if (width < minwidth) {
-		if (n_buttons > 0) {
-			fixedbuttonwidth = max_width + 6;
-		}
+		fixedbuttonwidth = max_width + 6;
 		width = (fixedbuttonwidth + 10) * n_buttons + 10;
 		if (width < minwidth) {
 			width = minwidth;
-			fixedbuttonwidth = (width - 10) / n_buttons - 10;
+			if (n_buttons > 0) {
+				fixedbuttonwidth = (width - 10) / n_buttons - 10;
+			}
 		}
 	} else if (width > screen->getWidth()) {
 		width = screen->getWidth();
