@@ -131,6 +131,8 @@ void TwoTabBox::penDown(u16 px, u16 py)
 				currentsubtab[currenttab] = tab_hit;
 			} else {
 				currenttab = tab_hit;
+				if (currentsubtab[currenttab] & 0x80)
+					currentgui = anyTabToGuiIdx(currentsubtab[currenttab]);
 			}
 			pleaseDraw();
 			if (onTabChange != 0) {
