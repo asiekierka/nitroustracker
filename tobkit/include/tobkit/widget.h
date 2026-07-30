@@ -38,9 +38,8 @@ struct Font {
 	const u8 *data;
 };
 
-#define GLYPH_3X5_COUNT 47
-#define GLYPH_3X5(c)                                                           \
-	(c == ':') ? 40 : ((c < 58 && c > 47) ? (c - 48) : (c - 55))
+#define GLYPH_3X5_COUNT 58
+#define GLYPH_3X5(c) ((c) - 33)
 #define GLYPH_3X5_WIDTH 4
 
 class Widget

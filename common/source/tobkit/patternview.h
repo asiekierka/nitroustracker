@@ -61,51 +61,35 @@ namespace tobkit
 #define SOLO_WIDTH MUTE_WIDTH
 #define SOLO_HEIGHT MUTE_HEIGHT
 
-#define C0 0
-#define C1 1
-#define C2 2
-#define C3 3
-#define C4 4
-#define C5 5
-#define C6 6
-#define C7 7
-#define C8 8
-#define C9 9
-#define A 10
-#define B 11
-#define C 12
-#define D 13
-#define E 14
-#define F 15
-#define G 16
-#define H 17
+#define DOT GLYPH_3X5('$')
+#define MINUS GLYPH_3X5('-')
+#define SHARP GLYPH_3X5('#')
+#define SPACE GLYPH_3X5(' ')
 
-#define L 21
-#define M 22
-#define P 25
-#define R 27
-#define S 28
-#define U 30
-#define V 31
-
-#define DOT 36
-#define MINUS 37
-#define SHARP 38
-#define SPACE 39
-
-#define VSLIDEUP 41
+#define VSLIDEUP GLYPH_3X5('+')
 #define VSLIDEDOWN MINUS
-#define FVSLIDEDOWN 43
-#define FVSLIDEUP 42
-#define SETPANPOS P
-#define PANSLIDELEFT 44
-#define PANSLIDERIGHT 45
-#define NOTEPORTA M
-#define SETVIBRATOSPD S
-#define SETVIBRATO V
+#define FVSLIDEDOWN GLYPH_3X5(';')
+#define FVSLIDEUP GLYPH_3X5('&')
+#define SETPANPOS GLYPH_3X5('P')
+#define PANSLIDELEFT GLYPH_3X5('<')
+#define PANSLIDERIGHT GLYPH_3X5('>')
+#define NOTEPORTA GLYPH_3X5('M')
+#define SETVIBRATOSPD GLYPH_3X5('S')
+#define SETVIBRATO GLYPH_3X5('V')
 
-const u8 notes_chars[] = {12, 12, 13, 13, 14, 15, 15, 16, 16, 10, 10, 17};
+const u8 notes_chars[] = {GLYPH_3X5('C'), GLYPH_3X5('C'), GLYPH_3X5('D'), GLYPH_3X5('D'), GLYPH_3X5('E'), GLYPH_3X5('F'), GLYPH_3X5('F'), GLYPH_3X5('G'), GLYPH_3X5('G'), GLYPH_3X5('A'), GLYPH_3X5('A'), GLYPH_3X5('H')};
 const u8 notes_signs[] = {0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0};
+const u8 hex_chars[] = {
+	GLYPH_3X5('0'), GLYPH_3X5('1'), GLYPH_3X5('2'), GLYPH_3X5('3'),
+	GLYPH_3X5('4'), GLYPH_3X5('5'), GLYPH_3X5('6'), GLYPH_3X5('7'),
+	GLYPH_3X5('8'), GLYPH_3X5('9'), GLYPH_3X5('A'), GLYPH_3X5('B'),
+	GLYPH_3X5('C'), GLYPH_3X5('D'), GLYPH_3X5('E'), GLYPH_3X5('F'),
+	GLYPH_3X5('G'), GLYPH_3X5('H'), GLYPH_3X5('I'), GLYPH_3X5('J'),
+	GLYPH_3X5('K'), GLYPH_3X5('L'), GLYPH_3X5('M'), GLYPH_3X5('N'),
+	GLYPH_3X5('O'), GLYPH_3X5('P'), GLYPH_3X5('Q'), GLYPH_3X5('R'),
+	GLYPH_3X5('S'), GLYPH_3X5('T'), GLYPH_3X5('U'), GLYPH_3X5('V'),
+	GLYPH_3X5('W'), GLYPH_3X5('X'), GLYPH_3X5('Y'), GLYPH_3X5('Z')
+};
 
 #define PV_COMPONENT_NOTE 0
 #define PV_COMPONENT_INSTRUMENT 1
@@ -197,10 +181,8 @@ private:
 
 	inline void drawHexByte(u8 byte, u16 cx, u16 cy, u16 col)
 	{
-		//drawSmallChar(byte/0x10, cx  , cy, col);
-		//drawSmallChar(byte%0x10, cx+1, cy, col);
-		drawSmallChar(byte / 0x10, cx, cy, col);
-		drawSmallChar(byte % 0x10, cx + PV_CHAR_WIDTH, cy, col);
+		drawSmallChar(hex_chars[byte >> 4], cx, cy, col);
+		drawSmallChar(hex_chars[byte & 0xF], cx + PV_CHAR_WIDTH, cy, col);
 	}
 
 	inline void drawCell(u16 cellx, u16 celly, u16 px, u16 py, u8 dark)
@@ -244,7 +226,7 @@ private:
 				drawSmallChar(MINUS, realx + PV_CELL_NOTE_X + PV_CHAR_WIDTH,
 				              realy, notecol);
 			}
-			drawSmallChar(cell->note / 12,
+			drawSmallChar(GLYPH_3X5('0' + (cell->note / 12)),
 			              realx + PV_CELL_NOTE_X + 2 * PV_CHAR_WIDTH, realy,
 			              notecol);
 		}
@@ -283,8 +265,8 @@ private:
 				eff = NOTEPORTA;
 
 			if (eff != 0) {
-				drawSmallChar(eff, realx + PV_CELL_VOL_X, realy, effectcol);
-				drawSmallChar(vol & 0x0F, realx + PV_CELL_VOL_X + PV_CHAR_WIDTH,
+				drawSmallChar(hex_chars[eff], realx + PV_CELL_VOL_X, realy, effectcol);
+				drawSmallChar(hex_chars[vol & 0x0F], realx + PV_CELL_VOL_X + PV_CHAR_WIDTH,
 				              realy, volumecol);
 			}
 		}
@@ -292,7 +274,7 @@ private:
 		if (effects_visible) {
 			// Effect and effect parameter
 			if (cell->effect != NO_EFFECT)
-				drawSmallChar(cell->effect, realx + PV_CELL_FX_X, realy,
+				drawSmallChar(hex_chars[cell->effect], realx + PV_CELL_FX_X, realy,
 				              effectcol);
 
 			if (cell->effect_param != 0x00 || cell->effect != NO_EFFECT)
