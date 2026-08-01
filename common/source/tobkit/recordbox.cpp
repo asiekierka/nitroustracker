@@ -216,7 +216,7 @@ bool RecordBox::startRecording(void)
 		// Start recording
 		ntxm_flush_dcache();
 #endif
-		CommandStartRecording(sound_data, RECORDBOX_SOUNDDATA_SIZE);
+		CommandStartRecording(RECORDBOX_SAMPLING_FREQ, sound_data, RECORDBOX_SOUNDDATA_SIZE);
 		recording = true;
 
 		draw();
