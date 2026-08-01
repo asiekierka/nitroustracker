@@ -26,7 +26,7 @@ GAME_FULL_TITLE_DEBUG := $(GAME_TITLE);$(GAME_VERSION);(debug build)
 # Source code paths
 # -----------------
 
-NITROFSDIR	:=
+NITROFSDIR	:= romfs
 
 # Tools
 # -----

@@ -1276,7 +1276,7 @@ void handleSave(void)
 	updateMemoryState(false);
 }
 
-void handleDiskOPChangeFileType(u8 newidx)
+void handleDiskOPChangeFileType(int newidx)
 {
 	if (newidx == FILETYPE_SAMPLE) {
 		cbsamplepreview->show();
@@ -2441,7 +2441,7 @@ void handleThemeReset(void)
 	destroyThemeDialog();
 
 	settings->getTheme()->loadDefault();
-	settings->setThemePath("/");
+	settings->setThemePath(SETTINGS_ROOT_PATH);
 	settings->writeIfChanged();
 	reloadSkin();
 }
@@ -2452,12 +2452,21 @@ void handleThemeApply(void)
 	destroyThemeDialog();
 }
 
+void handleThemeTypeChange(int type)
+{
+	if (type == THEMESELBOX_BUILTIN) {
+		fbtheme->setDir(THEMESELBOX_DEFAULT_PATH_BUILTIN);
+	} else {
+		fbtheme->setDir(settings->getLaunchPath());
+	}
+}
+
 void handleThemeButton(void)
 {
 	strncpy(last_themepath, settings->getThemePath(), SETTINGS_FILENAME_LEN);
 	fbtheme = new tobkit::ThemeSelectorBox(sub_screen, handleThemeChosen,
 	                                       handleThemeApply, handleThemeReset,
-	                                       handleThemeCancel);
+	                                       handleThemeCancel, handleThemeTypeChange);
 	std::string themepath_(settings->getThemePath());
 	fbtheme->setDir(themepath_.substr(0, themepath_.find_last_of("/")));
 	gui->registerOverlayWidget(fbtheme, 0, SUB_SCREEN);
@@ -2998,7 +3007,7 @@ void swapPatternButtons(Handedness handedness)
 	redraw_main_requested = true;
 }
 
-void handleHandednessChange(u8 handedness)
+void handleHandednessChange(int handedness)
 {
 	clearMainScreen();
 
@@ -3008,14 +3017,14 @@ void handleHandednessChange(u8 handedness)
 	swapPatternButtons(h);
 }
 
-void handleOutputModeChange(u8 outputMode)
+void handleOutputModeChange(int outputMode)
 {
 	settings->setStereoOutput(outputMode != 0);
 	CommandSetStereoOutput(outputMode != 0);
 	stopPlay();
 }
 
-void handleOutputFreqChange(u8 freq)
+void handleOutputFreqChange(int freq)
 {
 	settings->setFreq47kHz(freq != 0);
 #ifdef NT_PLATFORM_NDS
@@ -3686,7 +3695,7 @@ void handleMuteChannelsChanged(bool *muted_channels)
 	ntxm_flush_dcache();
 }
 
-void handleSampleLoopChanged(u8 val)
+void handleSampleLoopChanged(int val)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
 	if (inst == 0)
@@ -3706,7 +3715,7 @@ void handleSampleLoopChanged(u8 val)
 	ntxm_flush_dcache();
 }
 
-void handleVibratoTypeChanged(u8 val)
+void handleVibratoTypeChanged(int val)
 {
 	Instrument *inst = song->getInstrument(state->instrument);
 	if (inst == 0)

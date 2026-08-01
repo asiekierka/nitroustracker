@@ -29,4 +29,14 @@ typedef u16 tobkit_pixel_t;
 #define RGB5A1_G(c) (((c) >> 5) & 0x1F)
 #define RGB5A1_B(c) (((c) >> 10) & 0x1F)
 
+#ifdef __cplusplus
+#include <string>
+
+namespace tobkit {
+	static inline bool IsPathBuiltin(std::string path) {
+		return path.starts_with("nitro:/");
+	}
+}
+#endif
+
 #endif

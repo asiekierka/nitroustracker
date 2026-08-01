@@ -26,6 +26,7 @@ bool PlatformInitFilesystem(void)
 
 bool PlatformInit(int argc, char *argv[])
 {
+	romfsInit();
 	if (!PlatformVideoInit())
 		return false;
 	return true;
@@ -34,6 +35,7 @@ bool PlatformInit(int argc, char *argv[])
 void PlatformExit(void)
 {
 	PlatformVideoExit();
+	romfsExit();
 }
 
 PlatformKeyMask PlatformKey_LEFT = KEY_LEFT, PlatformKey_UP = KEY_UP,

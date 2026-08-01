@@ -44,4 +44,14 @@ void __ndsabi_wordset4(void *dest, size_t n, int c);
 };
 #endif
 
+#ifdef __cplusplus
+#include <string>
+
+namespace tobkit {
+	static inline bool IsPathBuiltin(std::string path) {
+		return path.starts_with("romfs:/");
+	}
+}
+#endif
+
 #endif

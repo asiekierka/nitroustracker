@@ -45,7 +45,7 @@ DATA		:=	n3ds/data
 INCLUDES	:=	$(SOURCES) tobkit/include
 GRAPHICS	:=	n3ds/gfx
 GFXBUILD	:=	$(BUILD)
-#ROMFS		:=	romfs
+ROMFS		:=	romfs
 #GFXBUILD	:=	$(ROMFS)/gfx
 
 TOBKIT_BITMAPS := tobkit/bitmaps common/bitmaps

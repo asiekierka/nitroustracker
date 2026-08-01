@@ -21,11 +21,22 @@ limitations under the License.
 #include "fileselector.h"
 #include "gui.h"
 #include "listbox.h"
+#include "radiobutton.h"
 #include "widget.h"
 
 #include <map>
 #include <string>
 #include <vector>
+
+#define THEMESELBOX_BUILTIN 0
+#define THEMESELBOX_EXTERNAL 1
+#if defined(NT_PLATFORM_NDS)
+#define THEMESELBOX_DEFAULT_PATH_BUILTIN "nitro:/themes"
+#elif defined(NT_PLATFORM_3DS)
+#define THEMESELBOX_DEFAULT_PATH_BUILTIN "romfs:/themes"
+#else
+#define THEMESELBOX_DEFAULT_PATH_BUILTIN "/"
+#endif
 
 namespace tobkit
 {
@@ -35,7 +46,7 @@ class ThemeSelectorBox : public Widget
 public:
 	ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File),
 	                 void (*_onOk)(void), void (*_onReset)(void),
-	                 void (*_onCancel)(void));
+	                 void (*_onCancel)(void), void (*_onTypeChange)(int));
 	~ThemeSelectorBox(void);
 
 	// Event calls
@@ -58,14 +69,12 @@ public:
 protected:
 	void draw(void);
 
-	void (*onSelect)(File);
-	void (*onOk)(void);
-	void (*onReset)(void);
-	void (*onCancel)(void);
-
 	GUI gui;
 	const char *title;
+	RadioButton::RadioButtonGroup *rbglocation;
+	RadioButton *rbexternal, *rbbuiltin;
 	Button *buttonok, *buttoncancel, *buttonreset;
+	bool changingtype;
 
 private:
 };

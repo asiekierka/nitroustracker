@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
-#define SETTINGS_DEFAULT_DATA_DIR "/data/NitroTracker"
+#define SETTINGS_DEFAULT_DATA_DIR "fat:/data/NitroTracker"
 #else
 #define SETTINGS_DEFAULT_DATA_DIR "."
 #endif
@@ -42,6 +42,20 @@ Settings::Settings(char *launch_path, bool use_fat)
     : handedness(RIGHT_HANDED), sample_preview(true), stereo_output(true),
       freq_47khz(false), lines_per_beat(8), fat(use_fat), changed(false)
 {
+	if (launch_path != NULL) {
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
+		if (launch_path[0] == '/') {
+			snprintf(launchpath, SETTINGS_FILENAME_LEN, "fat:%s", launch_path);
+		} else
+#endif
+		strlcpy(launchpath, launch_path, SETTINGS_FILENAME_LEN);
+	} else {
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
+		strcpy(launchpath, "fat:/");
+#else
+		launchpath[0] = 0;
+#endif
+	}
 	songpath[SETTINGS_FILENAME_LEN] = '\0';
 	samplepath[SETTINGS_FILENAME_LEN] = '\0';
 	instpath[SETTINGS_FILENAME_LEN] = '\0';
@@ -51,24 +65,12 @@ Settings::Settings(char *launch_path, bool use_fat)
 	configpath[0] = '\0';
 	configpath[SETTINGS_FILENAME_LEN] = '\0';
 
-	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/",
-	         launch_path != NULL ? launch_path : "");
-	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/",
-	         launch_path != NULL ? launch_path : "");
-	snprintf(instpath, SETTINGS_FILENAME_LEN, "%s/",
-	         launch_path != NULL ? launch_path : "");
-	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/Default.nttheme",
-	         launch_path != NULL ? launch_path : "");
+	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
+	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
+	snprintf(instpath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
+	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
 
 	if (fat == true) {
-#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
-		if (launch_path == NULL) {
-			dirCreate("/data");
-			dirCreate("/data/NitroTracker");
-			dirCreate("/data/NitroTracker/Themes");
-		}
-#endif
-
 		snprintf(configpath, SETTINGS_FILENAME_LEN, "%s/%s",
 		         launch_path != NULL ? launch_path : SETTINGS_DEFAULT_DATA_DIR,
 		         SETTINGS_CONFIG_FILENAME);
@@ -188,8 +190,7 @@ void Settings::setTheme(tobkit::Theme *theme_)
 
 void Settings::setThemePath(const char *themepath_)
 {
-	strncpy(themepath, themepath_, SETTINGS_FILENAME_LEN);
-	themepath[SETTINGS_FILENAME_LEN] = '\0';
+	strlcpy(themepath, themepath_, SETTINGS_FILENAME_LEN);
 	changed = true;
 }
 
@@ -198,48 +199,50 @@ char *Settings::getThemePath(void)
 	return themepath;
 }
 
+char *Settings::getLaunchPath(void)
+{
+	return launchpath;
+}
+
 char *Settings::getSongPath(void)
 {
 	if (!dirExists(songpath)) {
-		strncpy(songpath, "/", SETTINGS_FILENAME_LEN);
+		strcpy(songpath, SETTINGS_ROOT_PATH);
 	}
 	return songpath;
 }
 
 void Settings::setSongPath(const char *songpath_)
 {
-	strncpy(songpath, songpath_, SETTINGS_FILENAME_LEN);
-	songpath[SETTINGS_FILENAME_LEN] = '\0';
+	strlcpy(songpath, songpath_, SETTINGS_FILENAME_LEN);
 	changed = true;
 }
 
 char *Settings::getSamplePath(void)
 {
 	if (!dirExists(samplepath)) {
-		strncpy(samplepath, "/", SETTINGS_FILENAME_LEN);
+		strcpy(samplepath, SETTINGS_ROOT_PATH);
 	}
 	return samplepath;
 }
 
 void Settings::setSamplePath(const char *samplepath_)
 {
-	strncpy(samplepath, samplepath_, SETTINGS_FILENAME_LEN);
-	samplepath[SETTINGS_FILENAME_LEN] = '\0';
+	strlcpy(samplepath, samplepath_, SETTINGS_FILENAME_LEN);
 	changed = true;
 }
 
 char *Settings::getInstrumentPath(void)
 {
 	if (!dirExists(instpath)) {
-		strncpy(instpath, "/", SETTINGS_FILENAME_LEN);
+		strcpy(instpath, SETTINGS_ROOT_PATH);
 	}
 	return instpath;
 }
 
 void Settings::setInstrumentPath(const char *instpath_)
 {
-	strncpy(instpath, instpath_, SETTINGS_FILENAME_LEN);
-	instpath[SETTINGS_FILENAME_LEN] = '\0';
+	strlcpy(instpath, instpath_, SETTINGS_FILENAME_LEN);
 	changed = true;
 }
 
@@ -315,8 +318,7 @@ static bool setDefaultConfigValue(char *value, const char *defvalue,
                                   size_t maxlen)
 {
 	if (defvalue != NULL) {
-		strncpy(value, defvalue, maxlen);
-		value[maxlen - 1] = 0;
+		strlcpy(value, defvalue, maxlen);
 	}
 	return false;
 }
@@ -356,8 +358,7 @@ bool Settings::getConfigValue(char *config, const char *attribute, char *value,
 
 	size_t vallen = valend - valstart + 1;
 	size_t len = std::min(maxlen - 1, vallen);
-	strncpy(value, valstart, len);
-	value[len] = 0;
+	strlcpy(value, valstart, len);
 
 	//debugprintf("'%s' : '%s'\n", attribute, value);
 

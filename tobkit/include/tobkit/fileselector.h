@@ -86,6 +86,7 @@ private:
 	// Does not handle anything not in the filter
 	// Handles everything if there's no filter
 	void read_directory(void);
+	void read_directory_contents(void);
 
 	std::string current_directory;
 	FilterSet filters;

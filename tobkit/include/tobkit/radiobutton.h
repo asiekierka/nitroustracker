@@ -35,11 +35,11 @@ public:
 		void add(RadioButton *rb);
 		void pushed(RadioButton *rb);
 		void setActive(u8 idx);
-		void registerChangeCallback(void (*onChange_)(u8));
+		void registerChangeCallback(void (*onChange_)(int));
 
 	private:
 		std::vector<RadioButton *> rbvec;
-		void (*onChange)(u8);
+		void (*onChange)(int);
 	};
 
 	RadioButton(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,

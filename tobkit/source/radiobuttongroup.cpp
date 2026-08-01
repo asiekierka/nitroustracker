@@ -54,7 +54,7 @@ void RadioButton::RadioButtonGroup::setActive(u8 idx)
 }
 
 void RadioButton::RadioButtonGroup::registerChangeCallback(
-    void (*onChange_)(u8))
+    void (*onChange_)(int))
 {
 	onChange = onChange_;
 }

@@ -31,6 +31,7 @@ Improvements:
 - NDS: debug build now shows wifi debug messages
 - numerous minor ui/ux tweaks (prayerie)
 - sample snapping to zero crossing now respects zoom level
+- themes are now bundled within the .nds/.3dsx file
 
 Fixes:
 

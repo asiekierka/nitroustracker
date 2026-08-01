@@ -15,6 +15,7 @@
 
 #include "platform.h"
 #include <fat.h>
+#include <filesystem.h>
 #include <nds.h>
 
 #define FRONT_BUFFER 0
@@ -26,7 +27,10 @@ Screen *main_screen, *sub_screen;
 
 bool PlatformInitFilesystem(void)
 {
-	return fatInitDefault();
+	if (!fatInitDefault())
+		return false;
+	bool unused = nitroFSInit(NULL);
+	return true;
 }
 
 bool PlatformInit(int argc, char *argv[])

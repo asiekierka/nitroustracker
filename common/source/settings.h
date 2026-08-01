@@ -31,7 +31,19 @@
 
 #include <stdlib.h>
 
+#if defined(NT_PLATFORM_NDS)
 #define SETTINGS_FILENAME_LEN 255
+#elif defined(NT_PLATFORM_3DS)
+#define SETTINGS_FILENAME_LEN 1023
+#else
+#define SETTINGS_FILENAME_LEN 4095
+#endif
+
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
+#define SETTINGS_ROOT_PATH "fat:/"
+#else
+#define SETTINGS_ROOT_PATH "/"
+#endif
 
 enum Handedness { LEFT_HANDED, RIGHT_HANDED };
 
@@ -71,6 +83,8 @@ public:
 	char *getThemePath(void);
 	void setThemePath(const char *themepath_);
 
+	char *getLaunchPath(void);
+
 	bool writeIfChanged(void);
 
 private:
@@ -96,6 +110,7 @@ private:
 	char samplepath[SETTINGS_FILENAME_LEN + 1];
 	char instpath[SETTINGS_FILENAME_LEN + 1];
 	char themepath[SETTINGS_FILENAME_LEN + 1];
+	char launchpath[SETTINGS_FILENAME_LEN + 1];
 
 	bool fat, changed;
 };

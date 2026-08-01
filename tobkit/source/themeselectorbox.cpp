@@ -30,7 +30,7 @@ limitations under the License.
 #include "tobkit/themeselectorbox.h"
 
 #define THEMESELBOX_WIDTH 180
-#define THEMESELBOX_HEIGHT 128
+#define THEMESELBOX_HEIGHT 144
 
 using namespace tobkit;
 
@@ -38,37 +38,53 @@ using namespace tobkit;
 
 ThemeSelectorBox::ThemeSelectorBox(Screen *_screen, void (*_onSelect)(File),
                                    void (*_onOk)(void), void (*_onReset)(void),
-                                   void (*_onCancel)(void))
+                                   void (*_onCancel)(void), void (*_onTypeChange)(int))
     : Widget((_screen->getWidth() - THEMESELBOX_WIDTH) / 2,
-             (_screen->getHeight() - THEMESELBOX_HEIGHT) / 3, THEMESELBOX_WIDTH,
+#if defined(NT_PLATFORM_NDS)
+             153  - THEMESELBOX_HEIGHT,
+#else
+			 (_screen->getHeight() - THEMESELBOX_HEIGHT) / 2,
+#endif
+             THEMESELBOX_WIDTH,
              THEMESELBOX_HEIGHT, _screen),
-      onSelect(_onSelect), onOk(_onOk), onReset(_onReset), onCancel(_onCancel)
+    changingtype(false)
 {
 	title = "choose a theme";
+
+	rbglocation = new RadioButton::RadioButtonGroup();
+
+	rbbuiltin = new RadioButton(x + 10, y + 24, 60, 14, _screen, rbglocation);
+	rbbuiltin->setCaption("builtin");
+	rbexternal = new RadioButton(x + (THEMESELBOX_WIDTH / 2), y + 24, 60, 14, _screen, rbglocation);
+	rbexternal->setCaption("external");
+
+	rbglocation->registerChangeCallback(_onTypeChange);
 
 	buttonok = new Button(x + (THEMESELBOX_WIDTH - 50) / 2 - 55,
 	                      y + THEMESELBOX_HEIGHT - 20, 50, 14, _screen);
 	buttonok->setCaption("apply");
-	buttonok->registerPushCallback(onOk);
+	buttonok->registerPushCallback(_onOk);
 
 	buttonreset = new Button(x + (THEMESELBOX_WIDTH - 50) / 2,
 	                         y + THEMESELBOX_HEIGHT - 20, 50, 14, _screen);
 	buttonreset->setCaption("reset");
-	buttonreset->registerPushCallback(onReset);
+	buttonreset->registerPushCallback(_onReset);
 
 	buttoncancel = new Button(x + (THEMESELBOX_WIDTH - 50) / 2 + 55,
 	                          y + THEMESELBOX_HEIGHT - 20, 50, 14, _screen);
 	buttoncancel->setCaption("cancel");
-	buttoncancel->registerPushCallback(onCancel);
+	buttoncancel->registerPushCallback(_onCancel);
 
-	filesel = new FileSelector(x + 10, y + 25, THEMESELBOX_WIDTH - 20,
-	                           THEMESELBOX_HEIGHT - 50, _screen, true);
-	filesel->registerFileSelectCallback(onSelect);
+	filesel = new FileSelector(x + 10, y + 40, THEMESELBOX_WIDTH - 20,
+	                           THEMESELBOX_HEIGHT - 66, _screen, true);
+	filesel->registerFileSelectCallback(_onSelect);
 	std::vector<std::string> themefilter;
 	themefilter.push_back("nttheme");
 
 	filesel->addFilter("theme", themefilter);
 
+	gui.registerWidget(rbbuiltin, 0);
+	gui.registerWidget(rbexternal, 0);
 	gui.registerWidget(buttonok, 0);
 	gui.registerWidget(buttoncancel, 0);
 	gui.registerWidget(buttonreset, 0);
@@ -81,12 +97,25 @@ ThemeSelectorBox::~ThemeSelectorBox(void)
 	delete buttonreset;
 	delete buttoncancel;
 	delete filesel;
+	delete rbbuiltin;
+	delete rbexternal;
+	delete rbglocation;
 }
 
 void ThemeSelectorBox::setDir(std::string dir)
 {
-	if (filesel)
+	if (filesel) {
 		filesel->setDir(dir);
+		gui.draw();
+	}
+	if (rbglocation && !changingtype) {
+		int newlocationtype = IsPathBuiltin(dir) ? THEMESELBOX_BUILTIN : THEMESELBOX_EXTERNAL;
+		if (newlocationtype != (rbexternal->getActive() ? 1 : 0)) {
+			changingtype = true;
+			rbglocation->setActive(newlocationtype);
+			changingtype = false;
+		}
+	}
 }
 
 std::string ThemeSelectorBox::getDir(void)

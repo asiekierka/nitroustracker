@@ -42,4 +42,14 @@ typedef u16 tobkit_pixel_t;
 #define KEY_SELECT (1 << 11)
 #define KEY_TOUCH (1 << 12)
 
+#ifdef __cplusplus
+#include <string>
+
+namespace tobkit {
+	static inline bool IsPathBuiltin(std::string path) {
+		return false;
+	}
+}
+#endif
+
 #endif
