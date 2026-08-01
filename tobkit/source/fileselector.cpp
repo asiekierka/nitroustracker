@@ -180,6 +180,7 @@ void FileSelector::setDir(std::string dir)
 	if (!dir.ends_with("/"))
 		dir += "/";
 	current_directory = dir;
+	invalidateFileList();
 }
 
 /* ===================== PROTECTED ===================== */
@@ -221,9 +222,32 @@ inline bool compare_filenames(File f1, File f2)
 // Handles everything if there's no filter
 void FileSelector::read_directory(void)
 {
+	char filename[PATH_MAX + 1];
+
 	// Go though dir and collect files
 	filelist.clear();
 
+	read_directory_contents();
+
+	// Display
+	elements.clear();
+	activeelement = 0;
+	scrollpos = 0;
+
+	filename[sizeof(filename) - 1] = 0;
+	std::string newentry;
+	for (int i = 0; i < filelist.size(); ++i) {
+		newentry = filelist.at(i).name;
+		if (filelist.at(i).is_dir == true) {
+			newentry = "[" + newentry + "]";
+		}
+		strncpy(filename, newentry.c_str(), sizeof(filename) - 1);
+		elements.push_back(filename);
+	}
+}
+
+void FileSelector::read_directory_contents(void)
+{
 	if (chdir(current_directory.c_str()) == -1) {
 		printf("cwd to %s failed\n", current_directory.c_str());
 		return;
@@ -239,7 +263,6 @@ void FileSelector::read_directory(void)
 
 	struct dirent *direntry = readdir(dir);
 
-	char filename[PATH_MAX + 1];
 	while (direntry != NULL) {
 		if (direntry->d_name[0] != '.') { // Hidden and boring files
 			File newfile;
@@ -303,19 +326,4 @@ void FileSelector::read_directory(void)
 
 	// Sort
 	sort(filelist.begin(), filelist.end(), compare_filenames);
-	// Display
-	elements.clear();
-	activeelement = 0;
-	scrollpos = 0;
-
-	filename[sizeof(filename) - 1] = 0;
-	std::string newentry;
-	for (int i = 0; i < filelist.size(); ++i) {
-		newentry = filelist.at(i).name;
-		if (filelist.at(i).is_dir == true) {
-			newentry = "[" + newentry + "]";
-		}
-		strncpy(filename, newentry.c_str(), sizeof(filename) - 1);
-		elements.push_back(filename);
-	}
 }
