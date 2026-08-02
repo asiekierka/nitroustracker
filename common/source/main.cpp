@@ -3030,7 +3030,7 @@ void handleOutputFreqChange(int freq)
 #ifdef NT_PLATFORM_NDS
 	soundExtSetFrequency(freq ? 47 : 32);
 #else
-	ntxm_sound_set_playback_frequency(freq ? 47605 : 32728);
+	CommandSetPlaybackFrequency(freq ? NTXMSOUND_SAMPLE_RATE_47K : NTXMSOUND_SAMPLE_RATE_32K);
 #endif
 }
 
@@ -4613,7 +4613,7 @@ __attribute__((optimize("-Os"))) void setupGUI(bool dldi_enabled)
 			settingsvisual->addRow("lines/beat", {nblinesbeat});
 		}
 
-#if defined(NT_PLATFORM_NDS)
+#if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_SDL3)
 #if defined(NT_PLATFORM_NDS) && !defined(SHOW_ALL_SETTINGS)
 		if (isDSiMode())
 #endif
