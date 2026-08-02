@@ -25,11 +25,10 @@
 #include "tools.h"
 #include <ntxm/ntxmtools.h>
 
+#include <dirent.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/dir.h>
 #include <sys/stat.h>
-#include <sys/statvfs.h>
 #include <unistd.h>
 
 void lowercase(char *str)
@@ -76,7 +75,11 @@ bool dirExists(const char *path)
 void dirCreate(const char *path)
 {
 	if (!dirExists(path)) {
+#ifdef _WIN32
+		mkdir(path);
+#else
 		mkdir(path, 0777);
+#endif
 	}
 }
 

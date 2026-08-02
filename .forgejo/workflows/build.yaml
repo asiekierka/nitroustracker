@@ -62,6 +62,39 @@ jobs:
             themes/
             README.TXT
 
+  build-windows:
+    name: Build (Windows)
+    runs-on: docker
+    container: ubuntu:26.04
+    steps:
+      - name: Install dependencies
+        run: apt-get update -y && apt-get install -y --no-install-recommends build-essential ca-certificates cmake git ninja-build pkg-config nodejs python3 python3-pil python3-pip binutils-mingw-w64-x86-64 gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 libz-mingw-w64-dev </dev/null
+
+      - name: Clone project
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Meson
+        run: pip install meson --break-system-packages
+
+      - name: Configure
+        run: meson setup --buildtype release -Db_lto=true --cross-file .forgejo/mingw-cross.txt build-meson
+
+      - name: Build
+        run: meson compile -C build-meson && cp build-meson/nitroustracker.exe .
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: NitrousTracker (Windows, development build)
+          path: |
+            nitroustracker.exe
+            CHANGELOG.TXT
+            licenses/
+            themes/
+            README.TXT
+
   build-linux:
     name: Build (Linux)
     runs-on: docker

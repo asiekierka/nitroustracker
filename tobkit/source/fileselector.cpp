@@ -17,7 +17,7 @@ limitations under the License.
 #include <limits.h>
 #include <unistd.h>
 
-#include <sys/dir.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -27,6 +27,7 @@ limitations under the License.
 #include <string.h>
 #include <string>
 
+#include "config.h"
 #include "tobkit/fileselector.h"
 
 using namespace tobkit;
@@ -254,7 +255,7 @@ void FileSelector::read_directory_contents(void)
 	}
 
 	DIR *dir;
-	// struct stat filestats;
+	struct stat filestats;
 
 	if ((dir = opendir(current_directory.c_str())) == NULL) {
 		printf("Dir read error!\n");
@@ -263,23 +264,23 @@ void FileSelector::read_directory_contents(void)
 
 	struct dirent *direntry = readdir(dir);
 
-	while (direntry != NULL) {
+	for (; direntry != NULL; direntry = readdir(dir)) {
 		if (direntry->d_name[0] != '.') { // Hidden and boring files
 			File newfile;
 			newfile.name = direntry->d_name;
 			newfile.name_with_path = current_directory + direntry->d_name;
+#ifndef HAVE_DIRENT_D_TYPE
+			int stat_res = stat(newfile.name_with_path.c_str(), &filestats);
+			if (stat_res != -1) {
+				newfile.is_dir = S_ISDIR(filestats.st_mode);
+			}
+#else
 			newfile.is_dir = (direntry->d_type == DT_DIR);
+#endif
 			newfile.order = newfile.is_dir ? 1 : 2;
 
-			/* if(!newfile.is_dir) {
-                int stat_res = stat(newfile.name_with_path.c_str(), &filestats);
-                if(stat_res != -1) {
-        			newfile.size = filestats.st_size;
-                }
-            } */
 			filelist.push_back(newfile);
 		}
-		direntry = readdir(dir);
 	}
 
 	closedir(dir);

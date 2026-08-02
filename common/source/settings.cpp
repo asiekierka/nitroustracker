@@ -25,8 +25,9 @@
 #include "settings.h"
 #include "ntxm/ntxmtools.h"
 #include "tools.h"
-#include <stdio.h>
-#include <string.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
 #include <unistd.h>
 
 #if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)

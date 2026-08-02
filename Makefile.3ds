@@ -31,7 +31,7 @@ include $(DEVKITARM)/3ds_rules
 #     - icon.png
 #     - <libctru folder>/default_icon.png
 #---------------------------------------------------------------------------------
-export VERSION		?= 0.7.0b2
+export VERSION		?= 0.7.0b3
 export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 APP_TITLE	:= NitrousTracker
@@ -40,7 +40,7 @@ ICON		:= assets/icon48.png
 
 TARGET		:=	nitroustracker
 BUILD		:=	build_3ds
-SOURCES		:=	common/source/libnds n3ds/source/libnds common/source common/source/tobkit n3ds/source tobkit/source
+SOURCES		:=	common/source/libnds n3ds/source/libnds common/source common/source/tobkit common/source/tools n3ds/source tobkit/source
 DATA		:=	n3ds/data
 INCLUDES	:=	$(SOURCES) tobkit/include
 GRAPHICS	:=	n3ds/gfx

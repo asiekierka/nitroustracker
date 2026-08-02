@@ -25,10 +25,8 @@
 #ifndef _TOOLS_H_
 #define _TOOLS_H_
 
+#include "config.h"
 #include "ntxm/ntxmtools.h"
-#include <algorithm>
-#include <cstdio>
-#include <cstdlib>
 
 // A collection of utilities for everyday coding
 #define debugprintf ntxm_dprintf
@@ -48,5 +46,18 @@ void dirCreate(const char *dir);
 
 void PrintFreeMem(void);
 void printMallInfo(void);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifndef HAVE_STRLCAT
+size_t strlcat(char *dst, const char *src, size_t dstsize);
+#endif
+#ifndef HAVE_STRLCPY
+size_t strlcpy(char *dst, const char *src, size_t dstsize);
+#endif
+#ifdef __cplusplus
+}
+#endif
 
 #endif

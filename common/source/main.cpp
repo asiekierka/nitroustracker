@@ -2735,7 +2735,7 @@ void handleTypewriterNewFolderOk(const char *text)
 {
 	if (text[0] != '\0' && strchr(text, '/') == NULL &&
 	    strchr(text, ':') == NULL) {
-		mkdir(text, 0777);
+		dirCreate(text);
 		// TODO: Enter directory after creating it?
 		updateFilesystemState(true);
 	}

@@ -1,14 +1,17 @@
 project(
     'nitroustracker', ['c', 'cpp'],
-    version: '0.7.0b2',
+    version: '0.7.0b3',
     default_options: ['buildtype=debugoptimized', 'debug=true', 'optimization=2', 'c_std=gnu2x', 'cpp_std=gnu++20', 'warning_level=3']
 )
 cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')
 windows_build = target_machine.system() == 'windows'
+if windows_build
+	add_global_link_arguments(['-static-libgcc', '-static-libstdc++'], language: 'cpp')
+endif
 
 conf_data = configuration_data()
-conf_data.set('version', meson.project_version())
+conf_data.set_quoted('VERSION', meson.project_version())
 
 libntxm_sources = [
   'libntxm/libntxm/source/common/demokit.c',
@@ -66,7 +69,6 @@ nitroustracker_sources = [
   'common/source/main.cpp',
   'common/source/settings.cpp',
   'common/source/state.cpp',
-  'common/source/tools.cpp',
   'common/source/libnds/trig.c',
   'common/source/tobkit/envelope_editor.cpp',
   'common/source/tobkit/fxkeyboard.cpp',
@@ -75,6 +77,9 @@ nitroustracker_sources = [
   'common/source/tobkit/patternview.cpp',
   'common/source/tobkit/recordbox.cpp',
   'common/source/tobkit/sampledisplay.cpp',
+  'common/source/tools/strlcat.c',
+  'common/source/tools/strlcpy.c',
+  'common/source/tools/tools.cpp',
   'sdl/source/display_manager.cpp',
   'sdl/source/platform.cpp'
 ]
@@ -132,6 +137,10 @@ icon_pngs = [
   'common/bitmaps/vibrato_square.png'
 ]
 
+conf_data.set('HAVE_DIRENT_D_TYPE', cc.has_member('struct dirent', 'd_type', prefix : '#include <dirent.h>'))
+conf_data.set('HAVE_STRLCAT', cc.has_function('strlcat', prefix : '#include <string.h>'))
+conf_data.set('HAVE_STRLCPY', cc.has_function('strlcpy', prefix : '#include <string.h>'))
+
 sdl3_dep = dependency('sdl3', required: true)
 add_project_arguments(
 	cc.get_supported_arguments([
@@ -145,9 +154,10 @@ add_project_arguments(
 	language: 'cpp')
 add_project_arguments('-DNT_PLATFORM_SDL3', language: 'c')
 add_project_arguments('-DNT_PLATFORM_SDL3', language: 'cpp')
-add_project_arguments('-DVERSION="WIP"', language: 'cpp')
 add_project_arguments('-DGIT_HASH="WIP"', language: 'cpp')
 add_project_arguments('-DDEBUG', language: 'cpp')
+  
+configure_file(output : 'config.h', configuration : conf_data)
 
 libntxm = static_library('ntxm', libntxm_sources,
   dependencies: [sdl3_dep],
@@ -164,7 +174,14 @@ nitroustracker_sources += bin2c_raw.process(icon_raws)
 nitroustracker_sources += bin2c_raw.process(font_raws)
 nitroustracker_sources += bin2c_raw.process(font_3x5_raws)
 
+nitroustracker_dependencies = [sdl3_dep]
+
+if windows_build
+	windows = import('windows')
+	nitroustracker_sources += windows.compile_resources('assets/mingw/resources.rc')
+endif
+
 nitroustracker = executable('nitroustracker', nitroustracker_sources,
-  dependencies: [sdl3_dep],
+  dependencies: nitroustracker_dependencies,
   include_directories: include_directories('libntxm/libntxm/include', 'tobkit/include', 'common/source', 'sdl/source'),
   link_with: [libntxm])
