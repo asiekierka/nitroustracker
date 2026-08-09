@@ -1,4 +1,4 @@
--- NitrousTracker v0.7.0 beta 2 (2026-07-23)
+-- NitrousTracker v0.7.0 beta 4 (2026-??-??)
 
 New features:
 
@@ -19,7 +19,7 @@ New features:
 - [#273] added support for previewing samples while the song is playing
 - [#65] added support for importing .mod files
 - 3DS: open the NitrousTracker manual directly from the program
-- NDS: updated BlocksDS to 1.22.2
+- NDS: updated BlocksDS to 1.22.3
 
 Improvements:
 
