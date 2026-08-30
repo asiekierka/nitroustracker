@@ -30,8 +30,7 @@ ListBox::ListBox(u16 _x, u16 _y, u16 _width, u16 _height, Screen *_screen,
       activeelement(0), highlightedelement(-1), scrollpos(0),
       show_numbers(_show_numbers), zero_offset(_zero_offset)
 {
-	u16 i;
-	for (i = 0; i < n_items; ++i) {
+	for (int i = 0; i < n_items; ++i) {
 		elements.push_back("");
 	}
 	onChange = 0;
@@ -184,22 +183,38 @@ void ListBox::add(const char *name)
 	}
 }
 
+void ListBox::clipPositions(void)
+{
+	int size = elements.size();
+
+	// Move activeelement up if the last active element was deleted
+	if (activeelement > size - 1) {
+		activeelement = size - 1;
+		if (activeelement < 0) {
+			activeelement = 0;
+		}
+	}
+	if (highlightedelement > size - 1) {
+		highlightedelement = size - 1;
+	}
+
+	// If an element from the bottom of the list was deleted so that
+	// the last row is empty, scroll up if possible
+	if (scrollpos > size - height / ROW_HEIGHT) {
+		scrollpos = size - height / ROW_HEIGHT;
+		if (scrollpos < 0) {
+			scrollpos = 0;
+		}
+	}
+}
+
 // Always deletes selected item
 void ListBox::del(void)
 {
 	if (elements.size() > 0) {
 		elements.erase(elements.begin() + activeelement);
 
-		// Move activeelemnt up if the last active element was deleted
-		if (activeelement > elements.size() - 1) {
-			activeelement = elements.size() - 1;
-		}
-
-		// If an element from the bottom of the list was deleted so that
-		// the last row is empty, scroll up if possible
-		if (scrollpos > elements.size() - height / ROW_HEIGHT) {
-			scrollpos = elements.size() - height / ROW_HEIGHT;
-		}
+		clipPositions();
 
 		if (activeelement >= scrollpos) {
 			calcScrollThingy();
@@ -235,12 +250,13 @@ u16 ListBox::getidx(void)
 	return activeelement;
 }
 
-void ListBox::clear(void)
+void ListBox::clear(int n_items)
 {
-	activeelement = 0;
-	highlightedelement = -1;
-	scrollpos = 0;
 	elements.clear();
+	for (int i = 0; i < n_items; ++i) {
+		elements.push_back("");
+	}
+	clipPositions();
 }
 
 void ListBox::scrollTo(u16 idx)

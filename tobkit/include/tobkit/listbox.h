@@ -60,7 +60,7 @@ public:
 	void set(u16 idx, const char *name); // Inserts an element at position idx
 	const char *get(u16 idx);
 	u16 getidx(void); // get index of selected element
-	void clear(void);
+	void clear(int n_items = 0);
 	void select(u16 idx, bool scroll = true); // set selected element
 	void highlight(s32 idx,
 	               bool scroll = true); // set highlighted element, <0 disables
@@ -70,6 +70,8 @@ protected:
 	void scrollTo(u16 idx);
 	// Calculate height and position of the scroll thingy
 	void calcScrollThingy(void);
+	// Ensure active element/scroll positions are not out of bounds
+	void clipPositions(void);
 
 	void (*onChange)(u16);
 
