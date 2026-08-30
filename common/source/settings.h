@@ -32,11 +32,11 @@
 #include <stdlib.h>
 
 #if defined(NT_PLATFORM_NDS)
-#define SETTINGS_FILENAME_LEN 255
+#define SETTINGS_FILENAME_LEN 256
 #elif defined(NT_PLATFORM_3DS)
-#define SETTINGS_FILENAME_LEN 1023
+#define SETTINGS_FILENAME_LEN 1024
 #else
-#define SETTINGS_FILENAME_LEN 4095
+#define SETTINGS_FILENAME_LEN 4096
 #endif
 
 #if defined(NT_PLATFORM_NDS) || defined(NT_PLATFORM_3DS)
@@ -105,12 +105,12 @@ private:
 	bool freq_47khz;
 	u8 lines_per_beat;
 	tobkit::Theme *theme;
-	char configpath[SETTINGS_FILENAME_LEN + 1];
-	char songpath[SETTINGS_FILENAME_LEN + 1];
-	char samplepath[SETTINGS_FILENAME_LEN + 1];
-	char instpath[SETTINGS_FILENAME_LEN + 1];
-	char themepath[SETTINGS_FILENAME_LEN + 1];
-	char launchpath[SETTINGS_FILENAME_LEN + 1];
+	char configpath[SETTINGS_FILENAME_LEN];
+	char songpath[SETTINGS_FILENAME_LEN];
+	char samplepath[SETTINGS_FILENAME_LEN];
+	char instpath[SETTINGS_FILENAME_LEN];
+	char themepath[SETTINGS_FILENAME_LEN];
+	char launchpath[SETTINGS_FILENAME_LEN];
 
 	bool fat, changed;
 };

@@ -19,7 +19,7 @@ New features:
 - [#273] added support for previewing samples while the song is playing
 - [#65] added support for importing .mod files
 - 3DS: open the NitrousTracker manual directly from the program
-- NDS: updated BlocksDS to 1.22.3
+- NDS: updated BlocksDS to 1.23.0
 
 Improvements:
 
@@ -81,7 +81,7 @@ Improvements:
 - in fx mode, truncate pattern selection when channels are deleted or pattern length is reduced
 - prevent typing illegal characters in file names
 - expanded interface theming
- 
+
 Fixes:
 
 - fix crash caused by finishing a pattern selection on the last pixel column of the last channel

@@ -57,24 +57,26 @@ Settings::Settings(char *launch_path, bool use_fat)
 		launchpath[0] = 0;
 #endif
 	}
-	songpath[SETTINGS_FILENAME_LEN] = '\0';
-	samplepath[SETTINGS_FILENAME_LEN] = '\0';
-	instpath[SETTINGS_FILENAME_LEN] = '\0';
-	themepath[SETTINGS_FILENAME_LEN] = '\0';
+	launchpath[SETTINGS_FILENAME_LEN - 1] = '\0';
 
 	// might never have snprintf called
 	configpath[0] = '\0';
-	configpath[SETTINGS_FILENAME_LEN] = '\0';
 
 	snprintf(songpath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
 	snprintf(samplepath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
 	snprintf(instpath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
 	snprintf(themepath, SETTINGS_FILENAME_LEN, "%s/", launchpath);
 
+	songpath[SETTINGS_FILENAME_LEN - 1] = '\0';
+	samplepath[SETTINGS_FILENAME_LEN - 1] = '\0';
+	instpath[SETTINGS_FILENAME_LEN - 1] = '\0';
+	themepath[SETTINGS_FILENAME_LEN - 1] = '\0';
+
 	if (fat == true) {
 		snprintf(configpath, SETTINGS_FILENAME_LEN, "%s/%s",
 		         launch_path != NULL ? launch_path : SETTINGS_DEFAULT_DATA_DIR,
 		         SETTINGS_CONFIG_FILENAME);
+		configpath[SETTINGS_FILENAME_LEN - 1] = '\0';
 
 		// Check if the config file exists and, if not, create it
 		FILE *conf = fopen(configpath, "r");
@@ -359,7 +361,7 @@ bool Settings::getConfigValue(char *config, const char *attribute, char *value,
 
 	size_t vallen = valend - valstart + 1;
 	size_t len = std::min(maxlen - 1, vallen);
-	strlcpy(value, valstart, len);
+	memcpy(value, valstart, len);
 
 	//debugprintf("'%s' : '%s'\n", attribute, value);
 
