@@ -10,7 +10,7 @@ WONDERFUL_TOOLCHAIN	?= /opt/wonderful
 # ===========
 
 NAME		:= nitroustracker
-export VERSION		?= 0.7.0b3
+export VERSION		?= 0.7.0b4
 export GIT_HASH		:= $(shell git rev-parse --short HEAD)
 
 GAME_TITLE	:= NitrousTracker

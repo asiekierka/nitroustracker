@@ -1,6 +1,6 @@
 project(
     'nitroustracker', ['c', 'cpp'],
-    version: '0.7.0b3',
+    version: '0.7.0b4',
     default_options: ['buildtype=debugoptimized', 'debug=true', 'optimization=2', 'c_std=gnu2x', 'cpp_std=gnu++20', 'warning_level=3']
 )
 cc = meson.get_compiler('c')

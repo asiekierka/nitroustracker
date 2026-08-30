@@ -1,4 +1,4 @@
--- NitrousTracker v0.7.0 beta 4 (2026-??-??)
+-- NitrousTracker v0.7.0 beta 4 (2026-08-30)
 
 New features:
 
